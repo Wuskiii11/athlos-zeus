@@ -17,15 +17,41 @@ function fmtBirth(iso, lang) {
   return `${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// ── Typeform-style flow per spec §01: one step per screen, big "Naprej",
+// optional steps can be skipped, progress persists locally so closing the
+// app resumes from the last step. ──
+const FLOW = ["name", "acq", "birth", "gender", "body", "waist", "quote", "sport", "goals", "exp", "injuries", "equipment", "test"];
+
+const ACQ_OPTIONS = ["Instagram", "Prijatelj / soigralec", "Google", "TikTok", "Trener / klub", "Drugo"];
+const GENDERS = ["Moški", "Ženski", "Drugo"];
+const GOAL_OPTIONS = ["Moč", "Mišična masa", "Eksplozivnost", "Hitrost", "Vzdržljivost", "Izguba maščobe", "Preventiva poškodb", "Splošna kondicija"];
+const EXP_OPTIONS = ["0–1 let", "1–3 let", "3–5 let", "5+ let"];
+const INJURY_OPTIONS = ["Koleno", "Gleženj", "Rama", "Hrbet", "Kolk", "Hamstring", "Zapestje"];
+const EQUIPMENT_OPTIONS = ["Fitnes klub", "Domače uteži / ročke", "Drog za zgibe", "Elastike", "Samo lastna teža"];
+
+const SETUP_KEY = "athlos:setup";
+const loadSaved = () => { try { return JSON.parse(localStorage.getItem(SETUP_KEY) || "{}"); } catch { return {}; } };
+
 export default function SetupFlow({ profile, setProfile, onDone }) {
   const C = useTheme();
-  const [step, setStep] = useState(0);
-  const [username, setUsername] = useState("");
-  const [birth, setBirth] = useState("");
-  const [height, setHeight] = useState(175);
-  const [weight, setWeight] = useState(70);
-  const [sport, setSport] = useState("");
-  const [customSport, setCustomSport] = useState("");
+  const saved = useRef(loadSaved()).current;
+  const [step, setStep] = useState(() => Math.min(saved.step || 0, FLOW.length - 1));
+  const [username, setUsername] = useState(saved.username || "");
+  const [acquisition, setAcquisition] = useState(saved.acquisition || "");
+  const [birth, setBirth] = useState(saved.birth || "");
+  const [gender, setGender] = useState(saved.gender || "");
+  const [height, setHeight] = useState(saved.height || 175);
+  const [weight, setWeight] = useState(saved.weight || 70);
+  const [waist, setWaist] = useState(saved.waist || "");
+  const [bodyFat, setBodyFat] = useState(saved.bodyFat || "");
+  const [sport, setSport] = useState(saved.sport || "");
+  const [customSport, setCustomSport] = useState(saved.customSport || "");
+  const [goals, setGoals] = useState(saved.goals || []);
+  const [customGoal, setCustomGoal] = useState(saved.customGoal || "");
+  const [experience, setExperience] = useState(saved.experience || "");
+  const [injuries, setInjuries] = useState(saved.injuries || []);
+  const [injuryNote, setInjuryNote] = useState(saved.injuryNote || "");
+  const [equipment, setEquipment] = useState(saved.equipment || []);
   const [sportQuery, setSportQuery] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const scrollRef = useRef(null);
@@ -33,17 +59,35 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
   const lang = useLang();
   const curLang = profile?.lang === "en" ? "en" : "sl";
 
+  // Persist every answer + the current step so the flow resumes where the
+  // user left off (spec §01, "predlog za interakcijo").
+  useEffect(() => {
+    try {
+      localStorage.setItem(SETUP_KEY, JSON.stringify({
+        step, username, acquisition, birth, gender, height, weight, waist, bodyFat,
+        sport, customSport, goals, customGoal, experience, injuries, injuryNote, equipment,
+      }));
+    } catch {}
+  }, [step, username, acquisition, birth, gender, height, weight, waist, bodyFat, sport, customSport, goals, customGoal, experience, injuries, injuryNote, equipment]);
+
   // Reset scroll to top on every step change
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [step]);
 
-  const total = 5; // 0:name 1:birth 2:height/weight 3:quote 4:sport
+  const total = FLOW.length;
+  const key = FLOW[step];
   const next = () => setStep((s) => Math.min(s + 1, total - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
   const finish = () => {
     const finalSport = sport === "Drugo" ? (customSport.trim() || "Drugo") : sport;
-    onDone({ username: username.trim() || "Športnik", birth, height, weight, sport: finalSport });
+    const finalGoals = [...goals, ...(customGoal.trim() ? [customGoal.trim()] : [])];
+    try { localStorage.removeItem(SETUP_KEY); } catch {}
+    onDone({
+      username: username.trim() || "Športnik", birth, height, weight, sport: finalSport,
+      acquisition, gender, waist: waist ? +waist : null, bodyFat: bodyFat ? +bodyFat : null,
+      goals: finalGoals, experience, injuries, injuryNote: injuryNote.trim(), equipment,
+    });
   };
 
   const inp = {
@@ -52,18 +96,75 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
     color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15,
     outline: "none", boxSizing: "border-box", marginTop: 8, colorScheme: "dark",
   };
-  // Wheel pickers only ever offer values inside the realistic range, so
-  // height/weight are always valid once a step renders.
-  const heightOk = true;
-  const weightOk = true;
 
-  const STEP_TITLES = [
-    { title: "Uporabniško\nime",  sub: "KAKO TE BOMO KLICALI" },
-    { title: "Datum\nrojstva",    sub: "ZA PRILAGODITEV PROGRAMA" },
-    { title: "Višina\n& teža",    sub: "ZA IZRAČUN BREMEN IN KALORIJ" },
-    { title: "",                  sub: "" }, // quote step — custom render
-    { title: "Kateri šport\ntreniraš?", sub: "ZA PERSONALIZACIJO PROGRAMA" },
-  ];
+  const STEP_TITLES = {
+    name:      { title: "Uporabniško\nime",        sub: "KAKO TE BOMO KLICALI" },
+    acq:       { title: "Kako si\nslišal za nas?", sub: "DA VEMO, OD KOD PRIHAJAŠ" },
+    birth:     { title: "Datum\nrojstva",          sub: "ZA PRILAGODITEV PROGRAMA" },
+    gender:    { title: "Spol",                    sub: "ZA IZRAČUN NORM IN KALORIJ" },
+    body:      { title: "Višina\n& teža",          sub: "ZA IZRAČUN BREMEN IN KALORIJ" },
+    waist:     { title: "Obseg pasu\n& body fat",  sub: "ČE VEŠ — DRUGAČE PRESKOČI" },
+    quote:     { title: "",                        sub: "" }, // custom render
+    sport:     { title: "Kateri šport\ntreniraš?", sub: "ZA PERSONALIZACIJO PROGRAMA" },
+    goals:     { title: "Kaj je\ntvoj cilj?",      sub: "IZBERI ENEGA ALI VEČ" },
+    exp:       { title: "Koliko let\nizkušenj imaš?", sub: "S FITNESOM / TRENINGOM MOČI" },
+    injuries:  { title: "Poškodbe?",               sub: "TRENUTNE IN PRETEKLE — ZA VARNO PROGRAMIRANJE" },
+    equipment: { title: "Kakšno opremo\nimaš na voljo?", sub: "PROGRAM SE PRILAGODI OPREMI" },
+    test:      { title: "Začetni\ntest",           sub: "ZADNJI KORAK" },
+  };
+
+  // single-choice vertical option list (Typeform style)
+  const Choice = ({ options, value, onPick, subs }) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {options.map((o, i) => {
+        const active = value === o;
+        return (
+          <button key={o} onClick={() => { onPick(o); }} style={{
+            width: "100%", textAlign: "left", padding: "15px 16px", borderRadius: 14, cursor: "pointer",
+            border: `1.5px solid ${active ? C.accent : C.border2}`,
+            background: active ? `${C.accent}1f` : C.surface,
+            color: active ? C.accent : C.text,
+            fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15,
+            transition: "border-color 0.15s, background 0.15s, color 0.15s",
+            WebkitTapHighlightColor: "transparent",
+          }}>
+            {o}
+            {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  // multi-select chips
+  const MultiChips = ({ options, values, onToggle }) => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {options.map((o) => {
+        const active = values.includes(o);
+        return (
+          <button key={o} onClick={() => onToggle(o)} style={{
+            padding: "10px 16px", borderRadius: 999, cursor: "pointer",
+            border: `1.5px solid ${active ? C.accent : C.border2}`,
+            background: active ? `${C.accent}22` : "transparent",
+            color: active ? C.accent : C.text2,
+            fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 13,
+            transition: "border-color 0.15s, background 0.15s, color 0.15s",
+            WebkitTapHighlightColor: "transparent",
+          }}>
+            {active && <span style={{ marginRight: 6, fontSize: 11 }}>✓</span>}{o}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  const toggle = (setter) => (o) => setter((arr) => arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o]);
+
+  const SkipBtn = ({ onClick }) => (
+    <button onClick={onClick} style={{ width: "100%", marginTop: 10, padding: "12px", background: "none", border: "none", color: C.muted, fontFamily: C.display, fontWeight: 600, fontSize: 13, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+      {t("Preskoči")} ›
+    </button>
+  );
 
   return (
     <div className="app-fullscreen" style={{
@@ -96,16 +197,16 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
 
       {/* Step content */}
       <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 24px", display: "flex", flexDirection: "column", animation: "athlosScreen 0.28s cubic-bezier(.2,.8,.2,1)", overflowY: "auto", scrollbarWidth: "none" }}>
-        {step !== 3 && (
+        {key !== "quote" && (
           <div style={{ marginBottom: 28 }}>
-            <Mono style={{ color: C.accent, fontSize: 9 }}>{t(STEP_TITLES[step].sub)}</Mono>
+            <Mono style={{ color: C.accent, fontSize: 9 }}>{t(STEP_TITLES[key].sub)}</Mono>
             <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, textTransform: "uppercase", margin: "8px 0 0", color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
-              {t(STEP_TITLES[step].title)}
+              {t(STEP_TITLES[key].title)}
             </h2>
           </div>
         )}
 
-        {step === 0 && (
+        {key === "name" && (
           <>
             <Mono style={{ color: C.muted, fontSize: 9 }}>{t("UPORABNIŠKO IME")}</Mono>
             <input value={username} onChange={(e) => setUsername(e.target.value)} onKeyDown={(e) => e.key === "Enter" && username.trim() && next()} placeholder={t("npr. Nik")} style={inp} />
@@ -114,10 +215,18 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
           </>
         )}
 
-        {step === 1 && (
+        {key === "acq" && (
+          <>
+            <Choice options={ACQ_OPTIONS.map(t)} value={t(acquisition)} onPick={(o) => { setAcquisition(o); }} />
+            <div style={{ flex: 1, minHeight: 16 }} />
+            <PrimaryBtn onClick={() => acquisition && next()} style={{ opacity: acquisition ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <SkipBtn onClick={next} />
+          </>
+        )}
+
+        {key === "birth" && (
           <>
             <Mono style={{ color: C.muted, fontSize: 9 }}>{t("DATUM ROJSTVA")}</Mono>
-            {/* Custom date button */}
             <button
               onClick={() => setPickerOpen(true)}
               style={{
@@ -144,7 +253,15 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
           </>
         )}
 
-        {step === 2 && (
+        {key === "gender" && (
+          <>
+            <Choice options={GENDERS.map(t)} value={t(gender)} onPick={setGender} />
+            <div style={{ flex: 1 }} />
+            <PrimaryBtn onClick={() => gender && next()} style={{ opacity: gender ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+          </>
+        )}
+
+        {key === "body" && (
           <>
             <div style={{ display: "flex", justifyContent: "space-around", gap: 8 }}>
               <div style={{ textAlign: "center" }}>
@@ -157,25 +274,32 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
               </div>
             </div>
             <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={() => heightOk && weightOk && next()} style={{ opacity: heightOk && weightOk ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <PrimaryBtn onClick={next}>{t("Nadaljuj")}</PrimaryBtn>
+          </>
+        )}
+
+        {key === "waist" && (
+          <>
+            <Mono style={{ color: C.muted, fontSize: 9 }}>{t("OBSEG PASU (CM)")}</Mono>
+            <input value={waist} onChange={(e) => setWaist(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder={t("npr. 82")} style={inp} />
+            <Mono style={{ color: C.muted, fontSize: 9, marginTop: 18, display: "block" }}>{t("BODY FAT % (OKVIRNO)")}</Mono>
+            <input value={bodyFat} onChange={(e) => setBodyFat(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder={t("npr. 15")} style={inp} />
+            <div style={{ flex: 1 }} />
+            <PrimaryBtn onClick={next} style={{ opacity: waist || bodyFat ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <SkipBtn onClick={() => { setWaist(""); setBodyFat(""); next(); }} />
           </>
         )}
 
         {/* ── Quote step ── */}
-        {step === 3 && (
+        {key === "quote" && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", animation: "athlosScreen 0.3s cubic-bezier(.2,.8,.2,1)" }}>
             {/* Animated progress line */}
             <div style={{ marginBottom: 32 }}>
               <svg viewBox="0 0 300 80" width="100%" height="80" style={{ overflow: "visible" }}>
-                {/* Grid lines */}
                 {[20, 40, 60].map(y => <line key={y} x1="0" y1={y} x2="300" y2={y} stroke={C.border} strokeWidth="1" strokeDasharray="4 6"/>)}
-                {/* Main curve — downward trend with wobble */}
                 <path d="M0 15 C30 15, 50 55, 80 45 S130 20, 160 35 S210 55, 240 40 S280 25, 300 30" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round"/>
-                {/* Dashed target line */}
                 <line x1="0" y1="65" x2="300" y2="65" stroke={C.accent} strokeWidth="1.5" strokeDasharray="6 5" strokeOpacity="0.4"/>
-                {/* Start dot */}
                 <circle cx="0" cy="15" r="5" fill={C.accent}/>
-                {/* Labels */}
                 <text x="2" y="76" fill={C.muted} fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">{t("DANES")}</text>
                 <text x="240" y="76" fill={C.muted} fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">{t("6 MES.")}</text>
               </svg>
@@ -198,7 +322,7 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
           </div>
         )}
 
-        {step === 4 && (
+        {key === "sport" && (
           <>
             {/* Search bar */}
             <div style={{ position: "relative", marginBottom: 14 }}>
@@ -254,10 +378,67 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
           </>
         )}
 
+        {key === "goals" && (
+          <>
+            <MultiChips options={GOAL_OPTIONS.map(t)} values={goals} onToggle={toggle(setGoals)} />
+            <div style={{ marginTop: 16 }}>
+              <Mono style={{ color: C.muted, fontSize: 9 }}>{t("DRUGO (PO ŽELJI)")}</Mono>
+              <input value={customGoal} onChange={(e) => setCustomGoal(e.target.value)} placeholder={t("npr. priprava na maraton")} style={{ ...inp, marginTop: 6 }} />
+            </div>
+            <div style={{ flex: 1, minHeight: 16 }} />
+            <PrimaryBtn onClick={() => (goals.length || customGoal.trim()) && next()} style={{ opacity: goals.length || customGoal.trim() ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+          </>
+        )}
+
+        {key === "exp" && (
+          <>
+            <Choice options={EXP_OPTIONS} value={experience} onPick={setExperience} />
+            <div style={{ flex: 1 }} />
+            <PrimaryBtn onClick={() => experience && next()} style={{ opacity: experience ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+          </>
+        )}
+
+        {key === "injuries" && (
+          <>
+            <MultiChips options={INJURY_OPTIONS.map(t)} values={injuries} onToggle={toggle(setInjuries)} />
+            <div style={{ marginTop: 16 }}>
+              <Mono style={{ color: C.muted, fontSize: 9 }}>{t("DETAJLI (PO ŽELJI)")}</Mono>
+              <textarea value={injuryNote} onChange={(e) => setInjuryNote(e.target.value)} rows={3} placeholder={t("npr. operacija ACL 2024, občasna bolečina v rami…")} style={{ ...inp, resize: "none", fontSize: 14 }} />
+            </div>
+            <div style={{ flex: 1, minHeight: 16 }} />
+            <PrimaryBtn onClick={next} style={{ opacity: injuries.length || injuryNote.trim() ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <SkipBtn onClick={() => { setInjuries([]); setInjuryNote(""); next(); }} />
+          </>
+        )}
+
+        {key === "equipment" && (
+          <>
+            <MultiChips options={EQUIPMENT_OPTIONS.map(t)} values={equipment} onToggle={toggle(setEquipment)} />
+            <div style={{ flex: 1, minHeight: 16 }} />
+            <PrimaryBtn onClick={() => equipment.length && next()} style={{ opacity: equipment.length ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <SkipBtn onClick={() => { setEquipment([]); next(); }} />
+          </>
+        )}
+
+        {key === "test" && (
+          <>
+            {/* Placeholder — spec §01: assessment content is TBD */}
+            <div style={{ background: C.surface, border: `1.5px dashed ${C.border2}`, borderRadius: 18, padding: "26px 20px", textAlign: "center" }}>
+              <div style={{ fontSize: 34, marginBottom: 10 }}>📊</div>
+              <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, margin: "0 0 8px" }}>{t("Začetni assessment")}</h3>
+              <p style={{ fontFamily: C.display, fontSize: 13, color: C.text2, margin: 0, lineHeight: 1.55 }}>
+                {t("Kratek test moči, hitrosti in mobilnosti — vsebina prihaja kmalu. Zaenkrat ta korak preskočimo.")}
+              </p>
+            </div>
+            <div style={{ flex: 1 }} />
+            <PrimaryBtn onClick={finish}>{t("Začni")}</PrimaryBtn>
+          </>
+        )}
+
       </div>
 
-      {/* Fixed bottom button for step 4 */}
-      {step === 4 && (
+      {/* Fixed bottom button for the sport step */}
+      {key === "sport" && (
         <div style={{
           position: "absolute", bottom: 0, left: 0, right: 0,
           padding: "12px 28px",
@@ -265,10 +446,10 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
           background: `linear-gradient(to top, ${C.bg} 70%, transparent)`,
         }}>
           <PrimaryBtn
-            onClick={() => sport && (sport !== "Drugo" || customSport.trim()) && finish()}
+            onClick={() => sport && (sport !== "Drugo" || customSport.trim()) && next()}
             style={{ opacity: sport && (sport !== "Drugo" || customSport.trim()) ? 1 : 0.4 }}
           >
-            {t("Začni")}
+            {t("Nadaljuj")}
           </PrimaryBtn>
         </div>
       )}

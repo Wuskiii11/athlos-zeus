@@ -465,7 +465,12 @@ export default function AthlosApp() {
       {/* ── SETUP ── */}
       {!splash && authReady && needsSetup && (
         <SetupFlow profile={profile} setProfile={setProfile} onDone={(info) => {
-          const np = { ...profile, name: info.username, birth: info.birth, height: info.height, weight: info.weight, sport: info.sport || profile.sport };
+          const np = {
+            ...profile, name: info.username, birth: info.birth, height: info.height, weight: info.weight, sport: info.sport || profile.sport,
+            // extended onboarding (spec §01)
+            acquisition: info.acquisition, gender: info.gender, waist: info.waist, bodyFat: info.bodyFat,
+            goals: info.goals, experience: info.experience, injuries: info.injuries, injuryNote: info.injuryNote, equipment: info.equipment,
+          };
           setProfile(np);
           if (user) saveProfile(user.id, np).catch(() => {});
           profileLoaded.current = true;
