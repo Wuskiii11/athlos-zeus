@@ -59,8 +59,8 @@ function SplashScreen({ C }) {
         src="/img/greek-god.png"
         alt=""
         style={{
-          position: "absolute", inset: 0, width: "100%", height: "100%",
-          objectFit: "contain",
+          position: "absolute", top: 0, left: 0, right: 0, width: "100%", height: "76%",
+          objectFit: "contain", objectPosition: "center 30%",
           animation: "splashGod 0.55s ease-out forwards",
           pointerEvents: "none",
           userSelect: "none",
