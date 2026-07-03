@@ -46,29 +46,35 @@ function SplashScreen({ C }) {
     }}>
       <style>{`
         @keyframes splashGod {
-          from { opacity: 0; transform: translateY(16px) scale(0.965); }
-          to   { opacity: 1; transform: none; }
+          0%   { opacity: 0; transform: scale(1.035); }
+          20%  { opacity: 1; }
+          78%  { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; }
         }
-        @media (prefers-reduced-motion: reduce) { .athlos-splash * { animation-duration: 0.001ms !important; } }
+        @keyframes splashOut {
+          0%, 86% { opacity: 1; }
+          100%    { opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) { .athlos-splash, .athlos-splash * { animation-duration: 0.001ms !important; } }
       `}</style>
 
-      {/* the god — blue-ink engraving; the cream plate dissolves into the
-          marble via multiply, so only the ink and the ray burst remain */}
-      <div className="athlos-splash" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      {/* the god — full-bleed ink engraving that fades in, holds, fades out;
+          the cream plate dissolves into the marble via multiply */}
+      <div className="athlos-splash" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", paddingBottom: "12vh", animation: "splashOut 2.6s ease forwards" }}>
         <img
           src="/img/greek-god.png"
           alt=""
           style={{
-            height: "min(56vh, 500px)",
+            position: "absolute", inset: 0, width: "100%", height: "100%",
+            objectFit: "cover", objectPosition: "center 22%",
             mixBlendMode: "multiply",
-            animation: "splashGod 1.25s cubic-bezier(0.22,1,0.36,1) both",
-            marginBottom: -4,
+            animation: "splashGod 2.6s cubic-bezier(0.4,0,0.4,1) both",
             pointerEvents: "none",
             userSelect: "none",
           }}
         />
 
-        {/* ATHLOS — one letter at a time, engraved ink */}
+        {/* ATHLOS — one letter at a time, engraved ink over the engraving */}
         <div style={{ position: "relative", display: "flex" }}>
           {ATHLOS_LETTERS.map((letter, i) => (
             <span
@@ -224,7 +230,7 @@ export default function AthlosApp() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => setSplash(false), 1300);
+    const t = setTimeout(() => setSplash(false), 2600);
     return () => clearTimeout(t);
   }, []);
 
