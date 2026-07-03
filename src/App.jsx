@@ -47,15 +47,13 @@ function SplashScreen({ C }) {
     }}>
       <style>{`
         @keyframes splashGod {
-          0%   { opacity: 0; transform: scale(1.03); }
-          22%  { opacity: 1; }
-          78%  { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; }
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
-        @media (prefers-reduced-motion: reduce) { .athlos-splash-god { animation-duration: 0.001ms !important; } }
       `}</style>
 
-      {/* the god — the only animated element: fade in, hold, fade out */}
+      {/* the god — quick fade-in only; the end state is fully visible, so it
+          can never get stuck invisible (also safe with reduced motion) */}
       <img
         className="athlos-splash-god"
         src="/img/greek-god.png"
@@ -63,7 +61,7 @@ function SplashScreen({ C }) {
         style={{
           position: "absolute", inset: 0, width: "100%", height: "100%",
           objectFit: "contain",
-          animation: "splashGod 2.6s cubic-bezier(0.4,0,0.4,1) both",
+          animation: "splashGod 0.55s ease-out forwards",
           pointerEvents: "none",
           userSelect: "none",
         }}
@@ -189,7 +187,7 @@ export default function AthlosApp() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => setSplash(false), 2600);
+    const t = setTimeout(() => setSplash(false), 1800);
     return () => clearTimeout(t);
   }, []);
 
