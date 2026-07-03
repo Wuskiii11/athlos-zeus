@@ -42,11 +42,11 @@ function Drum({ items, value, onChange, label }) {
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: ITEM_H * PAD, background: `linear-gradient(to bottom, ${C.bg} 40%, transparent)`, zIndex: 2, pointerEvents: "none" }} />
         {/* Fade bottom */}
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: ITEM_H * PAD, background: `linear-gradient(to top, ${C.bg} 40%, transparent)`, zIndex: 2, pointerEvents: "none" }} />
-        {/* Selection highlight */}
+        {/* Selection highlight — engraved bronze band */}
         <div style={{
           position: "absolute", top: "50%", left: 8, right: 8,
           height: ITEM_H, transform: "translateY(-50%)",
-          background: `${C.accent}14`, border: `1.5px solid ${C.accent}44`,
+          background: `${C.gold}10`, border: `1.5px solid ${C.gold}55`,
           borderRadius: 14, zIndex: 1, pointerEvents: "none",
         }} />
 
@@ -82,7 +82,7 @@ function Drum({ items, value, onChange, label }) {
                   fontFamily: C.display,
                   fontWeight: active ? 800 : 400,
                   fontSize: active ? 30 : 22,
-                  color: active ? C.accent : C.muted,
+                  color: active ? C.text : C.muted,
                   letterSpacing: "-0.03em",
                   transition: "font-size 0.15s, color 0.15s, font-weight 0.15s",
                   cursor: "pointer",
@@ -133,8 +133,8 @@ export default function TimePicker({ value, onChange, onClose }) {
         {/* Header */}
         <div style={{ padding: "4px 20px 12px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
           <div>
-            <Mono style={{ color: C.muted, fontSize: 8 }}>{t("IZBRANA URA")}</Mono>
-            <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, color: C.accent, marginTop: 3, letterSpacing: "-0.04em" }}>
+            <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.22em" }}>{t("IZBRANA URA")}</Mono>
+            <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 24, color: C.text, marginTop: 4 }}>
               {hour}<span style={{ color: C.muted, margin: "0 2px" }}>:</span>{min}
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function TimePicker({ value, onChange, onClose }) {
           <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 14, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
             {t("Prekliči")}
           </button>
-          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.accent, color: "#000", fontFamily: C.display, fontWeight: 800, fontSize: 14, letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
             {t("Potrdi")}
           </button>
         </div>

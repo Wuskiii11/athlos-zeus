@@ -38,10 +38,10 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
 
   return (
     <div style={{ position: "relative", height: visibleH, width, flexShrink: 0 }}>
-      {/* center selection band */}
+      {/* center selection band — engraved bronze rules */}
       <div style={{
         position: "absolute", top: ITEM_H * PAD, left: 0, right: 0, height: ITEM_H,
-        borderTop: `1px solid ${C.border2}`, borderBottom: `1px solid ${C.border2}`,
+        borderTop: `1px solid ${C.gold}77`, borderBottom: `1px solid ${C.gold}77`,
         pointerEvents: "none", zIndex: 2,
       }} />
       <div
@@ -66,7 +66,7 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontFamily: C.heading, fontWeight: active ? 800 : 400,
                 fontSize: active ? 19 : 15,
-                color: active ? C.accent : C.muted,
+                color: active ? C.text : C.muted,
                 opacity: active ? 1 : 0.5,
                 transition: "font-size 0.15s, color 0.15s, opacity 0.15s, font-weight 0.15s",
                 cursor: "pointer", userSelect: "none", WebkitUserSelect: "none",
