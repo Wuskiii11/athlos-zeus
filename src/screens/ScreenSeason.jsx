@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme, useDatePicker, useTimePicker } from "../theme";
-import { Pressable, PrimaryBtn } from "../components/UI";
+import { Pressable, PrimaryBtn, Mono } from "../components/UI";
 import { listEvents, addEvent, deleteEvent, replaceEvents } from "../lib/api";
 import { useT, useLang } from "../lib/i18n";
 
@@ -401,65 +401,74 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
     : `${MONTHS_SH[mon.getMonth()]} ${mon.getDate()} – ${MONTHS_SH[sun.getMonth()]} ${sun.getDate()}`;
 
   const weekEvs = events.filter(e => dates.includes(e.date));
-  const weekInPeak = dates.some((iso) => inRanges(iso, peakRanges(events)));
-  const totalLoad = weekEvs.reduce((s, e) => s + (EV_LOAD[e.type] || 0), 0);
-  const dayLoads = dates.map(iso => events.filter(e => e.date === iso).reduce((s, e) => s + (EV_LOAD[e.type] || 0), 0));
-  const maxLoad = Math.max(...dayLoads, 100);
+  const peaks = peakRanges(events);
+  const weekInPeak = dates.some((iso) => inRanges(iso, peaks));
 
-  const loadStatus = totalLoad === 0 ? t("brez treninga")
-    : totalLoad < 1500 ? t("lahka obremenitev")
-    : totalLoad < 2800 ? t("optimalen ramp")
-    : t("visoka obremenitev");
-  const loadColor = totalLoad === 0 ? C.muted
-    : totalLoad < 1500 ? C.yellow
-    : totalLoad < 2800 ? C.accent
-    : C.red;
+  // Plain-language summary — how many of what, no load jargon.
+  const countOf = (ty) => weekEvs.filter(e => e.type === ty).length;
+  const summary = [
+    ["trening", countOf("trening"), C.accent],
+    ["tekma", countOf("tekma"), C.red],
+    ["recovery", countOf("recovery"), C.yellow],
+  ].filter(([, n]) => n > 0);
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, color: C.muted, letterSpacing: "0.08em", marginBottom: 6 }}>{t("TEDENSKI LOAD")}</div>
+      {/* Week nav — centered, calm */}
+      <div style={{ marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button onClick={() => setWeekOffset(w => w - 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "4px 8px 4px 0", display: "flex", alignItems: "center" }}>
+          <button onClick={() => setWeekOffset(w => w - 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "6px 10px 6px 0", display: "flex", alignItems: "center" }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 28, color: C.text, letterSpacing: "-0.02em" }}>{rangeLabel}</div>
-          <button onClick={() => setWeekOffset(w => w + 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "4px 0 4px 8px", display: "flex", alignItems: "center" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 20, letterSpacing: "0.06em", color: C.text, textTransform: "uppercase" }}>{rangeLabel}</div>
+            {weekOffset !== 0 && (
+              <button onClick={() => setWeekOffset(0)} style={{ background: "none", border: "none", padding: "3px 6px", color: C.accent, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+                ↺ {t("nazaj na danes")}
+              </button>
+            )}
+          </div>
+          <button onClick={() => setWeekOffset(w => w + 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "6px 0 6px 10px", display: "flex", alignItems: "center" }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         </div>
-        <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, marginTop: 5 }}>
-          {t("Planirano")} <strong style={{ color: C.text2 }}>{totalLoad.toLocaleString()} AU</strong>
-          {totalLoad > 0 && <> · <span style={{ color: loadColor }}>{loadStatus}</span></>}
+        {/* at-a-glance chips: the colors ARE the legend */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+          {summary.length === 0 && (
+            <span style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 13, color: C.muted }}>{t("Ta teden ni treningov")}</span>
+          )}
+          {summary.map(([ty, n, col]) => (
+            <span key={ty} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 11px", borderRadius: 999, background: `${col}14`, border: `1px solid ${col}40` }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: col }} />
+              <Mono style={{ color: col, fontSize: 9 }}>{n}× {t(EV_LABEL[ty])}</Mono>
+            </span>
+          ))}
           {weekInPeak && (
-            <span style={{ marginLeft: 8, fontFamily: C.display, fontSize: 11, fontWeight: 700, color: C.gold, background: `${C.gold}1f`, padding: "3px 10px", borderRadius: 999, textTransform: "lowercase" }}>{t("PEAK TEDEN")}</span>
+            <span style={{ padding: "4px 11px", borderRadius: 999, background: `${C.gold}1f`, border: `1px solid ${C.gold}50` }}>
+              <Mono style={{ color: C.gold, fontSize: 9 }}>{t("PEAK TEDEN")}</Mono>
+            </span>
           )}
         </div>
       </div>
 
-      {/* Bar chart */}
-      <div style={{ display: "flex", gap: 5, alignItems: "flex-end", marginBottom: 24 }}>
+      {/* Week strip — one glance: which day has what */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 4, marginBottom: 22, padding: "10px 8px", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16 }}>
         {dates.map((iso, i) => {
           const isToday = iso === today;
+          const d = new Date(iso + "T00:00:00");
           const dayEvs = events.filter(e => e.date === iso);
-          const load = dayLoads[i];
-          const hasEvents = load > 0;
-          const CHART_H = 80;
-          const barH = hasEvents ? Math.max(Math.round((load / maxLoad) * CHART_H), 14) : 0;
-          const BAR_COLORS = ["#7B61FF","#4F8EF0","#2DD4A0","#FF8C42","#4F8EF0","#E8547A","#9B7BFF"];
-          const color = dayEvs.some(e => e.type === "tekma") ? "#E8547A"
-            : dayEvs.some(e => e.type === "recovery") ? "#2DD4A0"
-            : BAR_COLORS[i];
+          const inPeak = inRanges(iso, peaks);
           return (
-            <div key={iso} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-              <div style={{ width: "100%", height: CHART_H, position: "relative" }}>
-                <div style={{ position: "absolute", inset: 0, borderRadius: "6px 6px 4px 4px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }} />
-                {hasEvents && (
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: barH, borderRadius: "6px 6px 4px 4px", background: color }} />
-                )}
+            <div key={iso} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, padding: "6px 0", borderRadius: 10, background: inPeak ? `${C.gold}14` : "transparent" }}>
+              <Mono style={{ color: isToday ? C.text : C.muted2, fontSize: 8 }}>{BAR_LABELS[i]}</Mono>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? C.text : "transparent" }}>
+                <span style={{ fontFamily: C.display, fontWeight: isToday ? 700 : 500, fontSize: 13, color: isToday ? C.bg : C.text }}>{d.getDate()}</span>
               </div>
-              <div style={{ fontFamily: C.display, fontWeight: isToday ? 800 : 500, fontSize: 10, color: isToday ? C.accent : C.muted, textTransform: "uppercase" }}>{BAR_LABELS[i]}</div>
+              <div style={{ display: "flex", gap: 2, minHeight: 6 }}>
+                {dayEvs.slice(0, 3).map((ev, ei) => (
+                  <span key={ei} style={{ width: 5, height: 5, borderRadius: "50%", background: evColor(C, ev.type) || C.accent }} />
+                ))}
+              </div>
             </div>
           );
         })}
@@ -473,36 +482,34 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
         const hasMatch = dayEvs.some(e => e.type === "tekma");
         return (
           <div key={iso} style={{ marginBottom: 18 }}>
-            <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 11, color: C.muted, letterSpacing: "0.07em", marginBottom: 10 }}>
-              {DAY_FULL[dayIdx(iso)]}
-              {hasMatch && <span style={{ color: C.red, marginLeft: 8 }}>· {t("DAN TEKME")}</span>}
-              {isToday && !hasMatch && <span style={{ color: C.accent, marginLeft: 8 }}>· {t("DANES")}</span>}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 11, letterSpacing: "0.14em", color: isToday ? C.text : C.muted, whiteSpace: "nowrap" }}>
+                {DAY_FULL[dayIdx(iso)]} · {fmtDate(iso, lang).toUpperCase()}
+              </span>
+              {hasMatch && <Mono style={{ color: C.red, fontSize: 8 }}>{t("DAN TEKME")}</Mono>}
+              {isToday && !hasMatch && <Mono style={{ color: C.accent, fontSize: 8 }}>{t("DANES")}</Mono>}
+              <span style={{ flex: 1, height: 1, background: C.border }} />
             </div>
             {dayEvs.map(ev => {
-              const load = EV_LOAD[ev.type] || 0;
               const color = evColor(C, ev.type) || C.accent;
               const done = !!ev.completed;
               return (
-                <div key={ev.id} style={{ display: "flex", alignItems: "stretch", background: C.surface, border: `1px solid ${done ? `${C.accent}30` : C.border}`, borderRadius: 16, marginBottom: 8, overflow: "hidden" }}>
-                  <div style={{ width: 4, background: color, flexShrink: 0 }} />
-                  <div style={{ flex: 1, padding: "13px 12px" }}>
-                    <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{ev.title}</div>
-                    <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>
-                      {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : ev.time}
+                <div key={ev.id} style={{ display: "flex", alignItems: "center", gap: 12, background: C.surface, border: `1px solid ${done ? `${C.accent}30` : C.border}`, borderRadius: 16, marginBottom: 8, padding: "13px 14px" }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</div>
+                    <div style={{ fontFamily: C.display, fontSize: 12.5, color: C.muted, marginTop: 3 }}>
+                      {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : `${t("ob")} ${ev.time}`}
                       {ev.type === "tekma" && ev.opponent ? ` · vs ${ev.opponent}` : ""}
                       {ev.type === "tekma" ? ` · ${ev.location || t("Doma")}` : ""}
-                      {load > 0 ? ` · Load ${load} AU` : ""}
                     </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", paddingRight: 12, gap: 8 }}>
-                    {done && (
-                      <div style={{ width: 20, height: 20, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      </div>
-                    )}
-                    {load > 0 && <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color, minWidth: 32, textAlign: "right" }}>{load}</div>}
-                    <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 20, cursor: "pointer", padding: "4px 2px", lineHeight: 1 }}>×</button>
-                  </div>
+                  {done && (
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                  )}
+                  <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 20, cursor: "pointer", padding: "4px 2px", lineHeight: 1 }}>×</button>
                 </div>
               );
             })}
@@ -510,16 +517,6 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
         );
       })}
 
-      {weekEvs.length === 0 && (
-        <div style={{ fontFamily: C.display, fontSize: 14, color: C.muted2, textAlign: "center", padding: "24px 0" }}>{t("Ta teden ni treningov")}</div>
-      )}
-
-      {/* Legend */}
-      <div style={{ display: "flex", gap: 16, marginTop: 4, textTransform: "lowercase" }}>
-        <Legend color={C.accent} label={t("TRENING")} />
-        <Legend color={C.red} label={t("TEKMA")} />
-        <Legend color={C.yellow} label={t("REGENERACIJA")} />
-      </div>
     </div>
   );
 }
@@ -625,28 +622,23 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
           {selectedEvs.length === 0
             ? <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted2 }}>{t("Ni treningov")}</div>
             : selectedEvs.map(ev => {
-                const load = EV_LOAD[ev.type] || 0;
                 const color = evColor(C, ev.type) || C.accent;
                 const done = !!ev.completed;
                 return (
-                  <div key={ev.id} style={{ display: "flex", alignItems: "stretch", background: C.surface, border: `1px solid ${done ? `${C.accent}30` : C.border}`, borderRadius: 16, marginBottom: 8, overflow: "hidden" }}>
-                    <div style={{ width: 4, background: color, flexShrink: 0 }} />
-                    <div style={{ flex: 1, padding: "13px 12px" }}>
-                      <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{ev.title}</div>
-                      <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>
-                        {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : ev.time}
+                  <div key={ev.id} style={{ display: "flex", alignItems: "center", gap: 12, background: C.surface, border: `1px solid ${done ? `${C.accent}30` : C.border}`, borderRadius: 16, marginBottom: 8, padding: "13px 14px" }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</div>
+                      <div style={{ fontFamily: C.display, fontSize: 12.5, color: C.muted, marginTop: 3 }}>
+                        {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : `${t("ob")} ${ev.time}`}
                         {ev.type === "tekma" && ev.opponent ? ` · vs ${ev.opponent}` : ""}
                         {ev.type === "tekma" ? ` · ${ev.location || t("Doma")}` : ""}
-                        {load > 0 ? ` · Load ${load} AU` : ""}
                       </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", paddingRight: 12, gap: 8 }}>
-                      {done && <div style={{ width: 20, height: 20, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      </div>}
-                      {load > 0 && <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color, minWidth: 32, textAlign: "right" }}>{load}</div>}
-                      <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 20, cursor: "pointer", padding: "4px 2px", lineHeight: 1 }}>×</button>
-                    </div>
+                    {done && <div style={{ width: 20, height: 20, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>}
+                    <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 20, cursor: "pointer", padding: "4px 2px", lineHeight: 1 }}>×</button>
                   </div>
                 );
               })

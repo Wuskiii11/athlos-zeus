@@ -85,6 +85,8 @@ const EN = {
   "CILJ": "GOAL",
 
   // ── Full calendar (spec §05) ──
+  "nazaj na danes": "back to today",
+  "ob": "at",
   "PEAK TEDEN": "PEAK WEEK",
   "ZAČETEK SEZONE": "SEASON START",
   "KONEC SEZONE": "SEASON END",
