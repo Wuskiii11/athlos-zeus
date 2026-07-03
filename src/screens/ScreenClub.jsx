@@ -4,14 +4,16 @@ import { Mono } from "../components/UI";
 import { useT } from "../lib/i18n";
 import InjuryWidget from "./widgets/InjuryWidget";
 
+// streak + wellness (last morning check-in, 1–5) per spec §04 — the coach sees
+// who fills in the questionnaire regularly and the raw answers behind it.
 const TEAM = [
-  { ini: "LK", name: "Luka Kovač",      pos: "Napadalec",   battery: 82, injury: { name: "Hamstring gr. II", phase: 1, progressNote: "RICE protokol, izolirana aktivacija.", returnWeeks: 3, returnDate: "do 15. jul" }, days: [1, 1, 0, 1, 1, 0, 1], sprint: "1.76s", squat: "140 kg" },
-  { ini: "NM", name: "Nina Mlakar",      pos: "Vezna igra",  battery: 91, injury: null, days: [1, 1, 1, 0, 1, 1, 1], sprint: "1.81s", squat: "95 kg" },
-  { ini: "TŽ", name: "Tim Žagar",        pos: "Branilec",    battery: 65, injury: { name: "Bolečina v kolenu", phase: 2, progressNote: "Začetek re-load protokola.", returnWeeks: 2, returnDate: "do 10. jul" }, days: [1, 0, 0, 1, 0, 1, 1], sprint: "1.84s", squat: "128 kg" },
-  { ini: "EH", name: "Eva Horvat",       pos: "Vezna igra",  battery: 88, injury: null, days: [1, 1, 1, 1, 0, 1, 1], sprint: "1.79s", squat: "102 kg" },
-  { ini: "JN", name: "Jure Novak",       pos: "Vratar",      battery: 73, injury: null, days: [1, 1, 0, 0, 1, 1, 1], sprint: "1.91s", squat: "115 kg" },
-  { ini: "AK", name: "Ana Kos",          pos: "Branilec",    battery: 94, injury: null, days: [1, 1, 1, 1, 1, 0, 1], sprint: "1.74s", squat: "98 kg" },
-  { ini: "MP", name: "Marko Potočnik",   pos: "Napadalec",   battery: 56, injury: { name: "Zvit gleženj gr. I", phase: 0, progressNote: "Akutna faza — RICE.", returnWeeks: 1, returnDate: "za 1 teden" }, days: [0, 0, 0, 1, 0, 0, 0], sprint: "1.88s", squat: "122 kg" },
+  { ini: "LK", name: "Luka Kovač",      pos: "Napadalec",   battery: 82, injury: { name: "Hamstring gr. II", phase: 1, progressNote: "RICE protokol, izolirana aktivacija.", returnWeeks: 3, returnDate: "do 15. jul" }, days: [1, 1, 0, 1, 1, 0, 1], sprint: "1.76s", squat: "140 kg", streak: 12, wellness: { sleepQuality: 4, soreness: 3, stress: 2, mood: 4 } },
+  { ini: "NM", name: "Nina Mlakar",      pos: "Vezna igra",  battery: 91, injury: null, days: [1, 1, 1, 0, 1, 1, 1], sprint: "1.81s", squat: "95 kg", streak: 34, wellness: { sleepQuality: 5, soreness: 1, stress: 1, mood: 5 } },
+  { ini: "TŽ", name: "Tim Žagar",        pos: "Branilec",    battery: 65, injury: { name: "Bolečina v kolenu", phase: 2, progressNote: "Začetek re-load protokola.", returnWeeks: 2, returnDate: "do 10. jul" }, days: [1, 0, 0, 1, 0, 1, 1], sprint: "1.84s", squat: "128 kg", streak: 3, wellness: { sleepQuality: 3, soreness: 4, stress: 3, mood: 3 } },
+  { ini: "EH", name: "Eva Horvat",       pos: "Vezna igra",  battery: 88, injury: null, days: [1, 1, 1, 1, 0, 1, 1], sprint: "1.79s", squat: "102 kg", streak: 21, wellness: { sleepQuality: 4, soreness: 2, stress: 2, mood: 4 } },
+  { ini: "JN", name: "Jure Novak",       pos: "Vratar",      battery: 73, injury: null, days: [1, 1, 0, 0, 1, 1, 1], sprint: "1.91s", squat: "115 kg", streak: 7, wellness: { sleepQuality: 4, soreness: 2, stress: 3, mood: 3 } },
+  { ini: "AK", name: "Ana Kos",          pos: "Branilec",    battery: 94, injury: null, days: [1, 1, 1, 1, 1, 0, 1], sprint: "1.74s", squat: "98 kg", streak: 45, wellness: { sleepQuality: 5, soreness: 1, stress: 2, mood: 5 } },
+  { ini: "MP", name: "Marko Potočnik",   pos: "Napadalec",   battery: 56, injury: { name: "Zvit gleženj gr. I", phase: 0, progressNote: "Akutna faza — RICE.", returnWeeks: 1, returnDate: "za 1 teden" }, days: [0, 0, 0, 1, 0, 0, 0], sprint: "1.88s", squat: "122 kg", streak: 0, wellness: { sleepQuality: 2, soreness: 4, stress: 4, mood: 2 } },
 ];
 
 const DAY_LABELS = ["P", "T", "S", "Č", "P", "S", "N"];
@@ -75,6 +77,29 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
             <InjuryWidget injury={athlete.injury} C={C} t={t} isCoach={true} />
           </div>
         )}
+
+        {/* wellness check-in — streak + raw answers (spec §04, coach view) */}
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("WELLNESS CHECK-IN")}</Mono>
+            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: athlete.streak > 0 ? C.text : C.muted2 }}>
+              🔥{athlete.streak} <Mono style={{ color: C.muted, fontSize: 8 }}>{t("DNI ZAPORED")}</Mono>
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {[["Spanje", athlete.wellness.sleepQuality, false], ["Bolečine", athlete.wellness.soreness, true], ["Stres", athlete.wellness.stress, true], ["Energija", athlete.wellness.mood, false]].map(([l, v, badHigh]) => {
+              const good = badHigh ? v <= 2 : v >= 4;
+              const bad = badHigh ? v >= 4 : v <= 2;
+              const col = good ? C.accent : bad ? (C.red || "#ef4444") : (C.yellow || "#f59e0b");
+              return (
+                <div key={l} style={{ flex: 1, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 4px", textAlign: "center" }}>
+                  <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: col }}>{v}<span style={{ fontSize: 10, color: C.muted2 }}>/5</span></div>
+                  <Mono style={{ color: C.muted, fontSize: 7 }}>{t(l.toUpperCase())}</Mono>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* 7-day history */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 14 }}>
@@ -167,6 +192,10 @@ export default function ScreenClub({ go, profile }) {
                 <Mono style={{ color: C.muted, fontSize: 8 }}>{t(member.pos)}</Mono>
               </span>
               {member.injury && <span style={{ fontSize: 13 }}>🤕</span>}
+              <div style={{ textAlign: "right", minWidth: 34 }}>
+                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: member.streak > 0 ? C.text : C.muted2 }}>🔥{member.streak}</div>
+                <Mono style={{ color: C.muted, fontSize: 7 }}>STREAK</Mono>
+              </div>
               <div style={{ textAlign: "right", minWidth: 40 }}>
                 <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: batCol }}>{member.battery}</div>
                 <Mono style={{ color: C.muted, fontSize: 7 }}>BAT</Mono>

@@ -57,6 +57,19 @@ const EN = {
   "AI PROGRAM DANES": "TODAY'S AI PROGRAM",
   "TVOJ SISTEM": "YOUR SYSTEM",
 
+  // ── Wellness check-in + streak (spec §04) ──
+  "Kako se počutiš?": "How are you feeling?",
+  "Kako si spal?": "How did you sleep?",
+  "Bolečine, mišična napetost?": "Pain, muscle tension?",
+  "Stres / razpoloženje?": "Stress / mood?",
+  "Energija danes?": "Energy today?",
+  "Pošlji & posodobi readiness": "Send & update readiness",
+  "DNI ZAPORED · STREAK": "DAY STREAK",
+  "DNI ZAPORED": "DAYS IN A ROW",
+  "WELLNESS CHECK-IN": "WELLNESS CHECK-IN",
+  "BOLEČINE": "PAIN",
+  "ENERGIJA": "ENERGY",
+
   // ── Quick add / Injury form ──
   "HITRI VNOS": "QUICK ADD",
   "Poškodba": "Injury",

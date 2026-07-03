@@ -5,6 +5,7 @@ import { useT, useLang } from "../lib/i18n";
 import { readinessFromCheckin, recommendation, DEFAULT_CHECKIN } from "../lib/readiness";
 import InjuryWidget from "./widgets/InjuryWidget";
 import ReflectionWidget from "./widgets/ReflectionWidget";
+import CheckinCard from "./widgets/CheckinCard";
 
 // Demo content matching the spec mockups — wire to real tables once the
 // injury-tracking and reflection-generation backend exists.
@@ -403,6 +404,11 @@ export default function ScreenToday({ go, profile }) {
       {/* Greek ornament — separates header from readiness */}
       <div style={{ marginBottom: 14, ...rise(0.04) }}>
         <GreekOrnament C={C} />
+      </div>
+
+      {/* morning wellness questionnaire + streak (spec §04) — answers feed the battery */}
+      <div style={{ ...rise(0.05) }}>
+        <CheckinCard C={C} t={t} lang={lang} onSubmit={(a) => setCheckin((p) => ({ ...p, ...a }))} />
       </div>
 
       {/* READINESS — centered hero */}
