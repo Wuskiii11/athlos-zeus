@@ -83,16 +83,21 @@ function seedProtoConvs(userId) {
 }
 
 // ─── Avatar ──────────────────────────────────────────────────
+// Marble disc with a bronze ring — engraved initials, like a small medallion.
 function Avatar({ initials = "?", size = 44, isGroup }) {
   const C = useTheme();
+  const dark = C.name === "dark";
   return (
     <div style={{
       width: size, height: size, borderRadius: "50%", flexShrink: 0,
-      background: isGroup ? `${C.gold}18` : `${C.accent}18`,
-      border: `1.5px solid ${isGroup ? C.gold + "45" : C.accent + "45"}`,
+      background: dark
+        ? "radial-gradient(circle at 38% 32%, #1F2420, #14120E 80%)"
+        : "radial-gradient(circle at 38% 32%, #FBF7EF, #EFE8D8 75%, #E4DAC6 100%)",
+      border: `1.5px solid ${C.gold}55`,
+      boxShadow: dark ? "none" : "inset 0 1px 2px rgba(255,255,255,0.8), 0 2px 6px rgba(28,24,20,0.08)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: C.heading, fontWeight: 700, fontSize: size * 0.3,
-      color: isGroup ? C.gold : C.accent,
+      fontFamily: C.heading, fontWeight: 700, fontSize: size * 0.3, letterSpacing: "0.04em",
+      color: isGroup ? C.gold : (dark ? C.text : "#1C1814"),
     }}>
       {isGroup ? (
         <svg width={size * 0.44} height={size * 0.44} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
@@ -121,12 +126,17 @@ function Bubble({ msg, isMine, C, onLongPress }) {
   const isImage = msg.type === "image";
   const isVideo = msg.type === "video";
   const isFile  = msg.type === "file";
+  // Mine = dark "ink" panel with warm marble text (the premium statement of the
+  // design system); theirs = raised marble surface with a vein border. The
+  // electric green stays a signal, never a bubble fill.
+  const dark = C.name === "dark";
   const bgBubble = isMine
-    ? C.accent
-    : (C.name === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)");
-  const textColor = isMine
-    ? (C.name === "dark" ? "#04130a" : "#fff")
-    : C.text;
+    ? "linear-gradient(160deg, #26221C, #1C1814)"
+    : (dark ? "rgba(255,255,255,0.07)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)");
+  const bubbleBorder = isMine
+    ? "1px solid rgba(244,239,230,0.10)"
+    : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`;
+  const textColor = isMine ? "#F4EFE6" : C.text;
 
   return (
     <div style={{
@@ -139,12 +149,14 @@ function Bubble({ msg, isMine, C, onLongPress }) {
         onContextMenu={e => { e.preventDefault(); onLongPress?.(msg); }}
         style={{
           maxWidth: "74%",
-          padding: (isImage || isVideo) ? 0 : "10px 14px",
+          padding: (isImage || isVideo) ? 0 : "10px 15px",
           borderRadius: isMine ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
           background: bgBubble,
+          border: bubbleBorder,
           color: textColor,
           overflow: "hidden",
           cursor: "context-menu",
+          boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
         }}
       >
         {isImage && msg.attachment_url && (
@@ -173,12 +185,12 @@ function Bubble({ msg, isMine, C, onLongPress }) {
           </div>
         )}
         {msg.type === "text" && (
-          <span style={{ fontFamily: C.display, fontSize: 14, lineHeight: 1.48 }}>
+          <span style={{ fontFamily: C.display, fontSize: 15, fontWeight: 500, lineHeight: 1.45 }}>
             {msg.content}
           </span>
         )}
       </div>
-      <Mono style={{ fontSize: 9, color: C.muted2, margin: "2px 4px" }}>
+      <Mono style={{ fontSize: 8, color: C.muted2, margin: "3px 4px", letterSpacing: "0.12em" }}>
         {msg.created_at
           ? new Date(msg.created_at).toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })
           : ""}
@@ -623,10 +635,10 @@ export default function ScreenChat({ user, profile }) {
       {view === "list" && (
         <div style={{ paddingBottom: 20 }}>
           <div style={{ padding: "10px 18px 0" }}>
-            <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.14em" }}>ATHLETE OS</Mono>
+            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.4em" }}>ΑΓΟΡΑ</Mono>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "8px 0 18px" }}>
-              <h1 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 27, margin: 0, letterSpacing: "0.04em", color: C.text }}>
-                Chat
+              <h1 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 26, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase", color: C.text }}>
+                {t("Pogovori")}
               </h1>
               <Pressable
                 onClick={() => setView("new-chat")}
@@ -669,39 +681,50 @@ export default function ScreenChat({ user, profile }) {
               </div>
             )}
 
-            {convs.map(conv => {
-              const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
-              return (
-                <button
-                  key={conv.id}
-                  onClick={() => openConv(conv)}
-                  style={{
-                    width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 13,
-                    padding: 13, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
-                    cursor: "pointer", WebkitTapHighlightColor: "transparent",
-                    opacity: isBlocked ? 0.4 : 1,
-                  }}
-                >
-                  <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} />
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                      <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 14, color: C.text }}>
-                        {convName(conv)}
+            {/* one raised marble panel, rows divided by engraved rules (.at-row) */}
+            {convs.length > 0 && (
+              <div style={{
+                background: C.name === "dark" ? C.surface : "linear-gradient(170deg, #FCF9F2, #F4EDDE)",
+                border: `1px solid ${C.name === "dark" ? C.border : "#D8CFBD"}`,
+                borderRadius: 20, overflow: "hidden",
+                boxShadow: C.name === "dark" ? "none" : "0 8px 22px rgba(28,24,20,0.07)",
+              }}>
+                {convs.map((conv, i) => {
+                  const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
+                  return (
+                    <button
+                      key={conv.id}
+                      onClick={() => openConv(conv)}
+                      style={{
+                        width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 13,
+                        padding: "14px 16px", background: "none", border: "none",
+                        borderBottom: i < convs.length - 1 ? `1px solid ${C.name === "dark" ? "rgba(255,255,255,0.06)" : "rgba(28,24,20,0.07)"}` : "none",
+                        cursor: "pointer", WebkitTapHighlightColor: "transparent",
+                        opacity: isBlocked ? 0.4 : 1,
+                      }}
+                    >
+                      <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} />
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                          <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 14, letterSpacing: "0.05em", color: C.text }}>
+                            {convName(conv)}
+                          </span>
+                          <Mono style={{ color: C.muted2, fontSize: 8, flexShrink: 0, letterSpacing: "0.1em" }}>
+                            {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
+                          </Mono>
+                        </span>
+                        <span style={{
+                          display: "block", fontFamily: C.display, fontStyle: "italic", fontSize: 13.5, fontWeight: 500, color: C.muted, marginTop: 3,
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        }}>
+                          {isBlocked ? "🚫 Blokirano" : lastMsgLabel(conv)}
+                        </span>
                       </span>
-                      <Mono style={{ color: C.muted2, fontSize: 9, flexShrink: 0 }}>
-                        {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
-                      </Mono>
-                    </span>
-                    <span style={{
-                      display: "block", fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}>
-                      {isBlocked ? "🚫 Blokirano" : lastMsgLabel(conv)}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -734,13 +757,13 @@ export default function ScreenChat({ user, profile }) {
                 display: "flex", alignItems: "center", gap: 10, flex: 1, textAlign: "left", padding: 0,
               }}
             >
-              <Avatar initials={convInitials(activeConv)} isGroup={activeConv.type === "group"} size={36} />
+              <Avatar initials={convInitials(activeConv)} isGroup={activeConv.type === "group"} size={38} />
               <div>
-                <div style={{ fontFamily: C.heading, fontSize: 15, fontWeight: 700, color: textOnBg }}>
+                <div style={{ fontFamily: C.heading, fontSize: 14, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: textOnBg }}>
                   {convName(activeConv)}
                 </div>
                 {activeConv.type === "direct" && activeConv.otherUser?.club && (
-                  <Mono style={{ fontSize: 9, color: mutedOnBg }}>
+                  <Mono style={{ fontSize: 8, color: C.gold, letterSpacing: "0.22em" }}>
                     {activeConv.otherUser.club}
                   </Mono>
                 )}
@@ -770,9 +793,14 @@ export default function ScreenChat({ user, profile }) {
             style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 2 }}
           >
             {messages.length === 0 && (
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.55 }}>
-                <div style={{ fontSize: 40 }}>👋</div>
-                <div style={{ fontFamily: C.display, fontSize: 14, color: mutedOnBg }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, opacity: 0.7 }}>
+                {/* Greek-key divider (.at-meander) */}
+                <div aria-hidden="true" style={{
+                  height: 14, width: 120, background: C.gold, opacity: 0.5,
+                  WebkitMask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='14'%3E%3Cpath d='M0 12h6V3h6v9h6V3h6v9h2' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E\") repeat-x center / 32px 14px",
+                  mask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='14'%3E%3Cpath d='M0 12h6V3h6v9h6V3h6v9h2' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E\") repeat-x center / 32px 14px",
+                }} />
+                <div style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 15, color: mutedOnBg }}>
                   {t("Začni pogovor")}
                 </div>
               </div>
@@ -852,7 +880,7 @@ export default function ScreenChat({ user, profile }) {
               onChange={handleFile}
             />
 
-            {/* Text input */}
+            {/* Text input — serif, on raised marble */}
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -860,29 +888,31 @@ export default function ScreenChat({ user, profile }) {
               placeholder={t("Sporočilo…")}
               rows={1}
               style={{
-                flex: 1, padding: "9px 13px", borderRadius: 20,
-                border: `1px solid ${borderOnBg}`,
-                background: C.name === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-                color: textOnBg, fontFamily: C.display, fontSize: 14,
+                flex: 1, padding: "9px 14px", borderRadius: 20,
+                border: `1px solid ${C.name === "dark" ? borderOnBg : "#D8CFBD"}`,
+                background: C.name === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.55)",
+                color: textOnBg, fontFamily: C.display, fontSize: 15, fontWeight: 500,
                 resize: "none", outline: "none", lineHeight: 1.4,
                 minHeight: 36, maxHeight: 100, overflowY: "auto",
               }}
             />
 
-            {/* Send */}
+            {/* Send — ink medallion with the electric-green arrow (signal, not fill) */}
             <Pressable
               onClick={() => doSend()}
               disabled={!input.trim()}
               style={{
-                background: C.accent, borderRadius: 50,
-                width: 36, height: 36, border: "none",
+                background: "linear-gradient(160deg, #26221C, #14120E)", borderRadius: 50,
+                width: 38, height: 38, border: "1px solid rgba(244,239,230,0.12)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                opacity: input.trim() ? 1 : 0.3, flexShrink: 0,
-                color: C.name === "dark" ? "#04130a" : "#fff",
+                opacity: input.trim() ? 1 : 0.35, flexShrink: 0,
+                color: input.trim() ? "#00FF87" : "rgba(244,239,230,0.6)",
+                boxShadow: input.trim() ? "0 6px 16px rgba(28,24,20,0.28)" : "none",
+                transition: "opacity 0.2s, color 0.2s, box-shadow 0.2s",
               }}
             >
-              <svg width={15} height={15} viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 5l7 7-7 7"/>
               </svg>
             </Pressable>
           </div>

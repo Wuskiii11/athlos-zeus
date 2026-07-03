@@ -58,6 +58,9 @@ const EN = {
   "Današnja preizkušnja": "Today's trial",
   "TVOJ SISTEM": "YOUR SYSTEM",
 
+  // ── Chat ──
+  "Pogovori": "Chats",
+
   // ── Live training widget (spec §07) ──
   "nato": "next",
   "pon.": "reps",
