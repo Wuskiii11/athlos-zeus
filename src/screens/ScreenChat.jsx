@@ -176,7 +176,7 @@ function DayDivider({ label, C, muted, line }) {
 // in italic Cormorant on a marble tablet; my replies are engraved ink panels
 // with a faint green "oracle" breath in the corner. Timestamps only close a
 // run of messages, like a catalog mark.
-function Bubble({ msg, isMine, C, onLongPress, showTime = true }) {
+function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }) {
   const isSticker = msg.type === "sticker";
   if (isSticker) {
     return (
@@ -193,16 +193,17 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true }) {
   const isVideo = msg.type === "video";
   const isFile  = msg.type === "file";
   // Mine = dark "ink" panel with warm marble text (the premium statement of the
-  // design system); theirs = raised marble surface with a vein border. The
-  // electric green stays a signal, never a bubble fill.
-  const dark = C.name === "dark";
+  // design system); theirs = raised marble surface with a vein border on light
+  // backdrops, a translucent light panel on dark ones. Text color is tied to
+  // the BUBBLE surface, never to the conversation backdrop — that's what kept
+  // making white-on-marble unreadable on dark chat backgrounds.
   const bgBubble = isMine
     ? "linear-gradient(160deg, #26221C, #1C1814)"
-    : (dark ? "rgba(255,255,255,0.07)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)");
+    : (darkBg ? "rgba(255,255,255,0.09)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)");
   const bubbleBorder = isMine
-    ? "1px solid rgba(244,239,230,0.10)"
-    : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`;
-  const textColor = isMine ? "#F4EFE6" : C.text;
+    ? `1px solid ${darkBg ? "rgba(244,239,230,0.22)" : "rgba(244,239,230,0.10)"}`
+    : `1px solid ${darkBg ? "rgba(255,255,255,0.16)" : "#D8CFBD"}`;
+  const textColor = isMine ? "#F4EFE6" : (darkBg ? "rgba(255,255,255,0.92)" : "#1C1814");
 
   return (
     <div style={{
@@ -223,7 +224,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true }) {
           overflow: "hidden",
           cursor: "context-menu",
           position: "relative",
-          boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
+          boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (darkBg ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
         }}
       >
         {/* faint oracle breath in the corner of my ink panels */}
@@ -664,6 +665,9 @@ export default function ScreenChat({ user, profile }) {
 
   // ── Helpers ──────────────────────────────────────────────────
   const bgColor = BG_OPTIONS.find(b => b.id === convBg)?.color || C.bg;
+  // Is the conversation sitting on a dark backdrop (dark theme or a dark
+  // custom background)? Bubbles pick their surface + text from this.
+  const darkBackdrop = C.name === "dark" || ["dark", "olive", "navy", "bronze"].includes(convBg);
   const textOnBg = (() => {
     const dark = ["dark", "olive", "navy", "bronze"].includes(convBg);
     return dark ? "rgba(255,255,255,0.9)" : C.text;
@@ -908,6 +912,7 @@ export default function ScreenChat({ user, profile }) {
                     C={{ ...C, text: textOnBg, muted2: mutedOnBg }}
                     onLongPress={msg.sender_id === userId ? setMsgMenu : undefined}
                     showTime={closesRun}
+                    darkBg={darkBackdrop}
                   />
                 </React.Fragment>
               );
