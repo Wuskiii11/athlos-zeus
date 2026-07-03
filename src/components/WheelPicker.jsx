@@ -9,6 +9,7 @@ const PAD = 2; // rows above/below center → 5-row visible window
 export default function WheelColumn({ items, value, onChange, render, width = 64, C }) {
   const ref = useRef(null);
   const settleTimer = useRef(null);
+  const drag = useRef(null); // mouse-drag scrolling (touch keeps native momentum)
   const idx = Math.max(0, items.indexOf(value));
 
   const scrollToIdx = useCallback((i, smooth = true) => {
@@ -47,10 +48,24 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
       <div
         ref={ref}
         onScroll={onScroll}
+        onPointerDown={(e) => {
+          if (e.pointerType !== "mouse") return;
+          drag.current = { y: e.clientY, top: ref.current.scrollTop, moved: false };
+          e.currentTarget.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          if (e.pointerType !== "mouse" || !drag.current) return;
+          const dy = e.clientY - drag.current.y;
+          if (Math.abs(dy) > 3) drag.current.moved = true;
+          ref.current.scrollTop = drag.current.top - dy;
+        }}
+        onPointerUp={() => { setTimeout(() => { drag.current = null; }, 0); }}
+        onPointerCancel={() => { drag.current = null; }}
         className="athlos-wheel-scroll"
         style={{
           height: "100%", overflowY: "scroll", scrollSnapType: "y mandatory",
           WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none",
+          cursor: "grab",
         }}
       >
         <style>{`.athlos-wheel-scroll::-webkit-scrollbar{display:none}`}</style>
@@ -60,7 +75,7 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
           return (
             <div
               key={i}
-              onClick={() => { scrollToIdx(i); onChange(it); }}
+              onClick={() => { if (drag.current?.moved) return; scrollToIdx(i); onChange(it); }}
               style={{
                 height: ITEM_H, scrollSnapAlign: "center",
                 display: "flex", alignItems: "center", justifyContent: "center",

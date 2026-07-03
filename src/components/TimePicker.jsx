@@ -11,6 +11,7 @@ function Drum({ items, value, onChange, label }) {
   const C = useTheme();
   const ref = useRef(null);
   const scrollTimer = useRef(null);
+  const drag = useRef(null); // mouse-drag scrolling (touch keeps native momentum)
   const idx = items.indexOf(value);
 
   const scrollTo = (i, smooth = true) => {
@@ -53,6 +54,19 @@ function Drum({ items, value, onChange, label }) {
         <div
           ref={ref}
           onScroll={onScroll}
+          onPointerDown={(e) => {
+            if (e.pointerType !== "mouse") return;
+            drag.current = { y: e.clientY, top: ref.current.scrollTop, moved: false };
+            e.currentTarget.setPointerCapture(e.pointerId);
+          }}
+          onPointerMove={(e) => {
+            if (e.pointerType !== "mouse" || !drag.current) return;
+            const dy = e.clientY - drag.current.y;
+            if (Math.abs(dy) > 3) drag.current.moved = true;
+            ref.current.scrollTop = drag.current.top - dy;
+          }}
+          onPointerUp={() => { setTimeout(() => { drag.current = null; }, 0); }}
+          onPointerCancel={() => { drag.current = null; }}
           style={{
             height: "100%", overflowY: "scroll",
             scrollSnapType: "y mandatory",
@@ -61,6 +75,7 @@ function Drum({ items, value, onChange, label }) {
             WebkitOverflowScrolling: "touch",
             paddingTop: ITEM_H * PAD,
             paddingBottom: ITEM_H * PAD,
+            cursor: "grab",
           }}
         >
           {items.map((v) => {
