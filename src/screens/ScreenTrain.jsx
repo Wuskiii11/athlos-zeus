@@ -3,6 +3,8 @@ import { useTheme } from "../theme";
 import { Mono, BackBtn, Pressable } from "../components/UI";
 import { saveWorkout, completeTodaysTraining } from "../lib/api";
 import { useT } from "../lib/i18n";
+import { getLive, setLive, clearLive } from "../lib/liveSession";
+import LockscreenDemo from "./widgets/LockscreenDemo";
 
 /* ───────────────────────── helpers ───────────────────────── */
 function fmtTime(s) {
@@ -231,16 +233,21 @@ function VBTSheet({ ex, C, t, onClose, onStart }) {
 export default function ScreenTrain({ go, user }) {
   const C = useTheme();
   const t = useT();
-  const [started, setStarted] = useState(false);
+  // Resume a running session from the live store (spec §07) — the component
+  // unmounts when the user switches tabs; the store keeps the workout alive.
+  const resume = useRef(getLive()).current;
+  const [started, setStarted] = useState(!!resume);
   const [finished, setFinished] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
-  const [exIdx, setExIdx] = useState(0);
+  const startedAt = useRef(resume?.startedAt || null);
+  const [elapsed, setElapsed] = useState(resume ? Math.floor((Date.now() - resume.startedAt) / 1000) : 0);
+  const [exIdx, setExIdx] = useState(resume?.exIdx || 0);
   // per-exercise set logs: { reps, load, done }[]
   const [logs, setLogs] = useState(() =>
-    SESSION.block.map((e) => Array.from({ length: e.sets }, () => ({ reps: 0, load: e.load, done: false })))
+    resume?.logs || SESSION.block.map((e) => Array.from({ length: e.sets }, () => ({ reps: 0, load: e.load, done: false })))
   );
   const [slide, setSlide] = useState(0); // slide-to-start progress 0..1
   const [vbtEx, setVbtEx] = useState(null); // index of exercise showing VBT sheet, or null
+  const [lockDemo, setLockDemo] = useState(false); // mock lockscreen overlay (spec §07)
 
   useEffect(() => {
     if (!started || finished) return;
@@ -252,14 +259,33 @@ export default function ScreenTrain({ go, user }) {
   const exLogs = logs[exIdx];
   const doneCount = exLogs.filter((s) => s.done).length;
 
-  const setLog = (si, patch) =>
+  // Publish the workout state for the cross-tab live bar + lockscreen demo.
+  useEffect(() => {
+    if (!started || finished) return;
+    if (!startedAt.current) startedAt.current = Date.now();
+    const active = exLogs.find((x) => !x.done) || exLogs[exLogs.length - 1];
+    setLive({
+      focus: SESSION.focus, block: ex.block, exName: ex.name,
+      setDone: doneCount, setsTotal: exLogs.length,
+      reps: ex.reps, load: active?.load || 0, unit: ex.unit,
+      nextName: SESSION.block[exIdx + 1]?.name || null,
+      startedAt: startedAt.current, exIdx, logs,
+    });
+  }, [started, finished, exIdx, logs]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const setLog = (si, patch) => {
+    // marking a set done starts the between-set rest countdown (spec §07)
+    if (patch.done) setLive({ resting: true, restUntil: Date.now() + SESSION.rest * 1000 });
     setLogs((all) => all.map((arr, i) => (i === exIdx ? arr.map((s, j) => (j === si ? { ...s, ...patch } : s)) : arr)));
+  };
 
   const addSet = () =>
     setLogs((all) => all.map((arr, i) => (i === exIdx ? [...arr, { reps: 0, load: ex.load, done: false }] : arr)));
 
   const finishSession = () => {
     setFinished(true);
+    clearLive();
+    startedAt.current = null;
     saveWorkout(user?.id, {
       title: `Trening ${SESSION.no} · ${SESSION.focus}`,
       durationSec: elapsed,
@@ -409,13 +435,21 @@ export default function ScreenTrain({ go, user }) {
             <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em", textTransform: "uppercase" }}>{t(ex.name)}</h1>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", background: C.surface, border: `1px solid ${C.accent}55`, borderRadius: 14, boxShadow: C.glowSoft }}>
-          <span style={{ width: 24, height: 24, borderRadius: "50%", border: `1.5px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="9" height="9" viewBox="0 0 24 24" fill={C.accent}><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
-          </span>
-          <div><Mono style={{ color: C.muted, fontSize: 8 }}>{t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 14, color: C.accent }}>{fmtTime(elapsed)}</div></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {/* mock lockscreen Live Activity demo (spec §07) */}
+          <button onClick={() => setLockDemo(true)} aria-label="Live Activity demo" style={{ width: 38, height: 38, borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", background: C.surface, border: `1px solid ${C.accent}55`, borderRadius: 14, boxShadow: C.glowSoft }}>
+            <span style={{ width: 24, height: 24, borderRadius: "50%", border: `1.5px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill={C.accent}><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
+            </span>
+            <div><Mono style={{ color: C.muted, fontSize: 8 }}>{t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 14, color: C.accent }}>{fmtTime(elapsed)}</div></div>
+          </div>
         </div>
       </div>
+
+      {lockDemo && <LockscreenDemo t={t} onClose={() => setLockDemo(false)} />}
 
       {/* progression chart (only for the main lift) */}
       {ex.chart && <Progression C={C} t={t} />}

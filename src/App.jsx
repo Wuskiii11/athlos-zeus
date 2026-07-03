@@ -22,6 +22,7 @@ import ConsentScreen from "./screens/ConsentScreen";
 import { getSession, onAuthChange, signOut as apiSignOut, loadProfile, saveProfile, getAthleteClub } from "./lib/api";
 import { LangContext, makeT } from "./lib/i18n";
 import CoachApp from "./coach/CoachApp";
+import LiveTrainingBar from "./screens/widgets/LiveTrainingBar";
 
 const NAV = [
   { id: "today",    label: "Danes",   icon: "today" },
@@ -394,6 +395,10 @@ export default function AthlosApp() {
       from { opacity: 0; transform: translateY(-12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes athlosPulse {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(0,255,135,0.5); }
+      50%      { opacity: 0.7; transform: scale(0.9); box-shadow: 0 0 0 6px rgba(0,255,135,0); }
+    }
     @keyframes athlosDot {
       0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
       30%            { opacity: 1;   transform: translateY(-4px); }
@@ -580,6 +585,8 @@ export default function AthlosApp() {
             background: `linear-gradient(to bottom, transparent 0%, ${C.bg} 62%)`,
             pointerEvents: "none",
           }}>
+            {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
+            {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
             <nav style={{
               display: "flex", justifyContent: "space-around", alignItems: "center",
               width: "100%", maxWidth: 560, marginInline: "auto",

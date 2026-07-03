@@ -57,6 +57,10 @@ const EN = {
   "AI PROGRAM DANES": "TODAY'S AI PROGRAM",
   "TVOJ SISTEM": "YOUR SYSTEM",
 
+  // ── Live training widget (spec §07) ──
+  "nato": "next",
+  "pon.": "reps",
+
   // ── Custom home screen (spec §06) ──
   "Uredi home screen": "Edit home screen",
   "Izberi widgete, ki jih želiš imeti na home screenu. Vlečenje za vrstni red.": "Pick the widgets you want on your home screen. Drag to reorder.",
