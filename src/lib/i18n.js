@@ -120,6 +120,8 @@ const EN = {
   "BODY FAT % (OKVIRNO)": "BODY FAT % (APPROX.)",
   "npr. 82": "e.g. 82",
   "npr. 15": "e.g. 15",
+  "Vnesi realen obseg pasu (40–200 cm).": "Enter a realistic waist size (40–200 cm).",
+  "Vnesi realen odstotek (3–60 %).": "Enter a realistic percentage (3–60 %).",
   "Kaj je\ntvoj cilj?": "What is\nyour goal?",
   "IZBERI ENEGA ALI VEČ": "PICK ONE OR MORE",
   "Moč": "Strength",

@@ -279,17 +279,34 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
           </>
         )}
 
-        {key === "waist" && (
+        {key === "waist" && (() => {
+          // realistic ranges only — no 1111111111111 (like the height/weight guards)
+          const clean = (v) => {
+            let s = v.replace(/[^\d.,]/g, "").replace(",", ".").slice(0, 5);
+            const parts = s.split(".");
+            if (parts.length > 2) s = parts[0] + "." + parts.slice(1).join("");
+            return s;
+          };
+          const waistOk = waist === "" || (+waist >= 40 && +waist <= 200);
+          const bfOk = bodyFat === "" || (+bodyFat >= 3 && +bodyFat <= 60);
+          const canNext = (waist !== "" || bodyFat !== "") && waistOk && bfOk;
+          const hint = { color: C.red, fontFamily: C.display, fontSize: 12, marginTop: 6, display: "block" };
+          return (
           <>
             <Mono style={{ color: C.muted, fontSize: 9 }}>{t("OBSEG PASU (CM)")}</Mono>
-            <input value={waist} onChange={(e) => setWaist(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder={t("npr. 82")} style={inp} />
+            <input value={waist} onChange={(e) => setWaist(clean(e.target.value))} inputMode="decimal" placeholder={t("npr. 82")}
+              style={{ ...inp, borderColor: waistOk ? C.border2 : C.red }} />
+            {!waistOk && <span style={hint}>{t("Vnesi realen obseg pasu (40–200 cm).")}</span>}
             <Mono style={{ color: C.muted, fontSize: 9, marginTop: 18, display: "block" }}>{t("BODY FAT % (OKVIRNO)")}</Mono>
-            <input value={bodyFat} onChange={(e) => setBodyFat(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder={t("npr. 15")} style={inp} />
+            <input value={bodyFat} onChange={(e) => setBodyFat(clean(e.target.value))} inputMode="decimal" placeholder={t("npr. 15")}
+              style={{ ...inp, borderColor: bfOk ? C.border2 : C.red }} />
+            {!bfOk && <span style={hint}>{t("Vnesi realen odstotek (3–60 %).")}</span>}
             <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={next} style={{ opacity: waist || bodyFat ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <PrimaryBtn onClick={() => canNext && next()} style={{ opacity: canNext ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
             <SkipBtn onClick={() => { setWaist(""); setBodyFat(""); next(); }} />
           </>
-        )}
+          );
+        })()}
 
         {/* ── Quote step ── */}
         {key === "quote" && (
