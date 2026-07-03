@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../theme";
-import { Pressable } from "../components/UI";
+import { Pressable, Mono } from "../components/UI";
 import {
   askAI, loadAiHistory, saveAiReply,
   loadCoachMemory, saveCoachMemory, saveCoachFeedback, addEvent,
@@ -298,18 +298,30 @@ export default function ScreenAI({ user, profile }) {
   // ── Chat ──
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg }}>
-      {/* Header */}
-      <div style={{ padding: "16px 18px 12px", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <AvatarIcon size={46} accent={C.accent} gold={C.gold} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 26, color: C.text, letterSpacing: "0.08em" }}>ZEUS</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: typing ? C.gold : C.accent }} />
-              <span style={{ fontFamily: C.display, fontSize: 13, fontWeight: 600, color: typing ? C.gold : C.muted, letterSpacing: "0.02em" }}>
-                {typing ? t("orakelj razmišlja...") : t("ATHLOS orakelj · te pozna")}
-              </span>
-            </div>
+      {/* Header — dark editorial hero: giant display type layered behind the
+          engraved god, a scattered epigram, one green oracle breath. */}
+      <div style={{ position: "relative", height: 200, flexShrink: 0, overflow: "hidden", background: "radial-gradient(130% 150% at 80% 28%, #1A2530 0%, #0C0F14 58%, #07090C 100%)" }}>
+        {/* giant type, sitting BEHIND the statue */}
+        <div aria-hidden="true" style={{ position: "absolute", left: -6, top: 2, fontFamily: C.heading, fontWeight: 800, fontSize: 94, lineHeight: 0.82, letterSpacing: "0.01em", color: "rgba(244,239,230,0.08)", userSelect: "none", pointerEvents: "none" }}>
+          ΖΕΥΣ
+        </div>
+        {/* engraved Zeus — the black plate vanishes through the screen blend */}
+        <img src="/img/hero-zeus-cut.png" alt="" aria-hidden="true" style={{ position: "absolute", right: -52, bottom: -70, height: 330, mixBlendMode: "screen", pointerEvents: "none", filter: "saturate(0.85)" }} />
+        {/* one green oracle breath near the bolt */}
+        <div aria-hidden="true" style={{ position: "absolute", right: 26, top: -34, width: 150, height: 150, background: "radial-gradient(circle, rgba(0,255,135,0.13), transparent 70%)", pointerEvents: "none" }} />
+        {/* scattered epigram, like the poster captions */}
+        <div style={{ position: "absolute", left: 18, top: 18, maxWidth: 150, fontFamily: C.serif, fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "rgba(244,239,230,0.52)" }}>
+          »{t("On ve, kaj si treniral — in kaj te čaka.")}«
+        </div>
+        {/* masthead */}
+        <div style={{ position: "absolute", left: 18, bottom: 14 }}>
+          <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.34em" }}>ΑΘΛΟΣ · ORAKELJ</Mono>
+          <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 34, letterSpacing: "0.14em", color: "#F4EFE6", lineHeight: 1, marginTop: 4 }}>ZEUS</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: typing ? C.gold : "#00FF87", boxShadow: typing ? "none" : "0 0 10px rgba(0,255,135,0.7)" }} />
+            <span style={{ fontFamily: C.display, fontSize: 12.5, fontWeight: 600, color: typing ? C.gold : "rgba(244,239,230,0.62)" }}>
+              {typing ? t("orakelj razmišlja...") : t("te pozna · uči se iz vsakega treninga")}
+            </span>
           </div>
         </div>
       </div>
