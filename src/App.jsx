@@ -152,10 +152,9 @@ function loadPrefs() {
 const cleanProfile = (o) =>
   Object.fromEntries(Object.entries(o || {}).filter(([k, v]) => v != null && k !== "id" && k !== "updated_at"));
 
-// The device's current OS theme (used until the user explicitly picks one in Settings).
-const systemTheme = () =>
-  (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
-    ? "dark" : "light";
+// Brand default is the light "Parian marble" (Greco-Roman) look — the app no
+// longer follows the OS theme, so dark devices don't hide the marble design.
+// Dark stays available as an explicit choice in Settings.
 
 export default function AthlosApp() {
   const [splash, setSplash]           = useState(true);
@@ -163,8 +162,8 @@ export default function AthlosApp() {
   const [prevScreen, setPrevScreen]   = useState("settings");
   const [transitioning, setTransitioning] = useState(false);
   const [navDir, setNavDir]           = useState(null); // "next" | "prev" | null — drives the slide direction
-  // Theme follows the device OS theme until the user picks one in Settings (then it sticks).
-  const [theme, setThemeState]        = useState(() => loadPrefs().themePref || systemTheme());
+  // Light marble is the default; the user's explicit Settings choice sticks.
+  const [theme, setThemeState]        = useState(() => loadPrefs().themePref || "light");
   const themeExplicit                 = useRef(!!loadPrefs().themePref);
   const setTheme = (val) => { themeExplicit.current = true; setThemeState(val); };
   const C = THEMES[theme];
@@ -237,18 +236,9 @@ export default function AthlosApp() {
   // Persist device prefs (theme, consent) locally
   useEffect(() => {
     // Persist the theme only once the user has explicitly chosen it in Settings,
-    // so otherwise the app keeps following the device OS theme.
+    // so everyone else stays on the brand-default light marble.
     try { localStorage.setItem(PREFS_KEY, JSON.stringify({ themePref: themeExplicit.current ? theme : undefined, consented, lang })); } catch {}
   }, [theme, consented, lang]);
-
-  // Follow the device OS theme live until the user picks one in Settings.
-  useEffect(() => {
-    if (!window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (e) => { if (!themeExplicit.current) setThemeState(e.matches ? "dark" : "light"); };
-    mq.addEventListener ? mq.addEventListener("change", onChange) : mq.addListener(onChange);
-    return () => { mq.removeEventListener ? mq.removeEventListener("change", onChange) : mq.removeListener(onChange); };
-  }, []);
 
   // Auto-save profile edits to the backend (only after the profile is loaded
   // for the logged-in user, so we never overwrite the stored profile with defaults)
