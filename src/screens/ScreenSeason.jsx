@@ -26,8 +26,56 @@ export function fmtDate(dateStr, lang = "sl") {
   return `${d.getDate()}. ${months[d.getMonth()]}`;
 }
 
-export const evColor = (C, type) => ({ trening: C.accent, tekma: C.red, recovery: C.yellow }[type]);
-export const EV_LABEL = { trening: "TRENING", tekma: "TEKMA", recovery: "REGENERACIJA" };
+export const evColor = (C, type) => ({ trening: C.accent, tekma: C.red, recovery: C.yellow, peak: C.gold, "season-start": C.gold2, "season-end": C.gold2 }[type]);
+export const EV_LABEL = { trening: "TRENING", tekma: "TEKMA", recovery: "REGENERACIJA", peak: "PEAK TEDEN", "season-start": "ZAČETEK SEZONE", "season-end": "KONEC SEZONE" };
+// Marker types have no time-of-day — they render as all-day markers (spec §05).
+export const MARKER_TYPES = ["peak", "season-start", "season-end"];
+
+export function addDaysISO(iso, n) {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// Peak-season ranges [{start,end}] from peak events (ev.days = span, default 7).
+export function peakRanges(events) {
+  return events.filter((e) => e.type === "peak").map((e) => ({ start: e.date, end: addDaysISO(e.date, (e.days || 7) - 1) }));
+}
+export const inRanges = (iso, ranges) => ranges.some((r) => iso >= r.start && iso <= r.end);
+
+// Apple/Google Calendar export (spec §05 · Sinhronizacija).
+export function buildICS(events) {
+  const esc = (s) => String(s || "").replace(/([,;\\])/g, "\\$1");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ATHLOS//Koledar//SL"];
+  events.forEach((ev) => {
+    const dt = ev.date.replace(/-/g, "");
+    lines.push("BEGIN:VEVENT", `UID:athlos-${ev.id}@athl-os.com`, `DTSTAMP:${dt}T000000`);
+    if (MARKER_TYPES.includes(ev.type)) {
+      lines.push(`DTSTART;VALUE=DATE:${dt}`);
+      if (ev.type === "peak") lines.push(`DTEND;VALUE=DATE:${addDaysISO(ev.date, ev.days || 7).replace(/-/g, "")}`);
+    } else {
+      lines.push(`DTSTART:${dt}T${(ev.time || "12:00").replace(":", "")}00`);
+    }
+    const extra = ev.type === "tekma" && ev.opponent ? ` vs ${ev.opponent}` : "";
+    lines.push(`SUMMARY:${esc((ev.title || EV_LABEL[ev.type]) + extra)}`);
+    if (ev.location) lines.push(`LOCATION:${esc(ev.location)}`);
+    lines.push("END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+
+export function downloadICS(events) {
+  const blob = new Blob([buildICS(events)], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "athlos-koledar.ics";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 const MOBILITY = {
   "Nogomet": "Mobilnost kolkov + raztezanje zadnje lože",
@@ -98,22 +146,53 @@ function AddEventForm({ onAdd, onCancel }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(isoOffset(0));
   const [time, setTime] = useState("17:00");
+  const [location, setLocation] = useState("");
+  const [opponent, setOpponent] = useState("");
+  const [days, setDays] = useState(7);
+  const isMarker = MARKER_TYPES.includes(type);
   const submit = () => {
     const fallback = EV_LABEL[type].charAt(0) + EV_LABEL[type].slice(1).toLowerCase();
-    onAdd({ type, title: title.trim() || fallback, date, time });
+    onAdd({
+      type, title: title.trim() || fallback, date, time: isMarker ? "" : time,
+      ...(type === "tekma" ? { location: location.trim(), opponent: opponent.trim() } : {}),
+      ...(type === "peak" ? { days: Math.max(1, +days || 7) } : {}),
+    });
   };
   const inputStyle = { width: "100%", padding: "13px 16px", minHeight: 50, borderRadius: 14, border: "none", background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 16, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light" };
   const labelStyle = { display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted };
   return (
     <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, marginBottom: 22, animation: "athlosFade 0.2s ease" }}>
       <span style={labelStyle}>{t("TIP")}</span>
-      <div style={{ display: "flex", gap: 8, margin: "10px 0 16px" }}>
-        {["trening", "tekma", "recovery"].map((ty) => (
-          <button key={ty} onClick={() => setType(ty)} style={{ flex: 1, padding: "11px 4px", borderRadius: 999, border: "none", background: type === ty ? `${evColor(C, ty)}26` : C.surface2, color: type === ty ? evColor(C, ty) : C.muted, fontFamily: C.display, fontSize: 12, textTransform: "lowercase", fontWeight: type === ty ? 700 : 500, cursor: "pointer", transition: "background 0.15s, color 0.15s" }}>{t(EV_LABEL[ty])}</button>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "10px 0 16px" }}>
+        {["trening", "tekma", "recovery", "peak", "season-start", "season-end"].map((ty) => (
+          <button key={ty} onClick={() => setType(ty)} style={{ flex: "1 0 30%", padding: "11px 4px", borderRadius: 999, border: "none", background: type === ty ? `${evColor(C, ty)}26` : C.surface2, color: type === ty ? evColor(C, ty) : C.muted, fontFamily: C.display, fontSize: 12, textTransform: "lowercase", fontWeight: type === ty ? 700 : 500, cursor: "pointer", transition: "background 0.15s, color 0.15s" }}>{t(EV_LABEL[ty])}</button>
         ))}
       </div>
-      <span style={labelStyle}>{t("NAZIV")}</span>
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("npr. Moč · spodnji del")} style={{ ...inputStyle, marginTop: 8, marginBottom: 16 }} />
+      {!isMarker && (
+        <>
+          <span style={labelStyle}>{t("NAZIV")}</span>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("npr. Moč · spodnji del")} style={{ ...inputStyle, marginTop: 8, marginBottom: 16 }} />
+        </>
+      )}
+      {type === "tekma" && (
+        <div style={{ display: "flex", gap: 12, marginBottom: 16, animation: "athlosFade 0.2s ease" }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <span style={labelStyle}>{t("NASPROTNIK")}</span>
+            <input value={opponent} onChange={(e) => setOpponent(e.target.value)} placeholder={t("npr. NK Bravo")} style={{ ...inputStyle, marginTop: 8 }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <span style={labelStyle}>{t("LOKACIJA")}</span>
+            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t("npr. Doma")} style={{ ...inputStyle, marginTop: 8 }} />
+          </div>
+        </div>
+      )}
+      {type === "peak" && (
+        <div style={{ marginBottom: 16, animation: "athlosFade 0.2s ease" }}>
+          <span style={labelStyle}>{t("TRAJANJE (DNI)")}</span>
+          <input value={days} onChange={(e) => setDays(e.target.value.replace(/\D/g, ""))} inputMode="numeric" style={{ ...inputStyle, marginTop: 8 }} />
+          <span style={{ display: "block", fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 6 }}>{t("Razpon dni, ko moraš biti najbolj pripravljen — v koledarju označen rumeno.")}</span>
+        </div>
+      )}
       <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
         <div style={{ flex: 1 }}>
           <span style={labelStyle}>{t("DATUM")}</span>
@@ -135,6 +214,7 @@ function AddEventForm({ onAdd, onCancel }) {
             </svg>
           </button>
         </div>
+        {!isMarker && (
         <div style={{ width: 110 }}>
           <span style={labelStyle}>{t("URA")}</span>
           <button
@@ -155,6 +235,7 @@ function AddEventForm({ onAdd, onCancel }) {
             </svg>
           </button>
         </div>
+        )}
       </div>
       <div style={{ display: "flex", gap: 10 }}>
         <Pressable onClick={onCancel} scale={0.97} style={{ flex: 1, padding: 15, borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: C.muted, fontFamily: C.display, fontSize: 14, fontWeight: 600 }}>{t("Prekliči")}</Pressable>
@@ -320,6 +401,7 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
     : `${MONTHS_SH[mon.getMonth()]} ${mon.getDate()} – ${MONTHS_SH[sun.getMonth()]} ${sun.getDate()}`;
 
   const weekEvs = events.filter(e => dates.includes(e.date));
+  const weekInPeak = dates.some((iso) => inRanges(iso, peakRanges(events)));
   const totalLoad = weekEvs.reduce((s, e) => s + (EV_LOAD[e.type] || 0), 0);
   const dayLoads = dates.map(iso => events.filter(e => e.date === iso).reduce((s, e) => s + (EV_LOAD[e.type] || 0), 0));
   const maxLoad = Math.max(...dayLoads, 100);
@@ -350,6 +432,9 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
         <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, marginTop: 5 }}>
           {t("Planirano")} <strong style={{ color: C.text2 }}>{totalLoad.toLocaleString()} AU</strong>
           {totalLoad > 0 && <> · <span style={{ color: loadColor }}>{loadStatus}</span></>}
+          {weekInPeak && (
+            <span style={{ marginLeft: 8, fontFamily: C.display, fontSize: 11, fontWeight: 700, color: C.gold, background: `${C.gold}1f`, padding: "3px 10px", borderRadius: 999, textTransform: "lowercase" }}>{t("PEAK TEDEN")}</span>
+          )}
         </div>
       </div>
 
@@ -403,7 +488,10 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
                   <div style={{ flex: 1, padding: "13px 12px" }}>
                     <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{ev.title}</div>
                     <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>
-                      {ev.time}{ev.type === "tekma" ? ` · ${t("Doma")}` : ""} · Load {load} AU
+                      {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : ev.time}
+                      {ev.type === "tekma" && ev.opponent ? ` · vs ${ev.opponent}` : ""}
+                      {ev.type === "tekma" ? ` · ${ev.location || t("Doma")}` : ""}
+                      {load > 0 ? ` · Load ${load} AU` : ""}
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", paddingRight: 12, gap: 8 }}>
@@ -449,6 +537,7 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
   const year = base.getFullYear();
   const month = base.getMonth();
   const cells = getMonthGrid(year, month);
+  const peaks = peakRanges(events); // yellow band per spec §05
 
   const selectedEvs = selectedDate
     ? events.filter(e => e.date === selectedDate).sort((a, b) => a.time < b.time ? -1 : 1)
@@ -481,10 +570,11 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
           const isToday = iso === today;
           const isSelected = iso === selectedDate;
           const dayEvs = outside ? [] : events.filter(e => e.date === iso);
+          const inPeak = !outside && inRanges(iso, peaks);
           const d = new Date(iso + "T00:00:00");
           return (
             <button key={idx} onClick={() => !outside && setSelectedDate(isSelected ? null : iso)} style={{
-              background: "none", border: "none", cursor: outside ? "default" : "pointer",
+              background: inPeak ? `${C.gold}1c` : "none", border: "none", cursor: outside ? "default" : "pointer",
               padding: "10px 0 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
               WebkitTapHighlightColor: "transparent",
             }}>
@@ -518,6 +608,13 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
         })}
       </div>
 
+      {/* Legend (spec §05 mockup: trening · tekma · peak teden) */}
+      <div style={{ display: "flex", gap: 16, marginBottom: 16, textTransform: "lowercase", flexWrap: "wrap" }}>
+        <Legend color={C.accent} label={t("TRENING")} />
+        <Legend color={C.red} label={t("TEKMA")} />
+        <Legend color={C.gold} label={t("PEAK TEDEN")} />
+      </div>
+
       {/* Selected day events */}
       {selectedDate && (
         <div style={{ marginTop: 4, marginBottom: 16 }}>
@@ -537,7 +634,10 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
                     <div style={{ flex: 1, padding: "13px 12px" }}>
                       <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{ev.title}</div>
                       <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>
-                        {ev.time} · Load {load} AU
+                        {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : ev.time}
+                        {ev.type === "tekma" && ev.opponent ? ` · vs ${ev.opponent}` : ""}
+                        {ev.type === "tekma" ? ` · ${ev.location || t("Doma")}` : ""}
+                        {load > 0 ? ` · Load ${load} AU` : ""}
                       </div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", paddingRight: 12, gap: 8 }}>
@@ -605,8 +705,24 @@ export default function ScreenSeason({ profile, user }) {
     }
   };
 
+  // In-app version of the day-before notification (spec §05 · Sinhronizacija).
+  const tomorrow = isoOffset(1);
+  const matchTomorrow = events.find((e) => e.type === "tekma" && e.date === tomorrow);
+  const peakStartsMonday = events.find((e) => e.type === "peak" && e.date === isoOffset(1) && dayIdx(e.date) === 0);
+
   return (
     <div style={{ padding: "10px 18px 28px" }}>
+      {(matchTomorrow || peakStartsMonday) && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", marginBottom: 14, borderRadius: 14, background: `${C.red}12`, border: `1px solid ${C.red}35`, animation: "athlosFade 0.25s ease" }}>
+          <span style={{ fontSize: 16 }}>⚽</span>
+          <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.text, lineHeight: 1.4 }}>
+            {matchTomorrow
+              ? <>{t("Tekma jutri")} · <strong>{matchTomorrow.title}</strong>{matchTomorrow.opponent ? ` vs ${matchTomorrow.opponent}` : ""} {matchTomorrow.time && `ob ${matchTomorrow.time}`}</>
+              : <>{t("Peak teden se začne jutri — bodi spočit.")}</>}
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
         <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj urnik")}</h2>
@@ -629,6 +745,10 @@ export default function ScreenSeason({ profile, user }) {
       <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
         <Pressable onClick={() => setMode(mode === "add" ? "list" : "add")} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: `1px solid ${C.border2}`, background: mode === "add" ? C.surface2 : "none", color: C.text, fontFamily: C.display, fontSize: 14, fontWeight: 600 }}>{t("+ Dodaj sam")}</Pressable>
         <Pressable onClick={() => setMode(mode === "ai" ? "list" : "ai")} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: "none", background: mode === "ai" ? C.accent : `${C.accent}1c`, color: mode === "ai" ? "#ffffff" : C.accent, fontFamily: C.display, fontSize: 14, fontWeight: 700 }}>{t("AI urnik")}</Pressable>
+        {/* .ics export — Apple/Google Calendar (spec §05) */}
+        <Pressable onClick={() => events.length && downloadICS(events)} scale={0.94} aria-label={t("Izvozi v koledar (.ics)")} style={{ width: 47, padding: "13px 0", borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: events.length ? C.text : C.muted2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </Pressable>
       </div>
 
       {mode === "add" && <AddEventForm onAdd={onAdd} onCancel={() => setMode("list")} />}

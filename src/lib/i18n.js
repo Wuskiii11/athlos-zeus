@@ -57,6 +57,20 @@ const EN = {
   "AI PROGRAM DANES": "TODAY'S AI PROGRAM",
   "TVOJ SISTEM": "YOUR SYSTEM",
 
+  // ── Full calendar (spec §05) ──
+  "PEAK TEDEN": "PEAK WEEK",
+  "ZAČETEK SEZONE": "SEASON START",
+  "KONEC SEZONE": "SEASON END",
+  "NASPROTNIK": "OPPONENT",
+  "LOKACIJA": "LOCATION",
+  "npr. NK Bravo": "e.g. NK Bravo",
+  "npr. Doma": "e.g. Home",
+  "TRAJANJE (DNI)": "DURATION (DAYS)",
+  "Razpon dni, ko moraš biti najbolj pripravljen — v koledarju označen rumeno.": "The span of days you need to peak — highlighted yellow in the calendar.",
+  "Tekma jutri": "Match tomorrow",
+  "Peak teden se začne jutri — bodi spočit.": "Peak week starts tomorrow — be rested.",
+  "Izvozi v koledar (.ics)": "Export to calendar (.ics)",
+
   // ── Extended onboarding (spec §01) ──
   "Kako si\nslišal za nas?": "How did you\nhear about us?",
   "DA VEMO, OD KOD PRIHAJAŠ": "SO WE KNOW WHERE YOU CAME FROM",
