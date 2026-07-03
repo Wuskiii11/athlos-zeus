@@ -31,18 +31,18 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
       width: "100%", maxWidth: 560, marginInline: "auto", marginBottom: 8,
       display: "flex", alignItems: "center", gap: 12, padding: "11px 16px",
       background: "linear-gradient(160deg, #1f2420, #14120e)",
-      border: "1px solid rgba(0,255,135,0.25)", borderRadius: 18,
+      border: `1px solid ${C.accent2}40`, borderRadius: 18,
       boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
       cursor: "pointer", textAlign: "left", pointerEvents: "auto",
       animation: "athlosSlideDown 0.3s ease", WebkitTapHighlightColor: "transparent",
       position: "relative", overflow: "hidden",
     }}>
-      {/* green "oracle" halo, same language as the AI panels */}
-      <span aria-hidden="true" style={{ position: "absolute", right: -18, top: -18, width: 90, height: 90, background: "radial-gradient(circle, rgba(0,255,135,0.20), transparent 70%)", pointerEvents: "none" }} />
+      {/* signal-tinted "oracle" halo, same language as the AI panels */}
+      <span aria-hidden="true" style={{ position: "absolute", right: -18, top: -18, width: 90, height: 90, background: `radial-gradient(circle, ${C.accent2}33, transparent 70%)`, pointerEvents: "none" }} />
 
       {/* pulsing live dot */}
       <span style={{ position: "relative", width: 9, height: 9, flexShrink: 0 }}>
-        <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#00FF87", animation: "athlosPulse 1.6s ease infinite" }} />
+        <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: C.accent2, boxShadow: `0 0 10px ${C.accent2}80`, animation: "athlosPulse 1.6s ease infinite" }} />
       </span>
 
       <span style={{ flex: 1, minWidth: 0 }}>
@@ -57,7 +57,7 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
       </span>
 
       <span style={{ textAlign: "right", flexShrink: 0 }}>
-        <span style={{ display: "block", fontFamily: C.mono, fontWeight: 700, fontSize: 15, color: "#00FF87" }}>{fmtElapsed(live.startedAt)}</span>
+        <span style={{ display: "block", fontFamily: C.mono, fontWeight: 700, fontSize: 15, color: C.accent2 }}>{fmtElapsed(live.startedAt)}</span>
         <Mono style={{ color: "rgba(244,239,230,0.45)", fontSize: 8, letterSpacing: "0.1em" }}>{t("TRENING")}</Mono>
       </span>
     </button>

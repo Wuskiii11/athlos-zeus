@@ -24,29 +24,30 @@ export const FONTS = {
 };
 
 export const THEMES = {
-  // ── DARK — "Olympian forest": deep hunter-green, electric-green signal ──
+  // ── DARK — "Obsidian": true black marble, electric-green signal carries
+  // everything the bronze does in daylight ──
   dark: {
     name: "dark",
-    bg: "#0C1A0F",
+    bg: "#0A0A09",
     bgImage:
-      "radial-gradient(130% 55% at 50% -14%, rgba(0,255,135,0.14) 0%, transparent 52%), radial-gradient(80% 40% at 90% 6%, rgba(200,162,74,0.07) 0%, transparent 55%), linear-gradient(180deg, #112015 0%, #0C1A0F 52%, #081408 100%)",
+      "radial-gradient(130% 55% at 50% -14%, rgba(0,255,135,0.10) 0%, transparent 52%), linear-gradient(180deg, #131312 0%, #0A0A09 52%, #050505 100%)",
     btn: "#E8FFF2",
     btnText: "#091A0D",
-    surface: "rgba(0,210,90,0.07)",
-    surface2: "rgba(0,210,90,0.11)",
-    surface3: "rgba(0,210,90,0.16)",
-    border: "rgba(0,255,135,0.11)",
-    border2: "rgba(0,255,135,0.22)",
-    text: "#EEF9F2",
-    text2: "rgba(238,249,242,0.80)",
-    muted: "rgba(238,249,242,0.52)",
-    muted2: "rgba(238,249,242,0.34)",
+    surface: "rgba(255,255,255,0.045)",
+    surface2: "rgba(255,255,255,0.075)",
+    surface3: "rgba(255,255,255,0.11)",
+    border: "rgba(255,255,255,0.09)",
+    border2: "rgba(255,255,255,0.18)",
+    text: "#F2F5F2",
+    text2: "rgba(242,245,242,0.80)",
+    muted: "rgba(242,245,242,0.52)",
+    muted2: "rgba(242,245,242,0.34)",
     accent: "#00FF87",
     accent2: "#33FFA3",
-    gold: "#C8A24A",
-    gold2: "#B08D57",
+    gold: "#33FFA3",
+    gold2: "#00FF87",
     red: "#C95A3F",
-    yellow: "#C8A24A",
+    yellow: "#33FFA3",
     // oracle-panel ambiance
     glow: "0 0 32px rgba(0,255,135,0.36)",
     glowSoft: "0 0 18px rgba(0,255,135,0.20)",
@@ -72,16 +73,17 @@ export const THEMES = {
     text2: "rgba(28,24,20,0.78)",
     muted: "rgba(28,24,20,0.52)",
     muted2: "rgba(28,24,20,0.34)",
-    accent: "#1F7A52",
-    accent2: "#00FF87",
+    // in daylight everything signals in bronze/gold — the battery's color
+    accent: "#B08D57",
+    accent2: "#C8A24A",
     gold: "#B08D57",
     gold2: "#C8A24A",
     red: "#B1452F",
     yellow: "#B08D57",
     // restrained marble glow
-    glow: "0 10px 30px rgba(31,122,82,0.20)",
-    glowSoft: "0 6px 18px rgba(31,122,82,0.13)",
-    ambient: "rgba(31,122,82,0.08)",
+    glow: "0 10px 30px rgba(176,141,87,0.24)",
+    glowSoft: "0 6px 18px rgba(176,141,87,0.15)",
+    ambient: "rgba(176,141,87,0.10)",
     grid: "rgba(28,24,20,0.04)",
     ...FONTS,
   },

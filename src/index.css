@@ -190,7 +190,7 @@
 .ray-burst-light::before {
   content: ""; position: absolute; inset: -42%; z-index: 0; pointer-events: none;
   background: repeating-conic-gradient(from 0deg at 50% 46%,
-    rgba(31,122,82,0.12) 0deg 0.45deg, transparent 0.45deg 2.4deg);
+    rgba(176,141,87,0.14) 0deg 0.45deg, transparent 0.45deg 2.4deg);
   -webkit-mask: radial-gradient(closest-side, #000 0%, #000 22%, transparent 64%);
           mask: radial-gradient(closest-side, #000 0%, #000 22%, transparent 64%);
   animation: rayspin 140s linear infinite;

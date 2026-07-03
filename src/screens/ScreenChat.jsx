@@ -229,7 +229,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
       >
         {/* faint oracle breath in the corner of my ink panels */}
         {isMine && msg.type === "text" && (
-          <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: "radial-gradient(circle, rgba(0,255,135,0.16), transparent 70%)", pointerEvents: "none" }} />
+          <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: `radial-gradient(circle, ${C.accent2}29, transparent 70%)`, pointerEvents: "none" }} />
         )}
         {isImage && msg.attachment_url && (
           <img
@@ -1009,7 +1009,7 @@ export default function ScreenChat({ user, profile }) {
                 width: 38, height: 38, border: "1px solid rgba(244,239,230,0.12)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 opacity: input.trim() ? 1 : 0.35, flexShrink: 0,
-                color: input.trim() ? "#00FF87" : "rgba(244,239,230,0.6)",
+                color: input.trim() ? C.accent2 : "rgba(244,239,230,0.6)",
                 boxShadow: input.trim() ? "0 6px 16px rgba(28,24,20,0.28)" : "none",
                 transition: "opacity 0.2s, color 0.2s, box-shadow 0.2s",
               }}

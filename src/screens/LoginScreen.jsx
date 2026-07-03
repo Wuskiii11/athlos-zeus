@@ -14,8 +14,8 @@ const L = {
   surface: "#FCF9F2",
   surface2: "#FFFFFF",
   border: "rgba(28,24,20,0.16)",
-  accent: "#1F7A52",
-  accent2: "#00FF87",
+  accent: "#B08D57",
+  accent2: "#C8A24A",
   gold: "#B08D57",
   red: "#B1452F",
   heading: "'Cinzel',Georgia,serif",
@@ -67,7 +67,7 @@ function LaunchAnimation({ onDone }) {
   return (
     <div className="app-fullscreen" style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, background: L.bg,
-      backgroundImage: "radial-gradient(120% 80% at 50% 6%, rgba(31,122,82,0.10), transparent 60%)",
+      backgroundImage: "radial-gradient(120% 80% at 50% 6%, rgba(176,141,87,0.12), transparent 60%)",
       display: "grid", placeItems: "center", overflow: "hidden",
       animation: "athlosSplashFade 1.22s cubic-bezier(.2,.8,.2,1) forwards",
     }}>
@@ -159,7 +159,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
     <div className="app-fullscreen" style={{
       position: "fixed", top: 0, left: 0, right: 0,
       background: L.bg,
-      backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(176,141,87,0.08) 0%, transparent 55%)",
+      backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(176,141,87,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(200,162,74,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
       paddingTop: "env(safe-area-inset-top, 24px)", paddingBottom: "env(safe-area-inset-bottom, 0px)",
       overflow: "hidden", color: L.text,
