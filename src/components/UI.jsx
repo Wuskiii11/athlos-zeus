@@ -39,11 +39,12 @@ export function SkeletonBlock({ width = "100%", height = 16, radius = 8, style }
   );
 }
 
-// Soft label — lowercase, quiet, no mono shouting (kept name for compatibility)
+// Design-system ".at-mono"/".at-eyebrow": data + kickers in JetBrains Mono,
+// UPPERCASE with wide tracking — the engraved look from the reference mock.
 export const Mono = ({ children, style }) => {
   const C = useTheme();
   return (
-    <span style={{ fontFamily: C.display, letterSpacing: "0.02em", textTransform: "lowercase", fontSize: 11, fontWeight: 500, ...style }}>
+    <span style={{ fontFamily: C.mono, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 10, fontWeight: 600, ...style }}>
       {children}
     </span>
   );

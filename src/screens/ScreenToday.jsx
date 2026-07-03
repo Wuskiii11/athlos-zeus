@@ -110,25 +110,41 @@ const GreekOrnament = ({ C }) => (
   </div>
 );
 
+// Bronze marble medallion per the reference mock: engraved serif score on a
+// 0–10 scale ("8.4"), thin vein ring + colored progress arc, PARATUS /
+// READINESS labels, marble disc with an inner bronze ring (.at-medallion).
 function Medallion({ pct, color, C, size = 130 }) {
   const r = 92;
   const circumference = 2 * Math.PI * r;
   const offset = circumference * (1 - Math.max(pct, 1) / 100);
-  const label = pct >= 70 ? "READY" : pct >= 40 ? "CAUTION" : "REST";
+  const label = pct >= 70 ? "PARATUS" : pct >= 40 ? "CAUTION" : "REQUIES";
+  const dark = C.name === "dark";
   return (
-    <div style={{ width: size, height: size, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+    <div style={{
+      width: size, height: size, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+      borderRadius: "50%",
+      background: dark
+        ? "radial-gradient(circle at 38% 32%, #1F2420, #14120E 78%)"
+        : "radial-gradient(circle at 38% 32%, #FBF7EF, #EFE8D8 70%, #E2D8C2 100%)",
+      boxShadow: dark
+        ? "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 3px rgba(255,255,255,0.06)"
+        : "0 16px 40px rgba(28,24,20,0.16), inset 0 2px 4px rgba(255,255,255,0.85), inset 0 -6px 14px rgba(140,120,80,0.24)",
+    }}>
+      {/* inner bronze ring */}
+      <div style={{ position: "absolute", inset: size * 0.10, borderRadius: "50%", border: `1.5px solid ${C.gold}`, opacity: 0.4, pointerEvents: "none" }} />
       <svg viewBox="0 0 210 210" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-        <circle cx="105" cy="105" r={r} fill="none" stroke={C.border2} strokeWidth="6" />
+        <circle cx="105" cy="105" r={r} fill="none" stroke={dark ? "rgba(255,255,255,0.10)" : "#D8CDB6"} strokeWidth="3" />
         <circle
-          cx="105" cy="105" r={r} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round"
+          cx="105" cy="105" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset}
           transform="rotate(-90 105 105)"
           style={{ transition: "stroke-dashoffset 0.9s cubic-bezier(.22,1,.36,1)" }}
         />
       </svg>
       <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
-        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: size * 0.34, color: C.text, letterSpacing: "-0.02em", lineHeight: 1 }}>{pct}</div>
-        <div style={{ fontFamily: C.mono, fontSize: 10, color, letterSpacing: "0.08em", marginTop: 2 }}>{label}</div>
+        <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: size * 0.30, color: C.text, lineHeight: 1 }}>{(pct / 10).toFixed(1)}</div>
+        <div style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9, color, letterSpacing: "0.22em", marginTop: 6, textTransform: "uppercase" }}>{label}</div>
+        <div style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 8, color: C.muted, letterSpacing: "0.22em", marginTop: 2, textTransform: "uppercase" }}>Readiness</div>
       </div>
     </div>
   );
@@ -396,6 +412,14 @@ export default function ScreenToday({ go, profile }) {
         position: "absolute", top: -28, right: -34, width: 188, height: 188, objectFit: "contain",
         opacity: 0.07, pointerEvents: "none", zIndex: 0,
       }} />
+      {/* engraved brand block, centered like the reference mock */}
+      <div style={{ textAlign: "center", margin: "2px 0 12px", position: "relative", zIndex: 1, order: 0, ...rise(0) }}>
+        <div style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 8, letterSpacing: "0.5em", color: C.gold, paddingLeft: "0.5em" }}>ΑΘΛΟΣ</div>
+        <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 20, letterSpacing: "0.30em", color: C.text, paddingLeft: "0.30em", marginTop: 3 }}>
+          ATHL<span style={{ color: C.gold }}>OS</span>
+        </div>
+      </div>
+
       {/* header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, position: "relative", zIndex: 1, order: 0, ...rise(0) }}>
         <div>
@@ -528,15 +552,22 @@ export default function ScreenToday({ go, profile }) {
         </div>
       )}
 
-      {/* workout */}
-      <div style={{ position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, overflow: "hidden", ...ord("workout"), ...rise(0.18) }}>
-        <div style={{ position: "absolute", top: 0, left: 18, right: 18, height: 2, background: C.accent, borderRadius: "0 0 4px 4px" }} />
-        <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.1em" }}>{t("AI PROGRAM DANES")} · 17:00</Mono>
-        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, margin: "8px 0 14px", color: C.text, letterSpacing: "-0.02em" }}>{t("Moč · Spodnji del")}</h2>
+      {/* workout — styled after the reference "Današnja preizkušnja" card */}
+      <div style={{ ...ord("workout"), ...rise(0.18) }}>
+        {/* engraved section header with trailing rule (.at-sec) */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "6px 0 10px" }}>
+          <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("Današnja preizkušnja")}</span>
+          <span style={{ flex: 1, height: 1, background: C.border }} />
+        </div>
+        <div style={{ position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, overflow: "hidden" }}>
+        {/* fluted-column texture (.at-flute) */}
+        <div aria-hidden="true" style={{ position: "absolute", top: 0, right: 0, width: 90, height: "100%", pointerEvents: "none", backgroundImage: "repeating-linear-gradient(90deg, rgba(176,141,87,0.07) 0 6px, transparent 6px 14px)", opacity: 0.7 }} />
+        <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.18em" }}>AGON · {t("AI PROGRAM DANES")} · 17:00</Mono>
+        <h2 style={{ fontFamily: C.cond, fontWeight: 800, fontSize: 30, margin: "8px 0 12px", color: C.text, textTransform: "uppercase", lineHeight: 0.95, letterSpacing: "0.01em" }}>{t("Moč · Spodnji del")}</h2>
         <div style={{ display: "flex", gap: 18, marginBottom: 16 }}>
-          {[["62", t("min")], ["7", t("vaj")], ["480", "kcal"]].map(([v, l], i) => (
+          {[["62", t("min")], ["7", t("vaj")], ["~480", "kcal"]].map(([v, l], i) => (
             <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.text }}>{v}</span>
+              <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 13, color: C.text2 }}>{v}</span>
               <Mono style={{ color: C.muted, fontSize: 9 }}>{l}</Mono>
             </div>
           ))}
@@ -545,6 +576,7 @@ export default function ScreenToday({ go, profile }) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill={C.accent2}><path d="M5 3l14 9-14 9V3z" /></svg>
           {t("Začni trening")}
         </button>
+        </div>
       </div>
 
       {/* quick-access rows — each is its own home widget (spec §06) */}

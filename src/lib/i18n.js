@@ -55,6 +55,7 @@ const EN = {
   "7-dnevno drseče okno · uteži se prilagodijo razpoložljivim podatkom": "7-day rolling window · weights adapt to available data",
   "HRV/RHR pridejo iz Apple Health · prehrana iz dnevnika · hitrost iz treninga": "HRV/RHR from Apple Health · nutrition from diary · speed from training",
   "AI PROGRAM DANES": "TODAY'S AI PROGRAM",
+  "Današnja preizkušnja": "Today's trial",
   "TVOJ SISTEM": "YOUR SYSTEM",
 
   // ── Live training widget (spec §07) ──
