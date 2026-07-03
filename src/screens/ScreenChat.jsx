@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTheme } from "../theme";
 import { BackBtn, Pressable, Mono } from "../components/UI";
+import { IcTrash } from "../components/Icons";
 import { useT } from "../lib/i18n";
 import {
   listConversations, listMessages, sendMessage, listClubmates,
@@ -28,8 +29,8 @@ const BG_OPTIONS = [
 ];
 
 const DEMO_AUTO_REPLIES = [
-  "💪 Super trening!", "Se vidimo jutri!", "OK 👊", "Hvala za info!", "🔥 Res!",
-  "Jasno!", "Bom tam ob 17:00!", "Odlično!", "🤙", "Pogledal bom!",
+  "Super trening!", "Se vidimo jutri!", "OK!", "Hvala za info!", "Res!",
+  "Jasno!", "Bom tam ob 17:00!", "Odlično!", "Pogledal bom!",
 ];
 
 // Prototype conversations seeded locally so the chat list always has content
@@ -40,9 +41,9 @@ const PROTO_PEOPLE = [
 ];
 const PROTO_SEEDS = [
   { otherId: "proto-nina",  msgs: [
-    { from: "proto-nina", text: "Živjo! Jutri trening ob 17:00 💪", ago: 82 },
+    { from: "proto-nina", text: "Živjo! Jutri trening ob 17:00.", ago: 82 },
     { from: "me",         text: "Super, sem tam!", ago: 80 },
-    { from: "proto-nina", text: "🔥", ago: 79 },
+    { from: "proto-nina", text: "Odlično, se vidiva!", ago: 79 },
   ]},
   { otherId: "proto-tim",   msgs: [
     { from: "proto-tim",  text: "Kaj kažeš za skupinski trening v soboto?", ago: 200 },
@@ -50,8 +51,8 @@ const PROTO_SEEDS = [
     { from: "proto-tim",  text: "10:00, zbiralište pri dvorani", ago: 197 },
   ]},
   { otherId: "proto-eva",   msgs: [
-    { from: "proto-eva",  text: "Pogledala sem tvoje čase — odlično napredovanje! 📈", ago: 300 },
-    { from: "me",         text: "Hvala! Trdo delam 💯", ago: 298 },
+    { from: "proto-eva",  text: "Pogledala sem tvoje čase — odlično napredovanje!", ago: 300 },
+    { from: "me",         text: "Hvala! Trdo delam.", ago: 298 },
   ]},
 ];
 
@@ -399,8 +400,9 @@ function MsgMenu({ msg, C, t, onDelete, onClose }) {
           width: "100%", padding: "14px 18px", borderRadius: 12, border: "none",
           background: "rgba(229,83,75,0.1)", color: "#e5534b",
           fontFamily: C.display, fontSize: 15, fontWeight: 600, cursor: "pointer", textAlign: "left",
+          display: "flex", alignItems: "center", gap: 10,
         }}>
-          🗑️ {t("Izbriši sporočilo")}
+          <IcTrash size={15} /> {t("Izbriši sporočilo")}
         </button>
         <button onClick={onClose} style={{
           width: "100%", marginTop: 8, padding: "14px 18px", borderRadius: 12,
@@ -642,10 +644,10 @@ export default function ScreenChat({ user, profile }) {
   const lastMsgLabel = (conv) => {
     const msg = conv.lastMsg;
     if (!msg) return t("Začni pogovor");
-    if (msg.type === "sticker") return "😄 Nalepka";
-    if (msg.type === "image")   return "📷 Slika";
-    if (msg.type === "video")   return "🎬 Video";
-    if (msg.type === "file")    return "📎 Datoteka";
+    if (msg.type === "sticker") return "Nalepka";
+    if (msg.type === "image")   return "Slika";
+    if (msg.type === "video")   return "Video";
+    if (msg.type === "file")    return "Datoteka";
     return msg.content || "";
   };
   const fmtTime = (iso) => {
@@ -748,7 +750,7 @@ export default function ScreenChat({ user, profile }) {
                       display: "block", fontFamily: C.display, fontSize: 14, fontWeight: 500, color: C.muted, marginTop: 3,
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
-                      {isBlocked ? "🚫 Blokirano" : lastMsgLabel(conv)}
+                      {isBlocked ? t("Blokirano") : lastMsgLabel(conv)}
                     </span>
                   </span>
                   <span style={{ color: C.muted2, fontSize: 16, flexShrink: 0 }}>›</span>

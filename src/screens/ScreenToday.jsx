@@ -7,6 +7,7 @@ import InjuryWidget from "./widgets/InjuryWidget";
 import ReflectionWidget from "./widgets/ReflectionWidget";
 import CheckinCard from "./widgets/CheckinCard";
 import { HOME_WIDGETS, loadLayout, saveLayout, EditHomeSheet } from "./widgets/HomeEdit";
+import { IcMeal, IcMoon, IcTrendUp, IcAlert, IcPencil } from "../components/Icons";
 
 // Demo content matching the spec mockups — wire to real tables once the
 // injury-tracking and reflection-generation backend exists.
@@ -20,10 +21,10 @@ const DEMO_INJURY = {
 };
 
 const DEMO_INSIGHTS = [
-  { id: "bodycomp", icon: "🥩", kicker: "TELESNA KOMPOZICIJA", text: "Ta teden si izgubil 2,5 kg — priporočamo večji vnos beljakovin za +10 %." },
-  { id: "sleep", icon: "😴", kicker: "SPANJE", text: "Tvoj ritem spanja se je izboljšal skozi zadnjih 5 dni — keep going." },
-  { id: "progression", icon: "📈", kicker: "TRENING PROGRESIJA", text: "V zadnjih 4 treningih si počep dvignil za +7,5 kg. Naslednji teden predlagamo deload." },
-  { id: "hrv", icon: "⚠️", kicker: "OPOZORILA", text: "Tvoja HRV pada 3. dan zapored. Razmisli o lažjem treningu danes." },
+  { id: "bodycomp", icon: <IcMeal size={18} />, kicker: "TELESNA KOMPOZICIJA", text: "Ta teden si izgubil 2,5 kg — priporočamo večji vnos beljakovin za +10 %." },
+  { id: "sleep", icon: <IcMoon size={18} />, kicker: "SPANJE", text: "Tvoj ritem spanja se je izboljšal skozi zadnjih 5 dni — keep going." },
+  { id: "progression", icon: <IcTrendUp size={18} />, kicker: "TRENING PROGRESIJA", text: "V zadnjih 4 treningih si počep dvignil za +7,5 kg. Naslednji teden predlagamo deload." },
+  { id: "hrv", icon: <IcAlert size={18} />, kicker: "OPOZORILA", text: "Tvoja HRV pada 3. dan zapored. Razmisli o lažjem treningu danes." },
 ];
 
 const CHECKIN_KEY = "athlos:checkin";
@@ -552,8 +553,8 @@ export default function ScreenToday({ go, profile }) {
           + {t("Hitri vnos")}
         </button>
         <span style={{ width: 1, height: 12, background: C.border }} />
-        <button onClick={() => setEditHome(true)} style={{ background: "none", border: "none", padding: "6px 4px", color: C.muted, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
-          ✎ {t("Uredi")}
+        <button onClick={() => setEditHome(true)} style={{ background: "none", border: "none", padding: "6px 4px", color: C.muted, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", alignItems: "center", gap: 5 }}>
+          <IcPencil size={10} /> {t("Uredi")}
         </button>
       </div>
 

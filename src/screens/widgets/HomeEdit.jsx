@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Mono, PrimaryBtn } from "../../components/UI";
+import { IcFlame, IcGauge, IcBandage, IcChat, IcDumbbell, IcTrendUp, IcBall, IcMeal, IcMoon, IcDrop } from "../../components/Icons";
 
 // Per spec (ATHLOS-dodatki-spec.pdf, §06 · Custom home):
 // The athlete picks which widgets the home screen shows and in what order.
@@ -7,16 +8,16 @@ import { Mono, PrimaryBtn } from "../../components/UI";
 // drag handle (⋮⋮) for pointer-based reordering. Readiness + today's AI
 // program are locked (always shown). The layout persists locally.
 export const HOME_WIDGETS = {
-  checkin:     { icon: "🧘", label: "Streak (wellness check-in)" },
-  readiness:   { icon: "📊", label: "Readiness baterija", locked: true },
-  injury:      { icon: "🤕", label: "Poškodbe" },
-  reflections: { icon: "💬", label: "Refleksije" },
-  workout:     { icon: "🏋️", label: "AI program danes", locked: true },
-  report:      { icon: "📈", label: "Včerajšnje poročilo" },
-  match:       { icon: "⚽", label: "Naslednja tekma" },
-  meal:        { icon: "🍽️", label: "Naslednji obrok" },
-  sleep:       { icon: "💤", label: "Spanje (zadnjih 7 dni)" },
-  hydration:   { icon: "💧", label: "Hidracija" },
+  checkin:     { icon: <IcFlame size={16} />, label: "Streak (wellness check-in)" },
+  readiness:   { icon: <IcGauge size={16} />, label: "Readiness baterija", locked: true },
+  injury:      { icon: <IcBandage size={16} />, label: "Poškodbe" },
+  reflections: { icon: <IcChat size={16} />, label: "Refleksije" },
+  workout:     { icon: <IcDumbbell size={16} />, label: "AI program danes", locked: true },
+  report:      { icon: <IcTrendUp size={16} />, label: "Včerajšnje poročilo" },
+  match:       { icon: <IcBall size={16} />, label: "Naslednja tekma" },
+  meal:        { icon: <IcMeal size={16} />, label: "Naslednji obrok" },
+  sleep:       { icon: <IcMoon size={16} />, label: "Spanje (zadnjih 7 dni)" },
+  hydration:   { icon: <IcDrop size={16} />, label: "Hidracija" },
 };
 
 // Mock order: medallion → today's trial, everything else below the fold.
@@ -124,7 +125,7 @@ export function EditHomeSheet({ layout, onSave, onClose, C, t }) {
                   onPointerDown={onDown(idx)}
                   style={{ cursor: "grab", touchAction: "none", color: C.muted, fontSize: 15, letterSpacing: "-2px", padding: "4px 2px", userSelect: "none" }}
                 >⋮⋮</span>
-                <span style={{ fontSize: 16 }}>{meta.icon}</span>
+                <span style={{ display: "flex", color: C.gold }}>{meta.icon}</span>
                 <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>
                   {t(meta.label)}
                   {meta.locked && <Mono style={{ color: C.muted2, fontSize: 8, marginLeft: 8 }}>{t("VEDNO PRIKAZAN")}</Mono>}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../theme";
 import { Pressable, Mono } from "../components/UI";
+import { IcCalendar } from "../components/Icons";
 import {
   askAI, loadAiHistory, saveAiReply,
   loadCoachMemory, saveCoachMemory, saveCoachFeedback, addEvent,
@@ -236,7 +237,7 @@ export default function ScreenAI({ user, profile }) {
     try { const mem = await saveCoachFeedback(user?.id, fb); if (mem) setMemory(mem); } catch {}
     setShowFeedback(false);
     const painTxt = fb.pain?.length ? `, bolečina: ${fb.pain.join(", ")}` : "";
-    setMsgs((m) => [...m, { from: "bot", t: `Zabeležil sem (RPE ${fb.rpe}${painTxt}). To upoštevam pri naslednjem treningu. 💪`, time: nowTime() }]);
+    setMsgs((m) => [...m, { from: "bot", t: `Zabeležil sem (RPE ${fb.rpe}${painTxt}). To upoštevam pri naslednjem treningu..`, time: nowTime() }]);
   };
 
   // Save this week's plan into the Koledar (season_events) — deterministic from memory.
@@ -249,7 +250,7 @@ export default function ScreenAI({ user, profile }) {
       for (let i = 0; i < sessions.length; i++) {
         await addEvent(user?.id, { type: "trening", title: sessions[i].title, date: dates[i], time: "17:00" });
       }
-      setMsgs((m) => [...m, { from: "bot", t: `📅 Dodal sem ${sessions.length} treningov v Koledar za prihodnji teden. Najdeš jih v zavihku Koledar — uredi termine po želji.`, time: nowTime() }]);
+      setMsgs((m) => [...m, { from: "bot", t: `Dodal sem ${sessions.length} treningov v Koledar za prihodnji teden. Najdeš jih v zavihku Koledar — uredi termine po želji.`, time: nowTime() }]);
     } catch {
       setMsgs((m) => [...m, { from: "bot", t: "Hmm, treningov nisem mogel shraniti v koledar. Poskusi še enkrat.", time: nowTime() }]);
     } finally {
@@ -280,7 +281,7 @@ export default function ScreenAI({ user, profile }) {
         const ev = extractSingleEvent(q);
         if (ev) {
           addEvent(user?.id, { type: ev.type, title: ev.title, date: ev.date, time: "17:00" })
-            .then(() => setMsgs((m) => [...m, { from: "bot", t: `📅 Dodal sem "${ev.title}" v Koledar. Najdeš ga v zavihku Koledar.`, time: nowTime() }]))
+            .then(() => setMsgs((m) => [...m, { from: "bot", t: `Dodal sem "${ev.title}" v Koledar. Najdeš ga v zavihku Koledar.`, time: nowTime() }]))
             .catch(() => {});
         }
       }
@@ -345,7 +346,7 @@ export default function ScreenAI({ user, profile }) {
         {calSaving && (
           <div style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 999, border: `1px solid ${C.border2}`, color: C.muted, fontFamily: C.display, fontSize: 12, animation: "athlosFade 0.2s ease" }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.accent }} />
-            📅 {t("Shranjujem v Koledar…")}
+            <span style={{ display: "flex", color: C.gold }}><IcCalendar size={13} /></span> {t("Shranjujem v Koledar…")}
           </div>
         )}
 

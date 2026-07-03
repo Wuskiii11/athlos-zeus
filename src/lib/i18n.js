@@ -64,6 +64,7 @@ const EN = {
 
   // ── Chat ──
   "Pogovori": "Chats",
+  "Blokirano": "Blocked",
   "VČERAJ": "YESTERDAY",
 
   // ── Live training widget (spec §07) ──

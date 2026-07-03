@@ -5,6 +5,7 @@ import { useLang, useT } from "../lib/i18n";
 import { SPORTS } from "./ScreenProfile";
 import DatePicker from "../components/DatePicker";
 import WheelColumn from "../components/WheelPicker";
+import { IcChart } from "../components/Icons";
 
 const HEIGHTS = Array.from({ length: 131 }, (_, i) => 100 + i); // 100–230 cm
 const WEIGHTS = Array.from({ length: 221 }, (_, i) => 30 + i);  // 30–250 kg
@@ -411,7 +412,7 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
           <>
             {/* Placeholder — spec §01: assessment content is TBD */}
             <div style={{ background: C.surface, border: `1.5px dashed ${C.border2}`, borderRadius: 18, padding: "26px 20px", textAlign: "center" }}>
-              <div style={{ fontSize: 34, marginBottom: 10 }}>📊</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12, color: C.gold }}><IcChart size={32} /></div>
               <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, margin: "0 0 8px" }}>{t("Začetni assessment")}</h3>
               <p style={{ fontFamily: C.display, fontSize: 13, color: C.text2, margin: 0, lineHeight: 1.55 }}>
                 {t("Kratek test moči, hitrosti in mobilnosti — vsebina prihaja kmalu. Zaenkrat ta korak preskočimo.")}

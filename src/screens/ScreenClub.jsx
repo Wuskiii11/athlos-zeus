@@ -3,6 +3,7 @@ import { useTheme } from "../theme";
 import { Mono } from "../components/UI";
 import { useT } from "../lib/i18n";
 import InjuryWidget from "./widgets/InjuryWidget";
+import { IcFlame, IcChat, IcChart, IcTrophy, IcBandage } from "../components/Icons";
 
 // streak + wellness (last morning check-in, 1–5) per spec §04 — the coach sees
 // who fills in the questionnaire regularly and the raw answers behind it.
@@ -44,7 +45,7 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
           <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text }}>{athlete.name}</div>
           <Mono style={{ color: C.muted, fontSize: 9 }}>{t(athlete.pos)}</Mono>
         </div>
-        <button onClick={() => { onClose(); go("chat"); }} style={{ padding: "8px 14px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text2, fontFamily: C.display, fontWeight: 700, fontSize: 12, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>💬</button>
+        <button onClick={() => { onClose(); go("chat"); }} aria-label="Chat" style={{ padding: "8px 14px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text2, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", alignItems: "center" }}><IcChat size={15} /></button>
       </div>
 
       <div style={{ flex: 1, padding: "18px 18px 28px" }}>
@@ -82,8 +83,9 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("WELLNESS CHECK-IN")}</Mono>
-            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: athlete.streak > 0 ? C.text : C.muted2 }}>
-              🔥{athlete.streak} <Mono style={{ color: C.muted, fontSize: 8 }}>{t("DNI ZAPORED")}</Mono>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: C.display, fontWeight: 800, fontSize: 15, color: athlete.streak > 0 ? C.text : C.muted2 }}>
+              <span style={{ display: "flex", color: athlete.streak > 0 ? C.gold : C.muted2 }}><IcFlame size={14} /></span>
+              {athlete.streak} <Mono style={{ color: C.muted, fontSize: 8 }}>{t("DNI ZAPORED")}</Mono>
             </span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -141,8 +143,8 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
         </div>
 
         {/* assessment CTA */}
-        <button onClick={() => { onClose(); go("assessment"); }} style={{ width: "100%", padding: "16px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 14, cursor: "pointer", letterSpacing: "0.04em", WebkitTapHighlightColor: "transparent" }}>
-          📊 {t("Performans ocena")}
+        <button onClick={() => { onClose(); go("assessment"); }} style={{ width: "100%", padding: "16px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 14, cursor: "pointer", letterSpacing: "0.04em", WebkitTapHighlightColor: "transparent", display: "flex", alignItems: "center", justifyContent: "center", gap: 9 }}>
+          <IcChart size={15} /> {t("Performans ocena")}
         </button>
       </div>
     </div>
@@ -162,7 +164,7 @@ export default function ScreenClub({ go, profile }) {
 
       {/* club card */}
       <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 18, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, marginBottom: 18 }}>
-        <span style={{ width: 52, height: 52, borderRadius: 14, background: `${C.accent}1a`, border: `1px solid ${C.accent}40`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>🏆</span>
+        <span style={{ width: 52, height: 52, borderRadius: 14, background: `${C.gold}14`, border: `1px solid ${C.gold}45`, display: "flex", alignItems: "center", justifyContent: "center", color: C.gold }}><IcTrophy size={24} /></span>
         <div>
           <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18 }}>{club}</div>
           <Mono style={{ color: C.muted, fontSize: 9 }}>U17 · {TEAM.length} {t("članov")}</Mono>
@@ -191,9 +193,12 @@ export default function ScreenClub({ go, profile }) {
                 <span style={{ display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{member.name}</span>
                 <Mono style={{ color: C.muted, fontSize: 8 }}>{t(member.pos)}</Mono>
               </span>
-              {member.injury && <span style={{ fontSize: 13 }}>🤕</span>}
+              {member.injury && <span style={{ display: "flex", color: C.red || "#B1452F" }}><IcBandage size={14} /></span>}
               <div style={{ textAlign: "right", minWidth: 34 }}>
-                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: member.streak > 0 ? C.text : C.muted2 }}>🔥{member.streak}</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 3, fontFamily: C.display, fontWeight: 800, fontSize: 14, color: member.streak > 0 ? C.text : C.muted2 }}>
+                  <span style={{ display: "flex", color: member.streak > 0 ? C.gold : C.muted2 }}><IcFlame size={12} /></span>
+                  {member.streak}
+                </div>
                 <Mono style={{ color: C.muted, fontSize: 7 }}>STREAK</Mono>
               </div>
               <div style={{ textAlign: "right", minWidth: 40 }}>

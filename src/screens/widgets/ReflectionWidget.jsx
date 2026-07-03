@@ -93,7 +93,7 @@ export default function ReflectionWidget({ insights, C, t }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <span style={{ fontSize: 20 }}>{top.icon}</span>
+          <span style={{ display: "flex", color: C.gold }}>{top.icon}</span>
           <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t(top.kicker)}</Mono>
         </div>
         <p style={{ fontFamily: C.display, fontSize: 14, color: C.text, lineHeight: 1.5, margin: 0 }}>{t(top.text)}</p>

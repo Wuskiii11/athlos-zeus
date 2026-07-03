@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTheme, useDatePicker, useTimePicker } from "../theme";
 import { Pressable, PrimaryBtn, Mono } from "../components/UI";
+import { IcBall } from "../components/Icons";
 import { listEvents, addEvent, deleteEvent, replaceEvents } from "../lib/api";
 import { useT, useLang } from "../lib/i18n";
 
@@ -706,7 +707,7 @@ export default function ScreenSeason({ profile, user }) {
     <div style={{ padding: "10px 18px 28px" }}>
       {(matchTomorrow || peakStartsMonday) && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", marginBottom: 14, borderRadius: 14, background: `${C.red}12`, border: `1px solid ${C.red}35`, animation: "athlosFade 0.25s ease" }}>
-          <span style={{ fontSize: 16 }}>⚽</span>
+          <span style={{ display: "flex", color: C.red, flexShrink: 0 }}><IcBall size={16} /></span>
           <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.text, lineHeight: 1.4 }}>
             {matchTomorrow
               ? <>{t("Tekma jutri")} · <strong>{matchTomorrow.title}</strong>{matchTomorrow.opponent ? ` vs ${matchTomorrow.opponent}` : ""} {matchTomorrow.time && `ob ${matchTomorrow.time}`}</>

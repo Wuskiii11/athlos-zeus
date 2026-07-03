@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Mono } from "../../components/UI";
+import { IcFlame } from "../../components/Icons";
 
 // Per spec (ATHLOS-dodatki-spec.pdf, §04 · Wellness check-in):
 // A morning questionnaire card at the top of the home screen. 4 questions on
@@ -71,9 +72,9 @@ function StreakStrip({ days, C, t, lang, style }) {
   const streak = computeStreak(days);
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, ...style }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontSize: 20, lineHeight: 1 }}>🔥</span>
-        <span style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 22, color: C.text }}>{streak}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ display: "flex", color: streak > 0 ? C.gold : C.muted2 }}><IcFlame size={19} /></span>
+        <span style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 22, color: C.text, lineHeight: 1 }}>{streak}</span>
         <Mono style={{ color: C.muted, fontSize: 8, letterSpacing: "0.1em" }}>{t("DNI ZAPORED · STREAK")}</Mono>
       </div>
       <div style={{ display: "flex", gap: 6 }}>
