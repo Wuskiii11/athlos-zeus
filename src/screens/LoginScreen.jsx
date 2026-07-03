@@ -161,8 +161,8 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
       background: L.bg,
       backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(176,141,87,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
-      paddingTop: "env(safe-area-inset-top, 44px)", paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      overflowY: "auto", overflowX: "hidden", color: L.text,
+      paddingTop: "env(safe-area-inset-top, 24px)", paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      overflow: "hidden", color: L.text,
     }}>
       <LanguageSwitcher
         value={curLang}
@@ -171,20 +171,20 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         style={{ position: "fixed", top: "max(env(safe-area-inset-top, 14px), 14px)", right: "max(20px, calc((100vw - 430px) / 2 + 20px))", zIndex: 3 }}
       />
 
-      <div style={{ flex: 1, width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "8px 28px 36px", position: "relative", zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 28px 12px", position: "relative", zIndex: 1 }}>
 
-        {/* ── Hero ── */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 16 }}>
-          <HeroFigure h={290} />
-          <div style={{ marginTop: -6 }}><Wordmark size={34} /></div>
-          <div style={{ width: 54, height: 1, margin: "16px 0 12px", background: `linear-gradient(90deg, transparent, ${L.gold}, transparent)` }} />
-          <div style={{ fontFamily: L.heading, fontSize: 11, color: L.muted, textAlign: "center", letterSpacing: "0.30em", textTransform: "uppercase" }}>
+        {/* ── Hero — sized in viewport units so the page always fits without scrolling ── */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 10, flexShrink: 1, minHeight: 0 }}>
+          <HeroFigure h="min(26dvh, 250px)" />
+          <div style={{ marginTop: -4 }}><Wordmark size={28} /></div>
+          <div style={{ width: 54, height: 1, margin: "10px 0 8px", background: `linear-gradient(90deg, transparent, ${L.gold}, transparent)` }} />
+          <div style={{ fontFamily: L.heading, fontSize: 10, color: L.muted, textAlign: "center", letterSpacing: "0.30em", textTransform: "uppercase" }}>
             {t("sistem, ki pozna vsakega športnika")}
           </div>
         </div>
 
         {/* ── Social ── */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+        <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
           <SocialBtn onClick={() => social("apple")}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
             Apple
@@ -196,14 +196,14 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         </div>
 
         {/* ── Divider ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
           <div style={{ flex: 1, height: 1, background: L.border }} />
           <span style={{ ...label, fontSize: 9 }}>{t("ALI")}</span>
           <div style={{ flex: 1, height: 1, background: L.border }} />
         </div>
 
         {/* ── Email ── */}
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 10 }}>
           <span style={label}>{t("E-POŠTA")}</span>
           <input type="email" value={email}
             onChange={e => { setEmail(e.target.value); setError(""); }}
@@ -241,7 +241,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
 
         {/* ── Primary CTA ── */}
         <button onClick={submit} disabled={busy} style={{
-          marginTop: 18, width: "100%", padding: "16px", borderRadius: 14, border: "none", cursor: busy ? "default" : "pointer",
+          marginTop: 14, width: "100%", padding: "15px", borderRadius: 14, border: "none", cursor: busy ? "default" : "pointer",
           background: `linear-gradient(180deg, ${L.accent2}, ${L.accent})`, color: "#FFFFFF",
           fontFamily: L.heading, fontWeight: 700, fontSize: 14, letterSpacing: "0.16em", textTransform: "uppercase",
           boxShadow: `0 10px 26px ${L.accent}44, inset 0 1px 0 rgba(255,255,255,0.3)`, opacity: busy ? 0.6 : 1,
@@ -250,7 +250,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
           {busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}
         </button>
 
-        <p style={{ textAlign: "center", color: L.muted, fontSize: 13, marginTop: 20, fontFamily: L.display, lineHeight: 1.5 }}>
+        <p style={{ textAlign: "center", color: L.muted, fontSize: 13, marginTop: 12, marginBottom: 0, fontFamily: L.display, lineHeight: 1.5 }}>
           {mode === "signup" ? t("Že imaš račun?") : t("Še nimaš računa?")}{" "}
           {mode === "signup" ? (
             <button onClick={() => { setMode("login"); setError(""); }} style={{ background: "none", border: "none", padding: 0, color: L.accent, fontWeight: 700, fontFamily: L.display, fontSize: 13, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
@@ -263,7 +263,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
           )}
         </p>
 
-        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: L.muted2, fontFamily: L.display, fontSize: 12, fontWeight: 500, cursor: "pointer", marginTop: 14, padding: 0, textAlign: "center", width: "100%" }}>
+        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: L.muted2, fontFamily: L.display, fontSize: 12, fontWeight: 500, cursor: "pointer", marginTop: 8, padding: 0, textAlign: "center", width: "100%" }}>
           {t("Politika zasebnosti")}
         </button>
       </div>
