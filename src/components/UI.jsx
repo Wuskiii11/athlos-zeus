@@ -133,6 +133,7 @@ export function LanguageSwitcher({ value = "sl", onChange, style, variant = "def
   const C = useTheme();
   const cur = value === "en" ? "en" : "sl";
   const floating = variant === "floating";
+  const compact = variant === "compact"; // small pill for tight headers (e.g. onboarding)
   const options = [
     ["sl", "SL", "Slovenščina", "Slovenian"],
     ["en", "EN", "English", "English"],
@@ -145,8 +146,8 @@ export function LanguageSwitcher({ value = "sl", onChange, style, variant = "def
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-        gap: floating ? 3 : 4,
-        padding: floating ? 3 : 4,
+        gap: floating || compact ? 3 : 4,
+        padding: floating || compact ? 3 : 4,
         borderRadius: 999,
         background: floating
           ? (C.name === "dark" ? "rgba(8,11,10,0.72)" : "rgba(255,255,255,0.72)")
@@ -155,7 +156,7 @@ export function LanguageSwitcher({ value = "sl", onChange, style, variant = "def
         boxShadow: floating ? (C.name === "dark" ? "0 14px 34px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.06)" : "0 12px 28px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.80)") : "none",
         backdropFilter: floating ? "blur(18px)" : undefined,
         WebkitBackdropFilter: floating ? "blur(18px)" : undefined,
-        minHeight: floating ? 38 : 44,
+        minHeight: floating ? 38 : compact ? 30 : 44,
         ...style,
       }}
     >
@@ -170,9 +171,9 @@ export function LanguageSwitcher({ value = "sl", onChange, style, variant = "def
             title={title}
             onClick={() => onChange?.(code)}
             style={{
-              minWidth: floating ? 42 : 54,
-              minHeight: floating ? 32 : 36,
-              padding: floating ? "0 10px" : "0 12px",
+              minWidth: floating ? 42 : compact ? 34 : 54,
+              minHeight: floating ? 32 : compact ? 24 : 36,
+              padding: floating ? "0 10px" : compact ? "0 8px" : "0 12px",
               borderRadius: 999,
               border: "none",
               cursor: "pointer",
@@ -180,7 +181,7 @@ export function LanguageSwitcher({ value = "sl", onChange, style, variant = "def
               color: active ? (floating ? "#04130a" : C.btnText) : C.muted,
               fontFamily: C.display,
               fontWeight: active ? 800 : 700,
-              fontSize: floating ? 11 : 12,
+              fontSize: floating ? 11 : compact ? 10.5 : 12,
               letterSpacing: "0.04em",
               boxShadow: active && floating ? `0 0 0 1px ${C.accent}30, 0 8px 18px ${C.accent}20` : "none",
               transition: "background 0.18s, color 0.18s, box-shadow 0.18s",

@@ -181,16 +181,17 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
       <LanguageSwitcher
         value={curLang}
         onChange={(lang) => setProfile((p) => ({ ...p, lang }))}
+        variant="compact"
         style={{ position: "absolute", top: "max(env(safe-area-inset-top, 12px), 12px)", right: 20, zIndex: 3 }}
       />
 
-      {/* Progress bar */}
-      <div style={{ padding: "10px 132px 0 24px", display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Progress bar — bronze, clear of the compact language pill */}
+      <div style={{ padding: "12px 112px 0 24px", display: "flex", alignItems: "center", gap: 10 }}>
         {step > 0 && (
           <button onClick={back} style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>‹</button>
         )}
         <div style={{ flex: 1, height: 3, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
-          <div style={{ width: `${((step + 1) / total) * 100}%`, height: "100%", background: C.accent, borderRadius: 999, transition: "width 0.35s cubic-bezier(.2,.8,.2,1)" }} />
+          <div style={{ width: `${((step + 1) / total) * 100}%`, height: "100%", background: C.gold, borderRadius: 999, transition: "width 0.35s cubic-bezier(.2,.8,.2,1)" }} />
         </div>
         <Mono style={{ color: C.muted, fontSize: 9 }}>{step + 1}/{total}</Mono>
       </div>
@@ -199,7 +200,7 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
       <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 24px", display: "flex", flexDirection: "column", animation: "athlosScreen 0.28s cubic-bezier(.2,.8,.2,1)", overflowY: "auto", scrollbarWidth: "none" }}>
         {key !== "quote" && (
           <div style={{ marginBottom: 28 }}>
-            <Mono style={{ color: C.accent, fontSize: 9 }}>{t(STEP_TITLES[key].sub)}</Mono>
+            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.18em" }}>{t(STEP_TITLES[key].sub)}</Mono>
             <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, textTransform: "uppercase", margin: "8px 0 0", color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
               {t(STEP_TITLES[key].title)}
             </h2>
@@ -232,7 +233,7 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
               style={{
                 width: "100%", marginTop: 8, padding: "16px 18px",
                 borderRadius: 12,
-                border: `1px solid ${birth ? C.accent : C.border2}`,
+                border: `1px solid ${birth ? `${C.gold}88` : C.border2}`,
                 background: C.surface,
                 color: birth ? C.text : C.muted,
                 fontFamily: C.display, fontWeight: birth ? 700 : 500, fontSize: 16,
@@ -243,7 +244,7 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
               }}
             >
               <span>{birth ? fmtBirth(birth, lang) : t("Izberi datum")}</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={birth ? C.accent : C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={birth ? C.gold : C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="17" rx="2"/>
                 <path d="M3 9h18M8 2v4M16 2v4"/>
               </svg>
