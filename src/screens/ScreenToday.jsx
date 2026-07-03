@@ -411,24 +411,7 @@ export default function ScreenToday({ go, profile }) {
         position: "absolute", top: -28, right: -34, width: 188, height: 188, objectFit: "contain",
         opacity: 0.07, pointerEvents: "none", zIndex: 0,
       }} />
-      {/* utility corners — date + quick-add left, edit + profile right */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2, position: "relative", zIndex: 2, order: 0, ...rise(0) }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => setQuickAdd(true)} aria-label="Hitri vnos" style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, fontSize: 18, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent", fontWeight: 300, padding: 0 }}>+</button>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>{dateStr}</Mono>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          {/* Edit home screen (spec §06) — discreet, top-right */}
-          <button onClick={() => setEditHome(true)} aria-label={t("Uredi home screen")} style={{ width: 30, height: 30, borderRadius: "50%", border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-          </button>
-          <button onClick={() => go("profile")} style={{ width: 34, height: 34, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, color: C.accent, fontFamily: C.display, fontWeight: 800, fontSize: 14, overflow: "hidden", cursor: "pointer", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
-            {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
-          </button>
-        </div>
-      </div>
-
-      {/* engraved brand block — exactly like the reference mock */}
+      {/* engraved brand block — exactly like the reference mock (nothing above it) */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "4px 0 20px", position: "relative", zIndex: 1, order: 1, ...rise(0.03) }}>
         {/* column-capital marks */}
         <div aria-hidden="true" style={{ display: "flex", gap: 9, marginBottom: 8 }}>
@@ -560,6 +543,19 @@ export default function ScreenToday({ go, profile }) {
           <Mono style={{ color: C.muted, fontSize: 9, marginTop: 10, display: "block" }}>~{((checkin.hydration / 100) * 3).toFixed(1)} L / 3.0 L {t("danes")}</Mono>
         </div>
       )}
+
+      {/* discreet utility row — below the fold, so the visible screen stays 1:1 with the mock */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, marginTop: 6, order: 999 }}>
+        <Mono style={{ color: C.muted2, fontSize: 8 }}>{dateStr}</Mono>
+        <span style={{ width: 1, height: 12, background: C.border }} />
+        <button onClick={() => setQuickAdd(true)} style={{ background: "none", border: "none", padding: "6px 4px", color: C.muted, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          + {t("Hitri vnos")}
+        </button>
+        <span style={{ width: 1, height: 12, background: C.border }} />
+        <button onClick={() => setEditHome(true)} style={{ background: "none", border: "none", padding: "6px 4px", color: C.muted, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          ✎ {t("Uredi")}
+        </button>
+      </div>
 
       {quickAdd && <QuickAddSheet C={C} t={t} onClose={() => setQuickAdd(false)} onSave={(inj) => setInjury(inj)} />}
       {openStats && <StatsSheet C={C} lang={lang} onClose={() => setOpenStats(false)} />}

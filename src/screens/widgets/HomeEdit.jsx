@@ -19,12 +19,13 @@ export const HOME_WIDGETS = {
   hydration:   { icon: "💧", label: "Hidracija" },
 };
 
+// Mock order: medallion → today's trial, everything else below the fold.
 const DEFAULT_LAYOUT = [
-  { id: "checkin", on: true },
   { id: "readiness", on: true },
+  { id: "workout", on: true },
+  { id: "checkin", on: true },
   { id: "injury", on: true },
   { id: "reflections", on: true },
-  { id: "workout", on: true },
   { id: "report", on: true },
   { id: "match", on: true },
   { id: "meal", on: true },
@@ -32,7 +33,8 @@ const DEFAULT_LAYOUT = [
   { id: "hydration", on: false },
 ];
 
-const LAYOUT_KEY = "athlos:homeLayout";
+// v2: bumped so layouts saved before the mock-exact pass don't override the new default order
+const LAYOUT_KEY = "athlos:homeLayout.v2";
 
 export function loadLayout() {
   try {

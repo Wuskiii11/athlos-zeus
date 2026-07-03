@@ -68,6 +68,8 @@ const EN = {
 
   // ── Custom home screen (spec §06) ──
   "Uredi home screen": "Edit home screen",
+  "Uredi": "Edit",
+  "Hitri vnos": "Quick add",
   "Izberi widgete, ki jih želiš imeti na home screenu. Vlečenje za vrstni red.": "Pick the widgets you want on your home screen. Drag to reorder.",
   "Shrani postavitev": "Save layout",
   "VEDNO PRIKAZAN": "ALWAYS SHOWN",
