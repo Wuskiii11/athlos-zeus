@@ -38,71 +38,81 @@ function SplashScreen({ C }) {
   return (
     <div style={{
       position: "fixed", inset: 0,
-      background: "#070908",
+      background: "#F4EFE6",
+      backgroundImage: "radial-gradient(ellipse 70% 45% at 50% 28%, rgba(216,207,189,0.5), transparent 65%), linear-gradient(180deg, #F6F1E8 0%, #EFE8DA 100%)",
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       zIndex: 999, overflow: "hidden",
     }}>
-      {/* Background hero watermark — breathing glow */}
-      <img
-        src="/img/hero-zeus.png"
-        alt=""
-        style={{
-          position: "absolute",
-          width: "88%", maxWidth: 460,
-          opacity: 0.14,
-          mixBlendMode: "screen",
-          filter: "hue-rotate(105deg) saturate(4) brightness(1.5)",
-          animation: "heroGlow 6s ease-in-out infinite",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      />
+      <style>{`
+        @keyframes splashGod {
+          from { opacity: 0; transform: translateY(16px) scale(0.965); }
+          to   { opacity: 1; transform: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { .athlos-splash * { animation-duration: 0.001ms !important; } }
+      `}</style>
 
-      {/* ATHLOS — one letter at a time */}
-      <div style={{ position: "relative", display: "flex" }}>
-        {ATHLOS_LETTERS.map((letter, i) => (
-          <span
-            key={i}
-            style={{
-              fontFamily: "'Cinzel', Georgia, serif",
-              fontWeight: 700,
-              fontSize: 36,
-              letterSpacing: "0.38em",
-              color: "#ffffff",
-              opacity: 0,
-              display: "inline-block",
-              animation: "athlosLetter 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards",
-              animationDelay: `${0.25 + i * 0.14}s`,
-            }}
-          >
-            {letter}
-          </span>
-        ))}
-      </div>
+      {/* the god — blue-ink engraving; the cream plate dissolves into the
+          marble via multiply, so only the ink and the ray burst remain */}
+      <div className="athlos-splash" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <img
+          src="/img/greek-god.png"
+          alt=""
+          style={{
+            height: "min(56vh, 500px)",
+            mixBlendMode: "multiply",
+            animation: "splashGod 1.25s cubic-bezier(0.22,1,0.36,1) both",
+            marginBottom: -4,
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
 
-      {/* Accent divider */}
-      <div style={{
-        width: 52, height: 1, margin: "20px 0 16px",
-        background: "linear-gradient(90deg, transparent, #00FF87 50%, transparent)",
-        opacity: 0,
-        animation: "athlosFade 0.6s ease forwards",
-        animationDelay: "1.35s",
-      }} />
+        {/* ATHLOS — one letter at a time, engraved ink */}
+        <div style={{ position: "relative", display: "flex" }}>
+          {ATHLOS_LETTERS.map((letter, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily: "'Cinzel', Georgia, serif",
+                fontWeight: 700,
+                fontSize: 36,
+                letterSpacing: "0.38em",
+                color: "#1C1814",
+                opacity: 0,
+                display: "inline-block",
+                animation: "athlosLetter 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards",
+                animationDelay: `${0.25 + i * 0.14}s`,
+              }}
+            >
+              {letter}
+            </span>
+          ))}
+        </div>
 
-      {/* Subtitle — Cormorant Garamond italic */}
-      <div style={{
-        fontFamily: "'Cormorant Garamond', Georgia, serif",
-        fontStyle: "italic",
-        fontWeight: 500,
-        fontSize: 15,
-        letterSpacing: "0.12em",
-        color: "rgba(255,255,255,0.40)",
-        opacity: 0,
-        animation: "athlosSubtitle 0.8s ease forwards",
-        animationDelay: "1.55s",
-      }}>
-        sistem, ki pozna vsakega športnika
+        {/* Bronze divider */}
+        <div style={{
+          width: 52, height: 1, margin: "20px 0 16px",
+          background: "linear-gradient(90deg, transparent, #B08D57 50%, transparent)",
+          opacity: 0,
+          animation: "athlosFade 0.6s ease forwards",
+          animationDelay: "1.35s",
+        }} />
+
+        {/* Subtitle — Cormorant Garamond italic */}
+        <div style={{
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          fontStyle: "italic",
+          fontWeight: 500,
+          fontSize: 15,
+          letterSpacing: "0.12em",
+          color: "rgba(28,24,20,0.5)",
+          opacity: 0,
+          animation: "athlosSubtitle 0.8s ease forwards",
+          animationDelay: "1.55s",
+        }}>
+          sistem, ki pozna vsakega športnika
+        </div>
       </div>
     </div>
   );
