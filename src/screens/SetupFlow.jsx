@@ -112,23 +112,43 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
     test:      { title: "Začetni\ntest",           sub: "ZADNJI KORAK" },
   };
 
-  // single-choice vertical option list (Typeform style)
-  const Choice = ({ options, value, onPick, subs }) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+  // single-choice list — one marble tablet, rows split by engraved rules,
+  // each option catalogued with a roman numeral; picking fills the bronze
+  // socket (design-system list language instead of stacked boxes)
+  const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+  const hairline = C.name === "dark" ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.08)";
+  const Choice = ({ options, value, onPick, subs, labels }) => (
+    <div style={{
+      background: C.name === "dark" ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)",
+      border: `1px solid ${C.name === "dark" ? C.border : "#D8CFBD"}`,
+      borderRadius: 18, overflow: "hidden",
+      boxShadow: C.name === "dark" ? "none" : "0 8px 22px rgba(28,24,20,0.06)",
+    }}>
       {options.map((o, i) => {
         const active = value === o;
         return (
-          <button key={o} onClick={() => { onPick(o); }} style={{
-            width: "100%", textAlign: "left", padding: "15px 16px", borderRadius: 14, cursor: "pointer",
-            border: `1.5px solid ${active ? C.accent : C.border2}`,
-            background: active ? `${C.accent}1f` : C.surface,
-            color: active ? C.accent : C.text,
-            fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15,
-            transition: "border-color 0.15s, background 0.15s, color 0.15s",
+          <button key={o} onClick={() => onPick(o)} style={{
+            width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14,
+            padding: "15px 16px", border: "none", cursor: "pointer",
+            background: active ? `${C.gold}12` : "transparent",
+            borderBottom: i < options.length - 1 ? `1px solid ${hairline}` : "none",
+            transition: "background 0.15s",
             WebkitTapHighlightColor: "transparent",
           }}>
-            {o}
-            {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
+            <span style={{ width: 24, textAlign: "center", flexShrink: 0, fontFamily: C.mono, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", color: active ? C.gold : C.muted2 }}>{ROMAN[i]}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: "block", fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15.5, color: C.text }}>{labels ? labels[i] : o}</span>
+              {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
+            </span>
+            <span style={{
+              width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+              border: `1.5px solid ${active ? C.gold : C.border2}`,
+              background: active ? C.gold : "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "background 0.15s, border-color 0.15s",
+            }}>
+              {active && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FCF9F2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+            </span>
           </button>
         );
       })}
@@ -340,42 +360,17 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
         )}
 
         {key === "sport" && (
-          <>
-            {/* Sports — one under another, near-transparent bronze when picked */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: 90 }}>
-              {SPORTS.map((s) => {
-                const active = sport === s;
-                return (
-                  <button
-                    key={s}
-                    onClick={() => setSport(s)}
-                    style={{
-                      width: "100%", textAlign: "left", padding: "15px 16px", borderRadius: 14, cursor: "pointer",
-                      WebkitTapHighlightColor: "transparent",
-                      fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15,
-                      border: `1.5px solid ${active ? `${C.gold}99` : C.border2}`,
-                      background: active ? `${C.gold}14` : C.surface,
-                      color: active ? C.text : C.text2,
-                      display: "flex", alignItems: "center", justifyContent: "space-between",
-                      transition: "border-color 0.15s, background 0.15s, color 0.15s",
-                    }}
-                  >
-                    <span>{t(s)}</span>
-                    {active && (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                    )}
-                  </button>
-                );
-              })}
+          <div style={{ paddingBottom: 90 }}>
+            {/* same engraved tablet as the other choice steps */}
+            <Choice options={SPORTS} labels={SPORTS.map(t)} value={sport} onPick={setSport} />
 
-              {sport === "Drugo" && (
-                <div style={{ animation: "athlosFade 0.2s ease" }}>
-                  <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPIŠI ŠPORT")}</Mono>
-                  <input value={customSport} onChange={(e) => setCustomSport(e.target.value)} placeholder={t("npr. Odbojka, Judo, Veslanje...")} style={{ ...inp, marginTop: 6 }} />
-                </div>
-              )}
-            </div>
-          </>
+            {sport === "Drugo" && (
+              <div style={{ animation: "athlosFade 0.2s ease", marginTop: 14 }}>
+                <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPIŠI ŠPORT")}</Mono>
+                <input value={customSport} onChange={(e) => setCustomSport(e.target.value)} placeholder={t("npr. Odbojka, Judo, Veslanje...")} style={{ ...inp, marginTop: 6 }} />
+              </div>
+            )}
+          </div>
         )}
 
         {key === "goals" && (
