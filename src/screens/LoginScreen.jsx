@@ -162,7 +162,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
       backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(176,141,87,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
       paddingTop: "env(safe-area-inset-top, 44px)", paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      overflowY: "auto", color: L.text,
+      overflowY: "auto", overflowX: "hidden", color: L.text,
     }}>
       <LanguageSwitcher
         value={curLang}

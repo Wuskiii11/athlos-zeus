@@ -116,6 +116,10 @@
   }
   input, button, textarea, select { font-family: inherit; }
   html, body { overscroll-behavior: none; }
+  /* phone-first: decorative overflows (ray bursts, giant type, watermarks)
+     must never create sideways scroll */
+  html, body { overflow-x: hidden; width: 100%; }
+  #root { overflow-x: clip; }
 }
 
 /* ── Marble decorative utilities ──────────────────────────────── */
