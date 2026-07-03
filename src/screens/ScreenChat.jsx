@@ -719,50 +719,42 @@ export default function ScreenChat({ user, profile }) {
               </div>
             )}
 
-            {/* one raised marble panel, rows divided by engraved rules (.at-row) */}
-            {convs.length > 0 && (
-              <div style={{
-                background: C.name === "dark" ? C.surface : "linear-gradient(170deg, #FCF9F2, #F4EDDE)",
-                border: `1px solid ${C.name === "dark" ? C.border : "#D8CFBD"}`,
-                borderRadius: 20, overflow: "hidden",
-                boxShadow: C.name === "dark" ? "none" : "0 8px 22px rgba(28,24,20,0.07)",
-              }}>
-                {convs.map((conv, i) => {
-                  const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
-                  return (
-                    <button
-                      key={conv.id}
-                      onClick={() => openConv(conv)}
-                      style={{
-                        width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 13,
-                        padding: "14px 16px", background: "none", border: "none",
-                        borderBottom: i < convs.length - 1 ? `1px solid ${C.name === "dark" ? "rgba(255,255,255,0.06)" : "rgba(28,24,20,0.07)"}` : "none",
-                        cursor: "pointer", WebkitTapHighlightColor: "transparent",
-                        opacity: isBlocked ? 0.4 : 1,
-                      }}
-                    >
-                      <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} />
-                      <span style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                          <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 14, letterSpacing: "0.05em", color: C.text }}>
-                            {convName(conv)}
-                          </span>
-                          <Mono style={{ color: C.muted2, fontSize: 8, flexShrink: 0, letterSpacing: "0.1em" }}>
-                            {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
-                          </Mono>
-                        </span>
-                        <span style={{
-                          display: "block", fontFamily: C.display, fontStyle: "italic", fontSize: 13.5, fontWeight: 500, color: C.muted, marginTop: 3,
-                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                        }}>
-                          {isBlocked ? "🚫 Blokirano" : lastMsgLabel(conv)}
-                        </span>
+            {/* airy full-width rows on the marble bg — hairline dividers, big touch targets */}
+            {convs.map((conv, i) => {
+              const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => openConv(conv)}
+                  style={{
+                    width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14,
+                    padding: "14px 4px", background: "none", border: "none",
+                    borderBottom: i < convs.length - 1 ? `1px solid ${C.name === "dark" ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.08)"}` : "none",
+                    cursor: "pointer", WebkitTapHighlightColor: "transparent",
+                    opacity: isBlocked ? 0.4 : 1,
+                  }}
+                >
+                  <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} size={48} />
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {convName(conv)}
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                      <Mono style={{ color: C.muted2, fontSize: 8, flexShrink: 0 }}>
+                        {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
+                      </Mono>
+                    </span>
+                    <span style={{
+                      display: "block", fontFamily: C.display, fontSize: 14, fontWeight: 500, color: C.muted, marginTop: 3,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {isBlocked ? "🚫 Blokirano" : lastMsgLabel(conv)}
+                    </span>
+                  </span>
+                  <span style={{ color: C.muted2, fontSize: 16, flexShrink: 0 }}>›</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
