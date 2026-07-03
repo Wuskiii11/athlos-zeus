@@ -6,6 +6,7 @@ import { readinessFromCheckin, recommendation, DEFAULT_CHECKIN } from "../lib/re
 import InjuryWidget from "./widgets/InjuryWidget";
 import ReflectionWidget from "./widgets/ReflectionWidget";
 import CheckinCard from "./widgets/CheckinCard";
+import { HOME_WIDGETS, loadLayout, saveLayout, EditHomeSheet } from "./widgets/HomeEdit";
 
 // Demo content matching the spec mockups — wire to real tables once the
 // injury-tracking and reflection-generation backend exists.
@@ -361,6 +362,8 @@ export default function ScreenToday({ go, profile }) {
   const [checkin, setCheckin] = useState(loadCheckin);
   const [quickAdd, setQuickAdd] = useState(false);
   const [injury, setInjury] = useState(DEMO_INJURY);
+  const [layout, setLayout] = useState(loadLayout);   // custom home order/toggles (spec §06)
+  const [editHome, setEditHome] = useState(false);
   useEffect(() => { try { localStorage.setItem(CHECKIN_KEY, JSON.stringify(checkin)); } catch {} }, [checkin]);
   const setC = (k, v) => setCheckin((p) => ({ ...p, [k]: v }));
 
@@ -377,15 +380,24 @@ export default function ScreenToday({ go, profile }) {
 
   const rise = (d) => ({ animation: `athlosRise 0.55s cubic-bezier(0.22,1,0.36,1) ${d}s both` });
 
+  // Custom home (spec §06): the container is a flex column; every widget gets
+  // its CSS order from the saved layout and renders only when toggled on
+  // (locked widgets are always on).
+  const isOn = (id) => {
+    const w = layout.find((x) => x.id === id);
+    return w ? (w.on || !!HOME_WIDGETS[id]?.locked) : true;
+  };
+  const ord = (id) => ({ order: 10 + Math.max(0, layout.findIndex((w) => w.id === id)) });
+
   return (
-    <div style={{ padding: "10px 18px 28px", color: C.text, position: "relative", overflow: "hidden" }}>
+    <div style={{ padding: "10px 18px 28px", color: C.text, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {/* antique classical-bust watermark behind the header */}
       <img src="/img/bust-ink.png" alt="" aria-hidden="true" style={{
         position: "absolute", top: -28, right: -34, width: 188, height: 188, objectFit: "contain",
         opacity: 0.07, pointerEvents: "none", zIndex: 0,
       }} />
       {/* header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, position: "relative", zIndex: 1, ...rise(0) }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, position: "relative", zIndex: 1, order: 0, ...rise(0) }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button onClick={() => setQuickAdd(true)} aria-label="Hitri vnos" style={{ width: 28, height: 28, borderRadius: "50%", border: `1.5px solid ${C.accent}`, background: `${C.accent}18`, color: C.accent, fontSize: 20, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent", fontWeight: 300, padding: 0 }}>+</button>
@@ -396,23 +408,31 @@ export default function ScreenToday({ go, profile }) {
             <span style={{ fontFamily: C.serif, fontStyle: "italic", fontWeight: 500, fontSize: "1.16em", color: C.gold }}>{profile.name}</span>
           </h1>
         </div>
-        <button onClick={() => go("profile")} style={{ width: 46, height: 46, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, color: C.accent, fontFamily: C.display, fontWeight: 800, fontSize: 18, overflow: "hidden", cursor: "pointer", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
-          {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          {/* Edit home screen (spec §06) — discreet, top-right */}
+          <button onClick={() => setEditHome(true)} aria-label={t("Uredi home screen")} style={{ width: 34, height: 34, borderRadius: "50%", border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          </button>
+          <button onClick={() => go("profile")} style={{ width: 46, height: 46, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, color: C.accent, fontFamily: C.display, fontWeight: 800, fontSize: 18, overflow: "hidden", cursor: "pointer", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
+            {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
+          </button>
+        </div>
       </div>
 
       {/* Greek ornament — separates header from readiness */}
-      <div style={{ marginBottom: 14, ...rise(0.04) }}>
+      <div style={{ marginBottom: 14, order: 1, ...rise(0.04) }}>
         <GreekOrnament C={C} />
       </div>
 
       {/* morning wellness questionnaire + streak (spec §04) — answers feed the battery */}
-      <div style={{ ...rise(0.05) }}>
-        <CheckinCard C={C} t={t} lang={lang} onSubmit={(a) => setCheckin((p) => ({ ...p, ...a }))} />
-      </div>
+      {isOn("checkin") && (
+        <div style={{ ...ord("checkin"), ...rise(0.05) }}>
+          <CheckinCard C={C} t={t} lang={lang} onSubmit={(a) => setCheckin((p) => ({ ...p, ...a }))} />
+        </div>
+      )}
 
       {/* READINESS — centered hero */}
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: "22px 18px 16px", marginBottom: 14, ...rise(0.06) }}>
+      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: "22px 18px 16px", marginBottom: 14, ...ord("readiness"), ...rise(0.06) }}>
         {/* Centered medallion */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 16 }}>
           <button onClick={() => setOpenStats(true)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
@@ -497,11 +517,19 @@ export default function ScreenToday({ go, profile }) {
         )}
       </div>
 
-      <InjuryWidget injury={injury} C={C} t={t} isCoach={profile.role === "coach"} />
-      <ReflectionWidget insights={DEMO_INSIGHTS} C={C} t={t} />
+      {isOn("injury") && (
+        <div style={ord("injury")}>
+          <InjuryWidget injury={injury} C={C} t={t} isCoach={profile.role === "coach"} />
+        </div>
+      )}
+      {isOn("reflections") && (
+        <div style={ord("reflections")}>
+          <ReflectionWidget insights={DEMO_INSIGHTS} C={C} t={t} />
+        </div>
+      )}
 
       {/* workout */}
-      <div style={{ position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, overflow: "hidden", ...rise(0.18) }}>
+      <div style={{ position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, overflow: "hidden", ...ord("workout"), ...rise(0.18) }}>
         <div style={{ position: "absolute", top: 0, left: 18, right: 18, height: 2, background: C.accent, borderRadius: "0 0 4px 4px" }} />
         <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.1em" }}>{t("AI PROGRAM DANES")} · 17:00</Mono>
         <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, margin: "8px 0 14px", color: C.text, letterSpacing: "-0.02em" }}>{t("Moč · Spodnji del")}</h2>
@@ -519,28 +547,67 @@ export default function ScreenToday({ go, profile }) {
         </button>
       </div>
 
-      {/* quick access */}
-      <div style={rise(0.24)}>
-        <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 10, display: "block" }}>{t("TVOJ SISTEM")}</Mono>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            [t("Včerajšnje poročilo"), "92", "report", "M3 3v18h18M7 14l3-3 3 3 4-5"],
-            [t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z"],
-            [t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3"],
-          ].map(([title, val, dest, path], i) => (
-            <button key={i} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 16px", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>
-              <span style={{ width: 34, height: 34, borderRadius: 10, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
-              </span>
-              <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{title}</span>
-              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: C.text }}>{val}</span>
-              <span style={{ color: C.muted }}>›</span>
-            </button>
-          ))}
+      {/* quick-access rows — each is its own home widget (spec §06) */}
+      {[
+        ["report", t("Včerajšnje poročilo"), "92", "report", "M3 3v18h18M7 14l3-3 3 3 4-5"],
+        ["match", t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z"],
+        ["meal", t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3"],
+      ].map(([id, title, val, dest, path]) => isOn(id) && (
+        <button key={id} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(id), ...rise(0.24) }}>
+          <span style={{ width: 34, height: 34, borderRadius: 10, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+          </span>
+          <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{title}</span>
+          <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: C.text }}>{val}</span>
+          <span style={{ color: C.muted }}>›</span>
+        </button>
+      ))}
+
+      {/* sleep — last 7 days (optional widget, spec §06) */}
+      {isOn("sleep") && (() => {
+        const sleep7 = [7.2, 6.8, 8.1, 7.4, 6.5, 7.9, checkin.sleepH];
+        const avg = (sleep7.reduce((a, b) => a + b, 0) / 7).toFixed(1);
+        const letters = lang === "en" ? ["M","T","W","T","F","S","S"] : ["P","T","S","Č","P","S","N"];
+        return (
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, ...ord("sleep") }}>
+            <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("SPANJE · ZADNJIH 7 DNI")}</Mono>
+            <div style={{ display: "flex", gap: 6, alignItems: "flex-end", height: 64, marginTop: 12 }}>
+              {sleep7.map((h, i) => (
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, height: "100%", justifyContent: "flex-end" }}>
+                  <div style={{ width: "100%", height: `${Math.round((h / 10) * 100)}%`, borderRadius: 6, background: h >= 7.5 ? C.accent : h >= 6.5 ? C.yellow : C.red, opacity: i === 6 ? 1 : 0.7 }} />
+                  <Mono style={{ color: i === 6 ? C.text : C.muted2, fontSize: 7 }}>{letters[i]}</Mono>
+                </div>
+              ))}
+            </div>
+            <Mono style={{ color: C.muted, fontSize: 9, marginTop: 10, display: "block" }}>{t("POVPREČJE")} {avg}h · {t("CILJ")} 8h</Mono>
+          </div>
+        );
+      })()}
+
+      {/* hydration (optional widget, spec §06) */}
+      {isOn("hydration") && (
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, ...ord("hydration") }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+            <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("HIDRACIJA")}</Mono>
+            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: checkin.hydration >= 80 ? C.accent : checkin.hydration >= 50 ? C.yellow : C.red }}>{checkin.hydration}%</span>
+          </div>
+          <div style={{ height: 6, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
+            <div style={{ width: `${Math.min(checkin.hydration, 100)}%`, height: "100%", borderRadius: 999, background: checkin.hydration >= 80 ? C.accent : checkin.hydration >= 50 ? C.yellow : C.red }} />
+          </div>
+          <Mono style={{ color: C.muted, fontSize: 9, marginTop: 10, display: "block" }}>~{((checkin.hydration / 100) * 3).toFixed(1)} L / 3.0 L {t("danes")}</Mono>
         </div>
-      </div>
+      )}
+
       {quickAdd && <QuickAddSheet C={C} t={t} onClose={() => setQuickAdd(false)} onSave={(inj) => setInjury(inj)} />}
       {openStats && <StatsSheet C={C} lang={lang} onClose={() => setOpenStats(false)} />}
+      {editHome && (
+        <EditHomeSheet
+          layout={layout}
+          C={C} t={t}
+          onSave={(l) => { setLayout(l); saveLayout(l); setEditHome(false); }}
+          onClose={() => setEditHome(false)}
+        />
+      )}
     </div>
   );
 }

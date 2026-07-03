@@ -57,6 +57,22 @@ const EN = {
   "AI PROGRAM DANES": "TODAY'S AI PROGRAM",
   "TVOJ SISTEM": "YOUR SYSTEM",
 
+  // ── Custom home screen (spec §06) ──
+  "Uredi home screen": "Edit home screen",
+  "Izberi widgete, ki jih želiš imeti na home screenu. Vlečenje za vrstni red.": "Pick the widgets you want on your home screen. Drag to reorder.",
+  "Shrani postavitev": "Save layout",
+  "VEDNO PRIKAZAN": "ALWAYS SHOWN",
+  "Streak (wellness check-in)": "Streak (wellness check-in)",
+  "Readiness baterija": "Readiness battery",
+  "Poškodbe": "Injuries",
+  "Refleksije": "Reflections",
+  "AI program danes": "Today's AI program",
+  "Spanje (zadnjih 7 dni)": "Sleep (last 7 days)",
+  "Hidracija": "Hydration",
+  "SPANJE · ZADNJIH 7 DNI": "SLEEP · LAST 7 DAYS",
+  "POVPREČJE": "AVERAGE",
+  "CILJ": "GOAL",
+
   // ── Full calendar (spec §05) ──
   "PEAK TEDEN": "PEAK WEEK",
   "ZAČETEK SEZONE": "SEASON START",
