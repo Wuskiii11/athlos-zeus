@@ -131,23 +131,18 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
             width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14,
             padding: "15px 16px", border: "none", cursor: "pointer",
             background: active ? `${C.gold}12` : "transparent",
+            boxShadow: active ? `inset 0 0 0 1.5px ${C.gold}88` : "none",
             borderBottom: i < options.length - 1 ? `1px solid ${hairline}` : "none",
-            transition: "background 0.15s",
+            transition: "background 0.15s, box-shadow 0.15s",
             WebkitTapHighlightColor: "transparent",
           }}>
-            <span style={{ width: 24, textAlign: "center", flexShrink: 0, fontFamily: C.mono, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", color: active ? C.gold : C.muted2 }}>{ROMAN[i]}</span>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: "block", fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15.5, color: C.text }}>{labels ? labels[i] : o}</span>
               {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
             </span>
-            <span style={{
-              width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-              border: `1.5px solid ${active ? C.gold : C.border2}`,
-              background: active ? C.gold : "transparent",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "background 0.15s, border-color 0.15s",
-            }}>
-              {active && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FCF9F2" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+            {/* roman numeral, right — grey until the row is picked */}
+            <span style={{ flexShrink: 0, minWidth: 28, textAlign: "right", fontFamily: C.mono, fontSize: active ? 12 : 10, fontWeight: active ? 700 : 600, letterSpacing: "0.06em", color: active ? C.gold : C.muted2, transition: "color 0.15s, font-size 0.15s" }}>
+              {ROMAN[i]}
             </span>
           </button>
         );
