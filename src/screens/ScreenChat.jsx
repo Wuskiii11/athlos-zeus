@@ -109,8 +109,29 @@ function Avatar({ initials = "?", size = 44, isGroup }) {
   );
 }
 
+// ─── Greek-key divider (shared ornament) ─────────────────────
+function Meander({ color, width = 96, opacity = 0.5 }) {
+  const mask = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='14'%3E%3Cpath d='M0 12h6V3h6v9h6V3h6v9h2' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E\") repeat-x center / 32px 14px";
+  return <div aria-hidden="true" style={{ height: 14, width, background: color, opacity, WebkitMask: mask, mask }} />;
+}
+
+// ─── Day divider — engraved rule with a mono date ────────────
+function DayDivider({ label, C, muted, line }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 6px 10px" }}>
+      <span style={{ flex: 1, height: 1, background: line }} />
+      <Mono style={{ color: muted, fontSize: 8, letterSpacing: "0.28em" }}>{label}</Mono>
+      <span style={{ flex: 1, height: 1, background: line }} />
+    </div>
+  );
+}
+
 // ─── Message bubble ──────────────────────────────────────────
-function Bubble({ msg, isMine, C, onLongPress }) {
+// The correspondence reads like a classical dialogue: the other side speaks
+// in italic Cormorant on a marble tablet; my replies are engraved ink panels
+// with a faint green "oracle" breath in the corner. Timestamps only close a
+// run of messages, like a catalog mark.
+function Bubble({ msg, isMine, C, onLongPress, showTime = true }) {
   const isSticker = msg.type === "sticker";
   if (isSticker) {
     return (
@@ -156,9 +177,14 @@ function Bubble({ msg, isMine, C, onLongPress }) {
           color: textColor,
           overflow: "hidden",
           cursor: "context-menu",
+          position: "relative",
           boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
         }}
       >
+        {/* faint oracle breath in the corner of my ink panels */}
+        {isMine && msg.type === "text" && (
+          <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: "radial-gradient(circle, rgba(0,255,135,0.16), transparent 70%)", pointerEvents: "none" }} />
+        )}
         {isImage && msg.attachment_url && (
           <img
             src={msg.attachment_url} alt=""
@@ -185,16 +211,21 @@ function Bubble({ msg, isMine, C, onLongPress }) {
           </div>
         )}
         {msg.type === "text" && (
-          <span style={{ fontFamily: C.display, fontSize: 15, fontWeight: 500, lineHeight: 1.45 }}>
+          <span style={{
+            fontFamily: C.display, fontSize: isMine ? 15 : 15.5, fontWeight: 500, lineHeight: 1.45,
+            fontStyle: isMine ? "normal" : "italic", position: "relative",
+          }}>
             {msg.content}
           </span>
         )}
       </div>
-      <Mono style={{ fontSize: 8, color: C.muted2, margin: "3px 4px", letterSpacing: "0.12em" }}>
-        {msg.created_at
-          ? new Date(msg.created_at).toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })
-          : ""}
-      </Mono>
+      {showTime && (
+        <Mono style={{ fontSize: 8, color: C.muted2, margin: "3px 4px", letterSpacing: "0.12em" }}>
+          {msg.created_at
+            ? new Date(msg.created_at).toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })
+            : ""}
+        </Mono>
+      )}
     </div>
   );
 }
@@ -627,6 +658,13 @@ export default function ScreenChat({ user, profile }) {
     if (days < 7) return d.toLocaleDateString("sl-SI", { weekday: "short" });
     return d.toLocaleDateString("sl-SI", { day: "2-digit", month: "2-digit" });
   };
+  const dayLabel = (iso) => {
+    const d = new Date(iso), now = new Date();
+    const yest = new Date(now); yest.setDate(now.getDate() - 1);
+    if (d.toDateString() === now.toDateString()) return t("DANES");
+    if (d.toDateString() === yest.toDateString()) return t("VČERAJ");
+    return d.toLocaleDateString("sl-SI", { day: "numeric", month: "short" }).toUpperCase();
+  };
 
   // ── RENDER ────────────────────────────────────────────────────
   return (
@@ -787,33 +825,55 @@ export default function ScreenChat({ user, profile }) {
             </Pressable>
           </div>
 
-          {/* Messages */}
+          {/* Messages — on faintly veined, halftoned marble */}
           <div
             className="athlos-scroll"
-            style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 2 }}
+            style={{
+              flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 2,
+              ...(convBg === "default" && C.name !== "dark" ? {
+                backgroundImage: "radial-gradient(rgba(28,24,20,0.045) 0.8px, transparent 1.2px), radial-gradient(ellipse 60% 30% at 20% 8%, rgba(216,207,189,0.35), transparent 60%), radial-gradient(ellipse 50% 40% at 85% 30%, rgba(216,207,189,0.28), transparent 55%)",
+                backgroundSize: "5px 5px, 100% 100%, 100% 100%",
+              } : {}),
+            }}
           >
             {messages.length === 0 && (
               <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, opacity: 0.7 }}>
-                {/* Greek-key divider (.at-meander) */}
-                <div aria-hidden="true" style={{
-                  height: 14, width: 120, background: C.gold, opacity: 0.5,
-                  WebkitMask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='14'%3E%3Cpath d='M0 12h6V3h6v9h6V3h6v9h2' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E\") repeat-x center / 32px 14px",
-                  mask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='14'%3E%3Cpath d='M0 12h6V3h6v9h6V3h6v9h2' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E\") repeat-x center / 32px 14px",
-                }} />
+                <Meander color={C.gold} width={120} />
                 <div style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 15, color: mutedOnBg }}>
                   {t("Začni pogovor")}
                 </div>
               </div>
             )}
-            {messages.map(msg => (
-              <Bubble
-                key={msg.id}
-                msg={msg}
-                isMine={msg.sender_id === userId}
-                C={{ ...C, text: textOnBg, muted2: mutedOnBg }}
-                onLongPress={msg.sender_id === userId ? setMsgMenu : undefined}
-              />
-            ))}
+
+            {/* engraved inscription that opens every correspondence */}
+            {messages.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7, padding: "14px 0 18px" }}>
+                <Meander color={C.gold} width={96} />
+                <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.34em", paddingLeft: "0.34em" }}>
+                  {convName(activeConv)}
+                </Mono>
+              </div>
+            )}
+
+            {messages.map((msg, i) => {
+              const prev = messages[i - 1];
+              const next = messages[i + 1];
+              const newDay = msg.created_at && (!prev || new Date(prev.created_at).toDateString() !== new Date(msg.created_at).toDateString());
+              const closesRun = !next || next.sender_id !== msg.sender_id ||
+                (new Date(next.created_at) - new Date(msg.created_at)) > 5 * 60000;
+              return (
+                <React.Fragment key={msg.id}>
+                  {newDay && <DayDivider label={dayLabel(msg.created_at)} C={C} muted={mutedOnBg} line={borderOnBg} />}
+                  <Bubble
+                    msg={msg}
+                    isMine={msg.sender_id === userId}
+                    C={{ ...C, text: textOnBg, muted2: mutedOnBg }}
+                    onLongPress={msg.sender_id === userId ? setMsgMenu : undefined}
+                    showTime={closesRun}
+                  />
+                </React.Fragment>
+              );
+            })}
             <div ref={msgsEndRef} />
           </div>
 

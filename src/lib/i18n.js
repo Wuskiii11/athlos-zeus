@@ -60,6 +60,7 @@ const EN = {
 
   // ── Chat ──
   "Pogovori": "Chats",
+  "VČERAJ": "YESTERDAY",
 
   // ── Live training widget (spec §07) ──
   "nato": "next",
