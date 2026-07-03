@@ -105,7 +105,7 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
     waist:     { title: "Obseg pasu\n& body fat",  sub: "ČE VEŠ — DRUGAČE PRESKOČI" },
     quote:     { title: "",                        sub: "" }, // custom render
     sport:     { title: "Kateri šport\ntreniraš?", sub: "ZA PERSONALIZACIJO PROGRAMA" },
-    goals:     { title: "Kaj je\ntvoj cilj?",      sub: "IZBERI ENEGA ALI VEČ" },
+    goals:     { title: "Kaj je tvoj cilj?",       sub: "IZBERI ENEGA ALI VEČ" },
     exp:       { title: "Koliko let\nizkušenj imaš?", sub: "S FITNESOM / TRENINGOM MOČI" },
     injuries:  { title: "Poškodbe?",               sub: "TRENUTNE IN PRETEKLE — ZA VARNO PROGRAMIRANJE" },
     equipment: { title: "Kakšno opremo\nimaš na voljo?", sub: "PROGRAM SE PRILAGODI OPREMI" },
@@ -155,14 +155,14 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
         return (
           <button key={o} onClick={() => onToggle(o)} style={{
             padding: "10px 16px", borderRadius: 999, cursor: "pointer",
-            border: `1.5px solid ${active ? C.accent : C.border2}`,
-            background: active ? `${C.accent}22` : "transparent",
-            color: active ? C.accent : C.text2,
+            border: `1.5px solid ${active ? `${C.gold}99` : C.border2}`,
+            background: active ? `${C.gold}14` : "transparent",
+            color: active ? C.text : C.text2,
             fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 13,
             transition: "border-color 0.15s, background 0.15s, color 0.15s",
             WebkitTapHighlightColor: "transparent",
           }}>
-            {active && <span style={{ marginRight: 6, fontSize: 11 }}>✓</span>}{o}
+            {active && <span style={{ marginRight: 6, fontSize: 11, color: C.gold }}>✓</span>}{o}
           </button>
         );
       })}
@@ -212,7 +212,7 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
         {key !== "quote" && (
           <div style={{ marginBottom: 28 }}>
             <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.18em" }}>{t(STEP_TITLES[key].sub)}</Mono>
-            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, textTransform: "uppercase", margin: "8px 0 0", color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
+            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, textTransform: "uppercase", margin: "8px 0 0", color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
               {t(STEP_TITLES[key].title)}
             </h2>
           </div>

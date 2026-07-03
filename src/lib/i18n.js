@@ -129,7 +129,7 @@ const EN = {
   "Rokomet": "Handball",
   "Borilne veščine": "Martial arts",
   "Tenis": "Tennis",
-  "Kaj je\ntvoj cilj?": "What is\nyour goal?",
+  "Kaj je tvoj cilj?": "What is your goal?",
   "IZBERI ENEGA ALI VEČ": "PICK ONE OR MORE",
   "Moč": "Strength",
   "Mišična masa": "Muscle mass",
