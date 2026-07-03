@@ -52,7 +52,6 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
   const [injuries, setInjuries] = useState(saved.injuries || []);
   const [injuryNote, setInjuryNote] = useState(saved.injuryNote || "");
   const [equipment, setEquipment] = useState(saved.equipment || []);
-  const [sportQuery, setSportQuery] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const scrollRef = useRef(null);
   const t = useT();
@@ -315,16 +314,16 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
             <div style={{ marginBottom: 32 }}>
               <svg viewBox="0 0 300 80" width="100%" height="80" style={{ overflow: "visible" }}>
                 {[20, 40, 60].map(y => <line key={y} x1="0" y1={y} x2="300" y2={y} stroke={C.border} strokeWidth="1" strokeDasharray="4 6"/>)}
-                <path d="M0 15 C30 15, 50 55, 80 45 S130 20, 160 35 S210 55, 240 40 S280 25, 300 30" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round"/>
-                <line x1="0" y1="65" x2="300" y2="65" stroke={C.accent} strokeWidth="1.5" strokeDasharray="6 5" strokeOpacity="0.4"/>
-                <circle cx="0" cy="15" r="5" fill={C.accent}/>
+                <path d="M0 15 C30 15, 50 55, 80 45 S130 20, 160 35 S210 55, 240 40 S280 25, 300 30" fill="none" stroke={C.gold} strokeWidth="2.5" strokeLinecap="round"/>
+                <line x1="0" y1="65" x2="300" y2="65" stroke={C.gold} strokeWidth="1.5" strokeDasharray="6 5" strokeOpacity="0.4"/>
+                <circle cx="0" cy="15" r="5" fill={C.gold}/>
                 <text x="2" y="76" fill={C.muted} fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">{t("DANES")}</text>
                 <text x="240" y="76" fill={C.muted} fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">{t("6 MES.")}</text>
               </svg>
             </div>
 
             <div style={{ flex: 1 }}>
-              <Mono style={{ color: C.accent, fontSize: 9 }}>{t("RESNICA JE:")}</Mono>
+              <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.18em" }}>{t("RESNICA JE:")}</Mono>
               <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 28, color: C.text, margin: "10px 0 0", lineHeight: 1.15, letterSpacing: "-0.02em" }}>
                 {t("Vsak vrhunski športnik je začel točno tam, kjer si ti zdaj.")}
               </h2>
@@ -342,57 +341,40 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
 
         {key === "sport" && (
           <>
-            {/* Search bar */}
-            <div style={{ position: "relative", marginBottom: 14 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-              </svg>
-              <input
-                value={sportQuery}
-                onChange={(e) => setSportQuery(e.target.value)}
-                placeholder={t("Iskanje šport...")}
-                style={{ ...inp, marginTop: 0, paddingLeft: 40, fontSize: 14 }}
-              />
-              {sportQuery && (
-                <button onClick={() => setSportQuery("")} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
-              )}
-            </div>
-
-            {/* Sport chips */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignContent: "flex-start", paddingBottom: 80 }}>
-              {SPORTS.filter(s => s.toLowerCase().includes(sportQuery.toLowerCase())).map((s) => {
+            {/* Sports — one under another, near-transparent bronze when picked */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: 90 }}>
+              {SPORTS.map((s) => {
                 const active = sport === s;
                 return (
                   <button
                     key={s}
                     onClick={() => setSport(s)}
                     style={{
-                      padding: "9px 16px", borderRadius: 999, cursor: "pointer",
+                      width: "100%", textAlign: "left", padding: "15px 16px", borderRadius: 14, cursor: "pointer",
                       WebkitTapHighlightColor: "transparent",
-                      fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 13,
-                      border: `1.5px solid ${active ? C.accent : C.border2}`,
-                      background: active ? `${C.accent}22` : "transparent",
-                      color: active ? C.accent : C.text2,
+                      fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15,
+                      border: `1.5px solid ${active ? `${C.gold}99` : C.border2}`,
+                      background: active ? `${C.gold}14` : C.surface,
+                      color: active ? C.text : C.text2,
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
                       transition: "border-color 0.15s, background 0.15s, color 0.15s",
                     }}
                   >
-                    {active && <span style={{ marginRight: 6, fontSize: 11 }}>✓</span>}
-                    {s}
+                    <span>{t(s)}</span>
+                    {active && (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    )}
                   </button>
                 );
               })}
-              {SPORTS.filter(s => s.toLowerCase().includes(sportQuery.toLowerCase())).length === 0 && (
-                <div style={{ color: C.muted, fontFamily: C.display, fontSize: 13, padding: "12px 0" }}>{t("Ni rezultatov za")} "{sportQuery}"</div>
+
+              {sport === "Drugo" && (
+                <div style={{ animation: "athlosFade 0.2s ease" }}>
+                  <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPIŠI ŠPORT")}</Mono>
+                  <input value={customSport} onChange={(e) => setCustomSport(e.target.value)} placeholder={t("npr. Odbojka, Judo, Veslanje...")} style={{ ...inp, marginTop: 6 }} />
+                </div>
               )}
             </div>
-
-            {sport === "Drugo" && (
-              <div style={{ animation: "athlosFade 0.2s ease", marginTop: 12 }}>
-                <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPIŠI ŠPORT")}</Mono>
-                <input value={customSport} onChange={(e) => setCustomSport(e.target.value)} placeholder={t("npr. Odbojka, Judo, Veslanje...")} style={{ ...inp, marginTop: 6 }} />
-              </div>
-            )}
           </>
         )}
 
