@@ -12,7 +12,7 @@ import { useT } from "../lib/i18n";
 const STEPS = [
   { key: "goal", type: "single", q: "Kaj je tvoj glavni cilj?", sub: "ZA SMER TRENINGA",
     options: ["Moč", "Hitrost", "Eksplozivnost", "Vzdržljivost", "Rehabilitacija", "Splošna pripravljenost"] },
-  { key: "level", type: "single", q: "Na kateri ravni si?", sub: "DOLOČA OBSEG IN INTENZITETO",
+  { key: "level", type: "single", q: "Na kateri ravni treniraš?", sub: "DOLOČA OBSEG IN INTENZIVNOST",
     options: [
       { v: "Rekreativec", sub: "3–4× / teden" },
       { v: "Tekmovalec", sub: "klubska liga" },
@@ -22,14 +22,14 @@ const STEPS = [
   { key: "seasonPhase", type: "single", q: "V kateri fazi sezone si?", sub: "VPLIVA NA PERIODIZACIJO",
     options: [
       { v: "Off-season", sub: "priprave, baza" },
-      { v: "Pred-sezona", sub: "ostrenje forme" },
+      { v: "Predsezona", sub: "ostrenje forme" },
       { v: "V sezoni", sub: "tekme, vzdrževanje" },
     ] },
   { key: "equipment", type: "multi", q: "Kakšno opremo imaš?", sub: "IZBERI VSE, KAR IMAŠ NA VOLJO",
     options: ["Polna telovadnica", "Domača oprema", "Samo telesna teža", "Stadion + travnik", "Bazen"] },
   { key: "daysPerWeek", type: "single", q: "Koliko dni na teden treniraš?", sub: "REALNO, NE IDEALNO",
     options: [{ v: 3, label: "3 dni" }, { v: 4, label: "4 dni" }, { v: 5, label: "5 dni" }, { v: 6, label: "6 dni" }] },
-  { key: "sessionMinutes", type: "single", q: "Koliko časa imaš na trening?", sub: "POVPREČJE NA ENOTO",
+  { key: "sessionMinutes", type: "single", q: "Koliko časa imaš za trening?", sub: "POVPREČNO TRAJANJE TRENINGA",
     options: [{ v: 45, label: "45 min" }, { v: 60, label: "60 min" }, { v: 75, label: "75 min" }, { v: 90, label: "90 min" }] },
   { key: "injuries", type: "multi", q: "Imaš kakšne poškodbe ali omejitve?", sub: "ZEUS SE JIM BO IZOGNIL", none: "Brez poškodb",
     options: ["Koleno", "Rama", "Spodnji hrbet", "Gleženj", "Komolec", "Kolk", "Zapestje", "Vrat"] },

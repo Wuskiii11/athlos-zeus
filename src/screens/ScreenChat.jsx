@@ -35,11 +35,24 @@ const DEMO_AUTO_REPLIES = [
 
 // Prototype conversations seeded locally so the chat list always has content
 const PROTO_PEOPLE = [
-  { user_id: "proto-nina",  name: "Nina Mlakar",    initials: "NM", club: "NK Domžale", sport: "Nogomet" },
-  { user_id: "proto-tim",   name: "Tim Žagar",      initials: "TŽ", club: "NK Domžale", sport: "Nogomet" },
-  { user_id: "proto-eva",   name: "Eva Horvat",     initials: "EH", club: "NK Domžale", sport: "Atletika" },
+  { user_id: "proto-nina",   name: "Nina Mlakar",      initials: "NM", club: "NK Domžale", sport: "Nogomet" },
+  { user_id: "proto-tim",    name: "Tim Žagar",        initials: "TŽ", club: "NK Domžale", sport: "Nogomet" },
+  { user_id: "proto-eva",    name: "Eva Horvat",       initials: "EH", club: "NK Domžale", sport: "Atletika" },
+  { user_id: "proto-matej",  name: "Coach Matej",      initials: "M",  club: "NK Domžale", sport: "Trener" },
+  { user_id: "proto-luka",   name: "Luka Kovač",       initials: "LK", club: "NK Domžale", sport: "Nogomet" },
+  { user_id: "proto-ana",    name: "Ana Kos",          initials: "AK", club: "NK Domžale", sport: "Nogomet" },
+  { user_id: "proto-jure",   name: "Jure Novak",       initials: "JN", club: "NK Domžale", sport: "Nogomet" },
+  { user_id: "proto-marko",  name: "Marko Potočnik",   initials: "MP", club: "NK Domžale", sport: "Nogomet" },
+  { user_id: "proto-sara",   name: "Sara Vidmar",      initials: "SV", club: "AK Kladivar", sport: "Atletika" },
+  { user_id: "proto-ziga",   name: "Žiga Kranjc",      initials: "ŽK", club: "NK Domžale", sport: "Nogomet" },
+  { user_id: "proto-maja",   name: "Maja Petek",       initials: "MP", club: "Fizioterapija", sport: "Fizioterapevtka" },
+  { user_id: "proto-rok",    name: "Rok Zupan",        initials: "RZ", club: "NK Bravo", sport: "Nogomet" },
 ];
 const PROTO_SEEDS = [
+  { otherId: "proto-matej", msgs: [
+    { from: "proto-matej", text: "Jutri pridemo 15 min prej — video analiza tekme.", ago: 12 },
+    { from: "me",          text: "Razumem, bom tam.", ago: 8 },
+  ]},
   { otherId: "proto-nina",  msgs: [
     { from: "proto-nina", text: "Živjo! Jutri trening ob 17:00.", ago: 82 },
     { from: "me",         text: "Super, sem tam!", ago: 80 },
@@ -48,11 +61,42 @@ const PROTO_SEEDS = [
   { otherId: "proto-tim",   msgs: [
     { from: "proto-tim",  text: "Kaj kažeš za skupinski trening v soboto?", ago: 200 },
     { from: "me",         text: "Zveni dobro, ob kateri uri?", ago: 198 },
-    { from: "proto-tim",  text: "10:00, zbiralište pri dvorani", ago: 197 },
+    { from: "proto-tim",  text: "10:00, zbirališče pri dvorani", ago: 197 },
   ]},
   { otherId: "proto-eva",   msgs: [
     { from: "proto-eva",  text: "Pogledala sem tvoje čase — odlično napredovanje!", ago: 300 },
     { from: "me",         text: "Hvala! Trdo delam.", ago: 298 },
+  ]},
+  { otherId: "proto-luka",  msgs: [
+    { from: "proto-luka", text: "A mi posodiš elastike za jutri?", ago: 460 },
+    { from: "me",         text: "Ja, prinesem jih na trening.", ago: 455 },
+  ]},
+  { otherId: "proto-maja",  msgs: [
+    { from: "proto-maja", text: "Kako je s kolenom po zadnji terapiji?", ago: 690 },
+    { from: "me",         text: "Precej bolje, hvala. Jutri spet lahko tečem.", ago: 640 },
+    { from: "proto-maja", text: "Odlično. V četrtek nadaljujeva z re-load fazo.", ago: 620 },
+  ]},
+  { otherId: "proto-ana",   msgs: [
+    { from: "proto-ana",  text: "Vidiš tabelo? Tri točke zaostanka!", ago: 1500 },
+    { from: "me",         text: "Ja! V soboto jih ujamemo.", ago: 1480 },
+  ]},
+  { otherId: "proto-jure",  msgs: [
+    { from: "proto-jure", text: "Kdo pobere dres pri opremi?", ago: 2900 },
+  ]},
+  { otherId: "proto-sara",  msgs: [
+    { from: "proto-sara", text: "Prideš pogledat miting v nedeljo?", ago: 4300 },
+    { from: "me",         text: "Če ne bo tekme, pridem!", ago: 4200 },
+  ]},
+  { otherId: "proto-marko", msgs: [
+    { from: "proto-marko", text: "Gleženj je spet v redu, naslednji teden sem nazaj.", ago: 5800 },
+    { from: "me",          text: "Super novica! Pazi nase.", ago: 5700 },
+  ]},
+  { otherId: "proto-ziga",  msgs: [
+    { from: "proto-ziga", text: "Deliš svoj program za moč? Zanima me tvoj počep.", ago: 7300 },
+  ]},
+  { otherId: "proto-rok",   msgs: [
+    { from: "proto-rok",  text: "Dobra tekma prejšnji teden. Se vidimo v povratni!", ago: 8600 },
+    { from: "me",         text: "Hvala, enako. Brez milosti :)", ago: 8500 },
   ]},
 ];
 

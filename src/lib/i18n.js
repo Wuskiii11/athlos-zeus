@@ -58,6 +58,13 @@ const EN = {
   "Današnja preizkušnja": "Today's trial",
   "TVOJ SISTEM": "YOUR SYSTEM",
 
+  // ── ZEUS funnel ──
+  "Na kateri ravni treniraš?": "At what level do you train?",
+  "DOLOČA OBSEG IN INTENZIVNOST": "SETS VOLUME AND INTENSITY",
+  "Predsezona": "Pre-season",
+  "Koliko časa imaš za trening?": "How much time per session?",
+  "POVPREČNO TRAJANJE TRENINGA": "AVERAGE SESSION LENGTH",
+
   // ── ZEUS hero ──
   "On ve, kaj si treniral — in kaj te čaka.": "He knows what you trained — and what awaits you.",
   "te pozna · uči se iz vsakega treninga": "knows you · learns from every session",
