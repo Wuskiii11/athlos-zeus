@@ -118,29 +118,26 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
   const hairline = C.name === "dark" ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.08)";
   const Choice = ({ options, value, onPick, subs, labels }) => (
-    <div style={{
-      background: C.name === "dark" ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)",
-      border: `1px solid ${C.name === "dark" ? C.border : "#D8CFBD"}`,
-      borderRadius: 18, overflow: "hidden",
-      boxShadow: C.name === "dark" ? "none" : "0 8px 22px rgba(28,24,20,0.06)",
-    }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {options.map((o, i) => {
         const active = value === o;
         return (
           <button key={o} onClick={() => onPick(o)} style={{
             width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14,
-            padding: "15px 16px", border: "none", cursor: "pointer",
-            background: active ? `${C.gold}12` : "transparent",
-            boxShadow: active ? `inset 0 0 0 1.5px ${C.gold}88` : "none",
-            borderBottom: i < options.length - 1 ? `1px solid ${hairline}` : "none",
-            transition: "background 0.15s, box-shadow 0.15s",
+            padding: "15px 16px", borderRadius: 16, cursor: "pointer",
+            background: active
+              ? `${C.gold}12`
+              : (C.name === "dark" ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)"),
+            border: `1.5px solid ${active ? `${C.gold}99` : (C.name === "dark" ? C.border : "#D8CFBD")}`,
+            boxShadow: C.name === "dark" ? "none" : "0 3px 10px rgba(28,24,20,0.05)",
+            transition: "background 0.15s, border-color 0.15s",
             WebkitTapHighlightColor: "transparent",
           }}>
             <span style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: "block", fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15.5, color: C.text }}>{labels ? labels[i] : o}</span>
               {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
             </span>
-            {/* roman numeral, right — grey until the row is picked */}
+            {/* roman numeral, right — grey until the box is picked */}
             <span style={{ flexShrink: 0, minWidth: 28, textAlign: "right", fontFamily: C.mono, fontSize: active ? 12 : 10, fontWeight: active ? 700 : 600, letterSpacing: "0.06em", color: active ? C.gold : C.muted2, transition: "color 0.15s, font-size 0.15s" }}>
               {ROMAN[i]}
             </span>
