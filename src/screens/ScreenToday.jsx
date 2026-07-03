@@ -1,0 +1,540 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useTheme } from "../theme";
+import { Mono } from "../components/UI";
+import { useT, useLang } from "../lib/i18n";
+import { readinessFromCheckin, recommendation, DEFAULT_CHECKIN } from "../lib/readiness";
+import InjuryWidget from "./widgets/InjuryWidget";
+import ReflectionWidget from "./widgets/ReflectionWidget";
+
+// Demo content matching the spec mockups — wire to real tables once the
+// injury-tracking and reflection-generation backend exists.
+const DEMO_INJURY = {
+  name: "Natrgan hamstring (gr. II)",
+  phase: 1,
+  progressNote: "Trenutno si v RICE + protokol fazi — mobilnost in izolirana aktivacija.",
+  returnWeeks: 3,
+  returnDate: "do 15. jul 2026",
+  coachNote: "Poročilo fizioterapevta: napredek po pričakovanjih. MRI kontrola 10. jul.",
+};
+
+const DEMO_INSIGHTS = [
+  { id: "bodycomp", icon: "🥩", kicker: "TELESNA KOMPOZICIJA", text: "Ta teden si izgubil 2,5 kg — priporočamo večji vnos beljakovin za +10 %." },
+  { id: "sleep", icon: "😴", kicker: "SPANJE", text: "Tvoj ritem spanja se je izboljšal skozi zadnjih 5 dni — keep going." },
+  { id: "progression", icon: "📈", kicker: "TRENING PROGRESIJA", text: "V zadnjih 4 treningih si počep dvignil za +7,5 kg. Naslednji teden predlagamo deload." },
+  { id: "hrv", icon: "⚠️", kicker: "OPOZORILA", text: "Tvoja HRV pada 3. dan zapored. Razmisli o lažjem treningu danes." },
+];
+
+const CHECKIN_KEY = "athlos:checkin";
+const loadCheckin = () => { try { return { ...DEFAULT_CHECKIN, ...JSON.parse(localStorage.getItem(CHECKIN_KEY) || "{}") }; } catch { return { ...DEFAULT_CHECKIN }; } };
+
+const DAYS_SL = ["NED", "PON", "TOR", "SRE", "ČET", "PET", "SOB"];
+const DAYS_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const MONTHS_SL = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AVG", "SEP", "OKT", "NOV", "DEC"];
+const MONTHS_EN = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 6) return "Pozna noč";
+  if (h < 12) return "Dobro jutro";
+  if (h < 17) return "Dober dan";
+  return "Dober večer";
+}
+
+function useCountUp(target, dur = 900, delay = 200) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start - delay) / dur, 1);
+      if (p < 0) { raf = requestAnimationFrame(tick); return; }
+      setN(Math.round((1 - Math.pow(1 - p, 3)) * target));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+  return n;
+}
+
+// ── Greek-inspired icon set (line-art, referencing classical mythology) ─────
+const IconMoon = ({ size = 18, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" fill={color} />
+    <circle cx="17" cy="5" r="0.9" fill={color} opacity="0.5" />
+    <circle cx="19.5" cy="8.5" r="0.55" fill={color} opacity="0.35" />
+  </svg>
+);
+const IconFace = ({ size = 18, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M8.5 15c.8 1.2 2 1.8 3.5 1.8s2.7-.6 3.5-1.8" />
+    <circle cx="9.5" cy="10" r="0.7" fill={color} />
+    <circle cx="14.5" cy="10" r="0.7" fill={color} />
+  </svg>
+);
+const IconBolt = ({ size = 18, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <path d="M13 2L4 13.5h7L9.5 22 20 10.5h-7L13 2z" />
+  </svg>
+);
+const IconHeal = ({ size = 20, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round">
+    <rect x="3" y="3" width="18" height="18" rx="4" />
+    <path d="M12 8v8M8 12h8" />
+  </svg>
+);
+const IconScroll = ({ size = 20, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round">
+    <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+    <path d="M9 7h6M9 11h5M9 15h4" />
+  </svg>
+);
+const IconScales = ({ size = 20, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3v18M6 3h12" />
+    <path d="M4.5 9.5l4 7h-8l4-7z" />
+    <path d="M19.5 9.5l-4 7h8l-4-7z" />
+  </svg>
+);
+const GreekOrnament = ({ C }) => (
+  <div style={{ opacity: 0.4, display: "flex", alignItems: "center", gap: 10 }}>
+    <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${C.gold})` }} />
+    <svg width="10" height="10" viewBox="0 0 10 10" style={{ flexShrink: 0 }}>
+      <rect x="1.5" y="1.5" width="7" height="7" transform="rotate(45 5 5)" fill="none" stroke={C.gold} strokeWidth="1" />
+    </svg>
+    <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${C.gold})` }} />
+  </div>
+);
+
+function Medallion({ pct, color, C, size = 130 }) {
+  const r = 92;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - Math.max(pct, 1) / 100);
+  const label = pct >= 70 ? "READY" : pct >= 40 ? "CAUTION" : "REST";
+  return (
+    <div style={{ width: size, height: size, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      <svg viewBox="0 0 210 210" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+        <circle cx="105" cy="105" r={r} fill="none" stroke={C.border2} strokeWidth="6" />
+        <circle
+          cx="105" cy="105" r={r} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round"
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          transform="rotate(-90 105 105)"
+          style={{ transition: "stroke-dashoffset 0.9s cubic-bezier(.22,1,.36,1)" }}
+        />
+      </svg>
+      <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
+        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: size * 0.34, color: C.text, letterSpacing: "-0.02em", lineHeight: 1 }}>{pct}</div>
+        <div style={{ fontFamily: C.mono, fontSize: 10, color, letterSpacing: "0.08em", marginTop: 2 }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function Slider({ label, value, min, max, step = 1, suffix = "", onChange, C }) {
+  const trackRef = useRef(null);
+  const toValue = (clientX) => {
+    const rect = trackRef.current?.getBoundingClientRect();
+    if (!rect) return value;
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const raw = min + pct * (max - min);
+    return parseFloat((Math.round(raw / step) * step).toFixed(2));
+  };
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+        <Mono style={{ color: C.muted, fontSize: 9 }}>{label}</Mono>
+        <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12, color: C.text }}>{value}{suffix}</span>
+      </div>
+      <div
+        ref={trackRef}
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); onChange(toValue(e.clientX)); }}
+        onPointerMove={(e) => { if (e.buttons > 0) onChange(toValue(e.clientX)); }}
+        style={{ height: 10, borderRadius: 999, background: C.surface3, cursor: "pointer", position: "relative", userSelect: "none", touchAction: "none", overflow: "hidden" }}
+      >
+        <div style={{ width: `${pct}%`, height: "100%", borderRadius: 999, background: C.accent, pointerEvents: "none" }} />
+      </div>
+    </div>
+  );
+}
+
+function QuickAddSheet({ C, t, onClose, onSave }) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState({ part: "", grade: 2, note: "" });
+  const PARTS = ["Hamstring", "Koleno", "Gleženj", "Mečna", "Križ", "Ramo", "Komolec", "Drugo"];
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 30, background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.bg, borderRadius: "24px 24px 0 0", padding: "0 18px 32px", maxHeight: "88vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div style={{ width: 36, height: 4, borderRadius: 999, background: C.border2, margin: "14px auto 20px" }} />
+        {step === 0 ? (
+          <>
+            <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.12em", marginBottom: 16, display: "block" }}>{t("HITRI VNOS")}</Mono>
+            {[
+              { icon: <IconHeal size={22} color={C.accent} />, label: t("Poškodba"), sub: t("Zabeleži poškodbo ali bolečino"), isActive: true },
+              { icon: <IconScroll size={22} color={C.muted} />, label: t("Opomba"), sub: t("Splošna opomba o treningu"), isActive: false },
+              { icon: <IconScales size={22} color={C.muted} />, label: t("Tehtanje"), sub: t("Zabeleži telesno težo"), isActive: false },
+            ].map(({ icon, label, sub, isActive }, i) => (
+              <button key={i} onClick={() => isActive && setStep(1)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${isActive ? C.accent : C.border}`, borderRadius: 16, cursor: isActive ? "pointer" : "default", textAlign: "left", opacity: isActive ? 1 : 0.42, WebkitTapHighlightColor: "transparent" }}>
+                <span style={{ width: 34, height: 34, borderRadius: 10, background: `${isActive ? C.accent : C.muted}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</span>
+                <span style={{ flex: 1 }}>
+                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{label}</span>
+                  <Mono style={{ color: C.muted, fontSize: 9 }}>{sub}</Mono>
+                </span>
+                {isActive && <span style={{ color: C.muted }}>›</span>}
+              </button>
+            ))}
+          </>
+        ) : (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+              <button onClick={() => setStep(0)} style={{ background: "none", border: `1px solid ${C.border2}`, borderRadius: 8, cursor: "pointer", color: C.muted, fontSize: 15, padding: "4px 10px", lineHeight: 1, WebkitTapHighlightColor: "transparent" }}>←</button>
+              <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.12em" }}>{t("NOVA POŠKODBA")}</Mono>
+            </div>
+            <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 8, display: "block" }}>{t("DEL TELESA")}</Mono>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 18 }}>
+              {PARTS.map(p => (
+                <button key={p} onClick={() => setForm(f => ({ ...f, part: p }))} style={{ padding: "8px 12px", borderRadius: 999, border: `1px solid ${form.part === p ? C.accent : C.border2}`, background: form.part === p ? `${C.accent}1f` : "transparent", color: form.part === p ? C.accent : C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 12, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t(p)}</button>
+              ))}
+            </div>
+            <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 8, display: "block" }}>{t("STOPNJA")}</Mono>
+            <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
+              {[[1, t("LAHKA"), C.accent], [2, t("ZMERNA"), C.yellow || "#f59e0b"], [3, t("HUDA"), C.red || "#ef4444"]].map(([g, label, col]) => (
+                <button key={g} onClick={() => setForm(f => ({ ...f, grade: g }))} style={{ flex: 1, padding: "11px 0", borderRadius: 12, border: `1px solid ${form.grade === g ? col : C.border2}`, background: form.grade === g ? `${col}1f` : "transparent", color: form.grade === g ? col : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 11, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{g} · {label}</button>
+              ))}
+            </div>
+            <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 6, display: "block" }}>{t("OPIS")}</Mono>
+            <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder={t("Opiši simptome ali lokacijo bolečine...")} rows={3} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: C.surface, color: C.text, fontFamily: C.display, fontSize: "14px", resize: "none", outline: "none", marginBottom: 18, boxSizing: "border-box" }} />
+            <button onClick={() => { if (!form.part) return; onSave({ name: `${t("Poškodba")} · ${t(form.part)}`, grade: form.grade, phase: 0, progressNote: form.note || t("Sveža poškodba — začetek protokola."), returnWeeks: form.grade * 2, returnDate: `${t("za")} ${form.grade * 2} ${t("tedna")}`, coachNote: "" }); onClose(); }} style={{ width: "100%", padding: "16px", borderRadius: 999, border: "none", background: form.part ? C.btn : C.surface3, color: form.part ? C.btnText : C.muted, fontFamily: C.display, fontWeight: 800, fontSize: 14, cursor: form.part ? "pointer" : "default", letterSpacing: "0.04em", WebkitTapHighlightColor: "transparent" }}>{t("SHRANI POŠKODBO")}</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Body stats (tapping the readiness circle) ────────────────
+const STAT_METRICS = [
+  {
+    key: "weight", label: "Teža", labelEn: "Weight", unit: "kg", color: "#818cf8",
+    data: [83.2, 82.8, 82.5, 82.1, 81.9, 82.3, 81.7, 81.4, 81.1, 80.9, 80.6, 80.8, 80.3, 80.1],
+    trendSL: "−3.1 kg za 14 dni", trendEN: "−3.1 kg over 14 days", good: "down",
+  },
+  {
+    key: "sleep", label: "Spanje", labelEn: "Sleep", unit: "h", color: "#a78bfa",
+    data: [7.2, 6.5, 8.1, 7.8, 6.9, 7.5, 8.2, 7.0, 6.8, 7.9, 8.0, 7.3, 7.6, 7.4],
+    trendSL: "Ø 7.4h / noč", trendEN: "Avg 7.4h / night", good: "up",
+  },
+  {
+    key: "hrv", label: "HRV", labelEn: "HRV", unit: "ms", color: "#22d3ee",
+    data: [62, 58, 65, 71, 68, 55, 60, 63, 67, 72, 69, 64, 66, 70],
+    trendSL: "+13% za 14 dni", trendEN: "+13% over 14 days", good: "up",
+  },
+  {
+    key: "soreness", label: "Sornost", labelEn: "Soreness", unit: "/5", color: "#fb923c",
+    data: [3, 2, 4, 3, 2, 1, 3, 4, 3, 2, 2, 3, 2, 2],
+    trendSL: "Povprečje 2.6/5", trendEN: "Average 2.6/5", good: "down",
+  },
+];
+
+function SparkChart({ data, color, C, metricKey }) {
+  const W = 320, H = 150;
+  const PAD = { top: 16, right: 8, bottom: 28, left: 36 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+  const minV = Math.min(...data), maxV = Math.max(...data);
+  const rng = (maxV - minV) || 1;
+  const yMin = minV - rng * 0.2, yMax = maxV + rng * 0.2;
+  const toX = i => PAD.left + (i / (data.length - 1)) * cW;
+  const toY = v => PAD.top + (1 - (v - yMin) / (yMax - yMin)) * cH;
+  const pts = data.map((v, i) => ({ x: toX(i), y: toY(v) }));
+  const line = pts.reduce((s, p, i) => {
+    if (i === 0) return `M${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+    const px = pts[i - 1], cx = ((px.x + p.x) / 2).toFixed(1);
+    return `${s} C${cx},${px.y.toFixed(1)} ${cx},${p.y.toFixed(1)} ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+  }, "");
+  const bot = (PAD.top + cH).toFixed(1);
+  const area = `${line} L${pts[pts.length-1].x.toFixed(1)},${bot} L${pts[0].x.toFixed(1)},${bot} Z`;
+  const gid = `sg-${metricKey}`;
+  const yLabels = [minV, (minV + maxV) / 2, maxV];
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {yLabels.map((v, i) => (
+        <line key={i} x1={PAD.left} y1={toY(v)} x2={W - PAD.right} y2={toY(v)} stroke={C.border} strokeWidth="1" strokeDasharray="3 5" opacity="0.5" />
+      ))}
+      <path d={area} fill={`url(#${gid})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {pts.map((p, i) => {
+        const isLast = i === pts.length - 1;
+        if (i % 3 !== 0 && !isLast) return null;
+        return <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r={isLast ? 5 : 3.5} fill={isLast ? color : C.bg} stroke={color} strokeWidth={isLast ? 0 : 2} />;
+      })}
+      {yLabels.map((v, i) => (
+        <text key={i} x={PAD.left - 6} y={toY(v) + 4} textAnchor="end" fontSize="9" fill={C.muted} fontFamily="monospace">{Math.round(v * 10) / 10}</text>
+      ))}
+      {data.map((_, i) => {
+        if (i % 4 !== 0 && i !== data.length - 1) return null;
+        const d = new Date(); d.setDate(d.getDate() - (data.length - 1 - i));
+        return <text key={i} x={toX(i).toFixed(1)} y={H - 4} textAnchor="middle" fontSize="9" fill={C.muted} fontFamily="monospace">{d.getDate()}/{d.getMonth() + 1}</text>;
+      })}
+    </svg>
+  );
+}
+
+function StatsSheet({ C, lang, onClose }) {
+  const [metric, setMetric] = useState("weight");
+  const m = STAT_METRICS.find(x => x.key === metric);
+  const current = m.data[m.data.length - 1];
+  const diff = Math.round((current - m.data[0]) * 10) / 10;
+  const avg = Math.round((m.data.reduce((s, v) => s + v, 0) / m.data.length) * 10) / 10;
+  const minV = Math.round(Math.min(...m.data) * 10) / 10;
+  const maxV = Math.round(Math.max(...m.data) * 10) / 10;
+  const isGood = (m.good === "down" && diff <= 0) || (m.good === "up" && diff >= 0);
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 30, background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.bg, borderRadius: "24px 24px 0 0", padding: "0 18px 44px", maxHeight: "92vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div style={{ width: 36, height: 4, borderRadius: 999, background: C.border2, margin: "14px auto 20px" }} />
+        <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.12em", display: "block", marginBottom: 20 }}>
+          {lang === "en" ? "BODY STATS · 14 DAYS" : "TELESNA STATISTIKA · 14 DNI"}
+        </Mono>
+        {/* Metric tabs */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 24, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none" }}>
+          {STAT_METRICS.map(sm => (
+            <button key={sm.key} onClick={() => setMetric(sm.key)} style={{
+              flexShrink: 0, padding: "8px 16px", borderRadius: 999,
+              border: `1.5px solid ${metric === sm.key ? sm.color : C.border}`,
+              background: metric === sm.key ? `${sm.color}22` : "transparent",
+              color: metric === sm.key ? sm.color : C.muted,
+              fontFamily: C.display, fontWeight: 700, fontSize: 13,
+              cursor: "pointer", transition: "all 0.15s", WebkitTapHighlightColor: "transparent",
+            }}>
+              {lang === "en" ? sm.labelEn : sm.label}
+            </button>
+          ))}
+        </div>
+        {/* Current value + diff */}
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 44, color: C.text, letterSpacing: "-0.03em", lineHeight: 1 }}>{current}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 18, color: C.muted }}>{m.unit}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: isGood ? C.accent : C.red, marginLeft: 4 }}>
+              {diff > 0 ? "+" : ""}{diff}{m.unit}
+            </span>
+          </div>
+          <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, marginTop: 5 }}>
+            {lang === "en" ? m.trendEN : m.trendSL}
+          </div>
+        </div>
+        {/* Chart */}
+        <div style={{ marginBottom: 22 }}>
+          <SparkChart data={m.data} color={m.color} C={C} metricKey={m.key} />
+        </div>
+        {/* Min / Avg / Max */}
+        <div style={{ display: "flex", gap: 8 }}>
+          {[["MIN", minV], [lang === "en" ? "AVG" : "POVP", avg], ["MAX", maxV]].map(([lbl, val]) => (
+            <div key={lbl} style={{ flex: 1, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
+              <Mono style={{ color: C.muted, fontSize: 8, display: "block" }}>{lbl}</Mono>
+              <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text, marginTop: 4 }}>{val} {m.unit}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ScreenToday({ go, profile }) {
+  const C = useTheme();
+  const t = useT();
+  const lang = useLang();
+  const [openStats, setOpenStats] = useState(false);
+  const [openBreakdown, setOpenBreakdown] = useState(false);
+  const [openCheckin, setOpenCheckin] = useState(false);
+  const [checkin, setCheckin] = useState(loadCheckin);
+  const [quickAdd, setQuickAdd] = useState(false);
+  const [injury, setInjury] = useState(DEMO_INJURY);
+  useEffect(() => { try { localStorage.setItem(CHECKIN_KEY, JSON.stringify(checkin)); } catch {} }, [checkin]);
+  const setC = (k, v) => setCheckin((p) => ({ ...p, [k]: v }));
+
+  const initial = (profile.name || "?").trim().charAt(0).toUpperCase();
+  const now = new Date();
+  const DAYS = lang === "en" ? DAYS_EN : DAYS_SL;
+  const MONTHS = lang === "en" ? MONTHS_EN : MONTHS_SL;
+  const dateStr = `${DAYS[now.getDay()]} · ${now.getDate()}. ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+
+  const { battery, components, season } = readinessFromCheckin(checkin);
+  const rec = recommendation(battery);
+  const tone = rec.tone === "accent" ? C.accent : rec.tone === "yellow" ? C.yellow : C.red;
+  const shown = useCountUp(battery);
+
+  const rise = (d) => ({ animation: `athlosRise 0.55s cubic-bezier(0.22,1,0.36,1) ${d}s both` });
+
+  return (
+    <div style={{ padding: "10px 18px 28px", color: C.text, position: "relative", overflow: "hidden" }}>
+      {/* antique classical-bust watermark behind the header */}
+      <img src="/img/bust-ink.png" alt="" aria-hidden="true" style={{
+        position: "absolute", top: -28, right: -34, width: 188, height: 188, objectFit: "contain",
+        opacity: 0.07, pointerEvents: "none", zIndex: 0,
+      }} />
+      {/* header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, position: "relative", zIndex: 1, ...rise(0) }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button onClick={() => setQuickAdd(true)} aria-label="Hitri vnos" style={{ width: 28, height: 28, borderRadius: "50%", border: `1.5px solid ${C.accent}`, background: `${C.accent}18`, color: C.accent, fontSize: 20, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent", fontWeight: 300, padding: 0 }}>+</button>
+            <Mono style={{ color: C.muted, fontSize: 10 }}>{dateStr}</Mono>
+          </div>
+          <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, margin: "6px 0 0", color: C.text, letterSpacing: "-0.02em", lineHeight: 1.08 }}>
+            {t(getGreeting())},{" "}
+            <span style={{ fontFamily: C.serif, fontStyle: "italic", fontWeight: 500, fontSize: "1.16em", color: C.gold }}>{profile.name}</span>
+          </h1>
+        </div>
+        <button onClick={() => go("profile")} style={{ width: 46, height: 46, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, color: C.accent, fontFamily: C.display, fontWeight: 800, fontSize: 18, overflow: "hidden", cursor: "pointer", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
+          {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
+        </button>
+      </div>
+
+      {/* Greek ornament — separates header from readiness */}
+      <div style={{ marginBottom: 14, ...rise(0.04) }}>
+        <GreekOrnament C={C} />
+      </div>
+
+      {/* READINESS — centered hero */}
+      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: "22px 18px 16px", marginBottom: 14, ...rise(0.06) }}>
+        {/* Centered medallion */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 16 }}>
+          <button onClick={() => setOpenStats(true)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+            <Medallion pct={shown} color={tone} C={C} size={148} />
+          </button>
+          <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.12em", marginTop: 10 }}>{t("READINESS · BATERIJA")}</Mono>
+          <div style={{ marginTop: 8 }}>
+            <span style={{ padding: "5px 11px", borderRadius: 999, background: `${tone}1a`, border: `1px solid ${tone}50`, display: "inline-block" }}>
+              <Mono style={{ color: tone, fontSize: 9 }}>{season === "off" ? t("OFF-SEASON") : t("MID-SEASON")}</Mono>
+            </span>
+          </div>
+          <p style={{ fontFamily: C.display, fontSize: 13, color: C.text2, margin: "10px 0 0", textAlign: "center", lineHeight: 1.5, paddingInline: 4 }}>{t(rec.text)}</p>
+        </div>
+        {/* Quick metrics row */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+          {[
+            { icon: <IconMoon size={20} color={tone} />, label: t("SPANJE"), val: `${checkin.sleepH}h` },
+            { icon: <IconFace size={20} color={tone} />, label: t("POČUTJE"), val: `${checkin.mood}/5` },
+            { icon: <IconBolt size={18} color={tone} />, label: t("SORNOST"), val: `${checkin.soreness}/5` },
+          ].map(({ icon, label, val }) => (
+            <div key={label} style={{ flex: 1, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 14, padding: "10px 6px", textAlign: "center" }}>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 5 }}>{icon}</div>
+              <Mono style={{ color: C.muted, fontSize: 7, letterSpacing: "0.04em" }}>{label}</Mono>
+              <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13, color: C.text, marginTop: 2 }}>{val}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* breakdown toggle */}
+        <button onClick={() => setOpenBreakdown((o) => !o)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, padding: "10px 0 0", borderTop: `1px solid ${C.border}`, background: "none", border: "none", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <Mono style={{ color: C.muted, fontSize: 9 }}>{t("RAZČLENITEV")}</Mono>
+          <span style={{ color: C.muted, fontSize: 16, transition: "transform 0.2s", transform: openBreakdown ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
+        </button>
+
+        {openBreakdown && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 12, animation: "athlosFade 0.2s ease" }}>
+            {components.map((c) => (
+              <div key={c.key}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 5 }}>
+                  <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13, color: C.text }}>{t(c.label)}</span>
+                    <Mono style={{ color: C.muted2, fontSize: 8 }}>{t(c.sub)}</Mono>
+                  </span>
+                  <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                    <Mono style={{ color: C.muted2, fontSize: 8 }}>{Math.round(c.weight * 100)}%</Mono>
+                    <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 13, color: c.score >= 70 ? C.accent : c.score >= 40 ? C.yellow : C.red }}>{c.score}</span>
+                  </span>
+                </div>
+                <div style={{ height: 5, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
+                  <div style={{ width: `${c.score}%`, height: "100%", borderRadius: 999, background: c.score >= 70 ? C.accent : c.score >= 40 ? C.yellow : C.red, transition: "width 0.8s ease" }} />
+                </div>
+              </div>
+            ))}
+            <Mono style={{ color: C.muted2, fontSize: 8, marginTop: 2 }}>{t("7-dnevno drseče okno · uteži se prilagodijo razpoložljivim podatkom")}</Mono>
+          </div>
+        )}
+
+        {/* morning check-in — live drives the battery */}
+        <button onClick={() => setOpenCheckin((o) => !o)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, padding: "10px 0 0", borderTop: `1px solid ${C.border}`, background: "none", border: "none", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <Mono style={{ color: C.accent, fontSize: 9 }}>{t("JUTRANJI CHECK-IN")}</Mono>
+          <span style={{ color: C.muted, fontSize: 16, transition: "transform 0.2s", transform: openCheckin ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
+        </button>
+
+        {openCheckin && (
+          <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 14, animation: "athlosFade 0.2s ease" }}>
+            <Slider label={t("SPANEC")} value={checkin.sleepH} min={4} max={10} step={0.1} suffix="h" onChange={(v) => setC("sleepH", v)} C={C} />
+            <Slider label={t("KAKOVOST SPANJA")} value={checkin.sleepQuality} min={1} max={5} onChange={(v) => setC("sleepQuality", v)} C={C} />
+            <Slider label={t("POČUTJE")} value={checkin.mood} min={1} max={5} onChange={(v) => setC("mood", v)} C={C} />
+            <Slider label={t("SORNOST (MIŠICE)")} value={checkin.soreness} min={1} max={5} onChange={(v) => setC("soreness", v)} C={C} />
+            <Slider label={t("STRES")} value={checkin.stress} min={1} max={5} onChange={(v) => setC("stress", v)} C={C} />
+            <Slider label={t("HIDRACIJA")} value={checkin.hydration} min={0} max={120} suffix="%" onChange={(v) => setC("hydration", v)} C={C} />
+            <div>
+              <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 6, display: "block" }}>{t("FAZA SEZONE")}</Mono>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[["mid", t("Sredina sezone")], ["off", t("Off-season")]].map(([val, lbl]) => (
+                  <button key={val} onClick={() => setC("season", val)} style={{ flex: 1, padding: "9px", borderRadius: 10, cursor: "pointer", border: `1px solid ${checkin.season === val ? C.accent : C.border2}`, background: checkin.season === val ? `${C.accent}1f` : "transparent", color: checkin.season === val ? C.accent : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 12, WebkitTapHighlightColor: "transparent" }}>{lbl}</button>
+                ))}
+              </div>
+            </div>
+            <Mono style={{ color: C.muted2, fontSize: 8 }}>{t("HRV/RHR pridejo iz Apple Health · prehrana iz dnevnika · hitrost iz treninga")}</Mono>
+          </div>
+        )}
+      </div>
+
+      <InjuryWidget injury={injury} C={C} t={t} isCoach={profile.role === "coach"} />
+      <ReflectionWidget insights={DEMO_INSIGHTS} C={C} t={t} />
+
+      {/* workout */}
+      <div style={{ position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, overflow: "hidden", ...rise(0.18) }}>
+        <div style={{ position: "absolute", top: 0, left: 18, right: 18, height: 2, background: C.accent, borderRadius: "0 0 4px 4px" }} />
+        <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.1em" }}>{t("AI PROGRAM DANES")} · 17:00</Mono>
+        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, margin: "8px 0 14px", color: C.text, letterSpacing: "-0.02em" }}>{t("Moč · Spodnji del")}</h2>
+        <div style={{ display: "flex", gap: 18, marginBottom: 16 }}>
+          {[["62", t("min")], ["7", t("vaj")], ["480", "kcal"]].map(([v, l], i) => (
+            <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.text }}>{v}</span>
+              <Mono style={{ color: C.muted, fontSize: 9 }}>{l}</Mono>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => go("train")} style={{ width: "100%", padding: "15px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={C.accent2}><path d="M5 3l14 9-14 9V3z" /></svg>
+          {t("Začni trening")}
+        </button>
+      </div>
+
+      {/* quick access */}
+      <div style={rise(0.24)}>
+        <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 10, display: "block" }}>{t("TVOJ SISTEM")}</Mono>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {[
+            [t("Včerajšnje poročilo"), "92", "report", "M3 3v18h18M7 14l3-3 3 3 4-5"],
+            [t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z"],
+            [t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3"],
+          ].map(([title, val, dest, path], i) => (
+            <button key={i} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 16px", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>
+              <span style={{ width: 34, height: 34, borderRadius: 10, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+              </span>
+              <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{title}</span>
+              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: C.text }}>{val}</span>
+              <span style={{ color: C.muted }}>›</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {quickAdd && <QuickAddSheet C={C} t={t} onClose={() => setQuickAdd(false)} onSave={(inj) => setInjury(inj)} />}
+      {openStats && <StatsSheet C={C} lang={lang} onClose={() => setOpenStats(false)} />}
+    </div>
+  );
+}
