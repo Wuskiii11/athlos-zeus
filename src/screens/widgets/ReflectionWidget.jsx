@@ -5,14 +5,48 @@ import { Mono } from "../../components/UI";
 // A small stack of personalized AI insight cards below the readiness card.
 // Swipe a card away to dismiss it permanently; the next one in the stack
 // shows through. Renders nothing once the stack is empty.
+//
+// Persistence (spec "sistemski hook"): dismissals survive reload, every
+// insight expires 48 h after it was first shown, and an id is never shown
+// again once dismissed (dedup).
+const STORE_KEY = "athlos:reflections";
+const TTL_MS = 48 * 3600 * 1000;
+
+const loadStore = () => {
+  try { return { dismissed: {}, firstSeen: {}, ...JSON.parse(localStorage.getItem(STORE_KEY) || "{}") }; }
+  catch { return { dismissed: {}, firstSeen: {} }; }
+};
+const saveStore = (s) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {} };
+
+// Stamp unseen ids and prune entries whose insight no longer exists so the
+// store doesn't grow forever.
+function syncStore(insights) {
+  const s = loadStore();
+  const now = Date.now();
+  const ids = new Set(insights.map((i) => i.id));
+  let changed = false;
+  for (const i of insights) {
+    if (!s.firstSeen[i.id]) { s.firstSeen[i.id] = now; changed = true; }
+  }
+  for (const id of Object.keys(s.firstSeen)) {
+    if (!ids.has(id) && !s.dismissed[id]) { delete s.firstSeen[id]; changed = true; }
+  }
+  if (changed) saveStore(s);
+  return s;
+}
+
 export default function ReflectionWidget({ insights, C, t }) {
-  const [dismissed, setDismissed] = useState([]);
+  const [store] = useState(() => syncStore(insights));
+  const [dismissed, setDismissed] = useState(() => Object.keys(store.dismissed));
   const dragX = useRef(0);
   const [drag, setDrag] = useState(0);
   const startX = useRef(0);
   const dragging = useRef(false);
 
-  const queue = insights.filter((i) => !dismissed.includes(i.id));
+  const now = Date.now();
+  const queue = insights.filter(
+    (i) => !dismissed.includes(i.id) && now - (store.firstSeen[i.id] || now) < TTL_MS
+  );
   if (queue.length === 0) return null;
 
   const top = queue[0];
@@ -25,6 +59,9 @@ export default function ReflectionWidget({ insights, C, t }) {
     dragging.current = false;
     if (Math.abs(dragX.current) > 90) {
       setDismissed((d) => [...d, top.id]);
+      const s = loadStore();
+      s.dismissed[top.id] = Date.now();
+      saveStore(s);
     }
     dragX.current = 0;
     setDrag(0);
