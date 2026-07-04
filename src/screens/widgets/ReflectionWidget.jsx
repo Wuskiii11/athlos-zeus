@@ -51,6 +51,7 @@ export default function ReflectionWidget({ insights, C, t }) {
 
   const top = queue[0];
   const behindCount = queue.length - 1;
+  const iconColor = { gold: C.gold, accent: C.accent, red: C.red }[top.color] || C.gold;
 
   const onStart = (x) => { dragging.current = true; startX.current = x; };
   const onMove = (x) => { if (!dragging.current) return; dragX.current = x - startX.current; setDrag(dragX.current); };
@@ -93,7 +94,11 @@ export default function ReflectionWidget({ insights, C, t }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <span style={{ display: "flex", color: C.gold }}>{top.icon}</span>
+          <span style={{
+            width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: `${iconColor}1c`, color: iconColor,
+          }}>{top.icon}</span>
           <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t(top.kicker)}</Mono>
         </div>
         <p style={{ fontFamily: C.display, fontSize: 14, color: C.text, lineHeight: 1.5, margin: 0 }}>{t(top.text)}</p>

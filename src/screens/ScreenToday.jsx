@@ -561,15 +561,17 @@ export default function ScreenToday({ go, profile }) {
         </div>
       </div>
 
-      {/* quick-access rows — each is its own home widget (spec §06) */}
+      {/* quick-access rows — each is its own home widget (spec §06); a tinted
+          icon badge per row (performance green / match red / nutrition gold)
+          instead of flat gray, so the section reads in the app's own palette. */}
       {[
-        ["report", t("Včerajšnje poročilo"), "92", "report", "M3 3v18h18M7 14l3-3 3 3 4-5"],
-        ["match", t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z"],
-        ["meal", t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3"],
-      ].map(([id, title, val, dest, path]) => isOn(id) && (
+        ["report", t("Včerajšnje poročilo"), "92", "report", "M3 3v18h18M7 14l3-3 3 3 4-5", C.accent],
+        ["match", t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z", C.red],
+        ["meal", t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3", C.gold],
+      ].map(([id, title, val, dest, path, color]) => isOn(id) && (
         <button key={id} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(id), ...rise(0.24) }}>
-          <span style={{ width: 34, height: 34, borderRadius: 10, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+          <span style={{ width: 34, height: 34, borderRadius: 10, background: `${color}1c`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
           </span>
           <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{title}</span>
           <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: C.text }}>{val}</span>
