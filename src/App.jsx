@@ -499,7 +499,9 @@ export default function AthlosApp() {
       {/* ── MAIN APP ── (athlete) */}
       {!splash && registered && !needsSetup && profile.role !== "coach" && consented && (
         <div className="app-fullscreen" style={{
-          position: "fixed", top: 0, left: 0, right: 0,
+          // anchor top AND bottom so the app fills the whole phone shell — without
+          // `bottom` it only got 100dvh, leaving the cut-off strip at the bottom
+          position: "fixed", inset: 0,
           width: "100%",
           background: C.bg,
           display: "flex", flexDirection: "column",
@@ -583,9 +585,9 @@ export default function AthlosApp() {
               display: "flex", justifyContent: "space-around", alignItems: "center",
               width: "100%", maxWidth: 560, marginInline: "auto",
               padding: "7px 6px",
-              background: theme === "dark" ? "rgba(22,24,22,0.30)" : "rgba(255,255,255,0.30)",
-              backdropFilter: "blur(30px) saturate(180%)",
-              WebkitBackdropFilter: "blur(30px) saturate(180%)",
+              background: theme === "dark" ? "rgba(22,24,22,0.16)" : "rgba(255,255,255,0.14)",
+              backdropFilter: "blur(34px) saturate(190%)",
+              WebkitBackdropFilter: "blur(34px) saturate(190%)",
               borderRadius: 999,
               border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.55)"}`,
               boxShadow: theme === "dark"
