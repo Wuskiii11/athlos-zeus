@@ -333,7 +333,7 @@ export default function AthlosApp() {
       case "ai":       return <ScreenAI user={user} profile={profile} />;
       case "report":   return <ScreenReport go={go} />;
       case "profile":  return <ScreenProfile go={go} profile={profile} setProfile={setProfile} />;
-      case "fuel":     return <ScreenFuel profile={profile} />;
+      case "fuel":     return <ScreenFuel go={go} profile={profile} />;
       case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} onPrivacy={() => setPrivacyOpen(true)} onAccount={() => setScreen("account")} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
       case "account":  return <ScreenAccount profile={profile} setProfile={setProfile} user={user} onBack={() => setScreen("settings")} />;
       case "season":   return <ScreenSeason go={go} profile={profile} user={user} />;

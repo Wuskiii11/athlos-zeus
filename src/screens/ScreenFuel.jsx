@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "../theme";
-import { Pressable, PrimaryBtn } from "../components/UI";
+import { Pressable, PrimaryBtn, BackBtn } from "../components/UI";
 import { useT } from "../lib/i18n";
 
 function calcTarget(goal) {
@@ -121,7 +121,7 @@ function EatenForm({ onAdd }) {
   );
 }
 
-export default function ScreenFuel() {
+export default function ScreenFuel({ go }) {
   const C = useTheme();
   const t = useT();
   const [goal, setGoal] = useState("vzdrzevanje");
@@ -145,6 +145,9 @@ export default function ScreenFuel() {
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text }}>
+      <div style={{ marginBottom: 8 }}>
+        <BackBtn onClick={() => go?.("today")} />
+      </div>
       <header style={{ marginBottom: 16 }}>
         <span style={label}>{t("HRANA")}</span>
         <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 28, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj jedilnik")}</h2>
