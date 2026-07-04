@@ -442,7 +442,7 @@ export async function getOrCreateDirectConversation(userId, otherUserId) {
         const { data: conv } = await supabase
           .from("conversations").select("*")
           .eq("id", shared[0].conversation_id).eq("type", "direct").maybeSingle();
-        if (conv) return conv;
+        if (conv) return withBgOverride(conv);
       }
     }
     // Create new
@@ -458,7 +458,7 @@ export async function getOrCreateDirectConversation(userId, otherUserId) {
   // Local mode: key by sorted pair
   const key = [userId, otherUserId].sort().join("~");
   const chat = chatLS();
-  if (chat.convs?.[key]) return chat.convs[key];
+  if (chat.convs?.[key]) return withBgOverride(chat.convs[key]);
   const conv = { id: key, type: "direct", created_by: userId, background: "default", created_at: new Date().toISOString() };
   writeChatLS({ convs: { ...(chat.convs || {}), [key]: conv } });
   return conv;
@@ -507,7 +507,7 @@ export async function listConversations(userId) {
             otherUser = { user_id: otherId, name: ath?.name || "Neznano", initials: ath?.initials || "?", club: ath?.clubs?.name || "" };
           }
         }
-        return { ...conv, lastMsg, otherUser };
+        return withBgOverride({ ...conv, lastMsg, otherUser });
       }));
       return result.sort((a, b) => new Date(b.lastMsg?.created_at || b.created_at) - new Date(a.lastMsg?.created_at || a.created_at));
     } catch { return []; }
@@ -522,7 +522,7 @@ export async function listConversations(userId) {
       const otherId = conv.id.split("~").find(p => p !== userId);
       otherUser = DEMO_ATHLETES.find(a => a.user_id === otherId) || null;
     }
-    return { ...conv, lastMsg, otherUser };
+    return withBgOverride({ ...conv, lastMsg, otherUser });
   }).sort((a, b) => new Date(b.lastMsg?.created_at || b.created_at) - new Date(a.lastMsg?.created_at || a.created_at));
 }
 
@@ -610,13 +610,29 @@ export async function listBlocks(userId) {
   return chatLS().blocks || [];
 }
 
+const isUuid = (id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || "");
+
+// Applies any locally-cached background override on top of a conversation
+// object. Demo/prototype conversations have no Supabase row to read the
+// background back from, and even real conversations get an instant local
+// mirror so a background change is never lost to a flaky network call.
+function withBgOverride(conv) {
+  const over = chatLS().bgOverrides || {};
+  return over[conv.id] ? { ...conv, background: over[conv.id] } : conv;
+}
+
+// Persists the chosen chat background/theme so it survives a reload.
+// Real (Supabase-backed) conversations save to the `conversations.background`
+// column; ALL conversations (including demo/prototype ones with non-UUID
+// ids, which have no row to update there) are also mirrored into a
+// localStorage override map, so the choice sticks even offline or if the
+// Supabase write silently fails.
 export async function updateConversationBackground(convId, bg) {
-  if (hasSupabase) {
-    await supabase.from("conversations").update({ background: bg }).eq("id", convId);
-    return;
+  if (hasSupabase && isUuid(convId)) {
+    supabase.from("conversations").update({ background: bg }).eq("id", convId).then(() => {}, () => {});
   }
   const chat = chatLS();
   const convs = { ...(chat.convs || {}) };
   if (convs[convId]) convs[convId] = { ...convs[convId], background: bg };
-  writeChatLS({ convs });
+  writeChatLS({ convs, bgOverrides: { ...(chat.bgOverrides || {}), [convId]: bg } });
 }

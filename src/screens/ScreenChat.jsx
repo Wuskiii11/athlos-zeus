@@ -646,8 +646,11 @@ export default function ScreenChat({ user, profile }) {
   const doChangeBg = useCallback(async (bgId) => {
     setConvBg(bgId);
     if (activeConv) {
-      await updateConversationBackground(activeConv.id, bgId).catch(() => {});
       setActiveConv(c => c ? { ...c, background: bgId } : c);
+      // Reflect immediately in the list too, so reopening without a reload
+      // still shows the just-picked background.
+      setConvs(list => list.map(c => c.id === activeConv.id ? { ...c, background: bgId } : c));
+      await updateConversationBackground(activeConv.id, bgId).catch(() => {});
     }
     setBgSheet(false);
   }, [activeConv]);
@@ -983,22 +986,27 @@ export default function ScreenChat({ user, profile }) {
               onChange={handleFile}
             />
 
-            {/* Text input — serif, on raised marble */}
+            {/* Text input — serif, on raised marble. Tied to darkBackdrop (the
+                conversation's own theme/background), not the app theme, so a
+                dark custom chat background never leaves it as a washed-out
+                gray pill fighting the backdrop. */}
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doSend(); } }}
               placeholder={t("Sporočilo…")}
               rows={1}
+              className="athlos-chat-input"
               style={{
                 flex: 1, padding: "9px 14px", borderRadius: 20,
-                border: `1px solid ${C.name === "dark" ? borderOnBg : "#D8CFBD"}`,
-                background: C.name === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.55)",
+                border: `1px solid ${darkBackdrop ? "rgba(255,255,255,0.16)" : "#D8CFBD"}`,
+                background: darkBackdrop ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.55)",
                 color: textOnBg, fontFamily: C.display, fontSize: 15, fontWeight: 500,
                 resize: "none", outline: "none", lineHeight: 1.4,
                 minHeight: 36, maxHeight: 100, overflowY: "auto",
               }}
             />
+            <style>{`.athlos-chat-input::placeholder { color: ${mutedOnBg}; }`}</style>
 
             {/* Send — ink medallion with the electric-green arrow (signal, not fill) */}
             <Pressable
