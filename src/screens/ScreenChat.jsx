@@ -141,7 +141,7 @@ function Avatar({ initials = "?", size = 44, isGroup }) {
       border: `1.5px solid ${C.gold}55`,
       boxShadow: dark ? "none" : "inset 0 1px 2px rgba(255,255,255,0.8), 0 2px 6px rgba(28,24,20,0.08)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: C.heading, fontWeight: 700, fontSize: size * 0.3, letterSpacing: "0.04em",
+      fontFamily: C.heading, fontWeight: 700, fontSize: size * 0.4,
       color: isGroup ? C.gold : (dark ? C.text : "#1C1814"),
     }}>
       {isGroup ? (
@@ -690,8 +690,10 @@ export default function ScreenChat({ user, profile }) {
 
   const convName = (conv) =>
     conv.type === "group" ? (conv.name || "Skupina") : (conv.otherUser?.name || "Neznano");
+  // Single engraved initial (like a Greek monogram) — first letter of the
+  // name, not a two-letter initial pair.
   const convInitials = (conv) =>
-    conv.type === "group" ? "" : (conv.otherUser?.initials || "?");
+    conv.type === "group" ? "" : (conv.otherUser?.name?.trim()?.[0]?.toUpperCase() || "?");
   const lastMsgLabel = (conv) => {
     const msg = conv.lastMsg;
     if (!msg) return t("Začni pogovor");
@@ -726,7 +728,6 @@ export default function ScreenChat({ user, profile }) {
       {view === "list" && (
         <div style={{ paddingBottom: 20 }}>
           <div style={{ padding: "10px 18px 0" }}>
-            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.4em" }}>ΑΓΟΡΑ</Mono>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "8px 0 18px" }}>
               <h1 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 26, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase", color: C.text }}>
                 {t("Pogovori")}
