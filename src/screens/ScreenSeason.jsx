@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTheme, useDatePicker, useTimePicker } from "../theme";
 import { Pressable, PrimaryBtn, Mono, SkeletonBlock } from "../components/UI";
-import { IcBall } from "../components/Icons";
+import { IcBall, IcBolt } from "../components/Icons";
 import { listEvents, addEvent, deleteEvent, replaceEvents } from "../lib/api";
 import { useT, useLang } from "../lib/i18n";
 
@@ -91,6 +91,12 @@ const MOBILITY = {
 
 function mobilityFor(sport) {
   return MOBILITY[sport] || "Lahka mobilnost + raztezanje za tvoj šport";
+}
+
+// Greek-key meander — same quiet ornament used elsewhere (chat empty state).
+function Meander({ color, width = 96, opacity = 0.5 }) {
+  const mask = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='14'%3E%3Cpath d='M0 12h6V3h6v9h6V3h6v9h2' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E\") repeat-x center / 32px 14px";
+  return <div aria-hidden="true" style={{ height: 14, width, background: color, opacity, WebkitMask: mask, mask }} />;
 }
 
 function Legend({ color, label }) {
@@ -301,7 +307,7 @@ function AiPlanForm({ sport, onPlan, onCancel }) {
         {DAYS.map((dn, i) => {
           const on = days.includes(i);
           return (
-            <button key={i} onClick={() => toggleDay(i)} style={{ flex: 1, padding: "11px 0", borderRadius: 999, border: "none", background: on ? C.accent : C.surface2, color: on ? "#04130a" : C.muted, fontFamily: C.display, fontSize: 12, textTransform: "lowercase", cursor: "pointer", fontWeight: on ? 700 : 500, transition: "background 0.15s, color 0.15s" }}>{dn}</button>
+            <button key={i} onClick={() => toggleDay(i)} style={{ flex: 1, padding: "11px 0", borderRadius: 999, border: "none", background: on ? C.btn : C.surface2, color: on ? C.btnText : C.muted, fontFamily: C.display, fontSize: 12, textTransform: "lowercase", cursor: "pointer", fontWeight: on ? 700 : 500, transition: "background 0.15s, color 0.15s" }}>{dn}</button>
           );
         })}
       </div>
@@ -383,7 +389,7 @@ function todayISO() { return new Date().toISOString().slice(0, 10); }
 const EV_LOAD = { trening: 480, tekma: 680, recovery: 120 };
 
 // ── Weekly view ───────────────────────────────────────────────
-function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
+function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onAddManual, onGenerateAI }) {
   const BAR_LABELS = lang === "en" ? ["M","T","W","T","F","S","S"] : ["P","T","S","Č","P","S","N"];
   const MONTHS_SH = lang === "en"
     ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -434,22 +440,21 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
           </button>
         </div>
         {/* at-a-glance chips: the colors ARE the legend */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
-          {summary.length === 0 && (
-            <span style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 13, color: C.muted }}>{t("Ta teden ni treningov")}</span>
-          )}
-          {summary.map(([ty, n, col]) => (
-            <span key={ty} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 11px", borderRadius: 999, background: `${col}14`, border: `1px solid ${col}40` }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: col }} />
-              <Mono style={{ color: col, fontSize: 9 }}>{n}× {t(EV_LABEL[ty])}</Mono>
-            </span>
-          ))}
-          {weekInPeak && (
-            <span style={{ padding: "4px 11px", borderRadius: 999, background: `${C.gold}1f`, border: `1px solid ${C.gold}50` }}>
-              <Mono style={{ color: C.gold, fontSize: 9 }}>{t("PEAK TEDEN")}</Mono>
-            </span>
-          )}
-        </div>
+        {(summary.length > 0 || weekInPeak) && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+            {summary.map(([ty, n, col]) => (
+              <span key={ty} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 11px", borderRadius: 999, background: `${col}14`, border: `1px solid ${col}40` }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: col }} />
+                <Mono style={{ color: col, fontSize: 9 }}>{n}× {t(EV_LABEL[ty])}</Mono>
+              </span>
+            ))}
+            {weekInPeak && (
+              <span style={{ padding: "4px 11px", borderRadius: 999, background: `${C.gold}1f`, border: `1px solid ${C.gold}50` }}>
+                <Mono style={{ color: C.gold, fontSize: 9 }}>{t("PEAK TEDEN")}</Mono>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Week strip — one glance: which day has what */}
@@ -518,6 +523,23 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete }) {
         );
       })}
 
+      {/* Empty week — fills the space with a clear next step instead of
+          leaving a dead blank page. */}
+      {weekEvs.length === 0 && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "36px 20px 12px" }}>
+          <Meander color={C.gold} width={100} />
+          <h3 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 18, color: C.text, margin: "18px 0 0" }}>{t("Prazen teden")}</h3>
+          <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 14.5, color: C.muted, margin: "8px 0 24px", maxWidth: 280, lineHeight: 1.55 }}>
+            {t("Naj ZEUS sestavi optimalen urnik glede na tvoj čas in tekme, ali dodaj trening ročno.")}
+          </p>
+          <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 300 }}>
+            <Pressable onClick={onAddManual} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: C.text, fontFamily: C.display, fontSize: 13, fontWeight: 600 }}>{t("+ Dodaj sam")}</Pressable>
+            <Pressable onClick={onGenerateAI} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <IcBolt size={13} /> {t("AI urnik")}
+            </Pressable>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -716,30 +738,43 @@ export default function ScreenSeason({ profile, user }) {
         </div>
       )}
 
-      {/* Header */}
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj urnik")}</h2>
-        {/* Week / Month toggle */}
-        <div style={{ display: "flex", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 999, padding: 3 }}>
-          {["week","month"].map(v => (
-            <button key={v} onClick={() => setCalView(v)} style={{
-              padding: "6px 14px", borderRadius: 999, border: "none", cursor: "pointer",
-              background: calView === v ? C.accent : "transparent",
-              color: calView === v ? "#04130a" : C.muted,
-              fontFamily: C.display, fontWeight: 700, fontSize: 12, transition: "background 0.15s",
-            }}>
-              {v === "week" ? t("Teden") : t("Mesec")}
-            </button>
-          ))}
+      {/* Header — same engraved kicker + heading language as the rest of the app */}
+      <header style={{ marginBottom: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+          <div>
+            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.3em" }}>SEZONA</Mono>
+            <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 26, margin: "5px 0 0", color: C.text }}>{t("Tvoj urnik")}</h2>
+          </div>
+          {/* Week / Month toggle */}
+          <div style={{ display: "flex", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 999, padding: 3, flexShrink: 0 }}>
+            {["week","month"].map(v => (
+              <button key={v} onClick={() => setCalView(v)} style={{
+                padding: "6px 14px", borderRadius: 999, border: "none", cursor: "pointer",
+                background: calView === v ? C.btn : "transparent",
+                color: calView === v ? C.btnText : C.muted,
+                fontFamily: C.display, fontWeight: 700, fontSize: 12, transition: "background 0.15s",
+              }}>
+                {v === "week" ? t("Teden") : t("Mesec")}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
-      {/* Add / AI buttons */}
+      {/* Actions — AI urnik leads as the primary move, manual add + export follow */}
       <div style={{ display: "flex", gap: 8, marginBottom: 22 }}>
+        <Pressable onClick={() => setMode(mode === "ai" ? "list" : "ai")} scale={0.97} style={{
+          flex: 1, padding: "13px", borderRadius: 999, border: "none",
+          background: mode === "ai" ? C.btn : `${C.gold}16`,
+          color: mode === "ai" ? C.btnText : C.gold,
+          fontFamily: C.display, fontSize: 14, fontWeight: 700,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+        }}>
+          <IcBolt size={14} /> {t("AI urnik")}
+        </Pressable>
         <Pressable onClick={() => setMode(mode === "add" ? "list" : "add")} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: `1px solid ${C.border2}`, background: mode === "add" ? C.surface2 : "none", color: C.text, fontFamily: C.display, fontSize: 14, fontWeight: 600 }}>{t("+ Dodaj sam")}</Pressable>
-        <Pressable onClick={() => setMode(mode === "ai" ? "list" : "ai")} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: "none", background: mode === "ai" ? C.accent : `${C.accent}1c`, color: mode === "ai" ? "#ffffff" : C.accent, fontFamily: C.display, fontSize: 14, fontWeight: 700 }}>{t("AI urnik")}</Pressable>
         {/* .ics export — Apple/Google Calendar (spec §05) */}
-        <Pressable onClick={() => events.length && downloadICS(events)} scale={0.94} aria-label={t("Izvozi v koledar (.ics)")} style={{ width: 47, padding: "13px 0", borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: events.length ? C.text : C.muted2, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Pressable onClick={() => events.length && downloadICS(events)} scale={0.94} aria-label={t("Izvozi v koledar (.ics)")} style={{ width: 47, padding: "13px 0", borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: events.length ? C.text : C.muted2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         </Pressable>
       </div>
@@ -773,7 +808,7 @@ export default function ScreenSeason({ profile, user }) {
       )}
 
       {loaded && calView === "week" && (
-        <WeekView C={C} t={t} lang={lang} weekOffset={weekOffset} setWeekOffset={setWeekOffset} events={events} onDelete={onDelete} />
+        <WeekView C={C} t={t} lang={lang} weekOffset={weekOffset} setWeekOffset={setWeekOffset} events={events} onDelete={onDelete} onAddManual={() => setMode("add")} onGenerateAI={() => setMode("ai")} />
       )}
       {loaded && calView === "month" && (
         <MonthView C={C} t={t} lang={lang} monthOffset={monthOffset} setMonthOffset={setMonthOffset} events={events} onDelete={onDelete} />

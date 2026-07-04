@@ -118,6 +118,8 @@ const EN = {
   "CILJ": "GOAL",
 
   // ── Full calendar (spec §05) ──
+  "Prazen teden": "Empty week",
+  "Naj ZEUS sestavi optimalen urnik glede na tvoj čas in tekme, ali dodaj trening ročno.": "Let ZEUS build an optimal schedule around your time and matches, or add a session manually.",
   "nazaj na danes": "back to today",
   "ob": "at",
   "PEAK TEDEN": "PEAK WEEK",
