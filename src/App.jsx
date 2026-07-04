@@ -494,7 +494,7 @@ export default function AthlosApp() {
 
       {/* ── LOGIN ── */}
       {!splash && authReady && !registered && !needsSetup && (
-        <LoginScreen profile={profile} setProfile={setProfile} onLogin={(u) => applySession({ user: u })} onPrivacy={() => setPrivacyOpen(true)} />
+        <LoginScreen profile={profile} setProfile={setProfile} theme={theme} onLogin={(u) => applySession({ user: u })} onPrivacy={() => setPrivacyOpen(true)} />
       )}
 
       {/* ── SETUP ── */}

@@ -4,69 +4,66 @@ import { LanguageSwitcher } from "../components/UI";
 import { signIn, signUp, signInWithProvider } from "../lib/api";
 import { useT } from "../lib/i18n";
 
-// ── Light "marble" palette for the entry experience ──
-const L = {
-  bg: "#F4EFE6",        // warm marble
-  text: "#1C1814",
-  text2: "rgba(28,24,20,0.78)",
-  muted: "rgba(28,24,20,0.52)",
-  muted2: "rgba(28,24,20,0.34)",
-  surface: "#FCF9F2",
-  surface2: "#FFFFFF",
-  border: "rgba(28,24,20,0.16)",
-  accent: "#1F7A52",
-  accent2: "#00FF87",
-  gold: "#1F7A52",
-  red: "#B1452F",
-  heading: "'Cinzel',Georgia,serif",
-  display: "'Cormorant Garamond',Georgia,serif",
+// ── Entry-experience palettes: light "marble" + dark "obsidian" ──
+const FONTS = { heading: "'Cinzel',Georgia,serif", display: "'Cormorant Garamond',Georgia,serif" };
+const LIGHT = {
+  bg: "#F4EFE6", text: "#1C1814", text2: "rgba(28,24,20,0.78)", muted: "rgba(28,24,20,0.52)", muted2: "rgba(28,24,20,0.34)",
+  surface: "#FCF9F2", surface2: "#FFFFFF", border: "rgba(28,24,20,0.16)",
+  accent: "#1F7A52", accent2: "#00FF87", gold: "#1F7A52", red: "#B1452F", ...FONTS,
+};
+const DARK = {
+  bg: "#0A0A09", text: "#F2F5F2", text2: "rgba(242,245,242,0.80)", muted: "rgba(242,245,242,0.52)", muted2: "rgba(242,245,242,0.34)",
+  surface: "rgba(255,255,255,0.05)", surface2: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.14)",
+  accent: "#00FF87", accent2: "#33FFA3", gold: "#00FF87", red: "#C95A3F", ...FONTS,
 };
 
 const HERO = "/img/hero-zeus-ink.png";
 
-// The blue Zeus engraving, cut from its paper → ink lines printed on the marble.
-function HeroFigure({ h = 300 }) {
+// The blue Zeus engraving — ink lines on the marble; inverted on dark so the
+// dark ink doesn't vanish into a dark canvas.
+function HeroFigure({ h = 300, dark }) {
   return (
     <div className="ray-burst-light" style={{ position: "relative", display: "inline-grid", placeItems: "center" }}>
       <img src={HERO} alt="ZEUS" style={{
         position: "relative", zIndex: 1, height: h, width: "auto", maxWidth: "100%", objectFit: "contain",
+        filter: dark ? "invert(1) hue-rotate(180deg)" : "none",
       }} />
     </div>
   );
 }
 
-function Wordmark({ size = 34 }) {
+function Wordmark({ size = 34, p }) {
   return (
-    <div style={{ fontFamily: L.heading, fontWeight: 700, fontSize: size, letterSpacing: "0.30em", color: L.text, paddingLeft: "0.30em" }}>
-      ATHL<span style={{ color: L.gold }}>OS</span>
+    <div style={{ fontFamily: p.heading, fontWeight: 700, fontSize: size, letterSpacing: "0.30em", color: p.text, paddingLeft: "0.30em" }}>
+      ATHL<span style={{ color: p.gold }}>OS</span>
     </div>
   );
 }
 
-function SocialBtn({ onClick, children }) {
+function SocialBtn({ onClick, children, p }) {
   return (
     <button onClick={onClick} style={{
       flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-      padding: "14px 10px", borderRadius: 14, border: `1px solid ${L.border}`, background: L.surface2,
-      color: L.text, fontFamily: L.display, fontWeight: 600, fontSize: 15.5,
+      padding: "14px 10px", borderRadius: 14, border: `1px solid ${p.border}`, background: p.surface2,
+      color: p.text, fontFamily: p.display, fontWeight: 600, fontSize: 15.5,
       cursor: "pointer", WebkitTapHighlightColor: "transparent", transition: "border-color 0.15s, box-shadow 0.15s",
       boxShadow: "0 1px 2px rgba(22,52,90,0.06)",
     }}
-    onPointerEnter={(e) => { e.currentTarget.style.borderColor = `${L.accent}66`; }}
-    onPointerLeave={(e) => { e.currentTarget.style.borderColor = L.border; }}>
+    onPointerEnter={(e) => { e.currentTarget.style.borderColor = `${p.accent}66`; }}
+    onPointerLeave={(e) => { e.currentTarget.style.borderColor = p.border; }}>
       {children}
     </button>
   );
 }
 
-function LaunchAnimation({ onDone }) {
+function LaunchAnimation({ onDone, p, dark }) {
   React.useEffect(() => {
     const timer = setTimeout(onDone, 1220);
     return () => clearTimeout(timer);
   }, [onDone]);
   return (
     <div className="app-fullscreen" style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, background: L.bg,
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, background: p.bg,
       backgroundImage: "radial-gradient(120% 80% at 50% 6%, rgba(31,122,82,0.12), transparent 60%)",
       display: "grid", placeItems: "center", overflow: "hidden",
       animation: "athlosSplashFade 1.22s cubic-bezier(.2,.8,.2,1) forwards",
@@ -82,14 +79,16 @@ function LaunchAnimation({ onDone }) {
         @media (prefers-reduced-motion: reduce) { .athlos-launch *{animation-duration:.001ms!important} }
       `}</style>
       <div className="athlos-launch" style={{ animation: "athlosHeroOpen 1.22s cubic-bezier(.18,.86,.24,1) forwards" }}>
-        <HeroFigure h={220} />
+        <HeroFigure h={220} dark={dark} />
       </div>
     </div>
   );
 }
 
-export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy }) {
+export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, theme }) {
   const t = useT();
+  const dark = theme === "dark";
+  const L = dark ? DARK : LIGHT;
   const [mode, setMode] = useState("login"); // "login" | "signup"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -152,7 +151,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
   };
   const label = { fontFamily: L.heading, fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: L.muted };
 
-  if (launching) return <LaunchAnimation onDone={() => onLogin(pendingUser)} />;
+  if (launching) return <LaunchAnimation onDone={() => onLogin(pendingUser)} p={L} dark={dark} />;
   const curLang = profile?.lang === "en" ? "en" : "sl";
 
   return (
@@ -178,8 +177,8 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
 
         {/* ── Hero — sized in viewport units so the page always fits without scrolling ── */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 10, flexShrink: 1, minHeight: 0 }}>
-          <HeroFigure h="min(26dvh, 250px)" />
-          <div style={{ marginTop: -4 }}><Wordmark size={28} /></div>
+          <HeroFigure h="min(26dvh, 250px)" dark={dark} />
+          <div style={{ marginTop: -4 }}><Wordmark size={28} p={L} /></div>
           <div style={{ width: 54, height: 1, margin: "10px 0 8px", background: `linear-gradient(90deg, transparent, ${L.gold}, transparent)` }} />
           <div style={{ fontFamily: L.heading, fontSize: 11, color: L.muted, textAlign: "center", letterSpacing: "0.30em", textTransform: "uppercase" }}>
             {t("sistem, ki pozna vsakega športnika")}
@@ -188,11 +187,11 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
 
         {/* ── Social ── */}
         <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-          <SocialBtn onClick={() => social("apple")}>
+          <SocialBtn onClick={() => social("apple")} p={L}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
             Apple
           </SocialBtn>
-          <SocialBtn onClick={() => social("google")}>
+          <SocialBtn onClick={() => social("google")} p={L}>
             <svg width="17" height="17" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Google
           </SocialBtn>
