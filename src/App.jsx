@@ -54,6 +54,20 @@ function SplashScreen({ C }) {
           from { transform: scaleX(0); }
           to   { transform: scaleX(1); }
         }
+        /* The app-wide reduced-motion reset (App.jsx global styles) forces
+           every animation-duration to ~0 via !important, which silently ate
+           this one-time, under-2-second brand reveal too - that's why the
+           rule looked static instead of growing. !important beats a plain
+           inline animation regardless of specificity, so the only way to
+           win it back is with an equally-important, explicit duration.
+           Scoped to just these two elements - everything else in the app
+           still honors reduced-motion untouched. */
+        .athlos-splash-god {
+          animation: splashGod 0.55s ease-out forwards !important;
+        }
+        .athlos-splash-rule {
+          animation: splashRule 1.1s cubic-bezier(.16,.9,.2,1) 0.3s forwards !important;
+        }
       `}</style>
 
       {/* the god — quick fade-in only; the end state is fully visible, so it
@@ -65,7 +79,6 @@ function SplashScreen({ C }) {
         style={{
           position: "absolute", top: 0, left: 0, right: 0, width: "100%", height: "76%",
           objectFit: "contain", objectPosition: "center 30%",
-          animation: "splashGod 0.55s ease-out forwards",
           pointerEvents: "none",
           userSelect: "none",
         }}
@@ -77,11 +90,10 @@ function SplashScreen({ C }) {
           ATHLOS
         </div>
         {/* grows outward from the center, like it's loading — as wide as the wordmark */}
-        <div style={{
+        <div className="athlos-splash-rule" style={{
           width: 220, maxWidth: "60vw", height: 1, margin: "14px 0 12px",
           background: "#B08D57",
           transform: "scaleX(0)", transformOrigin: "center",
-          animation: "splashRule 1.1s cubic-bezier(.16,.9,.2,1) 0.3s forwards",
         }} />
         <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 15, letterSpacing: "0.12em", color: "rgba(28,24,20,0.5)" }}>
           sistem, ki pozna vsakega športnika
