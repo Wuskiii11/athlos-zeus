@@ -174,6 +174,7 @@ export default function AthlosApp() {
   const [tp, setTp]                   = useState(null);
   const [pullDist, setPullDist]       = useState(0);
   const [refreshing, setRefreshing]   = useState(false);
+  const [refreshNonce, setRefreshNonce] = useState(0); // bump → remount current screen (soft refresh, no full reload/splash)
   // Privacy policy is a dismissable popup, not a navigation target — reachable
   // from Login, Settings, or Consent regardless of which screen is active.
   const [privacyOpen, setPrivacyOpen] = useState(false);
@@ -291,8 +292,11 @@ export default function AthlosApp() {
       }
     }
     if (pullDist > 44 && !refreshing) {
+      // Soft refresh: remount the current screen so it re-fetches its data —
+      // stays on the same tab, no full page reload (which would flash the splash).
       setRefreshing(true);
-      setTimeout(() => window.location.reload(), 600);
+      setPullDist(0);
+      setTimeout(() => { setRefreshNonce(n => n + 1); setRefreshing(false); }, 500);
     } else {
       setPullDist(0);
     }
@@ -547,7 +551,7 @@ export default function AthlosApp() {
           {/* Screen content — full height, padded bottom so content clears the floating nav */}
           <div
             ref={scrollRef}
-            key={screen}
+            key={`${screen}:${refreshNonce}`}
             className="athlos-scroll"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
