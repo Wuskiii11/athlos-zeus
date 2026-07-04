@@ -277,6 +277,9 @@ export default function AthlosApp() {
     const dy = touchCurY.current - touchStartY.current;
     // Horizontal gesture → don't also trigger pull-to-refresh.
     if (Math.abs(dx) > Math.abs(dy)) { if (pullDist) setPullDist(0); return; }
+    // No pull-to-refresh on the AI/ZEUS chat — a refresh would remount it and
+    // wipe the ongoing conversation. (Tab-swipe still works, handled above.)
+    if (screen === "ai") return;
     if (!scrollRef.current || scrollRef.current.scrollTop > 2) return;
     if (dy > 0) setPullDist(Math.min(dy * 0.45, 64));
   };
