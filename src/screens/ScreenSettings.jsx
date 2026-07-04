@@ -158,9 +158,6 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
       <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, marginBottom: 16 }}>
         <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.94} style={{ position: "relative", width: 60, height: 60, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.accent, fontWeight: 800, fontSize: 24, fontFamily: C.display, flexShrink: 0 }}>
           {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
-          <span style={{ position: "absolute", bottom: 0, right: 0, width: 22, height: 22, borderRadius: "50%", background: C.accent, color: "#000", display: "flex", alignItems: "center", justifyContent: "center", border: `2px solid ${C.bg}` }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" /></svg>
-          </span>
         </Pressable>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text }}>{profile.name}</div>

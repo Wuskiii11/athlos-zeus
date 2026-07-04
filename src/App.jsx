@@ -154,7 +154,6 @@ const cleanProfile = (o) =>
 export default function AthlosApp() {
   const [splash, setSplash]           = useState(true);
   const [screen, setScreen]           = useState("today");
-  const [prevScreen, setPrevScreen]   = useState("settings");
   const [transitioning, setTransitioning] = useState(false);
   const [navDir, setNavDir]           = useState(null); // "next" | "prev" | null — drives the slide direction
   // Light marble is the default; the user's explicit Settings choice sticks.
@@ -174,6 +173,9 @@ export default function AthlosApp() {
   const [tp, setTp]                   = useState(null);
   const [pullDist, setPullDist]       = useState(0);
   const [refreshing, setRefreshing]   = useState(false);
+  // Privacy policy is a dismissable popup, not a navigation target — reachable
+  // from Login, Settings, or Consent regardless of which screen is active.
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const touchStartY  = useRef(0);
   const touchStartX  = useRef(0);
   const touchCurX    = useRef(0);
@@ -249,7 +251,6 @@ export default function AthlosApp() {
 
   const navActive = ["train","session","report","fuel"].includes(screen) ? "today"
     : screen === "profile" ? "settings"
-    : screen === "privacy" ? prevScreen
     : screen;
 
   const go = (s) => {
@@ -322,12 +323,11 @@ export default function AthlosApp() {
       case "report":   return <ScreenReport go={go} />;
       case "profile":  return <ScreenProfile go={go} profile={profile} setProfile={setProfile} />;
       case "fuel":     return <ScreenFuel profile={profile} />;
-      case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} onPrivacy={() => { setPrevScreen("settings"); setScreen("privacy"); }} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
+      case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} onPrivacy={() => setPrivacyOpen(true)} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
       case "season":   return <ScreenSeason go={go} profile={profile} user={user} />;
       case "chat":       return <ScreenChat user={user} profile={profile} />;
       case "club":       return <ScreenClub go={go} profile={profile} />;
       case "assessment": return <ScreenAssessment go={go} profile={profile} />;
-      case "privacy":  return <ScreenPrivacy onBack={() => setScreen(prevScreen || "settings")} />;
       default:         return <ScreenToday go={go} profile={profile} />;
     }
   };
@@ -449,7 +449,7 @@ export default function AthlosApp() {
 
       {/* ── LOGIN ── */}
       {!splash && authReady && !registered && !needsSetup && (
-        <LoginScreen profile={profile} setProfile={setProfile} onLogin={(u) => applySession({ user: u })} onPrivacy={() => setScreen("privacy")} />
+        <LoginScreen profile={profile} setProfile={setProfile} onLogin={(u) => applySession({ user: u })} onPrivacy={() => setPrivacyOpen(true)} />
       )}
 
       {/* ── SETUP ── */}
@@ -596,6 +596,10 @@ export default function AthlosApp() {
           {tp && <TimePicker value={tp.value} onChange={v => { tp.onChange(v); setTp(null); }} onClose={() => setTp(null)} />}
         </div>
       )}
+
+      {/* Privacy policy — a dismissable popup reachable from Login or Settings,
+          not a navigation target, so it works regardless of the current screen. */}
+      {privacyOpen && <ScreenPrivacy onClose={() => setPrivacyOpen(false)} />}
 
       </div>
     </TimePickerContext.Provider>
