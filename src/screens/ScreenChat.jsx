@@ -827,7 +827,17 @@ export default function ScreenChat({ user, profile }) {
             background: bgColor,
             borderBottom: `1px solid ${borderOnBg}`,
           }}>
-            <BackBtn onClick={() => { setView("list"); loadConvs(); }} />
+            {/* Back — follows the conversation's own backdrop (borderOnBg/textOnBg),
+                not the app theme, so it stays visible on a dark custom background */}
+            <Pressable onClick={() => { setView("list"); loadConvs(); }} scale={0.88} style={{
+              background: "transparent", border: `1px solid ${borderOnBg}`, borderRadius: 50,
+              width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
+              color: textOnBg, marginRight: 4, lineHeight: 1, flexShrink: 0,
+            }}>
+              <svg width="9" height="16" viewBox="0 0 10 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 1L1 9l8 8"/>
+              </svg>
+            </Pressable>
 
             {/* Avatar + name tap → profile sheet */}
             <button
