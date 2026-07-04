@@ -76,10 +76,10 @@ function SplashScreen({ C }) {
         <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 34, letterSpacing: "0.38em", paddingLeft: "0.38em", color: "#1C1814" }}>
           ATHLOS
         </div>
-        {/* grows outward from the center, like it's loading */}
+        {/* grows outward from the center, like it's loading — as wide as the wordmark */}
         <div style={{
-          width: 52, height: 1, margin: "14px 0 12px",
-          background: "linear-gradient(90deg, transparent, #B08D57 50%, transparent)",
+          width: 220, maxWidth: "60vw", height: 1, margin: "14px 0 12px",
+          background: "#B08D57",
           transform: "scaleX(0)",
           animation: "splashRule 0.7s cubic-bezier(.22,.8,.28,1) 0.35s forwards",
         }} />
