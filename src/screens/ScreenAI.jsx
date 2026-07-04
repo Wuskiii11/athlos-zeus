@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../theme";
-import { Pressable, Mono } from "../components/UI";
+import { Pressable, Mono, SkeletonBlock } from "../components/UI";
 import { IcCalendar } from "../components/Icons";
 import {
   askAI, loadAiHistory, saveAiReply,
@@ -310,7 +310,28 @@ export default function ScreenAI({ user, profile }) {
   };
 
   // ── Gate renders ──
-  if (gate === "loading") return <div style={{ height: "100%", background: C.bg }} />;
+  if (gate === "loading") return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg }}>
+      {/* header skeleton */}
+      <div style={{ flexShrink: 0, padding: "18px 18px 14px", borderBottom: `1px solid ${C.border}` }}>
+        <SkeletonBlock width={104} height={30} radius={8} />
+        <div style={{ marginTop: 10 }}><SkeletonBlock width={190} height={12} radius={5} /></div>
+      </div>
+      {/* chat bubbles skeleton */}
+      <div style={{ flex: 1, overflow: "hidden", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 16 }}>
+        {[["l", "78%", 66], ["r", "58%", 44], ["l", "86%", 90], ["r", "48%", 40], ["l", "72%", 58]].map(([side, w, h], i) => (
+          <div key={i} style={{ alignSelf: side === "r" ? "flex-end" : "flex-start", width: w }}>
+            <SkeletonBlock width="100%" height={h} radius={16} />
+          </div>
+        ))}
+      </div>
+      {/* composer skeleton */}
+      <div style={{ flexShrink: 0, padding: "10px 14px", borderTop: `1px solid ${C.border}`, display: "flex", gap: 8, alignItems: "center" }}>
+        <SkeletonBlock width="100%" height={44} radius={22} />
+        <SkeletonBlock width={44} height={44} radius={999} />
+      </div>
+    </div>
+  );
   if (gate === "funnel") return <ZeusFunnel onDone={onFunnelDone} />;
 
   // ── Chat ──
