@@ -78,6 +78,7 @@ const EN = {
   // ── Settings → Account ──
   "RAČUN": "ACCOUNT",
   "Ime, e-pošta in geslo": "Name, e-mail and password",
+  "Ime, e-pošta, geslo, jezik in plan": "Name, e-mail, password, language and plan",
   "Račun": "Account",
   "E-POŠTA": "E-MAIL",
   "Ni nastavljeno": "Not set",

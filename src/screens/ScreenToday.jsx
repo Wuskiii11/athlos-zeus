@@ -616,7 +616,7 @@ export default function ScreenToday({ go, profile }) {
 
       {/* discreet utility row — below the fold, so the visible screen stays 1:1 with the mock */}
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, marginTop: 6, order: 999 }}>
-        <Mono style={{ color: C.muted2, fontSize: 8 }}>{dateStr}</Mono>
+        <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.08em" }}>{dateStr}</Mono>
         <span style={{ width: 1, height: 12, background: C.border }} />
         <button onClick={() => setQuickAdd(true)} style={{ background: "none", border: "none", padding: "6px 4px", color: C.muted, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
           + {t("Hitri vnos")}

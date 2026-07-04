@@ -1,63 +1,7 @@
 import React, { useState } from "react";
 import { useTheme, LANDING_URL } from "../theme";
-import { Pressable, SettingsBlock, LanguageSwitcher } from "../components/UI";
+import { Pressable, SettingsBlock } from "../components/UI";
 import { useT } from "../lib/i18n";
-
-const PLANS = [
-  {
-    id: "basic",
-    name: "BASIC",
-    earlyBird: "€29",
-    regular: "€49",
-    color: "#60A5FA",
-    features: [
-      "AI program + jedilnik",
-      "Zasebni sezonski koledar",
-      "AI asistent 24/7",
-      "Dnevni log + history",
-      "Community (opcijsko)",
-    ],
-    notIncluded: ["Daily Performance Report","Biometrija Apple Health","Video analiza","Post-match recovery","Tedna AI analiza","Ekskluzivni content","Early access"],
-  },
-  {
-    id: "pro",
-    name: "PRO",
-    earlyBird: "€59",
-    regular: "€99",
-    color: "#863bff",
-    badge: "PRILJUBLJEN",
-    features: [
-      "AI program + jedilnik",
-      "Zasebni sezonski koledar",
-      "AI asistent 24/7",
-      "Dnevni log + history",
-      "Community (opcijsko)",
-      "Daily Performance Report",
-      "Biometrija Apple Health",
-      "Video analiza · 10/mes",
-      "Post-match recovery",
-    ],
-    notIncluded: ["Tedna AI analiza","Ekskluzivni content (Tim)","Early access novih funkcij"],
-  },
-  {
-    id: "elite",
-    name: "ELITE",
-    earlyBird: "€89",
-    regular: "€149",
-    color: "#FFB800",
-    badge: "OPCIJSKO",
-    features: [
-      "Vse iz PRO plana",
-      "Tedna AI analiza napredka",
-      "Ekskluzivni content (Tim)",
-      "Early access novih funkcij",
-      "Video analiza · Neomejeno",
-      "Post-match recovery",
-    ],
-    notIncluded: [],
-    note: "Elite je opcijsko — se potrjuje.",
-  },
-];
 
 const FAQ_ITEMS = [
   { q: "Kako dodam nov trening?", a: "Pojdi na zavihek Trening, pritisni 'Začni trening' in sledi navodilom. Aplikacija te vodi skozi vsako vajo." },
@@ -72,12 +16,6 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
   const C = useTheme();
   const t = useT();
   const fileRef = React.useRef(null);
-
-  // Plan — lives on the profile so it's saved per account (backend/localStorage)
-  const currentPlan = profile.plan || "basic";
-  const [planOpen, setPlanOpen] = useState(false);
-  const curLang = profile.lang === "en" ? "en" : "sl";
-  const setLang = (lang) => setProfile((p) => ({ ...p, lang }));
 
   // Notification permission
   const [notifPerm, setNotifPerm] = useState(() => {
@@ -144,20 +82,16 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
         <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.95} style={editBtn}>{t("Slika")}</Pressable>
       </div>
 
-      {/* Account — name, e-mail, password now live on their own screen */}
+      {/* Account — name, e-mail, password, language and plan now live on
+          their own screen */}
       <SettingsBlock title={t("RAČUN")}>
         <Pressable onClick={onAccount} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
           <div>
             <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15, color: C.text }}>{profile.name}</span>
-            <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>{t("Ime, e-pošta in geslo")}</div>
+            <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>{t("Ime, e-pošta, geslo, jezik in plan")}</div>
           </div>
           <span style={{ color: C.muted, fontSize: 18 }}>›</span>
         </Pressable>
-      </SettingsBlock>
-
-      {/* Language */}
-      <SettingsBlock title={t("JEZIK")}>
-        <LanguageSwitcher value={curLang} onChange={setLang} />
       </SettingsBlock>
 
       {/* Theme */}
@@ -218,55 +152,6 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
             {t("Odpri nastavitve naprave → Aplikacije → Brskalnik → Obvestila in jih dovoli.")}
           </div>
         )}
-      </SettingsBlock>
-
-      {/* Plan — current plan only, tap to reveal its info */}
-      <SettingsBlock title={t("MOJ PLAN")}>
-        {(() => {
-          const plan = PLANS.find((p) => p.id === currentPlan) || PLANS[0];
-          return (
-            <>
-              <Pressable
-                onClick={() => setPlanOpen((o) => !o)}
-                scale={0.99}
-                style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}
-              >
-                <div>
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Trenutni plan")}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                    <span style={{ padding: "4px 12px", borderRadius: 999, background: `${plan.color}1a`, border: `1px solid ${plan.color}40` }}>
-                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", color: plan.color }}>{plan.name}</span>
-                    </span>
-                    <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted }}>{plan.earlyBird}{t("/mes")}</span>
-                  </div>
-                </div>
-                <span style={{ color: C.muted, fontSize: 18, transition: "transform 0.2s", transform: planOpen ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
-              </Pressable>
-
-              {planOpen && (
-                <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.border}`, animation: "athlosFade 0.2s ease" }}>
-                  <div style={{ marginBottom: 14 }}>
-                    <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, color: C.text, letterSpacing: "-0.02em" }}>{plan.earlyBird}</span>
-                    <span style={{ fontFamily: C.display, fontSize: 12, color: C.muted }}>{t("/mes · early bird")}</span>
-                    <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 4 }}>{t("Redna cena:")} {plan.regular}{t("/mes")}</div>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {plan.features.map((f) => (
-                      <div key={f} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-                          <circle cx="6" cy="6" r="6" fill={`${plan.color}20`} />
-                          <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke={plan.color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span style={{ fontFamily: C.display, fontSize: 14, color: C.text2 }}>{t(f)}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {plan.note && <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 12 }}>{t(plan.note)}</div>}
-                </div>
-              )}
-            </>
-          );
-        })()}
       </SettingsBlock>
 
       {/* FAQ */}
