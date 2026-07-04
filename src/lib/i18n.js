@@ -71,6 +71,10 @@ const EN = {
   "te pozna": "knows you",
   "razmišlja…": "thinking…",
 
+  // ── Settings: photo preview ──
+  "Zapri": "Close",
+  "Zamenjaj sliko": "Change photo",
+
   // ── Chat ──
   "Pogovori": "Chats",
   "Blokirano": "Blocked",

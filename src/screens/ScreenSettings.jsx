@@ -107,6 +107,9 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
   const [contactMsg, setContactMsg] = useState("");
   const [contactSent, setContactSent] = useState(false);
 
+  // Full-screen profile-photo preview (tap the avatar, TikTok-style)
+  const [photoPreview, setPhotoPreview] = useState(false);
+
   const initial = (name || "?").trim().charAt(0).toUpperCase();
 
   const onFile = (e) => {
@@ -156,7 +159,9 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
 
       {/* Profile row */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, marginBottom: 16 }}>
-        <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.94} style={{ position: "relative", width: 60, height: 60, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.accent, fontWeight: 800, fontSize: 24, fontFamily: C.display, flexShrink: 0 }}>
+        {/* Tap the avatar to preview it full-screen (TikTok-style); with no
+            photo yet there's nothing to preview, so it opens the picker instead. */}
+        <Pressable onClick={() => (profile.photo ? setPhotoPreview(true) : fileRef.current?.click())} scale={0.94} style={{ position: "relative", width: 60, height: 60, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.accent, fontWeight: 800, fontSize: 24, fontFamily: C.display, flexShrink: 0 }}>
           {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
         </Pressable>
         <div style={{ flex: 1 }}>
@@ -435,6 +440,31 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
 
       <Pressable onClick={onLogout} scale={0.98} style={{ width: "100%", marginTop: 24, padding: 15, borderRadius: 999, border: `1px solid ${C.red}40`, background: `${C.red}14`, color: C.red, fontFamily: C.display, fontWeight: 700, fontSize: 14 }}>{t("Odjava")}</Pressable>
       <p style={{ textAlign: "center", color: C.muted2, fontFamily: C.display, fontSize: 12, marginTop: 22 }}>ATHLOS v0.6 · © 2026</p>
+
+      {/* Full-screen photo preview — TikTok-style: tap the avatar, see it big,
+          tap the ✕ or backdrop to dismiss, or jump straight to changing it. */}
+      {photoPreview && profile.photo && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setPhotoPreview(false); }}
+          style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(10,9,8,0.94)", display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease" }}
+        >
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "max(16px, env(safe-area-inset-top, 16px)) 18px 12px" }}>
+            <button onClick={() => setPhotoPreview(false)} aria-label={t("Zapri")} style={{ width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(244,239,230,0.28)", background: "rgba(244,239,230,0.08)", color: "#F4EFE6", fontSize: 20, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
+          </div>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
+            <img src={profile.photo} alt="" style={{ width: "100%", maxWidth: 420, aspectRatio: "1 / 1", borderRadius: 20, objectFit: "cover", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "12px 24px max(24px, env(safe-area-inset-bottom, 24px))" }}>
+            <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16, color: "#F4EFE6" }}>{profile.name}</div>
+            <button
+              onClick={() => { setPhotoPreview(false); fileRef.current?.click(); }}
+              style={{ padding: "10px 22px", borderRadius: 999, border: "1px solid rgba(244,239,230,0.3)", background: "rgba(244,239,230,0.08)", color: "#F4EFE6", fontFamily: C.display, fontWeight: 700, fontSize: 13, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
+            >
+              {t("Zamenjaj sliko")}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
