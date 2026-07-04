@@ -155,15 +155,18 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
         const active = values.includes(o);
         return (
           <button key={o} onClick={() => onToggle(o)} style={{
-            padding: "10px 16px", borderRadius: 999, cursor: "pointer",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            padding: "12px 20px", borderRadius: 999, cursor: "pointer",
             border: `1.5px solid ${active ? `${C.gold}99` : C.border2}`,
             background: active ? `${C.gold}14` : "transparent",
             color: active ? C.text : C.text2,
-            fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 13,
+            fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 15.5,
             transition: "border-color 0.15s, background 0.15s, color 0.15s",
             WebkitTapHighlightColor: "transparent",
           }}>
-            {active && <span style={{ marginRight: 6, fontSize: 11, color: C.gold }}>✓</span>}{o}
+            {/* selection shows via colour only (no check). The label reserves its
+                bold width so switching 500→700 never widens the pill or reflows. */}
+            <span className="at-chip-lbl" data-text={o}>{o}</span>
           </button>
         );
       })}
@@ -180,7 +183,9 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
 
   return (
     <div className="app-fullscreen" style={{
-      position: "fixed", top: 0, left: 0, right: 0,
+      // top+bottom so it fills the whole phone shell (no empty strip at the
+      // bottom on mobile, where 100dvh can be shorter than the shell)
+      position: "fixed", inset: 0,
       background: C.bg,
       display: "flex", flexDirection: "column",
       overflow: "hidden",

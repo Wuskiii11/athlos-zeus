@@ -144,20 +144,20 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
       <div style={row}>{t("Napor (RPE 1–10)")}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 13 }}>
         {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-          <button key={n} onClick={() => setRpe(n)} style={chip(rpe === n, { minWidth: 34, textAlign: "center", padding: "7px 0" })}>{n}</button>
+          <button key={n} onClick={() => setRpe(n)} style={chip(rpe === n, { minWidth: 34, textAlign: "center", padding: "7px 0" })}><span className="at-chip-lbl" data-text={String(n)}>{n}</span></button>
         ))}
       </div>
 
       <div style={row}>{t("Opravljeno")}</div>
       <div style={{ display: "flex", gap: 6, marginBottom: 13 }}>
         {[["Da", true], ["Delno", "delno"], ["Ne", false]].map(([l, v]) => (
-          <button key={l} onClick={() => setDone(v)} style={chip(done === v)}>{t(l)}</button>
+          <button key={l} onClick={() => setDone(v)} style={chip(done === v)}><span className="at-chip-lbl" data-text={t(l)}>{t(l)}</span></button>
         ))}
       </div>
 
       <div style={row}>{t("Bolečina")}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {PAIN_TAGS.map((p) => <button key={p} onClick={() => togglePain(p)} style={chip(pain.includes(p))}>{t(p)}</button>)}
+        {PAIN_TAGS.map((p) => <button key={p} onClick={() => togglePain(p)} style={chip(pain.includes(p))}><span className="at-chip-lbl" data-text={t(p)}>{t(p)}</span></button>)}
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>

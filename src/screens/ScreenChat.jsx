@@ -135,11 +135,14 @@ function Avatar({ initials = "?", size = 44, isGroup }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: "50%", flexShrink: 0,
+      // filled "greige" disc (like Apple's grey avatars, warmed to the marble
+      // palette) so the icon reads as a solid chip against the cream page —
+      // not just a ring blending into the background
       background: dark
-        ? "radial-gradient(circle at 38% 32%, #1F2420, #14120E 80%)"
-        : "radial-gradient(circle at 38% 32%, #FBF7EF, #EFE8D8 75%, #E4DAC6 100%)",
+        ? "radial-gradient(circle at 38% 30%, #3B3833, #26241F 78%, #1D1B17 100%)"
+        : "radial-gradient(circle at 38% 30%, #ECE7DD, #D7CFC0 66%, #C4BAA5 100%)",
       border: `1.5px solid ${C.gold}55`,
-      boxShadow: dark ? "none" : "inset 0 1px 2px rgba(255,255,255,0.8), 0 2px 6px rgba(28,24,20,0.08)",
+      boxShadow: dark ? "inset 0 1px 1px rgba(255,255,255,0.06)" : "inset 0 1px 2px rgba(255,255,255,0.7), 0 2px 7px rgba(28,24,20,0.10)",
       display: "flex", alignItems: "center", justifyContent: "center",
       fontFamily: C.heading, fontWeight: 700, fontSize: size * 0.4,
       color: isGroup ? C.gold : (dark ? C.text : "#1C1814"),
@@ -484,6 +487,7 @@ export default function ScreenChat({ user, profile }) {
   const [groupName, setGroupName]   = useState("");
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [convBg, setConvBg]         = useState("default");
+  const [search, setSearch]         = useState("");
 
   const msgsEndRef   = useRef(null);
   const fileInputRef = useRef(null);
@@ -725,101 +729,112 @@ export default function ScreenChat({ user, profile }) {
   return (
     <>
       {/* ════════════════════ LIST VIEW ════════════════════════ */}
-      {view === "list" && (
+      {view === "list" && (() => {
+        const dark = C.name === "dark";
+        const sep = dark ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.08)";
+        const q = search.trim().toLowerCase();
+        const shown = convs.filter(c => convName(c).toLowerCase().includes(q));
+        return (
         <div style={{ paddingBottom: 20 }}>
-          <div style={{ padding: "10px 18px 0" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "8px 0 18px" }}>
-              <h1 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 26, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase", color: C.text }}>
+          {/* Title + compose on one row (Apple Messages layout, marble theme) */}
+          <div style={{ padding: "10px 16px 0" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "2px 0 12px" }}>
+              <h1 style={{ fontFamily: C.heading, fontSize: 30, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", margin: 0, color: C.text }}>
                 {t("Pogovori")}
               </h1>
               <Pressable
                 onClick={() => setView("new-chat")}
+                scale={0.9}
                 style={{
-                  background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 50,
-                  width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-                  color: C.accent,
+                  background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 50, flexShrink: 0,
+                  width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: C.accent,
                 }}
               >
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
                 </svg>
               </Pressable>
             </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 14, padding: "9px 12px", marginBottom: 6 }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth={2.4} strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder={t("Iskanje")}
+                style={{ flex: 1, border: "none", background: "none", outline: "none", fontFamily: C.display, fontWeight: 500, color: C.text, minWidth: 0 }}
+              />
+              {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 18, lineHeight: 1 }}>×</button>}
+            </div>
           </div>
 
-          <div style={{ padding: "0 18px", display: "flex", flexDirection: "column", gap: 8 }}>
-            {loadingConvs && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 4px" }}>
-                    <SkeletonBlock width={48} height={48} radius={999} />
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
-                      <SkeletonBlock width={`${60 - i * 4}%`} height={13} radius={4} />
-                      <SkeletonBlock width={`${40 - i * 3}%`} height={11} radius={4} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {!loadingConvs && convs.length === 0 && (
-              <div style={{ textAlign: "center", padding: "56px 0" }}>
-                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-                  <div style={{ filter: `drop-shadow(0 0 16px ${C.accent}88)` }}>
-                    <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-                      <path d="M6 8a4 4 0 014-4h32a4 4 0 014 4v24a4 4 0 01-4 4H30l-8 8v-8H10a4 4 0 01-4-4V8z" fill={C.accent} fillOpacity="0.15" stroke={C.accent} strokeWidth="1.5" strokeLinejoin="round" />
-                      <path d="M16 18h20M16 25h14" stroke={C.accent} strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
+          {/* Loading skeletons */}
+          {loadingConvs && (
+            <div style={{ padding: "4px 16px" }}>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0" }}>
+                  <SkeletonBlock width={52} height={52} radius={999} />
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
+                    <SkeletonBlock width={`${55 - i * 4}%`} height={14} radius={5} />
+                    <SkeletonBlock width={`${78 - i * 5}%`} height={12} radius={5} />
                   </div>
                 </div>
-                <div style={{ fontFamily: C.heading, fontSize: 16, color: C.text, marginBottom: 6 }}>
-                  Ni pogovorov
-                </div>
-                <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted }}>
-                  Klikni + za nov pogovor
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
+          )}
 
-            {/* airy full-width rows on the marble bg — hairline dividers, big touch targets */}
-            {convs.map((conv, i) => {
-              const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
-              return (
-                <button
-                  key={conv.id}
-                  onClick={() => openConv(conv)}
-                  style={{
-                    width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14,
-                    padding: "14px 4px", background: "none", border: "none",
-                    borderBottom: i < convs.length - 1 ? `1px solid ${C.name === "dark" ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.08)"}` : "none",
-                    cursor: "pointer", WebkitTapHighlightColor: "transparent",
-                    opacity: isBlocked ? 0.4 : 1,
-                  }}
-                >
-                  <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} size={48} />
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+          {/* Empty state */}
+          {!loadingConvs && shown.length === 0 && (
+            <div style={{ textAlign: "center", padding: "60px 24px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 15 }}>
+              {q ? t("Ni zadetkov") : t("Ni pogovorov")}
+            </div>
+          )}
+
+          {/* Rows — Apple Messages structure, marble medallion avatars */}
+          {!loadingConvs && shown.map((conv, i) => {
+            const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
+            const unread = !!conv.lastMsg && conv.lastMsg.sender_id && conv.lastMsg.sender_id !== userId;
+            const last = i === shown.length - 1;
+            return (
+              <button
+                key={conv.id}
+                onClick={() => openConv(conv)}
+                style={{
+                  width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 6,
+                  padding: "0 0 0 6px", background: "none", border: "none",
+                  cursor: "pointer", WebkitTapHighlightColor: "transparent",
+                  opacity: isBlocked ? 0.45 : 1,
+                }}
+              >
+                {/* unread dot sits in the left margin */}
+                <span style={{ width: 9, height: 9, borderRadius: "50%", background: unread ? C.accent : "transparent", flexShrink: 0 }} />
+                <span style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, padding: "0 16px 0 4px" }}>
+                  <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} size={52} />
+                  <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "11px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
+                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                       <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {convName(conv)}
                       </span>
-                      <Mono style={{ color: C.muted2, fontSize: 8, flexShrink: 0 }}>
-                        {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
-                      </Mono>
+                      <span style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                        <span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted2, letterSpacing: "0.04em" }}>
+                          {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
+                        </span>
+                        <svg width={7} height={12} viewBox="0 0 8 13" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 1.5L6.5 6.5L1.5 11.5"/></svg>
+                      </span>
                     </span>
                     <span style={{
-                      display: "block", fontFamily: C.display, fontSize: 14, fontWeight: 500, color: C.muted, marginTop: 3,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      fontFamily: C.display, fontSize: 14, fontWeight: 500, color: C.muted, marginTop: 3, lineHeight: 1.3,
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                     }}>
                       {isBlocked ? t("Blokirano") : lastMsgLabel(conv)}
                     </span>
                   </span>
-                  <span style={{ color: C.muted2, fontSize: 16, flexShrink: 0 }}>›</span>
-                </button>
-              );
-            })}
-          </div>
+                </span>
+              </button>
+            );
+          })}
         </div>
-      )}
+        );
+      })()}
 
       {/* ════════════════ DETAIL (full-screen) ═════════════════ */}
       {view === "detail" && activeConv && (

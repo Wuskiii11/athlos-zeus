@@ -7,7 +7,9 @@ export default function ConsentScreen({ onAccept, onReject }) {
 
   return (
     <div className="app-fullscreen" style={{
-      position: "fixed", top: 0, left: 0, right: 0,
+      // top+bottom so it fills the whole phone shell (no empty strip at the
+      // bottom on mobile, where 100dvh can be shorter than the shell)
+      position: "fixed", inset: 0,
       background: C.bg,
       display: "flex", flexDirection: "column",
       paddingTop: "env(safe-area-inset-top, 44px)",

@@ -569,21 +569,28 @@ export default function AthlosApp() {
             bottom: 0, left: 0, right: 0, zIndex: 2,
             padding: "8px 16px",
             paddingBottom: "max(env(safe-area-inset-bottom, 12px), 12px)",
-            background: `linear-gradient(to bottom, transparent 0%, ${C.bg} 62%)`,
+            // no solid backdrop here — real glass needs the app content to show
+            // THROUGH the bar (blurred), so nothing opaque may sit behind it
             pointerEvents: "none",
           }}>
             {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
             {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
+
+            {/* Transparent "liquid glass" nav (Apple-style): low-opacity material
+                + heavy blur & saturation, so the app content scrolling underneath
+                shows through, blurred and colour-enriched. Nothing opaque behind it. */}
             <nav style={{
               display: "flex", justifyContent: "space-around", alignItems: "center",
               width: "100%", maxWidth: 560, marginInline: "auto",
-              padding: "5px 4px",
-              background: theme === "dark" ? "rgba(18,21,20,0.92)" : "rgba(255,255,255,0.86)",
-              backdropFilter: "blur(18px)",
-              WebkitBackdropFilter: "blur(18px)",
+              padding: "7px 6px",
+              background: theme === "dark" ? "rgba(22,24,22,0.30)" : "rgba(255,255,255,0.30)",
+              backdropFilter: "blur(30px) saturate(180%)",
+              WebkitBackdropFilter: "blur(30px) saturate(180%)",
               borderRadius: 999,
-              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.075)" : "rgba(16,23,18,0.08)"}`,
-              boxShadow: theme === "dark" ? "0 14px 34px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.04)" : "0 16px 38px rgba(16,23,18,0.10), inset 0 1px 0 rgba(255,255,255,0.75)",
+              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.55)"}`,
+              boxShadow: theme === "dark"
+                ? "0 18px 40px rgba(0,0,0,0.44), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 1px rgba(0,0,0,0.28)"
+                : "0 18px 40px rgba(16,23,18,0.16), inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(28,24,20,0.06)",
               pointerEvents: "auto",
             }}>
               {NAV.map(n => {

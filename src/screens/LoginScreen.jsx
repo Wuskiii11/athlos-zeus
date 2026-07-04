@@ -157,7 +157,10 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
 
   return (
     <div className="app-fullscreen" style={{
-      position: "fixed", top: 0, left: 0, right: 0,
+      // anchor top AND bottom so the screen fills the full phone-shell height —
+      // without `bottom` it only got 100dvh, leaving an empty strip at the
+      // bottom on mobile where the shell (top:0/bottom:0) is taller
+      position: "fixed", inset: 0,
       background: L.bg,
       backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(176,141,87,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(200,162,74,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",

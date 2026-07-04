@@ -229,3 +229,19 @@
   animation-duration: 1.4s !important;
   animation-iteration-count: infinite !important;
 }
+
+/* ── Pill / chip selects: never reflow on toggle ─────────────────
+   A selected chip must occupy the exact same width as when it is not
+   selected, so ticking an option can't bump a neighbour to the next row.
+   The label reserves its BOLD width via a hidden ghost: the visible text
+   can switch 500→700 on select without the box growing. Pair it with an
+   always-present (visibility-toggled) check slot — see MultiChips. */
+.at-chip-lbl { display: inline-flex; flex-direction: column; align-items: center; }
+.at-chip-lbl::after {
+  content: attr(data-text);
+  font-weight: 700;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
