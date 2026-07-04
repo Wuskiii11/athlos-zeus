@@ -80,8 +80,8 @@ function SplashScreen({ C }) {
         <div style={{
           width: 220, maxWidth: "60vw", height: 1, margin: "14px 0 12px",
           background: "#B08D57",
-          transform: "scaleX(0)",
-          animation: "splashRule 0.7s cubic-bezier(.22,.8,.28,1) 0.35s forwards",
+          transform: "scaleX(0)", transformOrigin: "center",
+          animation: "splashRule 1.1s cubic-bezier(.16,.9,.2,1) 0.3s forwards",
         }} />
         <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 15, letterSpacing: "0.12em", color: "rgba(28,24,20,0.5)" }}>
           sistem, ki pozna vsakega športnika
