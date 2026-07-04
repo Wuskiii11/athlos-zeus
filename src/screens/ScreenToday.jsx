@@ -131,6 +131,16 @@ function Medallion({ pct, color, C, size = 130 }) {
         ? "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 3px rgba(255,255,255,0.06)"
         : "0 16px 40px rgba(28,24,20,0.16), inset 0 2px 4px rgba(255,255,255,0.85), inset 0 -6px 14px rgba(140,120,80,0.24)",
     }}>
+      {/* battery fill — the disc literally fills bottom-up to the score */}
+      <div aria-hidden="true" style={{ position: "absolute", inset: size * 0.085, borderRadius: "50%", overflow: "hidden", pointerEvents: "none" }}>
+        <div style={{
+          position: "absolute", left: 0, right: 0, bottom: 0,
+          height: `${Math.max(pct, 2)}%`,
+          background: `linear-gradient(180deg, ${color}30, ${color}16)`,
+          borderTop: `1.5px solid ${color}77`,
+          transition: "height 0.9s cubic-bezier(.22,1,.36,1)",
+        }} />
+      </div>
       {/* inner bronze ring */}
       <div style={{ position: "absolute", inset: size * 0.10, borderRadius: "50%", border: `1.5px solid ${C.gold}`, opacity: 0.4, pointerEvents: "none" }} />
       <svg viewBox="0 0 210 210" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
