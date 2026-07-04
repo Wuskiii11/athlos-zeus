@@ -161,6 +161,7 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
 export default function ScreenAI({ user, profile }) {
   const C = useTheme();
   const t = useT();
+  const dark = C.name === "dark";
   const [gate, setGate] = useState("loading");   // loading | funnel | chat
   const [memory, setMemory] = useState(null);
   const returningRef = useRef(false);
@@ -299,29 +300,21 @@ export default function ScreenAI({ user, profile }) {
   // ── Chat ──
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg }}>
-      {/* Header — dark editorial hero: giant display type layered behind the
-          engraved god, a scattered epigram, one green oracle breath. */}
-      <div style={{ position: "relative", height: 200, flexShrink: 0, overflow: "hidden", background: "radial-gradient(130% 150% at 80% 28%, #1A2530 0%, #0C0F14 58%, #07090C 100%)" }}>
-        {/* giant type, sitting BEHIND the statue */}
-        <div aria-hidden="true" style={{ position: "absolute", left: -6, top: 2, fontFamily: C.heading, fontWeight: 800, fontSize: 94, lineHeight: 0.82, letterSpacing: "0.01em", color: "rgba(244,239,230,0.08)", userSelect: "none", pointerEvents: "none" }}>
-          ΖΕΥΣ
-        </div>
-        {/* engraved Zeus — the black plate vanishes through the screen blend */}
-        <img src="/img/hero-zeus-cut.png" alt="" aria-hidden="true" style={{ position: "absolute", right: -52, bottom: -70, height: 330, mixBlendMode: "screen", pointerEvents: "none", filter: "saturate(0.85)" }} />
-        {/* one signal-tinted oracle breath near the bolt */}
-        <div aria-hidden="true" style={{ position: "absolute", right: 26, top: -34, width: 150, height: 150, background: `radial-gradient(circle, ${C.accent2}21, transparent 70%)`, pointerEvents: "none" }} />
-        {/* scattered epigram, like the poster captions */}
-        <div style={{ position: "absolute", left: 18, top: 18, maxWidth: 150, fontFamily: C.serif, fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "rgba(244,239,230,0.52)" }}>
-          »{t("On ve, kaj si treniral — in kaj te čaka.")}«
-        </div>
-        {/* masthead */}
-        <div style={{ position: "absolute", left: 18, bottom: 14 }}>
+      {/* Header — same marble language as the splash: the engraving sits
+          quietly on the brand's own plate color, no dark panel, no giant
+          overlapping type. Dark theme keeps the same layout on the obsidian
+          surface instead. */}
+      <div style={{ position: "relative", height: 132, flexShrink: 0, overflow: "hidden", background: dark ? C.surface2 : "#F3ECE3" }}>
+        <img src="/img/greek-god.png" alt="" aria-hidden="true" style={{ position: "absolute", right: -30, top: "50%", transform: "translateY(-46%)", height: 210, pointerEvents: "none", filter: dark ? "invert(1) brightness(0.82)" : "none" }} />
+        {/* fade so text stays legible over the statue's shoulder */}
+        <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: dark ? `linear-gradient(90deg, ${C.bg} 46%, transparent 88%)` : "linear-gradient(90deg, #F3ECE3 46%, rgba(243,236,227,0.55) 68%, transparent 88%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", left: 18, bottom: 16, maxWidth: "62%" }}>
           <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.34em" }}>ΑΘΛΟΣ · ORAKELJ</Mono>
-          <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 34, letterSpacing: "0.14em", color: "#F4EFE6", lineHeight: 1, marginTop: 4 }}>ZEUS</div>
+          <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 30, letterSpacing: "0.12em", color: C.text, lineHeight: 1, marginTop: 4 }}>ZEUS</div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: typing ? C.gold : C.accent2, boxShadow: typing ? "none" : `0 0 10px ${C.accent2}B3` }} />
-            <span style={{ fontFamily: C.display, fontSize: 12.5, fontWeight: 600, color: typing ? C.gold : "rgba(244,239,230,0.62)" }}>
-              {typing ? t("orakelj razmišlja...") : t("te pozna · uči se iz vsakega treninga")}
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: typing ? C.gold : C.accent2, boxShadow: typing ? "none" : `0 0 8px ${C.accent2}99`, flexShrink: 0 }} />
+            <span style={{ fontFamily: C.display, fontSize: 12, fontWeight: 600, color: typing ? C.gold : C.muted }}>
+              {typing ? t("razmišlja…") : t("te pozna")}
             </span>
           </div>
         </div>

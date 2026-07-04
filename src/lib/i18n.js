@@ -68,6 +68,8 @@ const EN = {
   // ── ZEUS hero ──
   "On ve, kaj si treniral — in kaj te čaka.": "He knows what you trained — and what awaits you.",
   "te pozna · uči se iz vsakega treninga": "knows you · learns from every session",
+  "te pozna": "knows you",
+  "razmišlja…": "thinking…",
 
   // ── Chat ──
   "Pogovori": "Chats",
