@@ -379,6 +379,61 @@ function StatsSheet({ C, lang, onClose }) {
   );
 }
 
+// Bottom sheet that can be dismissed either by tapping the backdrop or by
+// pulling down once its content is scrolled to the top — the same gesture
+// as iOS/Google Maps sheets ("scroll down and it goes away").
+function DragSheet({ children, onClose, style }) {
+  const scrollRef = useRef(null);
+  const drag = useRef({ active: false, startY: 0, atTop: false });
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  const onTouchStart = (e) => {
+    drag.current.startY = e.touches[0].clientY;
+    drag.current.atTop = (scrollRef.current?.scrollTop || 0) <= 0;
+  };
+  const onTouchMove = (e) => {
+    const dy = e.touches[0].clientY - drag.current.startY;
+    if (drag.current.atTop && dy > 0) {
+      drag.current.active = true;
+      e.stopPropagation();
+      setDragging(true);
+      setDragY(dy);
+    } else if (drag.current.active) {
+      e.stopPropagation();
+      setDragY(Math.max(0, dy));
+    }
+  };
+  const onTouchEnd = () => {
+    if (drag.current.active && dragY > 90) {
+      setDragY(800); // slide fully off, then unmount
+      setTimeout(onClose, 220);
+    } else {
+      setDragY(0);
+    }
+    drag.current.active = false;
+    setDragging(false);
+  };
+
+  return (
+    <div
+      ref={scrollRef}
+      className="athlos-scroll"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+      style={{
+        ...style,
+        transform: dragY ? `translateY(${dragY}px)` : undefined,
+        transition: dragging ? "none" : "transform 0.28s cubic-bezier(.22,1,.36,1)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function ScreenToday({ go, profile }) {
   const C = useTheme();
   const t = useT();
@@ -573,7 +628,7 @@ export default function ScreenToday({ go, profile }) {
       {/* ── BATTERY INFO — bottom sheet, opens from the medallion ── */}
       {openBattery && (
         <div onClick={(e) => { if (e.target === e.currentTarget) setOpenBattery(false); }} style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(20,18,14,0.55)" }}>
-          <div className="athlos-scroll" style={{
+          <DragSheet onClose={() => setOpenBattery(false)} style={{
             position: "absolute", bottom: 0, left: 0, right: 0, maxHeight: "88%", overflowY: "auto",
             background: C.bg, borderRadius: "24px 24px 0 0", padding: "16px 20px",
             paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
@@ -659,7 +714,7 @@ export default function ScreenToday({ go, profile }) {
               </div>
               <Mono style={{ color: C.muted2, fontSize: 8 }}>{t("HRV/RHR pridejo iz Apple Health · prehrana iz dnevnika · hitrost iz treninga")}</Mono>
             </div>
-          </div>
+          </DragSheet>
         </div>
       )}
       {editHome && (

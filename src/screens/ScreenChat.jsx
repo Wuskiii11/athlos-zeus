@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTheme } from "../theme";
-import { BackBtn, Pressable, Mono } from "../components/UI";
+import { BackBtn, Pressable, Mono, SkeletonBlock } from "../components/UI";
 import { IcTrash } from "../components/Icons";
 import { useT } from "../lib/i18n";
 import {
@@ -749,8 +749,16 @@ export default function ScreenChat({ user, profile }) {
 
           <div style={{ padding: "0 18px", display: "flex", flexDirection: "column", gap: 8 }}>
             {loadingConvs && (
-              <div style={{ textAlign: "center", padding: 40, fontFamily: C.display, color: C.muted, fontSize: 14 }}>
-                Nalagam…
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 4px" }}>
+                    <SkeletonBlock width={48} height={48} radius={999} />
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
+                      <SkeletonBlock width={`${60 - i * 4}%`} height={13} radius={4} />
+                      <SkeletonBlock width={`${40 - i * 3}%`} height={11} radius={4} />
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 

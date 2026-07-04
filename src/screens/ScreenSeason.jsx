@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme, useDatePicker, useTimePicker } from "../theme";
-import { Pressable, PrimaryBtn, Mono } from "../components/UI";
+import { Pressable, PrimaryBtn, Mono, SkeletonBlock } from "../components/UI";
 import { IcBall } from "../components/Icons";
 import { listEvents, addEvent, deleteEvent, replaceEvents } from "../lib/api";
 import { useT, useLang } from "../lib/i18n";
@@ -747,7 +747,30 @@ export default function ScreenSeason({ profile, user }) {
       {mode === "add" && <AddEventForm onAdd={onAdd} onCancel={() => setMode("list")} />}
       {mode === "ai" && <AiPlanForm sport={profile?.sport} onPlan={onPlan} onCancel={() => setMode("list")} />}
 
-      {!loaded && <div style={{ fontFamily: C.display, fontSize: 14, color: C.muted2, textAlign: "center", padding: 32 }}>{t("Nalagam…")}</div>}
+      {!loaded && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+            <SkeletonBlock width={140} height={20} radius={6} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 4, marginBottom: 22, padding: "10px 8px" }}>
+            {Array.from({ length: 7 }, (_, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "6px 0" }}>
+                <SkeletonBlock width={14} height={8} radius={3} />
+                <SkeletonBlock width={28} height={28} radius={999} />
+              </div>
+            ))}
+          </div>
+          {[70, 55, 62].map((w, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 14px", marginBottom: 8 }}>
+              <SkeletonBlock width={8} height={8} radius={999} />
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                <SkeletonBlock width={`${w}%`} height={13} radius={4} />
+                <SkeletonBlock width={`${w - 20}%`} height={10} radius={4} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {loaded && calView === "week" && (
         <WeekView C={C} t={t} lang={lang} weekOffset={weekOffset} setWeekOffset={setWeekOffset} events={events} onDelete={onDelete} />

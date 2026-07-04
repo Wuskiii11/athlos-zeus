@@ -29,11 +29,14 @@ export function Pressable({ children, onClick, style, scale = 0.98, disabled }) 
   );
 }
 
+// Pulsing placeholder — used everywhere something is loading, so a slow
+// network/query reads as "in progress" rather than a blank flash.
 export function SkeletonBlock({ width = "100%", height = 16, radius = 8, style }) {
+  const C = useTheme();
   return (
-    <div style={{
+    <div className="athlos-skeleton" style={{
       width, height, borderRadius: radius,
-      background: "rgba(128,128,128,0.12)",
+      background: C.surface3,
       ...style,
     }} />
   );

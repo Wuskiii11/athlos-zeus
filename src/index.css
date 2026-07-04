@@ -214,3 +214,18 @@
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* loading placeholders — pulse so a slow load reads as "in progress".
+   The app-wide reduced-motion reset (App.jsx) forces animation-duration/
+   iteration-count to ~0 via !important, which would otherwise flatten this
+   to a near-static frame; pin the same two longhands back with !important
+   so the pulse still visibly breathes. */
+@keyframes athlosSkeletonPulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.athlos-skeleton {
+  animation: athlosSkeletonPulse 1.4s ease-in-out infinite;
+  animation-duration: 1.4s !important;
+  animation-iteration-count: infinite !important;
+}
