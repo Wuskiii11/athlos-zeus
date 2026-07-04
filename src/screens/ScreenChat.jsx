@@ -7,7 +7,7 @@ import {
   listConversations, listMessages, sendMessage, listClubmates,
   getOrCreateDirectConversation, createGroupConversation,
   blockUser, listBlocks, updateConversationBackground,
-  uploadChatFile, hasSupabase,
+  uploadChatFile, hasSupabase, loadChatReads, markChatRead,
 } from "../lib/api";
 
 // ─── Constants ───────────────────────────────────────────────
@@ -488,6 +488,7 @@ export default function ScreenChat({ user, profile }) {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [convBg, setConvBg]         = useState("default");
   const [search, setSearch]         = useState("");
+  const [reads, setReads]           = useState(() => loadChatReads());
 
   const msgsEndRef   = useRef(null);
   const fileInputRef = useRef(null);
@@ -567,6 +568,8 @@ export default function ScreenChat({ user, profile }) {
     setInput("");
     setStickerOpen(false);
     setView("detail");
+    // Mark read → clears the unread dot for this conversation (persisted).
+    setReads(markChatRead(conv.id));
   }, []);
 
   // ── Start / open DM with a user ────────────────────────────
@@ -792,7 +795,10 @@ export default function ScreenChat({ user, profile }) {
           {/* Rows — Apple Messages structure, marble medallion avatars */}
           {!loadingConvs && shown.map((conv, i) => {
             const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
-            const unread = !!conv.lastMsg && conv.lastMsg.sender_id && conv.lastMsg.sender_id !== userId;
+            // Unread = their latest message is newer than the last time we opened
+            // this conversation (opening it marks it read → clears the dot).
+            const unread = !!conv.lastMsg && conv.lastMsg.sender_id && conv.lastMsg.sender_id !== userId
+              && (!reads[conv.id] || new Date(conv.lastMsg.created_at) > new Date(reads[conv.id]));
             const last = i === shown.length - 1;
             return (
               <button
@@ -853,7 +859,7 @@ export default function ScreenChat({ user, profile }) {
           }}>
             {/* Back — follows the conversation's own backdrop (borderOnBg/textOnBg),
                 not the app theme, so it stays visible on a dark custom background */}
-            <Pressable onClick={() => { setView("list"); loadConvs(); }} scale={0.88} style={{
+            <Pressable onClick={() => { setReads(markChatRead(activeConv.id)); setView("list"); loadConvs(); }} scale={0.88} style={{
               background: "transparent", border: `1px solid ${borderOnBg}`, borderRadius: 50,
               width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
               color: textOnBg, marginRight: 4, lineHeight: 1, flexShrink: 0,
@@ -964,7 +970,7 @@ export default function ScreenChat({ user, profile }) {
                 {STICKERS.map((s, i) => (
                   <button
                     key={i}
-                    onClick={() => doSend("sticker", s)}
+                    onClick={() => setInput((prev) => prev + s)}
                     style={{
                       background: "none", border: "none", cursor: "pointer",
                       fontSize: 28, padding: "6px 2px", lineHeight: 1,

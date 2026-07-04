@@ -542,7 +542,9 @@ export async function listConversations(userId) {
 }
 
 export async function listMessages(convId, limit = 60) {
-  if (hasSupabase) {
+  // Only real (cloud) conversations have UUID ids; prototype/demo convs live in
+  // localStorage, so read those there even when Supabase is configured.
+  if (hasSupabase && isUuid(convId)) {
     const { data, error } = await supabase
       .from("messages").select("*").eq("conversation_id", convId)
       .order("created_at").limit(limit);
@@ -555,13 +557,16 @@ export async function listMessages(convId, limit = 60) {
 
 export async function sendMessage(convId, senderId, type, content, attachmentUrl = null) {
   const now = new Date().toISOString();
-  if (hasSupabase) {
+  // Real (cloud) conversations have UUID ids; prototype/demo convs (non-UUID)
+  // only exist locally, so route those to localStorage even in Supabase mode —
+  // otherwise the insert fails the uuid/FK check and the message is lost.
+  if (hasSupabase && isUuid(convId)) {
     const { data, error } = await supabase.from("messages").insert({
       conversation_id: convId, sender_id: senderId, type, content,
       attachment_url: attachmentUrl, created_at: now,
     }).select().single();
-    if (error) throw new Error(error.message);
-    return data;
+    if (!error && data) return data;
+    // fall through to local persistence if the cloud write failed
   }
   const id = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   const msg = { id, conversation_id: convId, sender_id: senderId, type, content, attachment_url: attachmentUrl, created_at: now };
@@ -650,4 +655,17 @@ export async function updateConversationBackground(convId, bg) {
   const convs = { ...(chat.convs || {}) };
   if (convs[convId]) convs[convId] = { ...convs[convId], background: bg };
   writeChatLS({ convs, bgOverrides: { ...(chat.bgOverrides || {}), [convId]: bg } });
+}
+
+// ── Read state (device-local) ────────────────────────────────
+// There's no server-side read receipt; unread is tracked per device so that
+// opening a conversation clears its dot. Map of { convId: ISO timestamp read }.
+export function loadChatReads() {
+  return chatLS().reads || {};
+}
+
+export function markChatRead(convId) {
+  const reads = { ...(chatLS().reads || {}), [convId]: new Date().toISOString() };
+  writeChatLS({ reads });
+  return reads;
 }
