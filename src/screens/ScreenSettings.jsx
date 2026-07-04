@@ -452,7 +452,7 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
             <button onClick={() => setPhotoPreview(false)} aria-label={t("Zapri")} style={{ width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(244,239,230,0.28)", background: "rgba(244,239,230,0.08)", color: "#F4EFE6", fontSize: 20, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
           </div>
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
-            <img src={profile.photo} alt="" style={{ width: "100%", maxWidth: 420, aspectRatio: "1 / 1", borderRadius: 20, objectFit: "cover", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }} />
+            <img src={profile.photo} alt="" style={{ width: "100%", maxWidth: 320, aspectRatio: "1 / 1", borderRadius: "50%", objectFit: "cover", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "12px 24px max(24px, env(safe-area-inset-bottom, 24px))" }}>
             <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16, color: "#F4EFE6" }}>{profile.name}</div>
