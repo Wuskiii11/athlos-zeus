@@ -308,22 +308,17 @@ export default function ScreenAI({ user, profile }) {
         filter: dark ? "invert(1)" : "none", pointerEvents: "none", userSelect: "none", zIndex: 0,
       }} />
 
-      {/* Header — flat, calm bar. No image, no hard color edge. */}
+      {/* Header — flat, calm bar. No image, no hard color edge, no kicker
+          line above ZEUS. The status line doubles as the disclaimer, so
+          there's no separate floating strip either. */}
       <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "18px 18px 14px", borderBottom: `1px solid ${C.border}` }}>
-        <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.34em" }}>ΑΘΛΟΣ · ORAKELJ</Mono>
-        <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 28, letterSpacing: "0.12em", color: C.text, lineHeight: 1, marginTop: 5 }}>ZEUS</div>
+        <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 28, letterSpacing: "0.12em", color: C.text, lineHeight: 1 }}>ZEUS</div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: typing ? C.gold : C.accent2, boxShadow: typing ? "none" : `0 0 8px ${C.accent2}99`, flexShrink: 0 }} />
           <span style={{ fontFamily: C.display, fontSize: 12, fontWeight: 600, color: typing ? C.gold : C.muted }}>
-            {typing ? t("razmišlja…") : t("te pozna")}
+            {typing ? t("razmišlja…") : t("ATHLOS AI · ni nadomestilo za zdravnika")}
           </span>
         </div>
-      </div>
-
-      {/* Disclaimer — a quiet permanent strip under the header, not floating
-          above the tab bar where it looked disconnected from everything. */}
-      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, textAlign: "center", padding: "8px 18px", borderBottom: `1px solid ${C.border}` }}>
-        <Mono style={{ color: C.muted2, fontSize: 8, letterSpacing: "0.1em" }}>{t("ATHLOS AI · ni nadomestilo za zdravnika")}</Mono>
       </div>
 
       {/* Messages */}

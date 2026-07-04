@@ -433,8 +433,7 @@ export default function ScreenToday({ go, profile }) {
             </span>
           ))}
         </div>
-        <div style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 8, letterSpacing: "0.5em", color: C.gold, paddingLeft: "0.5em" }}>ΑΘΛΟΣ</div>
-        <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 32, letterSpacing: "0.18em", color: C.text, paddingLeft: "0.18em", marginTop: 4, lineHeight: 1 }}>
+        <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 32, letterSpacing: "0.18em", color: C.text, paddingLeft: "0.18em", marginTop: 10, lineHeight: 1 }}>
           ATHL<span style={{ color: C.gold }}>·</span>OS
         </div>
         <div style={{ fontFamily: C.serif, fontStyle: "italic", fontWeight: 500, fontSize: 13.5, color: C.muted, marginTop: 8 }}>
