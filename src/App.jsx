@@ -296,7 +296,10 @@ export default function AthlosApp() {
       // stays on the same tab, no full page reload (which would flash the splash).
       setRefreshing(true);
       setPullDist(0);
-      setTimeout(() => { setRefreshNonce(n => n + 1); setRefreshing(false); }, 500);
+      // Clear navDir so the refresh remount fades in place instead of replaying
+      // the last tab-slide animation (which made Koledar slide sideways on refresh).
+      setNavDir(null);
+      setTimeout(() => { setNavDir(null); setRefreshNonce(n => n + 1); setRefreshing(false); }, 500);
     } else {
       setPullDist(0);
     }
