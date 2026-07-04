@@ -595,28 +595,33 @@ export default function AthlosApp() {
             {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
             {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
 
-            {/* Transparent "liquid glass" nav (Apple-style): low-opacity material
-                + heavy blur & saturation, so the app content scrolling underneath
-                shows through, blurred and colour-enriched. Nothing opaque behind it. */}
-            <nav style={{
-              display: "flex", justifyContent: "space-around", alignItems: "center",
-              width: "100%", maxWidth: 560, marginInline: "auto",
-              padding: "7px 6px",
-              background: theme === "dark" ? "rgba(22,24,22,0.16)" : "rgba(255,255,255,0.14)",
-              backdropFilter: "blur(34px) saturate(190%)",
-              WebkitBackdropFilter: "blur(34px) saturate(190%)",
-              borderRadius: 999,
-              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.55)"}`,
-              boxShadow: theme === "dark"
-                ? "0 18px 40px rgba(0,0,0,0.44), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 1px rgba(0,0,0,0.28)"
-                : "0 18px 40px rgba(16,23,18,0.16), inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(28,24,20,0.06)",
-              pointerEvents: "auto",
-            }}>
-              {NAV.map(n => {
-                const active = navActive === n.id;
-                return <TabButton key={n.id} n={{ ...n, label: t(n.label) }} active={active} onClick={() => go(n.id)} />;
-              })}
-            </nav>
+            {/* Liquid-glass nav (iOS-26 style): a vivid colour field sits behind
+                the bar, and the very transparent, blurred material refracts it —
+                THAT is what makes glass read as transparent. On a flat marble page
+                there's nothing to refract, so the glow is the colour source. */}
+            <div style={{ position: "relative", width: "100%", maxWidth: 560, marginInline: "auto", pointerEvents: "auto" }}>
+              <div aria-hidden="true" style={{
+                position: "absolute", inset: 0, borderRadius: 999, overflow: "hidden", pointerEvents: "none",
+                background: "radial-gradient(78% 150% at 6% 50%, rgba(74,124,255,0.58), transparent 60%), radial-gradient(72% 165% at 50% 128%, rgba(255,118,170,0.52), transparent 62%), radial-gradient(78% 150% at 95% 40%, rgba(192,110,240,0.54), transparent 60%)",
+              }} />
+              <nav style={{
+                position: "relative",
+                display: "flex", justifyContent: "space-around", alignItems: "center",
+                width: "100%",
+                padding: "7px 6px",
+                background: "linear-gradient(to bottom, rgba(255,255,255,0.20), rgba(255,255,255,0.06))",
+                backdropFilter: "blur(22px) saturate(200%) brightness(1.05)",
+                WebkitBackdropFilter: "blur(22px) saturate(200%) brightness(1.05)",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,0.65)",
+                boxShadow: "0 18px 42px rgba(40,30,70,0.22), inset 0 1.5px 1px rgba(255,255,255,0.95), inset 0 -2px 3px rgba(70,45,110,0.12)",
+              }}>
+                {NAV.map(n => {
+                  const active = navActive === n.id;
+                  return <TabButton key={n.id} n={{ ...n, label: t(n.label) }} active={active} onClick={() => go(n.id)} />;
+                })}
+              </nav>
+            </div>
           </div>
 
           {/* Pickers */}
