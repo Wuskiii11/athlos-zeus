@@ -38,3 +38,6 @@ dist-ssr
 .agents/
 .codex/
 scripts/
+
+.vercel
+.env*

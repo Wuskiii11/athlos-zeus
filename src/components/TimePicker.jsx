@@ -37,7 +37,7 @@ function Drum({ items, value, onChange, label }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
-      <Mono style={{ color: C.muted, fontSize: 8, marginBottom: 8 }}>{label}</Mono>
+      <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 8 }}>{label}</Mono>
       <div style={{ position: "relative", height: ITEM_H * VISIBLE, width: "100%", overflow: "hidden", borderRadius: 16 }}>
         {/* Fade top */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: ITEM_H * PAD, background: `linear-gradient(to bottom, ${C.bg} 40%, transparent)`, zIndex: 2, pointerEvents: "none" }} />
@@ -96,7 +96,7 @@ function Drum({ items, value, onChange, label }) {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontFamily: C.display,
                   fontWeight: active ? 800 : 400,
-                  fontSize: active ? 30 : 22,
+                  fontSize: active ? 33.5 : 24.5,
                   color: active ? C.text : C.muted,
                   letterSpacing: "-0.03em",
                   transition: "font-size 0.15s, color 0.15s, font-weight 0.15s",
@@ -148,28 +148,28 @@ export default function TimePicker({ value, onChange, onClose }) {
         {/* Header */}
         <div style={{ padding: "4px 20px 12px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
           <div>
-            <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.22em" }}>{t("IZBRANA URA")}</Mono>
-            <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 24, color: C.text, marginTop: 4 }}>
+            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.22em" }}>{t("IZBRANA URA")}</Mono>
+            <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 27, color: C.text, marginTop: 4 }}>
               {hour}<span style={{ color: C.muted, margin: "0 2px" }}>:</span>{min}
             </div>
           </div>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>24H</Mono>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>24H</Mono>
         </div>
 
         {/* Drums */}
         <div style={{ display: "flex", padding: "8px 16px 4px", gap: 8, position: "relative" }}>
           {/* Center divider line */}
-          <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", fontFamily: C.display, fontWeight: 800, fontSize: 32, color: C.muted, pointerEvents: "none", zIndex: 10, marginTop: 18 }}>:</div>
+          <div style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", fontFamily: C.display, fontWeight: 800, fontSize: 36, color: C.muted, pointerEvents: "none", zIndex: 10, marginTop: 18 }}>:</div>
           <Drum items={HOURS}   value={hour} onChange={setHour} label={t("URE")} />
           <Drum items={MINUTES} value={min}  onChange={setMin}  label={t("MINUTE")} />
         </div>
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 10, padding: "12px 16px 28px" }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 14, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 15.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
             {t("Prekliči")}
           </button>
-          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
             {t("Potrdi")}
           </button>
         </div>

@@ -96,7 +96,7 @@ function mobilityFor(sport) {
 function Legend({ color, label }) {
   const C = useTheme();
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 7, color: C.muted, fontFamily: C.display, fontWeight: 600, fontSize: 13 }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 7, color: C.muted, fontFamily: C.display, fontWeight: 600, fontSize: 14.5 }}>
       <span style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
       {label}
     </span>
@@ -120,16 +120,16 @@ function EventRow({ ev, onDelete }) {
       ) : null}
       <div style={{ flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</span>
-          <span style={{ fontFamily: C.display, fontSize: 11, fontWeight: 600, textTransform: "lowercase", color, background: `${color}1f`, padding: "3px 10px", borderRadius: 999 }}>{t(EV_LABEL[ev.type])}</span>
+          <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</span>
+          <span style={{ fontFamily: C.display, fontSize: 12.5, fontWeight: 600, textTransform: "lowercase", color, background: `${color}1f`, padding: "3px 10px", borderRadius: 999 }}>{t(EV_LABEL[ev.type])}</span>
           {done && (
-            <span style={{ fontFamily: C.display, fontSize: 11, fontWeight: 700, textTransform: "lowercase", color: C.accent, background: `${C.accent}1f`, padding: "3px 10px", borderRadius: 999 }}>{t("opravljeno")}</span>
+            <span style={{ fontFamily: C.display, fontSize: 12.5, fontWeight: 700, textTransform: "lowercase", color: C.accent, background: `${C.accent}1f`, padding: "3px 10px", borderRadius: 999 }}>{t("opravljeno")}</span>
           )}
         </div>
-        <span style={{ display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted, marginTop: 4 }}>{fmtDate(ev.date, lang)} · {ev.time}</span>
+        <span style={{ display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, marginTop: 4 }}>{fmtDate(ev.date, lang)} · {ev.time}</span>
       </div>
       <button onClick={onDelete} onPointerDown={() => setPressed(true)} onPointerUp={() => setPressed(false)} onPointerLeave={() => setPressed(false)}
-        style={{ background: "none", border: "none", color: pressed ? C.red : C.muted2, fontSize: 20, cursor: "pointer", padding: 6, transition: "color 0.15s, transform 0.12s", transform: pressed ? "scale(0.85)" : "scale(1)" }}>
+        style={{ background: "none", border: "none", color: pressed ? C.red : C.muted2, fontSize: 22.5, cursor: "pointer", padding: 6, transition: "color 0.15s, transform 0.12s", transform: pressed ? "scale(0.85)" : "scale(1)" }}>
         ×
       </button>
     </div>
@@ -159,14 +159,14 @@ function AddEventForm({ onAdd, onCancel }) {
       ...(type === "peak" ? { days: Math.max(1, +days || 7) } : {}),
     });
   };
-  const inputStyle = { width: "100%", padding: "13px 16px", minHeight: 50, borderRadius: 14, border: "none", background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 16, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light" };
-  const labelStyle = { display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted };
+  const inputStyle = { width: "100%", padding: "13px 16px", minHeight: 50, borderRadius: 14, border: "none", background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 18, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light" };
+  const labelStyle = { display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted };
   return (
     <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, marginBottom: 22, animation: "athlosFade 0.2s ease" }}>
       <span style={labelStyle}>{t("TIP")}</span>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "10px 0 16px" }}>
         {["trening", "tekma", "recovery", "peak", "season-start", "season-end"].map((ty) => (
-          <button key={ty} onClick={() => setType(ty)} style={{ flex: "1 0 30%", padding: "11px 4px", borderRadius: 999, border: "none", background: type === ty ? `${evColor(C, ty)}26` : C.surface2, color: type === ty ? evColor(C, ty) : C.muted, fontFamily: C.display, fontSize: 12, textTransform: "lowercase", fontWeight: type === ty ? 700 : 500, cursor: "pointer", transition: "background 0.15s, color 0.15s" }}>{t(EV_LABEL[ty])}</button>
+          <button key={ty} onClick={() => setType(ty)} style={{ flex: "1 0 30%", padding: "11px 4px", borderRadius: 999, border: "none", background: type === ty ? `${evColor(C, ty)}26` : C.surface2, color: type === ty ? evColor(C, ty) : C.muted, fontFamily: C.display, fontSize: 13.5, textTransform: "lowercase", fontWeight: type === ty ? 700 : 500, cursor: "pointer", transition: "background 0.15s, color 0.15s" }}>{t(EV_LABEL[ty])}</button>
         ))}
       </div>
       {!isMarker && (
@@ -191,7 +191,7 @@ function AddEventForm({ onAdd, onCancel }) {
         <div style={{ marginBottom: 16, animation: "athlosFade 0.2s ease" }}>
           <span style={labelStyle}>{t("TRAJANJE (DNI)")}</span>
           <input value={days} onChange={(e) => setDays(e.target.value.replace(/\D/g, ""))} inputMode="numeric" style={{ ...inputStyle, marginTop: 8 }} />
-          <span style={{ display: "block", fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 6 }}>{t("Razpon dni, ko moraš biti najbolj pripravljen — v koledarju označen rumeno.")}</span>
+          <span style={{ display: "block", fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 6 }}>{t("Razpon dni, ko moraš biti najbolj pripravljen — v koledarju označen rumeno.")}</span>
         </div>
       )}
       <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
@@ -203,7 +203,7 @@ function AddEventForm({ onAdd, onCancel }) {
               width: "100%", marginTop: 8, padding: "13px 16px", minHeight: 50,
               borderRadius: 14, border: "none",
               background: C.surface2, color: C.text,
-              fontFamily: C.display, fontWeight: 600, fontSize: 14,
+              fontFamily: C.display, fontWeight: 600, fontSize: 15.5,
               textAlign: "left", cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "space-between",
               WebkitTapHighlightColor: "transparent",
@@ -224,7 +224,7 @@ function AddEventForm({ onAdd, onCancel }) {
               width: "100%", marginTop: 8, padding: "13px 16px", minHeight: 50,
               borderRadius: 14, border: "none",
               background: C.surface2, color: C.text,
-              fontFamily: C.display, fontWeight: 600, fontSize: 14,
+              fontFamily: C.display, fontWeight: 600, fontSize: 15.5,
               textAlign: "center", cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               WebkitTapHighlightColor: "transparent",
@@ -239,7 +239,7 @@ function AddEventForm({ onAdd, onCancel }) {
         )}
       </div>
       <div style={{ display: "flex", gap: 10 }}>
-        <Pressable onClick={onCancel} scale={0.97} style={{ flex: 1, padding: 15, borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: C.muted, fontFamily: C.display, fontSize: 14, fontWeight: 600 }}>{t("Prekliči")}</Pressable>
+        <Pressable onClick={onCancel} scale={0.97} style={{ flex: 1, padding: 15, borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: C.muted, fontFamily: C.display, fontSize: 15.5, fontWeight: 600 }}>{t("Prekliči")}</Pressable>
         <PrimaryBtn onClick={submit} style={{ flex: 1 }}>{t("Dodaj")}</PrimaryBtn>
       </div>
     </div>
@@ -291,17 +291,17 @@ function AiPlanForm({ sport, onPlan, onCancel }) {
       setLoading(false);
     }, 1100);
   };
-  const dateStyle = { width: "100%", marginTop: 8, padding: "13px 16px", minHeight: 50, borderRadius: 14, border: "none", background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 16, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light", WebkitAppearance: "none", appearance: "none" };
-  const labelStyle = { display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted };
+  const dateStyle = { width: "100%", marginTop: 8, padding: "13px 16px", minHeight: 50, borderRadius: 14, border: "none", background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 18, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light", WebkitAppearance: "none", appearance: "none" };
+  const labelStyle = { display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted };
   return (
     <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, marginBottom: 22, animation: "athlosFade 0.2s ease" }}>
-      <p style={{ margin: "0 0 16px", color: C.text2, fontSize: 14, lineHeight: 1.5 }}>{t("Povej kdaj imaš čas in kdaj je tekma — AI sestavi optimalen 2-tedenski urnik.")}</p>
+      <p style={{ margin: "0 0 16px", color: C.text2, fontSize: 15.5, lineHeight: 1.5 }}>{t("Povej kdaj imaš čas in kdaj je tekma — AI sestavi optimalen 2-tedenski urnik.")}</p>
       <span style={labelStyle}>{t("KATERE DNEVE LAHKO TRENIRAŠ")}</span>
       <div style={{ display: "flex", gap: 6, margin: "10px 0 16px" }}>
         {DAYS.map((dn, i) => {
           const on = days.includes(i);
           return (
-            <button key={i} onClick={() => toggleDay(i)} style={{ flex: 1, padding: "11px 0", borderRadius: 999, border: "none", background: on ? C.btn : C.surface2, color: on ? C.btnText : C.muted, fontFamily: C.display, fontSize: 12, textTransform: "lowercase", cursor: "pointer", fontWeight: on ? 700 : 500, transition: "background 0.15s, color 0.15s" }}>{dn}</button>
+            <button key={i} onClick={() => toggleDay(i)} style={{ flex: 1, padding: "11px 0", borderRadius: 999, border: "none", background: on ? C.btn : C.surface2, color: on ? C.btnText : C.muted, fontFamily: C.display, fontSize: 13.5, textTransform: "lowercase", cursor: "pointer", fontWeight: on ? 700 : 500, transition: "background 0.15s, color 0.15s" }}>{dn}</button>
           );
         })}
       </div>
@@ -324,15 +324,15 @@ function AiPlanForm({ sport, onPlan, onCancel }) {
             {fillRest && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
           </span>
           <span>
-            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Izkoristi proste dni")}</span>
-            <span style={{ display: "block", color: C.muted, fontSize: 12, lineHeight: 1.45, marginTop: 3 }}>
+            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text }}>{t("Izkoristi proste dni")}</span>
+            <span style={{ display: "block", color: C.muted, fontSize: 13.5, lineHeight: 1.45, marginTop: 3 }}>
               {t("Na proste dni dodam lahke")} <strong style={{ color: C.text2 }}>{t("raztezne in mobilnostne vaje")}</strong> {t("za")} {sport || t("tvoj šport")}.
             </span>
           </span>
         </button>
       )}
       <div style={{ display: "flex", gap: 10 }}>
-        <Pressable onClick={onCancel} scale={0.97} style={{ flex: 1, padding: 15, borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: C.muted, fontFamily: C.display, fontSize: 14, fontWeight: 600 }}>{t("Prekliči")}</Pressable>
+        <Pressable onClick={onCancel} scale={0.97} style={{ flex: 1, padding: 15, borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: C.muted, fontFamily: C.display, fontSize: 15.5, fontWeight: 600 }}>{t("Prekliči")}</Pressable>
         <PrimaryBtn onClick={generate} style={{ flex: 1, opacity: days.length === 0 ? 0.5 : 1 }}>{loading ? t("Generiram…") : t("Generiraj urnik")}</PrimaryBtn>
       </div>
     </div>
@@ -419,9 +419,9 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onA
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 20, letterSpacing: "0.06em", color: C.text, textTransform: "uppercase" }}>{rangeLabel}</div>
+            <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 22.5, letterSpacing: "0.06em", color: C.text, textTransform: "uppercase" }}>{rangeLabel}</div>
             {weekOffset !== 0 && (
-              <button onClick={() => setWeekOffset(0)} style={{ background: "none", border: "none", padding: "3px 6px", color: C.accent, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+              <button onClick={() => setWeekOffset(0)} style={{ background: "none", border: "none", padding: "3px 6px", color: C.accent, fontFamily: C.mono, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
                 ↺ {t("nazaj na danes")}
               </button>
             )}
@@ -436,12 +436,12 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onA
             {summary.map(([ty, n, col]) => (
               <span key={ty} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 11px", borderRadius: 999, background: `${col}14`, border: `1px solid ${col}40` }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: col }} />
-                <Mono style={{ color: col, fontSize: 9 }}>{n}× {t(EV_LABEL[ty])}</Mono>
+                <Mono style={{ color: col, fontSize: 10 }}>{n}× {t(EV_LABEL[ty])}</Mono>
               </span>
             ))}
             {weekInPeak && (
               <span style={{ padding: "4px 11px", borderRadius: 999, background: `${C.gold}1f`, border: `1px solid ${C.gold}50` }}>
-                <Mono style={{ color: C.gold, fontSize: 9 }}>{t("PEAK TEDEN")}</Mono>
+                <Mono style={{ color: C.gold, fontSize: 10 }}>{t("PEAK TEDEN")}</Mono>
               </span>
             )}
           </div>
@@ -466,9 +466,9 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onA
             }}>
               {/* day marker column */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0, width: 34 }}>
-                <Mono style={{ color: isToday ? C.gold : C.muted2, fontSize: 8 }}>{BAR_LABELS[i]}</Mono>
+                <Mono style={{ color: isToday ? C.gold : C.muted2, fontSize: 9 }}>{BAR_LABELS[i]}</Mono>
                 <div style={{ width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? C.btn : "transparent", border: inPeak && !isToday ? `1px solid ${C.gold}55` : "none" }}>
-                  <span style={{ fontFamily: C.display, fontWeight: isToday ? 700 : 500, fontSize: 14, color: isToday ? C.btnText : C.text }}>{d.getDate()}</span>
+                  <span style={{ fontFamily: C.display, fontWeight: isToday ? 700 : 500, fontSize: 15.5, color: isToday ? C.btnText : C.text }}>{d.getDate()}</span>
                 </div>
               </div>
 
@@ -479,8 +479,8 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onA
                     display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", padding: 0,
                     cursor: "pointer", WebkitTapHighlightColor: "transparent", alignSelf: "flex-start",
                   }}>
-                    <span style={{ width: 18, height: 18, borderRadius: "50%", border: `1px dashed ${C.border2}`, color: C.muted2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, lineHeight: 1, flexShrink: 0 }}>+</span>
-                    <span style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 13.5, color: C.muted2 }}>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", border: `1px dashed ${C.border2}`, color: C.muted2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13.5, lineHeight: 1, flexShrink: 0 }}>+</span>
+                    <span style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 15, color: C.muted2 }}>
                       {t("Prost dan")}{inPeak ? ` · ${t("PEAK TEDEN")}` : ""}
                     </span>
                   </button>
@@ -492,8 +492,8 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onA
                       <div key={ev.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <span style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14.5, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</span>
-                          <Mono style={{ color: C.muted, fontSize: 9, display: "block", marginTop: 2 }}>
+                          <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</span>
+                          <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginTop: 2 }}>
                             {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : ev.time}
                             {ev.type === "tekma" && ev.opponent ? ` · vs ${ev.opponent}` : ""}
                             {ev.type === "tekma" ? ` · ${ev.location || t("Doma")}` : ""}
@@ -504,12 +504,12 @@ function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onA
                             <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                           </div>
                         )}
-                        <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 17, cursor: "pointer", padding: "2px", lineHeight: 1, flexShrink: 0 }}>×</button>
+                        <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 19, cursor: "pointer", padding: "2px", lineHeight: 1, flexShrink: 0 }}>×</button>
                       </div>
                     );
                   })
                 )}
-                {hasMatch && <Mono style={{ color: C.red, fontSize: 8 }}>{t("DAN TEKME")}</Mono>}
+                {hasMatch && <Mono style={{ color: C.red, fontSize: 9 }}>{t("DAN TEKME")}</Mono>}
               </div>
             </div>
           );
@@ -543,19 +543,19 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
       {/* Header: big month name + year + nav arrows */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 34, color: C.text, letterSpacing: "-0.02em", lineHeight: 1.1 }}>{MONTHS[month]}</div>
-          <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted, marginTop: 3 }}>{year}</div>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 38, color: C.text, letterSpacing: "-0.02em", lineHeight: 1.1 }}>{MONTHS[month]}</div>
+          <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 15.5, color: C.muted, marginTop: 3 }}>{year}</div>
         </div>
         <div style={{ display: "flex", gap: 4, alignItems: "center", marginTop: 6 }}>
-          <button onClick={() => setMonthOffset(m => m - 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "6px 8px", fontSize: 20, lineHeight: 1, display: "flex", alignItems: "center" }}>‹</button>
-          <button onClick={() => setMonthOffset(m => m + 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "6px 8px", fontSize: 20, lineHeight: 1, display: "flex", alignItems: "center" }}>›</button>
+          <button onClick={() => setMonthOffset(m => m - 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "6px 8px", fontSize: 22.5, lineHeight: 1, display: "flex", alignItems: "center" }}>‹</button>
+          <button onClick={() => setMonthOffset(m => m + 1)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: "6px 8px", fontSize: 22.5, lineHeight: 1, display: "flex", alignItems: "center" }}>›</button>
         </div>
       </div>
 
       {/* Day letter headers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", marginBottom: 4 }}>
         {DAY_LETTERS.map((d, i) => (
-          <div key={i} style={{ textAlign: "center", fontFamily: C.display, fontWeight: 500, fontSize: 12, color: C.muted, padding: "2px 0" }}>{d}</div>
+          <div key={i} style={{ textAlign: "center", fontFamily: C.display, fontWeight: 500, fontSize: 13.5, color: C.muted, padding: "2px 0" }}>{d}</div>
         ))}
       </div>
 
@@ -582,7 +582,7 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
                 <span style={{
                   fontFamily: C.display,
                   fontWeight: isToday ? 700 : 500,
-                  fontSize: 14,
+                  fontSize: 15.5,
                   color: isToday ? C.bg : outside ? C.muted2 : isSelected ? C.accent : C.text,
                 }}>
                   {d.getDate()}
@@ -614,11 +614,11 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
       {selectedDate && (
         <div style={{ marginTop: 4, marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{fmtDate(selectedDate, lang)}</span>
-            {selectedDate === today && <span style={{ fontFamily: C.display, fontSize: 10, fontWeight: 700, color: C.accent, background: `${C.accent}1a`, padding: "2px 8px", borderRadius: 999 }}>{t("danes")}</span>}
+            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text }}>{fmtDate(selectedDate, lang)}</span>
+            {selectedDate === today && <span style={{ fontFamily: C.display, fontSize: 11, fontWeight: 700, color: C.accent, background: `${C.accent}1a`, padding: "2px 8px", borderRadius: 999 }}>{t("danes")}</span>}
           </div>
           {selectedEvs.length === 0
-            ? <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted2 }}>{t("Ni treningov")}</div>
+            ? <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.muted2 }}>{t("Ni treningov")}</div>
             : selectedEvs.map(ev => {
                 const color = evColor(C, ev.type) || C.accent;
                 const done = !!ev.completed;
@@ -626,8 +626,8 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
                   <div key={ev.id} style={{ display: "flex", alignItems: "center", gap: 12, background: C.surface, border: `1px solid ${done ? `${C.accent}30` : C.border}`, borderRadius: 16, marginBottom: 8, padding: "13px 14px" }}>
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</div>
-                      <div style={{ fontFamily: C.display, fontSize: 12.5, color: C.muted, marginTop: 3 }}>
+                      <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</div>
+                      <div style={{ fontFamily: C.display, fontSize: 14, color: C.muted, marginTop: 3 }}>
                         {MARKER_TYPES.includes(ev.type) ? t(EV_LABEL[ev.type]) : `${t("ob")} ${ev.time}`}
                         {ev.type === "tekma" && ev.opponent ? ` · vs ${ev.opponent}` : ""}
                         {ev.type === "tekma" ? ` · ${ev.location || t("Doma")}` : ""}
@@ -636,7 +636,7 @@ function MonthView({ C, t, lang, monthOffset, setMonthOffset, events, onDelete }
                     {done && <div style={{ width: 20, height: 20, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>}
-                    <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 20, cursor: "pointer", padding: "4px 2px", lineHeight: 1 }}>×</button>
+                    <button onClick={() => onDelete(ev.id)} style={{ background: "none", border: "none", color: C.muted2, fontSize: 22.5, cursor: "pointer", padding: "4px 2px", lineHeight: 1 }}>×</button>
                   </div>
                 );
               })
@@ -705,7 +705,7 @@ export default function ScreenSeason({ profile, user }) {
       {(matchTomorrow || peakStartsMonday) && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", marginBottom: 14, borderRadius: 14, background: `${C.red}12`, border: `1px solid ${C.red}35`, animation: "athlosFade 0.25s ease" }}>
           <span style={{ display: "flex", color: C.red, flexShrink: 0 }}><IcBall size={16} /></span>
-          <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.text, lineHeight: 1.4 }}>
+          <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.text, lineHeight: 1.4 }}>
             {matchTomorrow
               ? <>{t("Tekma jutri")} · <strong>{matchTomorrow.title}</strong>{matchTomorrow.opponent ? ` vs ${matchTomorrow.opponent}` : ""} {matchTomorrow.time && `ob ${matchTomorrow.time}`}</>
               : <>{t("Peak teden se začne jutri — bodi spočit.")}</>}
@@ -717,8 +717,8 @@ export default function ScreenSeason({ profile, user }) {
       <header style={{ marginBottom: 18 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div>
-            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.3em" }}>SEZONA</Mono>
-            <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 26, margin: "5px 0 0", color: C.text }}>{t("Tvoj urnik")}</h2>
+            <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.3em" }}>SEZONA</Mono>
+            <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 29, margin: "5px 0 0", color: C.text }}>{t("Tvoj urnik")}</h2>
           </div>
           {/* Week / Month toggle */}
           <div style={{ display: "flex", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 999, padding: 3, flexShrink: 0 }}>
@@ -727,7 +727,7 @@ export default function ScreenSeason({ profile, user }) {
                 padding: "6px 14px", borderRadius: 999, border: "none", cursor: "pointer",
                 background: calView === v ? C.btn : "transparent",
                 color: calView === v ? C.btnText : C.muted,
-                fontFamily: C.display, fontWeight: 700, fontSize: 12, transition: "background 0.15s",
+                fontFamily: C.display, fontWeight: 700, fontSize: 13.5, transition: "background 0.15s",
               }}>
                 {v === "week" ? t("Teden") : t("Mesec")}
               </button>
@@ -742,12 +742,12 @@ export default function ScreenSeason({ profile, user }) {
           flex: 1, padding: "13px", borderRadius: 999, border: "none",
           background: mode === "ai" ? C.btn : `${C.gold}16`,
           color: mode === "ai" ? C.btnText : C.gold,
-          fontFamily: C.display, fontSize: 14, fontWeight: 700,
+          fontFamily: C.display, fontSize: 15.5, fontWeight: 700,
           display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
         }}>
           <IcBolt size={14} /> {t("AI urnik")}
         </Pressable>
-        <Pressable onClick={() => setMode(mode === "add" ? "list" : "add")} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: `1px solid ${C.border2}`, background: mode === "add" ? C.surface2 : "none", color: C.text, fontFamily: C.display, fontSize: 14, fontWeight: 600 }}>{t("+ Dodaj sam")}</Pressable>
+        <Pressable onClick={() => setMode(mode === "add" ? "list" : "add")} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: `1px solid ${C.border2}`, background: mode === "add" ? C.surface2 : "none", color: C.text, fontFamily: C.display, fontSize: 15.5, fontWeight: 600 }}>{t("+ Dodaj sam")}</Pressable>
         {/* .ics export — Apple/Google Calendar (spec §05) */}
         <Pressable onClick={() => events.length && downloadICS(events)} scale={0.94} aria-label={t("Izvozi v koledar (.ics)")} style={{ width: 47, padding: "13px 0", borderRadius: 999, border: `1px solid ${C.border2}`, background: "none", color: events.length ? C.text : C.muted2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>

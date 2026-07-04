@@ -12,7 +12,7 @@ export default function ScreenSession({ go }) {
         <BackBtn onClick={() => go("train")} />
         <div>
           <Kicker>{t("TRENING V ŽIVO")}</Kicker>
-          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Počep")} — {t("serija")} 3/5</h2>
+          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Počep")} — {t("serija")} 3/5</h2>
         </div>
       </header>
 
@@ -26,13 +26,13 @@ export default function ScreenSession({ go }) {
       <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 18 }}>
           <Mono style={{ color: C.muted }}>{t("SERIJA 3 OD 5")}</Mono>
-          <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("CILJ")} 82.5 KG ✓</span>
+          <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text }}>{t("CILJ")} 82.5 KG ✓</span>
         </div>
         {[[t("TEŽA"), "82.5 KG", 72], [t("PONOVITVE"), "3", 50], [t("TEŽAVNOST"), "7.5 / 10", 78]].map(([l, v, w], i) => (
           <div key={i} style={{ marginBottom: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <Mono style={{ color: C.muted, fontSize: 10 }}>{l}</Mono>
-              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13, color: C.text }}>{v}</span>
+              <Mono style={{ color: C.muted, fontSize: 11 }}>{l}</Mono>
+              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14.5, color: C.text }}>{v}</span>
             </div>
             <div style={{ height: 6, borderRadius: 3, background: C.surface3 }}>
               <div style={{ width: `${w}%`, height: "100%", borderRadius: 3, background: C.accent }} />
@@ -44,7 +44,7 @@ export default function ScreenSession({ go }) {
 
       <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12 }}>
         <Mono style={{ color: C.accent }}>AI</Mono>
-        <span style={{ color: C.text2, fontSize: 13, lineHeight: 1.5 }}>{t("Tvoja izvedba je stabilna in hitra. Kar tako naprej — tehnika je odlična.")}</span>
+        <span style={{ color: C.text2, fontSize: 14.5, lineHeight: 1.5 }}>{t("Tvoja izvedba je stabilna in hitra. Kar tako naprej — tehnika je odlična.")}</span>
       </div>
     </div>
   );

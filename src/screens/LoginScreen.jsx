@@ -48,7 +48,7 @@ function SocialBtn({ onClick, children }) {
     <button onClick={onClick} style={{
       flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
       padding: "14px 10px", borderRadius: 14, border: `1px solid ${L.border}`, background: L.surface2,
-      color: L.text, fontFamily: L.display, fontWeight: 600, fontSize: 14,
+      color: L.text, fontFamily: L.display, fontWeight: 600, fontSize: 15.5,
       cursor: "pointer", WebkitTapHighlightColor: "transparent", transition: "border-color 0.15s, box-shadow 0.15s",
       boxShadow: "0 1px 2px rgba(22,52,90,0.06)",
     }}
@@ -146,11 +146,11 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
     width: "100%", padding: "15px 18px", borderRadius: 14,
     border: `1px solid ${L.border}`, background: L.surface2,
     color: L.text, fontFamily: L.display, fontWeight: 500,
-    fontSize: 15, outline: "none", boxSizing: "border-box",
+    fontSize: 17, outline: "none", boxSizing: "border-box",
     marginTop: 8, transition: "border-color 0.2s, box-shadow 0.2s",
     boxShadow: "inset 0 1px 2px rgba(22,52,90,0.05)",
   };
-  const label = { fontFamily: L.heading, fontSize: 10, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: L.muted };
+  const label = { fontFamily: L.heading, fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: L.muted };
 
   if (launching) return <LaunchAnimation onDone={() => onLogin(pendingUser)} />;
   const curLang = profile?.lang === "en" ? "en" : "sl";
@@ -181,7 +181,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
           <HeroFigure h="min(26dvh, 250px)" />
           <div style={{ marginTop: -4 }}><Wordmark size={28} /></div>
           <div style={{ width: 54, height: 1, margin: "10px 0 8px", background: `linear-gradient(90deg, transparent, ${L.gold}, transparent)` }} />
-          <div style={{ fontFamily: L.heading, fontSize: 10, color: L.muted, textAlign: "center", letterSpacing: "0.30em", textTransform: "uppercase" }}>
+          <div style={{ fontFamily: L.heading, fontSize: 11, color: L.muted, textAlign: "center", letterSpacing: "0.30em", textTransform: "uppercase" }}>
             {t("sistem, ki pozna vsakega športnika")}
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         {/* ── Divider ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
           <div style={{ flex: 1, height: 1, background: L.border }} />
-          <span style={{ ...label, fontSize: 9 }}>{t("ALI")}</span>
+          <span style={{ ...label, fontSize: 10 }}>{t("ALI")}</span>
           <div style={{ flex: 1, height: 1, background: L.border }} />
         </div>
 
@@ -233,12 +233,12 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         </div>
 
         {error && (
-          <div style={{ color: L.red, fontSize: 12.5, marginTop: 10, fontFamily: L.display, padding: "10px 12px", borderRadius: 10, background: `${L.red}12`, border: `1px solid ${L.red}3a` }}>
+          <div style={{ color: L.red, fontSize: 14, marginTop: 10, fontFamily: L.display, padding: "10px 12px", borderRadius: 10, background: `${L.red}12`, border: `1px solid ${L.red}3a` }}>
             {t(error)}
           </div>
         )}
 
-        <button onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} style={{ alignSelf: "flex-end", background: "none", border: "none", color: L.muted, fontFamily: L.display, fontSize: 12, fontWeight: 500, cursor: "pointer", marginTop: 10, padding: 0 }}>
+        <button onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} style={{ alignSelf: "flex-end", background: "none", border: "none", color: L.muted, fontFamily: L.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 10, padding: 0 }}>
           {t("Pozabljeno geslo?")}
         </button>
 
@@ -246,27 +246,27 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         <button onClick={submit} disabled={busy} style={{
           marginTop: 14, width: "100%", padding: "15px", borderRadius: 14, border: "none", cursor: busy ? "default" : "pointer",
           background: `linear-gradient(180deg, ${L.accent2}, ${L.accent})`, color: "#FFFFFF",
-          fontFamily: L.heading, fontWeight: 700, fontSize: 14, letterSpacing: "0.16em", textTransform: "uppercase",
+          fontFamily: L.heading, fontWeight: 700, fontSize: 15.5, letterSpacing: "0.16em", textTransform: "uppercase",
           boxShadow: `0 10px 26px ${L.accent}44, inset 0 1px 0 rgba(255,255,255,0.3)`, opacity: busy ? 0.6 : 1,
           WebkitTapHighlightColor: "transparent",
         }}>
           {busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}
         </button>
 
-        <p style={{ textAlign: "center", color: L.muted, fontSize: 13, marginTop: 12, marginBottom: 0, fontFamily: L.display, lineHeight: 1.5 }}>
+        <p style={{ textAlign: "center", color: L.muted, fontSize: 14.5, marginTop: 12, marginBottom: 0, fontFamily: L.display, lineHeight: 1.5 }}>
           {mode === "signup" ? t("Že imaš račun?") : t("Še nimaš računa?")}{" "}
           {mode === "signup" ? (
-            <button onClick={() => { setMode("login"); setError(""); }} style={{ background: "none", border: "none", padding: 0, color: L.accent, fontWeight: 700, fontFamily: L.display, fontSize: 13, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
+            <button onClick={() => { setMode("login"); setError(""); }} style={{ background: "none", border: "none", padding: 0, color: L.accent, fontWeight: 700, fontFamily: L.display, fontSize: 14.5, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
               {t("Prijava")}
             </button>
           ) : (
-            <button onClick={() => { setMode("signup"); setError(""); }} style={{ background: "none", border: "none", padding: 0, color: L.accent, fontWeight: 700, fontFamily: L.display, fontSize: 13, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
+            <button onClick={() => { setMode("signup"); setError(""); }} style={{ background: "none", border: "none", padding: 0, color: L.accent, fontWeight: 700, fontFamily: L.display, fontSize: 14.5, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
               {t("Registracija")}
             </button>
           )}
         </p>
 
-        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: L.muted2, fontFamily: L.display, fontSize: 12, fontWeight: 500, cursor: "pointer", marginTop: 8, padding: 0, textAlign: "center", width: "100%" }}>
+        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: L.muted2, fontFamily: L.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 8, padding: 0, textAlign: "center", width: "100%" }}>
           {t("Politika zasebnosti")}
         </button>
       </div>

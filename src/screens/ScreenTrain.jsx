@@ -49,7 +49,7 @@ function RepsSlider({ value, max, onChange, accent, track, dim }) {
       style={{ position: "relative", height: 34, borderRadius: 10, background: track, cursor: "pointer", touchAction: "none", overflow: "hidden", userSelect: "none" }}
     >
       <div style={{ position: "absolute", inset: 0, width: `${pct * 100}%`, background: `linear-gradient(90deg, ${accent}22, ${accent}55)`, borderRadius: 10, transition: "width 0.08s linear" }} />
-      <div style={{ position: "absolute", top: "50%", left: `calc(${pct * 100}% )`, transform: "translate(-50%,-50%)", width: 30, height: 26, borderRadius: 8, background: accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 14px ${accent}99`, color: "#ffffff", fontWeight: 800, fontSize: 12, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", top: "50%", left: `calc(${pct * 100}% )`, transform: "translate(-50%,-50%)", width: 30, height: 26, borderRadius: 8, background: accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 14px ${accent}99`, color: "#ffffff", fontWeight: 800, fontSize: 13.5, pointerEvents: "none" }}>
         ‹›
       </div>
     </div>
@@ -58,13 +58,13 @@ function RepsSlider({ value, max, onChange, accent, track, dim }) {
 
 /* ───────────────────────── load stepper ───────────────────────── */
 function LoadStepper({ value, unit, onChange, C, step = 2.5 }) {
-  const btn = { width: 40, height: 40, borderRadius: 12, border: `1px solid ${C.border2}`, background: C.surface2, color: C.text, fontSize: 20, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" };
+  const btn = { width: 40, height: 40, borderRadius: 12, border: `1px solid ${C.border2}`, background: C.surface2, color: C.text, fontSize: 22.5, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" };
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <button onClick={() => onChange(Math.max(0, +(value - step).toFixed(1)))} style={btn}>−</button>
       <div style={{ flex: 1, textAlign: "center" }}>
-        <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text }}>{value}</span>
-        <span style={{ fontFamily: C.mono, fontSize: 11, color: C.muted, marginLeft: 4 }}>{unit}</span>
+        <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24.5, color: C.text }}>{value}</span>
+        <span style={{ fontFamily: C.mono, fontSize: 12.5, color: C.muted, marginLeft: 4 }}>{unit}</span>
       </div>
       <button onClick={() => onChange(+(value + step).toFixed(1))} style={{ ...btn, color: C.accent, borderColor: `${C.accent}66` }}>+</button>
     </div>
@@ -85,12 +85,12 @@ function Progression({ C, t }) {
     <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: 18, marginBottom: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
         <div>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>{t("NAPREDEK · 8 TEDNOV")}</Mono>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, letterSpacing: "-0.01em", marginTop: 2 }}>{t("OBREMENITEV & HITROST")}</div>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>{t("NAPREDEK · 8 TEDNOV")}</Mono>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 19, color: C.text, letterSpacing: "-0.01em", marginTop: 2 }}>{t("OBREMENITEV & HITROST")}</div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div><span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.accent }}>120</span><span style={{ fontFamily: C.mono, fontSize: 9, color: C.muted }}> KG</span> <span style={{ fontFamily: C.mono, fontSize: 9, color: C.accent }}>+20%</span></div>
-          <div><span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.text }}>0.58</span><span style={{ fontFamily: C.mono, fontSize: 9, color: C.muted }}> M/S {t("HITR.")}</span></div>
+          <div><span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.accent }}>120</span><span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted }}> KG</span> <span style={{ fontFamily: C.mono, fontSize: 10, color: C.accent }}>+20%</span></div>
+          <div><span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text }}>0.58</span><span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted }}> M/S {t("HITR.")}</span></div>
         </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="120" style={{ display: "block" }}>
@@ -99,13 +99,13 @@ function Progression({ C, t }) {
         <circle cx={W - pad} cy={pad + (1 - (load[7] - 30) / 90) * (H - pad * 2)} r="4" fill={C.accent} />
       </svg>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-        <Mono style={{ color: C.muted2, fontSize: 8 }}>T-7</Mono>
-        <Mono style={{ color: C.muted2, fontSize: 8 }}>T-4</Mono>
-        <Mono style={{ color: C.accent, fontSize: 8 }}>{t("ZDAJ")}</Mono>
+        <Mono style={{ color: C.muted2, fontSize: 9 }}>T-7</Mono>
+        <Mono style={{ color: C.muted2, fontSize: 9 }}>T-4</Mono>
+        <Mono style={{ color: C.accent, fontSize: 9 }}>{t("ZDAJ")}</Mono>
       </div>
       <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 14, height: 2, background: C.accent }} /><Mono style={{ color: C.muted, fontSize: 8 }}>{t("Obremenitev · kg")}</Mono></span>
-        <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 14, height: 0, borderTop: `2px dashed ${C.accent}80` }} /><Mono style={{ color: C.muted, fontSize: 8 }}>{t("Hitrost · m/s")}</Mono></span>
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 14, height: 2, background: C.accent }} /><Mono style={{ color: C.muted, fontSize: 9 }}>{t("Obremenitev · kg")}</Mono></span>
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 14, height: 0, borderTop: `2px dashed ${C.accent}80` }} /><Mono style={{ color: C.muted, fontSize: 9 }}>{t("Hitrost · m/s")}</Mono></span>
       </div>
     </div>
   );
@@ -143,13 +143,13 @@ function VBTSheet({ ex, C, t, onClose, onStart }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 20, background: C.bg, display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease" }}>
       {/* header */}
       <div style={{ padding: "14px 18px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${C.border}` }}>
-        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>←</button>
+        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>←</button>
         <div style={{ flex: 1 }}>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>{ex.block} · {t("VAJA V TRENINGU")}</Mono>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, marginTop: 2 }}>{t(ex.name)}</div>
-          <Mono style={{ color: C.accent, fontSize: 9, marginTop: 2 }}>{ex.reps} {t("PON.")} · {t("NAPREDOVANJE 4 TEDNI")}</Mono>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>{ex.block} · {t("VAJA V TRENINGU")}</Mono>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22.5, color: C.text, marginTop: 2 }}>{t(ex.name)}</div>
+          <Mono style={{ color: C.accent, fontSize: 10, marginTop: 2 }}>{ex.reps} {t("PON.")} · {t("NAPREDOVANJE 4 TEDNI")}</Mono>
         </div>
-        <span style={{ fontFamily: C.mono, fontSize: 8, fontWeight: 700, color: C.accent, border: `1px solid ${C.accent}55`, borderRadius: 5, padding: "2px 6px" }}>{ex.tag}</span>
+        <span style={{ fontFamily: C.mono, fontSize: 9, fontWeight: 700, color: C.accent, border: `1px solid ${C.accent}55`, borderRadius: 5, padding: "2px 6px" }}>{ex.tag}</span>
       </div>
 
       {/* body */}
@@ -157,8 +157,8 @@ function VBTSheet({ ex, C, t, onClose, onStart }) {
         {/* chart card */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: "16px 14px 14px", marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Napredovanje")} · {t("teža")}</span>
-            <span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted }}>kg / {t("čas")}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text }}>{t("Napredovanje")} · {t("teža")}</span>
+            <span style={{ fontFamily: C.mono, fontSize: 11, color: C.muted }}>kg / {t("čas")}</span>
           </div>
           <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="auto" style={{ display: "block" }}>
             {/* horizontal grid */}
@@ -190,27 +190,27 @@ function VBTSheet({ ex, C, t, onClose, onStart }) {
           <div style={{ display: "flex", gap: 20, marginTop: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5" fill={C.bg} stroke={C.accent} strokeWidth="1.5" /></svg>
-              <Mono style={{ color: C.muted, fontSize: 8 }}>{t("brez snemanja")}</Mono>
+              <Mono style={{ color: C.muted, fontSize: 9 }}>{t("brez snemanja")}</Mono>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5" fill={C.accent} /></svg>
-              <Mono style={{ color: C.muted, fontSize: 8 }}>VBT · {t("zadnji set")}</Mono>
+              <Mono style={{ color: C.muted, fontSize: 9 }}>VBT · {t("zadnji set")}</Mono>
             </div>
           </div>
         </div>
 
         {/* today's sets */}
-        <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em", display: "block", marginBottom: 10 }}>{t("DANES")} · {VBT_TODAY_SETS.length} {t("SERIJE")}</Mono>
+        <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em", display: "block", marginBottom: 10 }}>{t("DANES")} · {VBT_TODAY_SETS.length} {t("SERIJE")}</Mono>
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, overflow: "hidden", marginBottom: 8 }}>
           {VBT_TODAY_SETS.map((s, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderBottom: i < VBT_TODAY_SETS.length - 1 ? `1px solid ${C.border}` : "none" }}>
-              <span style={{ width: 28, height: 28, borderRadius: "50%", background: s.top ? C.accent : C.surface2, color: s.top ? "#fff" : C.text2, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 12, flexShrink: 0 }}>{s.num}</span>
+              <span style={{ width: 28, height: 28, borderRadius: "50%", background: s.top ? C.accent : C.surface2, color: s.top ? "#fff" : C.text2, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 13.5, flexShrink: 0 }}>{s.num}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{s.label}</div>
-                <Mono style={{ color: C.muted, fontSize: 9 }}>{t(s.sub)}</Mono>
+                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text }}>{s.label}</div>
+                <Mono style={{ color: C.muted, fontSize: 10 }}>{t(s.sub)}</Mono>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: s.top ? C.accent : C.text }}>{s.kg} × {s.reps}</span>
+                <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: s.top ? C.accent : C.text }}>{s.kg} × {s.reps}</span>
                 {s.top && <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#FF4B4B", flexShrink: 0 }} />}
               </div>
             </div>
@@ -220,7 +220,7 @@ function VBTSheet({ ex, C, t, onClose, onStart }) {
 
       {/* CTA */}
       <div style={{ padding: "14px 18px", paddingBottom: "max(18px, env(safe-area-inset-bottom, 18px))", borderTop: `1px solid ${C.border}` }}>
-        <button onClick={onStart} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: C.glow, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+        <button onClick={onStart} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: C.glow, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z" /></svg>
           {t("ZAČNI VAJO")} · {t(ex.name)}
         </button>
@@ -306,28 +306,28 @@ export default function ScreenTrain({ go, user }) {
       <div style={{ padding: "8px 18px 28px" }}>
         {/* header */}
         <div style={{ marginBottom: 20 }}>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>{t(SESSION.when)}</Mono>
-          <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, margin: "6px 0 2px", color: C.text, letterSpacing: "-0.02em" }}>{t("TRENING")} {SESSION.no}</h1>
-          <Mono style={{ color: C.accent, fontSize: 11, letterSpacing: "0.12em" }}>{t(SESSION.focus)}</Mono>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>{t(SESSION.when)}</Mono>
+          <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 33.5, margin: "6px 0 2px", color: C.text, letterSpacing: "-0.02em" }}>{t("TRENING")} {SESSION.no}</h1>
+          <Mono style={{ color: C.accent, fontSize: 12.5, letterSpacing: "0.12em" }}>{t(SESSION.focus)}</Mono>
         </div>
 
         {/* overview card */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 18, marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <div>
-              <Mono style={{ color: C.muted, fontSize: 9 }}>{t("PREGLED TRENINGA")}</Mono>
-              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, marginTop: 2 }}>3 {t("BLOKI")} · 9 {t("VAJ")}</div>
+              <Mono style={{ color: C.muted, fontSize: 10 }}>{t("PREGLED TRENINGA")}</Mono>
+              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, marginTop: 2 }}>3 {t("BLOKI")} · 9 {t("VAJ")}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 999, background: `${C.accent}1a`, border: `1px solid ${C.accent}40` }}>
               <svg width="16" height="10" viewBox="0 0 26 14" fill="none"><rect x="0.5" y="0.5" width="22" height="13" rx="3" stroke={C.accent} /><rect x="23" y="4" width="2.5" height="6" rx="1" fill={C.accent} /><rect x="2" y="2" width="16" height="10" rx="1.5" fill={C.accent} /></svg>
-              <span style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 11, color: C.accent }}>84%</span>
+              <span style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 12.5, color: C.accent }}>84%</span>
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             {[[SESSION.stats.time, t("MIN"), C.text], [SESSION.stats.intens + "%", t("INTENZ."), C.accent], [SESSION.stats.volume + t(" T"), t("VOLUMEN"), C.text], ["~" + SESSION.stats.kcal, t("KCAL"), C.text]].map(([v, l, col], i) => (
               <div key={i}>
-                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 19, color: col }}>{v}</div>
-                <Mono style={{ color: C.muted, fontSize: 8 }}>{l}</Mono>
+                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 21.5, color: col }}>{v}</div>
+                <Mono style={{ color: C.muted, fontSize: 9 }}>{l}</Mono>
               </div>
             ))}
           </div>
@@ -342,24 +342,24 @@ export default function ScreenTrain({ go, user }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "20px 2px 10px" }}>
           <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
             <span style={{ width: 8, height: 8, borderRadius: 2, background: C.accent }} />
-            <Mono style={{ color: C.text, fontSize: 11, letterSpacing: "0.12em" }}>{t("SUPER SERIJA A")}</Mono>
+            <Mono style={{ color: C.text, fontSize: 12.5, letterSpacing: "0.12em" }}>{t("SUPER SERIJA A")}</Mono>
           </span>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>{SESSION.rounds} {t("KROGI")} · {SESSION.rest}s {t("ODMOR")}</Mono>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>{SESSION.rounds} {t("KROGI")} · {SESSION.rest}s {t("ODMOR")}</Mono>
         </div>
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: "6px 16px", marginBottom: 16, position: "relative" }}>
           {SESSION.block.map((e, i) => (
             <button key={i} onClick={() => { if (e.chart || e.tag === "VBT") { setVbtEx(i); } else { setStarted(true); setExIdx(i); } }}
               style={{ width: "100%", textAlign: "left", background: "none", border: "none", borderBottom: i < SESSION.block.length - 1 ? `1px solid ${C.border}` : "none", padding: "16px 0", display: "flex", alignItems: "center", gap: 14, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
               <span style={{ position: "relative", width: 34, height: 34, flexShrink: 0 }}>
-                <span style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `1.5px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 11, color: C.accent, background: C.bg }}>{e.block}</span>
+                <span style={{ position: "absolute", inset: 0, borderRadius: "50%", border: `1.5px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 12.5, color: C.accent, background: C.bg }}>{e.block}</span>
                 {i < SESSION.block.length - 1 && <span style={{ position: "absolute", top: 34, left: "50%", width: 1, height: 28, background: C.border2, transform: "translateX(-50%)" }} />}
               </span>
               <span style={{ flex: 1 }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{t(e.name)}</span>
-                  {e.tag && <span style={{ fontFamily: C.mono, fontSize: 8, fontWeight: 700, color: C.accent, border: `1px solid ${C.accent}55`, borderRadius: 5, padding: "1px 5px", letterSpacing: "0.08em" }}>{e.tag}</span>}
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>{t(e.name)}</span>
+                  {e.tag && <span style={{ fontFamily: C.mono, fontSize: 9, fontWeight: 700, color: C.accent, border: `1px solid ${C.accent}55`, borderRadius: 5, padding: "1px 5px", letterSpacing: "0.08em" }}>{e.tag}</span>}
                 </span>
-                <Mono style={{ color: C.muted, fontSize: 10 }}>{e.reps} {t("pon.")} · {e.load > 0 ? `${e.load} ${e.unit.toLowerCase()}` : `${e.reps} ${e.unit.toLowerCase()} / ${t("stran")}`}</Mono>
+                <Mono style={{ color: C.muted, fontSize: 11 }}>{e.reps} {t("pon.")} · {e.load > 0 ? `${e.load} ${e.unit.toLowerCase()}` : `${e.reps} ${e.unit.toLowerCase()} / ${t("stran")}`}</Mono>
               </span>
               <span style={{ color: C.muted }}>›</span>
             </button>
@@ -379,7 +379,7 @@ export default function ScreenTrain({ go, user }) {
         {/* slide to start */}
         <div style={{ marginTop: 22 }}>
           <div style={{ position: "relative", height: 58, borderRadius: 999, background: C.accent, overflow: "hidden", boxShadow: C.glow }}>
-            <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, fontSize: 15, color: "#ffffff", letterSpacing: "0.04em", opacity: 1 - slide }}>
+            <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, fontSize: 17, color: "#ffffff", letterSpacing: "0.04em", opacity: 1 - slide }}>
               {t("POVLECI ZA ZAČETEK")} →
             </span>
             <div
@@ -406,17 +406,17 @@ export default function ScreenTrain({ go, user }) {
         <div style={{ width: 84, height: 84, borderRadius: "50%", background: `${C.accent}1a`, border: `2px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 22, boxShadow: C.name === "dark" ? `0 0 34px ${C.accent}44` : "none" }}>
           <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
         </div>
-        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, margin: "0 0 8px", color: C.text, letterSpacing: "-0.02em" }}>{t("Trening končan!")}</h2>
-        <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 28 }}>{t("SHRANJENO V TVOJO ZGODOVINO")}</Mono>
+        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, margin: "0 0 8px", color: C.text, letterSpacing: "-0.02em" }}>{t("Trening končan!")}</h2>
+        <Mono style={{ color: C.muted, fontSize: 11, marginBottom: 28 }}>{t("SHRANJENO V TVOJO ZGODOVINO")}</Mono>
         <div style={{ display: "flex", gap: 24, marginBottom: 34 }}>
           {[[fmtTime(elapsed), t("čas")], [String(logs.reduce((s, a) => s + a.filter((x) => x.done).length, 0)), t("serij")], [String(SESSION.block.length), t("vaj")]].map(([v, l], i) => (
             <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, color: C.text }}>{v}</div>
-              <Mono style={{ color: C.muted, fontSize: 9 }}>{l}</Mono>
+              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, color: C.text }}>{v}</div>
+              <Mono style={{ color: C.muted, fontSize: 10 }}>{l}</Mono>
             </div>
           ))}
         </div>
-        <Pressable onClick={() => { setStarted(false); setFinished(false); setElapsed(0); setExIdx(0); go("today"); }} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 700, fontSize: 15 }}>
+        <Pressable onClick={() => { setStarted(false); setFinished(false); setElapsed(0); setExIdx(0); go("today"); }} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 700, fontSize: 17 }}>
           {t("Nazaj na pregled")}
         </Pressable>
       </div>
@@ -431,8 +431,8 @@ export default function ScreenTrain({ go, user }) {
         <div style={{ display: "flex", gap: 10 }}>
           <BackBtn onClick={() => setStarted(false)} />
           <div>
-            <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.1em" }}>{t("TRENING")} {SESSION.no} · {ex.block} · {t(ex.cat)}</Mono>
-            <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em", textTransform: "uppercase" }}>{t(ex.name)}</h1>
+            <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.1em" }}>{t("TRENING")} {SESSION.no} · {ex.block} · {t(ex.cat)}</Mono>
+            <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em", textTransform: "uppercase" }}>{t(ex.name)}</h1>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -444,7 +444,7 @@ export default function ScreenTrain({ go, user }) {
             <span style={{ width: 24, height: 24, borderRadius: "50%", border: `1.5px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="9" height="9" viewBox="0 0 24 24" fill={C.accent}><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
             </span>
-            <div><Mono style={{ color: C.muted, fontSize: 8 }}>{t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 14, color: C.accent }}>{fmtTime(elapsed)}</div></div>
+            <div><Mono style={{ color: C.muted, fontSize: 9 }}>{t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 15.5, color: C.accent }}>{fmtTime(elapsed)}</div></div>
           </div>
         </div>
       </div>
@@ -458,9 +458,9 @@ export default function ScreenTrain({ go, user }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "4px 2px 12px" }}>
         <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span style={{ width: 8, height: 8, borderRadius: 2, background: C.accent }} />
-          <Mono style={{ color: C.text, fontSize: 11, letterSpacing: "0.12em" }}>{t("SERIJE · DNEVNIK")}</Mono>
+          <Mono style={{ color: C.text, fontSize: 12.5, letterSpacing: "0.12em" }}>{t("SERIJE · DNEVNIK")}</Mono>
         </span>
-        <Mono style={{ color: C.muted, fontSize: 9 }}>{doneCount}/{exLogs.length} {t("KONČANO")}</Mono>
+        <Mono style={{ color: C.muted, fontSize: 10 }}>{doneCount}/{exLogs.length} {t("KONČANO")}</Mono>
       </div>
 
       {exLogs.map((s, si) => {
@@ -468,10 +468,10 @@ export default function ScreenTrain({ go, user }) {
         return (
           <div key={si} style={{ background: C.surface, border: `1px solid ${isActive ? `${C.accent}88` : C.border}`, borderRadius: 16, padding: 16, marginBottom: 12, boxShadow: isActive ? C.glowSoft : "none", transition: "border-color 0.2s" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <span style={{ width: 26, height: 26, borderRadius: 8, background: s.done ? C.accent : C.surface2, color: s.done ? "#ffffff" : C.muted, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 12, flexShrink: 0 }}>{si + 1}</span>
+              <span style={{ width: 26, height: 26, borderRadius: 8, background: s.done ? C.accent : C.surface2, color: s.done ? "#ffffff" : C.muted, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 13.5, flexShrink: 0 }}>{si + 1}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: C.text, letterSpacing: "0.02em" }}>{t("SERIJA")} {si + 1}</div>
-                <Mono style={{ color: C.muted, fontSize: 9 }}>{t("CILJ")} · {ex.reps} {t("PON.")} {ex.load > 0 ? `@ ${ex.load} ${ex.unit}` : ""}</Mono>
+                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15.5, color: C.text, letterSpacing: "0.02em" }}>{t("SERIJA")} {si + 1}</div>
+                <Mono style={{ color: C.muted, fontSize: 10 }}>{t("CILJ")} · {ex.reps} {t("PON.")} {ex.load > 0 ? `@ ${ex.load} ${ex.unit}` : ""}</Mono>
               </div>
               <button onClick={() => setLog(si, { done: !s.done, reps: s.done ? s.reps : (s.reps || ex.reps) })}
                 style={{ width: 30, height: 30, borderRadius: "50%", border: `1.5px solid ${s.done ? C.accent : C.border2}`, background: s.done ? C.accent : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
@@ -481,12 +481,12 @@ export default function ScreenTrain({ go, user }) {
 
             {/* reps */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-              <Mono style={{ color: C.muted, fontSize: 9 }}>{t("PONOVITVE")}</Mono>
-              <span><span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: s.reps > 0 ? C.accent : C.muted }}>{s.reps}</span><span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted }}> / {ex.reps}</span></span>
+              <Mono style={{ color: C.muted, fontSize: 10 }}>{t("PONOVITVE")}</Mono>
+              <span><span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: s.reps > 0 ? C.accent : C.muted }}>{s.reps}</span><span style={{ fontFamily: C.mono, fontSize: 11, color: C.muted }}> / {ex.reps}</span></span>
             </div>
             <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14 }}>
               <button style={{ width: 56, height: 50, borderRadius: 12, border: `1px dashed ${C.border2}`, background: "transparent", color: C.muted, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, cursor: "pointer", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
-                <span style={{ fontSize: 16, lineHeight: 1 }}>+</span><span style={{ fontFamily: C.mono, fontSize: 7 }}>{t("VIDEO")}</span>
+                <span style={{ fontSize: 18, lineHeight: 1 }}>+</span><span style={{ fontFamily: C.mono, fontSize: 8 }}>{t("VIDEO")}</span>
               </button>
               <div style={{ flex: 1 }}>
                 <RepsSlider value={s.reps} max={ex.reps} onChange={(v) => setLog(si, { reps: v })} accent={C.accent} track={C.surface3} dim={C.muted} />
@@ -496,7 +496,7 @@ export default function ScreenTrain({ go, user }) {
             {/* load */}
             {ex.load > 0 && (
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <Mono style={{ color: C.muted, fontSize: 9, width: 44 }}>{t("TEŽA")}</Mono>
+                <Mono style={{ color: C.muted, fontSize: 10, width: 44 }}>{t("TEŽA")}</Mono>
                 <div style={{ flex: 1 }}><LoadStepper value={s.load} unit={ex.unit} onChange={(v) => setLog(si, { load: v })} C={C} /></div>
               </div>
             )}
@@ -505,12 +505,12 @@ export default function ScreenTrain({ go, user }) {
       })}
 
       {/* add set */}
-      <button onClick={addSet} style={{ width: "100%", padding: "15px", borderRadius: 14, border: `1px dashed ${C.border2}`, background: "transparent", color: C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 13, cursor: "pointer", marginBottom: 18, WebkitTapHighlightColor: "transparent" }}>
+      <button onClick={addSet} style={{ width: "100%", padding: "15px", borderRadius: 14, border: `1px dashed ${C.border2}`, background: "transparent", color: C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 14.5, cursor: "pointer", marginBottom: 18, WebkitTapHighlightColor: "transparent" }}>
         + {t("DODAJ SERIJO")}
       </button>
 
       {/* next exercise */}
-      <Pressable onClick={nextExercise} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: C.glow, letterSpacing: "0.02em" }}>
+      <Pressable onClick={nextExercise} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: C.glow, letterSpacing: "0.02em" }}>
         {exIdx >= SESSION.block.length - 1 ? t("KONČAJ TRENING") : t("NASLEDNJA VAJA")} →
       </Pressable>
     </div>
@@ -524,8 +524,8 @@ function BlockCard({ C, icon, iconBg, title, info, onClick }) {
     <button onClick={onClick} style={{ width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14, padding: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
       <span style={{ width: 38, height: 38, borderRadius: 12, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</span>
       <span style={{ flex: 1 }}>
-        <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, textTransform: "uppercase", letterSpacing: "0.02em" }}>{title}</span>
-        <Mono style={{ color: C.muted, fontSize: 10 }}>{info}</Mono>
+        <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text, textTransform: "uppercase", letterSpacing: "0.02em" }}>{title}</span>
+        <Mono style={{ color: C.muted, fontSize: 11 }}>{info}</Mono>
       </span>
       <span style={{ color: C.muted }}>›</span>
     </button>

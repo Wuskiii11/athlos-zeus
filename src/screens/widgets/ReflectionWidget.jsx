@@ -99,10 +99,10 @@ export default function ReflectionWidget({ insights, C, t }) {
             display: "flex", alignItems: "center", justifyContent: "center",
             background: `${iconColor}1c`, color: iconColor,
           }}>{top.icon}</span>
-          <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t(top.kicker)}</Mono>
+          <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em" }}>{t(top.kicker)}</Mono>
         </div>
-        <p style={{ fontFamily: C.display, fontSize: 14, color: C.text, lineHeight: 1.5, margin: 0 }}>{t(top.text)}</p>
-        <Mono style={{ color: C.muted2, fontSize: 9, marginTop: 12, display: "block" }}>
+        <p style={{ fontFamily: C.display, fontSize: 15.5, color: C.text, lineHeight: 1.5, margin: 0 }}>{t(top.text)}</p>
+        <Mono style={{ color: C.muted2, fontSize: 10, marginTop: 12, display: "block" }}>
           ← {t("povleci za naslednje")} · {queue.length} {t("sporočil")}
         </Mono>
       </div>

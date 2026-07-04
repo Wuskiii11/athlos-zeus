@@ -31,12 +31,12 @@ export default function LockscreenDemo({ onClose, t }) {
       animation: "athlosFade 0.25s ease", color: "#fff", userSelect: "none",
     }}>
       {/* status hint */}
-      <Mono style={{ color: "rgba(255,255,255,0.4)", fontSize: 9, letterSpacing: "0.2em", marginTop: 10 }}>LIVE ACTIVITY · DEMO</Mono>
+      <Mono style={{ color: "rgba(255,255,255,0.4)", fontSize: 10, letterSpacing: "0.2em", marginTop: 10 }}>LIVE ACTIVITY · DEMO</Mono>
 
       {/* clock */}
       <div style={{ textAlign: "center", marginTop: 34 }}>
-        <Mono style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, letterSpacing: "0.18em" }}>{dateLine}</Mono>
-        <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: 76, lineHeight: 1.05, letterSpacing: "0.02em", textShadow: "0 4px 30px rgba(0,0,0,0.45)" }}>{clock}</div>
+        <Mono style={{ color: "rgba(255,255,255,0.75)", fontSize: 13.5, letterSpacing: "0.18em" }}>{dateLine}</Mono>
+        <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: 85, lineHeight: 1.05, letterSpacing: "0.02em", textShadow: "0 4px 30px rgba(0,0,0,0.45)" }}>{clock}</div>
       </div>
 
       {/* Live Activity card */}
@@ -49,17 +49,17 @@ export default function LockscreenDemo({ onClose, t }) {
         <span aria-hidden="true" style={{ position: "absolute", right: -20, top: -20, width: 110, height: 110, background: "radial-gradient(circle, rgba(0,255,135,0.20), transparent 70%)", pointerEvents: "none" }} />
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <span style={{ width: 26, height: 26, borderRadius: 8, background: "rgba(0,255,135,0.14)", border: "1px solid rgba(0,255,135,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cinzel',serif", fontWeight: 800, fontSize: 13, color: "#00FF87" }}>A</span>
-          <Mono style={{ color: "rgba(244,239,230,0.6)", fontSize: 9, letterSpacing: "0.18em", flex: 1 }}>ATHLOS · {live ? t(live.focus) : "MOČ · SPODNJI DEL"}</Mono>
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 14, color: "#00FF87" }}>{live ? fmtElapsed(live.startedAt) : "14:32"}</span>
+          <span style={{ width: 26, height: 26, borderRadius: 8, background: "rgba(0,255,135,0.14)", border: "1px solid rgba(0,255,135,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cinzel',serif", fontWeight: 800, fontSize: 14.5, color: "#00FF87" }}>A</span>
+          <Mono style={{ color: "rgba(244,239,230,0.6)", fontSize: 10, letterSpacing: "0.18em", flex: 1 }}>ATHLOS · {live ? t(live.focus) : "MOČ · SPODNJI DEL"}</Mono>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 15.5, color: "#00FF87" }}>{live ? fmtElapsed(live.startedAt) : "14:32"}</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 800, fontSize: 26, textTransform: "uppercase", color: "#F4EFE6", lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 800, fontSize: 29, textTransform: "uppercase", color: "#F4EFE6", lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {live ? `${live.block} · ${t(live.exName)}` : "A1 · Počep"}
             </div>
-            <Mono style={{ color: restLeft ? "#C8A24A" : "rgba(244,239,230,0.55)", fontSize: 10, letterSpacing: "0.08em", marginTop: 6, display: "block" }}>
+            <Mono style={{ color: restLeft ? "#C8A24A" : "rgba(244,239,230,0.55)", fontSize: 11, letterSpacing: "0.08em", marginTop: 6, display: "block" }}>
               {restLeft
                 ? `${t("ODMOR")} ${restLeft}s${live?.nextName ? ` · ${t("nato")}: ${t(live.nextName)}` : ""}`
                 : live
@@ -84,7 +84,7 @@ export default function LockscreenDemo({ onClose, t }) {
 
       {/* swipe hint */}
       <div style={{ textAlign: "center", paddingBottom: "max(env(safe-area-inset-bottom, 28px), 28px)" }}>
-        <Mono style={{ color: "rgba(255,255,255,0.45)", fontSize: 9, letterSpacing: "0.24em" }}>SWIPE UP TO OPEN ATHLOS</Mono>
+        <Mono style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, letterSpacing: "0.24em" }}>SWIPE UP TO OPEN ATHLOS</Mono>
         <div style={{ width: 120, height: 4, borderRadius: 999, background: "rgba(255,255,255,0.55)", margin: "14px auto 0" }} />
       </div>
     </div>

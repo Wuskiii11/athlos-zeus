@@ -47,7 +47,7 @@ export function SkeletonBlock({ width = "100%", height = 16, radius = 8, style }
 export const Mono = ({ children, style }) => {
   const C = useTheme();
   return (
-    <span style={{ fontFamily: C.mono, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 10, fontWeight: 600, ...style }}>
+    <span style={{ fontFamily: C.mono, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 11, fontWeight: 600, ...style }}>
       {children}
     </span>
   );
@@ -105,7 +105,7 @@ export const Kicker = ({ children, color }) => {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 7,
-      fontFamily: C.display, fontSize: 12, letterSpacing: "0.02em", textTransform: "lowercase",
+      fontFamily: C.display, fontSize: 13.5, letterSpacing: "0.02em", textTransform: "lowercase",
       color: color || C.muted, fontWeight: 500, marginBottom: 6,
     }}>
       <span aria-hidden="true" style={{
@@ -121,7 +121,7 @@ export const Pill = ({ children, fill, color }) => {
   const c = color || C.accent;
   return (
     <span style={{
-      fontFamily: C.display, fontSize: 11, letterSpacing: "0.01em", textTransform: "lowercase",
+      fontFamily: C.display, fontSize: 12.5, letterSpacing: "0.01em", textTransform: "lowercase",
       padding: "4px 11px", borderRadius: 999, fontWeight: 600,
       color: fill ? "#000" : c, background: fill ? c : `${c}16`,
       border: "none",
@@ -213,7 +213,7 @@ export const PrimaryBtn = ({ children, onClick, style, disabled }) => {
         width: "100%", padding: "17px 16px", borderRadius: 999, border: "none",
         background: C.btn, color: C.btnText,
         fontFamily: C.display, fontWeight: 700, textTransform: "none",
-        letterSpacing: "0.01em", fontSize: 15,
+        letterSpacing: "0.01em", fontSize: 17,
         cursor: disabled ? "default" : "pointer",
         boxShadow: pressed ? "none" : (C.name === "dark" ? "0 10px 30px rgba(0,0,0,0.45)" : "0 8px 22px rgba(0,0,0,0.18)"),
         WebkitTapHighlightColor: "transparent",
@@ -277,7 +277,7 @@ export function TabButton({ n, active, onClick }) {
       <div key={active ? `${n.id}-on` : n.id} style={{ animation: active ? "athlosTabPop 0.35s ease" : "none", display: "flex" }}>
         <Icon name={n.icon} color={color} size={22} />
       </div>
-      <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 10, letterSpacing: "0.01em", color, whiteSpace: "nowrap", transition: "color 0.2s" }}>
+      <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, letterSpacing: "0.01em", color, whiteSpace: "nowrap", transition: "color 0.2s" }}>
         {n.label}
       </span>
       <style>{`
@@ -297,7 +297,7 @@ export function SettingsBlock({ title, children }) {
   const C = useTheme();
   return (
     <div style={{ padding: "16px 0", borderBottom: `1px solid ${C.border}` }}>
-      <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 12 }}>{title}</Mono>
+      <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginBottom: 12 }}>{title}</Mono>
       {children}
     </div>
   );

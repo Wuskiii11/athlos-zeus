@@ -168,7 +168,7 @@ function DayDivider({ label, C, muted, line }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 6px 10px" }}>
       <span style={{ flex: 1, height: 1, background: line }} />
-      <Mono style={{ color: muted, fontSize: 8, letterSpacing: "0.28em" }}>{label}</Mono>
+      <Mono style={{ color: muted, fontSize: 9, letterSpacing: "0.28em" }}>{label}</Mono>
       <span style={{ flex: 1, height: 1, background: line }} />
     </div>
   );
@@ -186,7 +186,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
       <div style={{ textAlign: isMine ? "right" : "left", margin: "4px 0" }}>
         <span
           onContextMenu={e => { e.preventDefault(); onLongPress?.(msg); }}
-          style={{ fontSize: 56, lineHeight: 1.1, display: "inline-block", cursor: "context-menu" }}
+          style={{ fontSize: 62.5, lineHeight: 1.1, display: "inline-block", cursor: "context-menu" }}
         >{msg.content}</span>
       </div>
     );
@@ -254,14 +254,14 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
-            <span style={{ fontFamily: C.display, fontSize: 13, fontWeight: 600 }}>
+            <span style={{ fontFamily: C.display, fontSize: 14.5, fontWeight: 600 }}>
               {msg.content || "Datoteka"}
             </span>
           </div>
         )}
         {msg.type === "text" && (
           <span style={{
-            fontFamily: C.display, fontSize: isMine ? 15 : 15.5, fontWeight: 500, lineHeight: 1.45,
+            fontFamily: C.display, fontSize: isMine ? 17 : 17.5, fontWeight: 500, lineHeight: 1.45,
             fontStyle: isMine ? "normal" : "italic", position: "relative",
           }}>
             {msg.content}
@@ -269,7 +269,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
         )}
       </div>
       {showTime && (
-        <Mono style={{ fontSize: 8, color: C.muted2, margin: "3px 4px", letterSpacing: "0.12em" }}>
+        <Mono style={{ fontSize: 9, color: C.muted2, margin: "3px 4px", letterSpacing: "0.12em" }}>
           {msg.created_at
             ? new Date(msg.created_at).toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })
             : ""}
@@ -297,19 +297,19 @@ function ProfileSheet({ user, C, t, onClose, onMessage, onBlock }) {
             width: 76, height: 76, borderRadius: "50%",
             background: `${C.accent}18`, border: `2px solid ${C.accent}45`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: C.heading, fontSize: 26, fontWeight: 700, color: C.accent,
+            fontFamily: C.heading, fontSize: 29, fontWeight: 700, color: C.accent,
           }}>{user?.initials || "?"}</div>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontFamily: C.heading, fontSize: 19, fontWeight: 700, color: C.text, letterSpacing: "0.04em" }}>
+            <div style={{ fontFamily: C.heading, fontSize: 21.5, fontWeight: 700, color: C.text, letterSpacing: "0.04em" }}>
               {user?.name}
             </div>
             {user?.sport && (
-              <Mono style={{ color: C.accent, fontSize: 10, display: "block", marginTop: 3 }}>
+              <Mono style={{ color: C.accent, fontSize: 11, display: "block", marginTop: 3 }}>
                 {user.sport}
               </Mono>
             )}
             {user?.club && (
-              <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginTop: 2 }}>
+              <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginTop: 2 }}>
                 {user.club}
               </Mono>
             )}
@@ -319,21 +319,21 @@ function ProfileSheet({ user, C, t, onClose, onMessage, onBlock }) {
           <button onClick={onMessage} style={{
             padding: "15px", borderRadius: 14, border: "none",
             background: C.accent, color: C.name === "dark" ? "#04130a" : "#fff",
-            fontFamily: C.display, fontSize: 15, fontWeight: 700, cursor: "pointer",
+            fontFamily: C.display, fontSize: 17, fontWeight: 700, cursor: "pointer",
           }}>
             {t("Pošlji sporočilo")}
           </button>
           <button onClick={() => onBlock(user?.user_id)} style={{
             padding: "15px", borderRadius: 14, border: "1px solid rgba(229,83,75,0.35)",
             background: "transparent", color: "#e5534b",
-            fontFamily: C.display, fontSize: 15, fontWeight: 600, cursor: "pointer",
+            fontFamily: C.display, fontSize: 17, fontWeight: 600, cursor: "pointer",
           }}>
             {t("Blokiraj")}
           </button>
           <button onClick={onClose} style={{
             padding: "13px", borderRadius: 14, border: `1px solid ${C.border}`,
             background: "transparent", color: C.muted,
-            fontFamily: C.display, fontSize: 14, fontWeight: 600, cursor: "pointer",
+            fontFamily: C.display, fontSize: 15.5, fontWeight: 600, cursor: "pointer",
           }}>
             {t("Zapri")}
           </button>
@@ -356,7 +356,7 @@ function BgSheet({ current, C, t, onSelect, onClose }) {
         animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
       }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 18px" }} />
-        <div style={{ fontFamily: C.heading, fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 16 }}>
+        <div style={{ fontFamily: C.heading, fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>
           {t("Ozadje pogovora")}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
@@ -372,7 +372,7 @@ function BgSheet({ current, C, t, onSelect, onClose }) {
               padding: "0 0 6px",
             }}>
               <span style={{
-                fontFamily: C.display, fontSize: 9, fontWeight: 700,
+                fontFamily: C.display, fontSize: 10, fontWeight: 700,
                 color: bg.id === "dark" || bg.id === "olive" || bg.id === "navy" || bg.id === "bronze"
                   ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.55)",
                 letterSpacing: "0.02em",
@@ -409,10 +409,10 @@ function BlockConfirm({ name, C, t, onConfirm, onCancel }) {
         background: C.bg, borderRadius: 20, padding: "26px 22px 20px", width: "88%", maxWidth: 320,
         animation: "athlosFade 0.2s ease",
       }}>
-        <div style={{ fontFamily: C.heading, fontSize: 17, fontWeight: 700, color: C.text, textAlign: "center", marginBottom: 8 }}>
+        <div style={{ fontFamily: C.heading, fontSize: 19, fontWeight: 700, color: C.text, textAlign: "center", marginBottom: 8 }}>
           {t("Blokiraj")} {name}
         </div>
-        <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, textAlign: "center", marginBottom: 22, lineHeight: 1.4 }}>
+        <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.muted, textAlign: "center", marginBottom: 22, lineHeight: 1.4 }}>
           {t("Uporabnik vam ne bo mogel pošiljati sporočil.")}
         </div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -447,7 +447,7 @@ function MsgMenu({ msg, C, t, onDelete, onClose }) {
         <button onClick={onDelete} style={{
           width: "100%", padding: "14px 18px", borderRadius: 12, border: "none",
           background: "rgba(229,83,75,0.1)", color: "#e5534b",
-          fontFamily: C.display, fontSize: 15, fontWeight: 600, cursor: "pointer", textAlign: "left",
+          fontFamily: C.display, fontSize: 17, fontWeight: 600, cursor: "pointer", textAlign: "left",
           display: "flex", alignItems: "center", gap: 10,
         }}>
           <IcTrash size={15} /> {t("Izbriši sporočilo")}
@@ -455,7 +455,7 @@ function MsgMenu({ msg, C, t, onDelete, onClose }) {
         <button onClick={onClose} style={{
           width: "100%", marginTop: 8, padding: "14px 18px", borderRadius: 12,
           border: `1px solid ${C.border}`, background: "transparent", color: C.muted,
-          fontFamily: C.display, fontSize: 14, fontWeight: 600, cursor: "pointer",
+          fontFamily: C.display, fontSize: 15.5, fontWeight: 600, cursor: "pointer",
         }}>
           {t("Prekliči")}
         </button>
@@ -742,7 +742,7 @@ export default function ScreenChat({ user, profile }) {
           {/* Title + compose on one row (Apple Messages layout, marble theme) */}
           <div style={{ padding: "10px 16px 0" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "2px 0 12px" }}>
-              <h1 style={{ fontFamily: C.heading, fontSize: 30, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", margin: 0, color: C.text }}>
+              <h1 style={{ fontFamily: C.heading, fontSize: 33.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", margin: 0, color: C.text }}>
                 {t("Pogovori")}
               </h1>
               <Pressable
@@ -766,7 +766,7 @@ export default function ScreenChat({ user, profile }) {
                 placeholder={t("Iskanje")}
                 style={{ flex: 1, border: "none", background: "none", outline: "none", fontFamily: C.display, fontWeight: 500, color: C.text, minWidth: 0 }}
               />
-              {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 18, lineHeight: 1 }}>×</button>}
+              {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 20, lineHeight: 1 }}>×</button>}
             </div>
           </div>
 
@@ -787,7 +787,7 @@ export default function ScreenChat({ user, profile }) {
 
           {/* Empty state */}
           {!loadingConvs && shown.length === 0 && (
-            <div style={{ textAlign: "center", padding: "60px 24px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 15 }}>
+            <div style={{ textAlign: "center", padding: "60px 24px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 17 }}>
               {q ? t("Ni zadetkov") : t("Ni pogovorov")}
             </div>
           )}
@@ -817,18 +817,18 @@ export default function ScreenChat({ user, profile }) {
                   <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} size={52} />
                   <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "11px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
                     <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 18.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {convName(conv)}
                       </span>
                       <span style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                        <span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted2, letterSpacing: "0.04em" }}>
+                        <span style={{ fontFamily: C.mono, fontSize: 11, color: C.muted2, letterSpacing: "0.04em" }}>
                           {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
                         </span>
                         <svg width={7} height={12} viewBox="0 0 8 13" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 1.5L6.5 6.5L1.5 11.5"/></svg>
                       </span>
                     </span>
                     <span style={{
-                      fontFamily: C.display, fontSize: 14, fontWeight: 500, color: C.muted, marginTop: 3, lineHeight: 1.3,
+                      fontFamily: C.display, fontSize: 15.5, fontWeight: 500, color: C.muted, marginTop: 3, lineHeight: 1.3,
                       display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                     }}>
                       {isBlocked ? t("Blokirano") : lastMsgLabel(conv)}
@@ -882,11 +882,11 @@ export default function ScreenChat({ user, profile }) {
             >
               <Avatar initials={convInitials(activeConv)} isGroup={activeConv.type === "group"} size={38} />
               <div>
-                <div style={{ fontFamily: C.heading, fontSize: 14, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: textOnBg }}>
+                <div style={{ fontFamily: C.heading, fontSize: 15.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: textOnBg }}>
                   {convName(activeConv)}
                 </div>
                 {activeConv.type === "direct" && activeConv.otherUser?.club && (
-                  <Mono style={{ fontSize: 8, color: C.gold, letterSpacing: "0.22em" }}>
+                  <Mono style={{ fontSize: 9, color: C.gold, letterSpacing: "0.22em" }}>
                     {activeConv.otherUser.club}
                   </Mono>
                 )}
@@ -924,7 +924,7 @@ export default function ScreenChat({ user, profile }) {
             {messages.length === 0 && (
               <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, opacity: 0.7 }}>
                 <Meander color={C.gold} width={120} />
-                <div style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 15, color: mutedOnBg }}>
+                <div style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 17, color: mutedOnBg }}>
                   {t("Začni pogovor")}
                 </div>
               </div>
@@ -934,7 +934,7 @@ export default function ScreenChat({ user, profile }) {
             {messages.length > 0 && (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7, padding: "14px 0 18px" }}>
                 <Meander color={C.gold} width={96} />
-                <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.34em", paddingLeft: "0.34em" }}>
+                <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.34em", paddingLeft: "0.34em" }}>
                   {convName(activeConv)}
                 </Mono>
               </div>
@@ -973,7 +973,7 @@ export default function ScreenChat({ user, profile }) {
                     onClick={() => setInput((prev) => prev + s)}
                     style={{
                       background: "none", border: "none", cursor: "pointer",
-                      fontSize: 28, padding: "6px 2px", lineHeight: 1,
+                      fontSize: 31.5, padding: "6px 2px", lineHeight: 1,
                       borderRadius: 8, WebkitTapHighlightColor: "transparent",
                     }}
                   >{s}</button>
@@ -1041,7 +1041,7 @@ export default function ScreenChat({ user, profile }) {
                 flex: 1, padding: "9px 14px", borderRadius: 20,
                 border: `1px solid ${darkBackdrop ? "rgba(255,255,255,0.16)" : "#D8CFBD"}`,
                 background: darkBackdrop ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.55)",
-                color: textOnBg, fontFamily: C.display, fontSize: 15, fontWeight: 500,
+                color: textOnBg, fontFamily: C.display, fontSize: 17, fontWeight: 500,
                 resize: "none", outline: "none", lineHeight: 1.4,
                 minHeight: 36, maxHeight: 100, overflowY: "auto",
               }}
@@ -1080,7 +1080,7 @@ export default function ScreenChat({ user, profile }) {
             borderBottom: `1px solid ${C.border}`,
           }}>
             <BackBtn onClick={() => setView("list")} />
-            <div style={{ fontFamily: C.heading, fontSize: 17, fontWeight: 700, color: C.text }}>
+            <div style={{ fontFamily: C.heading, fontSize: 19, fontWeight: 700, color: C.text }}>
               Nov pogovor
             </div>
           </div>
@@ -1106,7 +1106,7 @@ export default function ScreenChat({ user, profile }) {
                   <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
                 </svg>
               </div>
-              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>
+              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
                 Ustvari skupino
               </span>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth={2} strokeLinecap="round" style={{ marginLeft: "auto" }}>
@@ -1114,7 +1114,7 @@ export default function ScreenChat({ user, profile }) {
               </svg>
             </button>
 
-            <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 10, letterSpacing: "0.12em" }}>
+            <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginBottom: 10, letterSpacing: "0.12em" }}>
               SOTEKMOVALCI
             </Mono>
 
@@ -1131,11 +1131,11 @@ export default function ScreenChat({ user, profile }) {
               >
                 <Avatar initials={mate.initials} size={42} />
                 <div style={{ flex: 1, textAlign: "left" }}>
-                  <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>
+                  <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
                     {mate.name}
                   </div>
                   {mate.club && (
-                    <Mono style={{ fontSize: 9, color: C.muted, display: "block", marginTop: 1 }}>
+                    <Mono style={{ fontSize: 10, color: C.muted, display: "block", marginTop: 1 }}>
                       {mate.club}
                     </Mono>
                   )}
@@ -1147,7 +1147,7 @@ export default function ScreenChat({ user, profile }) {
             ))}
 
             {clubmates.length === 0 && (
-              <div style={{ textAlign: "center", padding: 40, fontFamily: C.display, color: C.muted, fontSize: 14 }}>
+              <div style={{ textAlign: "center", padding: 40, fontFamily: C.display, color: C.muted, fontSize: 15.5 }}>
                 Ni sotekmovalcev v klubu
               </div>
             )}
@@ -1165,7 +1165,7 @@ export default function ScreenChat({ user, profile }) {
             borderBottom: `1px solid ${C.border}`,
           }}>
             <BackBtn onClick={() => setView("new-chat")} />
-            <div style={{ fontFamily: C.heading, fontSize: 17, fontWeight: 700, color: C.text, flex: 1 }}>
+            <div style={{ fontFamily: C.heading, fontSize: 19, fontWeight: 700, color: C.text, flex: 1 }}>
               Nova skupina
             </div>
             <button
@@ -1174,7 +1174,7 @@ export default function ScreenChat({ user, profile }) {
               style={{
                 background: C.accent, color: C.name === "dark" ? "#04130a" : "#fff",
                 border: "none", borderRadius: 20, padding: "7px 18px",
-                fontFamily: C.display, fontWeight: 700, fontSize: 13, cursor: "pointer",
+                fontFamily: C.display, fontWeight: 700, fontSize: 14.5, cursor: "pointer",
                 opacity: (!groupName.trim() || groupSelected.length === 0) ? 0.38 : 1,
               }}
             >
@@ -1190,12 +1190,12 @@ export default function ScreenChat({ user, profile }) {
               style={{
                 width: "100%", padding: "13px 16px", borderRadius: 14,
                 border: `1.5px solid ${C.border}`,
-                background: C.surface2, color: C.text, fontFamily: C.display, fontSize: 15,
+                background: C.surface2, color: C.text, fontFamily: C.display, fontSize: 17,
                 outline: "none", marginBottom: 22, boxSizing: "border-box",
               }}
             />
 
-            <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 10, letterSpacing: "0.12em" }}>
+            <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginBottom: 10, letterSpacing: "0.12em" }}>
               IZBERI ČLANE ({groupSelected.length} izbranih)
             </Mono>
 
@@ -1214,11 +1214,11 @@ export default function ScreenChat({ user, profile }) {
                 >
                   <Avatar initials={mate.initials} size={42} />
                   <div style={{ flex: 1, textAlign: "left" }}>
-                    <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>
+                    <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
                       {mate.name}
                     </div>
                     {mate.club && (
-                      <Mono style={{ fontSize: 9, color: C.muted, display: "block", marginTop: 1 }}>
+                      <Mono style={{ fontSize: 10, color: C.muted, display: "block", marginTop: 1 }}>
                         {mate.club}
                       </Mono>
                     )}

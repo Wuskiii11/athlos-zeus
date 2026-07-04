@@ -80,7 +80,7 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
                 height: ITEM_H, scrollSnapAlign: "center",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontFamily: C.heading, fontWeight: active ? 800 : 400,
-                fontSize: active ? 19 : 15,
+                fontSize: active ? 21.5 : 17,
                 color: active ? C.text : C.muted,
                 opacity: active ? 1 : 0.5,
                 transition: "font-size 0.15s, color 0.15s, opacity 0.15s, font-weight 0.15s",

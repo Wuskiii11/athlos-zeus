@@ -38,8 +38,8 @@ export default function ScreenProfile({ go, profile, setProfile }) {
   const setLang = (lang) => setProfile((p) => ({ ...p, lang }));
   const curLang = profile.lang === "en" ? "en" : "sl";
 
-  const label = { fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted, display: "block" };
-  const field = { width: "100%", marginTop: 8, padding: "14px 16px", borderRadius: 16, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 16, outline: "none", boxSizing: "border-box" };
+  const label = { fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, display: "block" };
+  const field = { width: "100%", marginTop: 8, padding: "14px 16px", borderRadius: 16, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 18, outline: "none", boxSizing: "border-box" };
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text }}>
@@ -51,7 +51,7 @@ export default function ScreenProfile({ go, profile, setProfile }) {
       <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, marginBottom: 30 }}>
-        <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.94} style={{ position: "relative", width: 110, height: 110, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.accent, fontWeight: 800, fontSize: 42, fontFamily: C.display }}>
+        <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.94} style={{ position: "relative", width: 110, height: 110, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.accent, fontWeight: 800, fontSize: 47, fontFamily: C.display }}>
           {photo
             ? <img src={photo} alt="profil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             : initial}
@@ -60,9 +60,9 @@ export default function ScreenProfile({ go, profile, setProfile }) {
           </span>
         </Pressable>
         <div style={{ display: "flex", gap: 10 }}>
-          <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.96} style={{ padding: "10px 18px", borderRadius: 999, border: `1px solid ${C.border}`, background: "none", color: C.text, fontFamily: C.display, fontSize: 13, fontWeight: 600 }}>{t("Naloži sliko")}</Pressable>
+          <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.96} style={{ padding: "10px 18px", borderRadius: 999, border: `1px solid ${C.border}`, background: "none", color: C.text, fontFamily: C.display, fontSize: 14.5, fontWeight: 600 }}>{t("Naloži sliko")}</Pressable>
           {photo && (
-            <Pressable onClick={() => setPhoto(null)} scale={0.96} style={{ padding: "10px 18px", borderRadius: 999, border: `1px solid ${C.border}`, background: "none", color: C.muted, fontFamily: C.display, fontSize: 13, fontWeight: 600 }}>{t("Odstrani")}</Pressable>
+            <Pressable onClick={() => setPhoto(null)} scale={0.96} style={{ padding: "10px 18px", borderRadius: 999, border: `1px solid ${C.border}`, background: "none", color: C.muted, fontFamily: C.display, fontSize: 14.5, fontWeight: 600 }}>{t("Odstrani")}</Pressable>
           )}
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function ScreenProfile({ go, profile, setProfile }) {
         <div style={{ marginTop: 8, border: `1px solid ${C.border}`, borderRadius: 16, overflow: "hidden", animation: "athlosFade 0.2s ease" }}>
           {SPORTS.map((s, i) => (
             <button key={i} onClick={() => { setSport(s); setPickSport(false); }}
-              style={{ width: "100%", textAlign: "left", padding: "13px 16px", background: s === sport ? `${C.accent}14` : "transparent", border: "none", borderBottom: i < SPORTS.length - 1 ? `1px solid ${C.border}` : "none", color: s === sport ? C.accent : C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 15, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+              style={{ width: "100%", textAlign: "left", padding: "13px 16px", background: s === sport ? `${C.accent}14` : "transparent", border: "none", borderBottom: i < SPORTS.length - 1 ? `1px solid ${C.border}` : "none", color: s === sport ? C.accent : C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 17, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
               {s}
             </button>
           ))}

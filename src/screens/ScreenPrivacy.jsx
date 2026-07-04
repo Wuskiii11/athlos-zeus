@@ -8,9 +8,9 @@ const SYS_FONT = "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-seri
 
 export default function ScreenPrivacy({ onClose }) {
   const C = useTheme();
-  const H = ({ children }) => <h3 style={{ fontFamily: SYS_FONT, fontWeight: 700, fontSize: 15, color: C.text, margin: "20px 0 8px" }}>{children}</h3>;
-  const P = ({ children }) => <p style={{ fontFamily: SYS_FONT, color: C.text2, fontSize: 13.5, lineHeight: 1.6, margin: "0 0 10px" }}>{children}</p>;
-  const LI = ({ children }) => <li style={{ fontFamily: SYS_FONT, color: C.text2, fontSize: 13.5, lineHeight: 1.55, marginBottom: 6 }}>{children}</li>;
+  const H = ({ children }) => <h3 style={{ fontFamily: SYS_FONT, fontWeight: 700, fontSize: 17, color: C.text, margin: "20px 0 8px" }}>{children}</h3>;
+  const P = ({ children }) => <p style={{ fontFamily: SYS_FONT, color: C.text2, fontSize: 15, lineHeight: 1.6, margin: "0 0 10px" }}>{children}</p>;
+  const LI = ({ children }) => <li style={{ fontFamily: SYS_FONT, color: C.text2, fontSize: 15, lineHeight: 1.55, marginBottom: 6 }}>{children}</li>;
 
   return (
     <div
@@ -25,17 +25,17 @@ export default function ScreenPrivacy({ onClose }) {
         {/* header — plain, official, with an explicit close control */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 14px", borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
           <div>
-            <div style={{ fontFamily: SYS_FONT, fontWeight: 600, fontSize: 10, color: C.muted, letterSpacing: "0.06em", textTransform: "uppercase" }}>Pravno</div>
-            <h2 style={{ fontFamily: SYS_FONT, fontWeight: 700, fontSize: 19, margin: "3px 0 0", color: C.text }}>Politika zasebnosti</h2>
+            <div style={{ fontFamily: SYS_FONT, fontWeight: 600, fontSize: 11, color: C.muted, letterSpacing: "0.06em", textTransform: "uppercase" }}>Pravno</div>
+            <h2 style={{ fontFamily: SYS_FONT, fontWeight: 700, fontSize: 21.5, margin: "3px 0 0", color: C.text }}>Politika zasebnosti</h2>
           </div>
-          <button onClick={onClose} aria-label="Zapri" style={{ width: 34, height: 34, borderRadius: "50%", border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 18, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
+          <button onClick={onClose} aria-label="Zapri" style={{ width: 34, height: 34, borderRadius: "50%", border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 20, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
             ×
           </button>
         </div>
 
         {/* scrollable body */}
         <div className="athlos-scroll" style={{ overflowY: "auto", padding: "16px 20px 28px" }}>
-          <div style={{ fontFamily: SYS_FONT, fontWeight: 600, fontSize: 10, letterSpacing: "0.04em", color: C.muted, marginBottom: 14 }}>ZADNJA POSODOBITEV: 6. JUNIJ 2026</div>
+          <div style={{ fontFamily: SYS_FONT, fontWeight: 600, fontSize: 11, letterSpacing: "0.04em", color: C.muted, marginBottom: 14 }}>ZADNJA POSODOBITEV: 6. JUNIJ 2026</div>
           <P>Ta politika zasebnosti opisuje, kako ATHLOS d.o.o. (Jarska cesta 70, Slovenija) zbira, uporablja in deli tvoje podatke pri uporabi aplikacije ATHLOS, ter tvoje pravice glede zasebnosti.</P>
           <H>Katere podatke zbiramo</H>
           <P>Osebni podatki, ki nam jih posreduješ:</P>
@@ -72,7 +72,7 @@ export default function ScreenPrivacy({ onClose }) {
             <LI>Telefon: 069 749 787</LI>
             <LI>Spletna stran: athlos-sync-flow.lovable.app</LI>
           </ul>
-          <p style={{ textAlign: "center", fontFamily: SYS_FONT, color: C.muted2, fontSize: 11, marginTop: 20 }}>ATHLOS d.o.o. © 2026</p>
+          <p style={{ textAlign: "center", fontFamily: SYS_FONT, color: C.muted2, fontSize: 12.5, marginTop: 20 }}>ATHLOS d.o.o. © 2026</p>
         </div>
       </div>
     </div>

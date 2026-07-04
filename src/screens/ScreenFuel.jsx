@@ -80,8 +80,8 @@ function MacroPie({ macros, eaten, target }) {
         />
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, lineHeight: 1 }}>{pct}%</span>
-        <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 9, color: C.muted, marginTop: 3 }}>{t("ZAUŽITO")}</span>
+        <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, lineHeight: 1 }}>{pct}%</span>
+        <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 10, color: C.muted, marginTop: 3 }}>{t("ZAUŽITO")}</span>
       </div>
     </div>
   );
@@ -93,8 +93,8 @@ function MacroMini({ label, v, color }) {
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
       <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
       <div>
-        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: C.text, lineHeight: 1 }}>{v}<span style={{ fontSize: 9, color: C.muted }}>g</span></div>
-        <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, color: C.muted }}>{label}</span>
+        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15.5, color: C.text, lineHeight: 1 }}>{v}<span style={{ fontSize: 10, color: C.muted }}>g</span></div>
+        <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12.5, color: C.muted }}>{label}</span>
       </div>
     </div>
   );
@@ -111,12 +111,12 @@ function EatenForm({ onAdd }) {
     onAdd({ name: name.trim(), kcal: k });
     setName(""); setKcal("");
   };
-  const inp = { padding: "13px 14px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 14, outline: "none", boxSizing: "border-box" };
+  const inp = { padding: "13px 14px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, outline: "none", boxSizing: "border-box" };
   return (
     <div style={{ display: "flex", gap: 8, margin: "10px 0 12px" }}>
       <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder={t("npr. Sendvič")} style={{ ...inp, flex: 1 }} />
       <input value={kcal} onChange={(e) => setKcal(e.target.value.replace(/[^0-9]/g, ""))} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="kcal" inputMode="numeric" style={{ ...inp, width: 70, textAlign: "center" }} />
-      <Pressable onClick={submit} scale={0.9} style={{ width: 46, borderRadius: 14, border: "none", background: C.accent, color: "#ffffff", fontWeight: 800, fontSize: 22, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>+</Pressable>
+      <Pressable onClick={submit} scale={0.9} style={{ width: 46, borderRadius: 14, border: "none", background: C.accent, color: "#ffffff", fontWeight: 800, fontSize: 24.5, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>+</Pressable>
     </div>
   );
 }
@@ -141,20 +141,20 @@ export default function ScreenFuel() {
       setLoading(false);
     }, 900);
   };
-  const label = { fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted, display: "block" };
+  const label = { fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, display: "block" };
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text }}>
       <header style={{ marginBottom: 16 }}>
         <span style={label}>{t("HRANA")}</span>
-        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 25, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj jedilnik")}</h2>
+        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 28, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj jedilnik")}</h2>
       </header>
 
       <div style={{ display: "flex", alignItems: "center", gap: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, marginBottom: 14 }}>
         <MacroPie macros={plan.macros} eaten={eatenTotal} target={plan.target} />
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{remaining}<span style={{ fontSize: 13, color: C.muted, fontWeight: 600 }}> kcal</span></div>
-          <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted, display: "block", marginTop: 4 }}>{t("ŠE NA VOLJO DANES")}</span>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{remaining}<span style={{ fontSize: 14.5, color: C.muted, fontWeight: 600 }}> kcal</span></div>
+          <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.muted, display: "block", marginTop: 4 }}>{t("ŠE NA VOLJO DANES")}</span>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 14 }}>
             <MacroMini label={t("Proteini")} v={plan.macros.p} color={MACRO_COLORS.p} />
             <MacroMini label={t("Ogljikohidrati")} v={plan.macros.c} color={MACRO_COLORS.c} />
@@ -164,7 +164,7 @@ export default function ScreenFuel() {
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-        <Pressable onClick={() => setShowSetup((v) => !v)} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: "none", background: showSetup ? C.btn : `${C.accent}1c`, color: showSetup ? C.btnText : C.accent, fontFamily: C.display, fontSize: 14, fontWeight: 700 }}>
+        <Pressable onClick={() => setShowSetup((v) => !v)} scale={0.97} style={{ flex: 1, padding: "13px", borderRadius: 999, border: "none", background: showSetup ? C.btn : `${C.accent}1c`, color: showSetup ? C.btnText : C.accent, fontFamily: C.display, fontSize: 15.5, fontWeight: 700 }}>
           {t("AI Sestavi jedilnik")}
         </Pressable>
       </div>
@@ -174,13 +174,13 @@ export default function ScreenFuel() {
           <span style={label}>{t("CILJ")}</span>
           <div style={{ display: "flex", gap: 8, margin: "8px 0 16px" }}>
             {["izguba", "vzdrzevanje", "pridobitev"].map((g) => (
-              <button key={g} onClick={() => setGoal(g)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: goal === g ? C.accent : C.surface2, color: goal === g ? "#04130a" : C.muted, fontFamily: C.display, fontSize: 11, textTransform: "lowercase", cursor: "pointer", fontWeight: goal === g ? 700 : 500 }}>{t(GOAL_LABEL[g]).split(" ")[0]}</button>
+              <button key={g} onClick={() => setGoal(g)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: goal === g ? C.accent : C.surface2, color: goal === g ? "#04130a" : C.muted, fontFamily: C.display, fontSize: 12.5, textTransform: "lowercase", cursor: "pointer", fontWeight: goal === g ? 700 : 500 }}>{t(GOAL_LABEL[g]).split(" ")[0]}</button>
             ))}
           </div>
           <span style={label}>{t("FOKUS")}</span>
           <div style={{ display: "flex", gap: 8, margin: "8px 0 18px" }}>
             {["mascoba", "misice"].map((mm) => (
-              <button key={mm} onClick={() => setMass(mm)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: mass === mm ? C.accent : C.surface2, color: mass === mm ? "#04130a" : C.muted, fontFamily: C.display, fontSize: 11, textTransform: "lowercase", cursor: "pointer", fontWeight: mass === mm ? 700 : 500 }}>{t(MASS_LABEL[mm])}</button>
+              <button key={mm} onClick={() => setMass(mm)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: mass === mm ? C.accent : C.surface2, color: mass === mm ? "#04130a" : C.muted, fontFamily: C.display, fontSize: 12.5, textTransform: "lowercase", cursor: "pointer", fontWeight: mass === mm ? 700 : 500 }}>{t(MASS_LABEL[mm])}</button>
             ))}
           </div>
           <PrimaryBtn onClick={generate}>{loading ? t("Sestavljam...") : t("Sestavi jedilnik")}</PrimaryBtn>
@@ -188,9 +188,9 @@ export default function ScreenFuel() {
       )}
 
       <div style={{ display: "flex", gap: 8, marginBottom: 22, flexWrap: "wrap" }}>
-        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, fontSize: 12 }}>{t(GOAL_LABEL[goal])}</span>
-        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 12 }}>{t(MASS_LABEL[mass])}</span>
-        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 12 }}>{plan.target} KCAL</span>
+        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, fontSize: 13.5 }}>{t(GOAL_LABEL[goal])}</span>
+        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 13.5 }}>{t(MASS_LABEL[mass])}</span>
+        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 13.5 }}>{plan.target} KCAL</span>
       </div>
 
       <span style={{ ...label, marginBottom: 10 }}>{t("NAČRT OBROKOV")}</span>
@@ -198,10 +198,10 @@ export default function ScreenFuel() {
         {plan.meals.map((meal, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: i < plan.meals.length - 1 ? `1px solid ${C.border}` : "none" }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{t(meal.name)}</div>
-              <div style={{ fontFamily: C.display, fontWeight: 400, fontSize: 13, color: C.text2, marginTop: 2 }}>{t(meal.desc)}</div>
+              <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>{t(meal.name)}</div>
+              <div style={{ fontFamily: C.display, fontWeight: 400, fontSize: 14.5, color: C.text2, marginTop: 2 }}>{t(meal.desc)}</div>
             </div>
-            <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.accent }}>{meal.kcal}<span style={{ fontSize: 10, color: C.muted }}> kcal</span></div>
+            <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.accent }}>{meal.kcal}<span style={{ fontSize: 11, color: C.muted }}> kcal</span></div>
           </div>
         ))}
       </div>
@@ -209,19 +209,19 @@ export default function ScreenFuel() {
       <div style={{ marginTop: 22 }}>
         <span style={{ ...label, marginBottom: 4 }}>{t("KAJ SEM DANES POJEDEL")}</span>
         <EatenForm onAdd={(item) => setEaten((e) => [...e, { ...item, id: Date.now() }])} />
-        {eaten.length === 0 && <span style={{ fontFamily: C.display, fontWeight: 400, fontSize: 13, color: C.muted2 }}>{t("Vpiši obrok zgoraj — kalorije se odštejejo avtomatsko.")}</span>}
+        {eaten.length === 0 && <span style={{ fontFamily: C.display, fontWeight: 400, fontSize: 14.5, color: C.muted2 }}>{t("Vpiši obrok zgoraj — kalorije se odštejejo avtomatsko.")}</span>}
         {eaten.length > 0 && (
           <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: "4px 16px" }}>
             {eaten.map((e) => (
               <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 0", borderBottom: `1px solid ${C.border}` }}>
-                <div style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{e.name}</div>
-                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text2 }}>{e.kcal} kcal</div>
-                <button onClick={() => setEaten((list) => list.filter((x) => x.id !== e.id))} style={{ background: "none", border: "none", color: C.muted2, fontSize: 16, cursor: "pointer", padding: 4 }}>×</button>
+                <div style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{e.name}</div>
+                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text2 }}>{e.kcal} kcal</div>
+                <button onClick={() => setEaten((list) => list.filter((x) => x.id !== e.id))} style={{ background: "none", border: "none", color: C.muted2, fontSize: 18, cursor: "pointer", padding: 4 }}>×</button>
               </div>
             ))}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", fontFamily: C.display, fontWeight: 800 }}>
-              <span style={{ color: C.muted, fontFamily: C.display, fontSize: 13, fontWeight: 600 }}>{t("skupaj danes")}</span>
-              <span style={{ color: C.accent, fontSize: 18 }}>{eatenTotal} kcal</span>
+              <span style={{ color: C.muted, fontFamily: C.display, fontSize: 14.5, fontWeight: 600 }}>{t("skupaj danes")}</span>
+              <span style={{ color: C.accent, fontSize: 20 }}>{eatenTotal} kcal</span>
             </div>
           </div>
         )}

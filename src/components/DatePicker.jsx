@@ -57,8 +57,8 @@ function FutureDatePicker({ value, onChange, onClose, futureDays }) {
         </div>
         {/* Selected label */}
         <div style={{ padding: "4px 20px 14px", borderBottom: `1px solid ${C.border}` }}>
-          <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.22em" }}>{t("IZBRANI DATUM")}</Mono>
-          <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 19, color: sel ? C.text : C.muted, marginTop: 4 }}>{fmtSel()}</div>
+          <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.22em" }}>{t("IZBRANI DATUM")}</Mono>
+          <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 21.5, color: sel ? C.text : C.muted, marginTop: 4 }}>{fmtSel()}</div>
         </div>
         {/* Day grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, padding: "14px 10px 10px" }}>
@@ -79,10 +79,10 @@ function FutureDatePicker({ value, onChange, onClose, futureDays }) {
                   transition: "background 0.12s, transform 0.1s",
                 }}
               >
-                <span style={{ fontFamily: C.mono, fontSize: 8, color: active ? C.btnText : C.muted, letterSpacing: "0.06em" }}>
+                <span style={{ fontFamily: C.mono, fontSize: 9, color: active ? C.btnText : C.muted, letterSpacing: "0.06em" }}>
                   {daysShort[d.getDay()].toUpperCase()}
                 </span>
-                <span style={{ fontFamily: C.display, fontWeight: active ? 800 : isToday ? 700 : 400, fontSize: 15, color: active ? C.btnText : C.text, lineHeight: 1 }}>
+                <span style={{ fontFamily: C.display, fontWeight: active ? 800 : isToday ? 700 : 400, fontSize: 17, color: active ? C.btnText : C.text, lineHeight: 1 }}>
                   {d.getDate()}
                 </span>
                 {isToday && !active && (
@@ -94,8 +94,8 @@ function FutureDatePicker({ value, onChange, onClose, futureDays }) {
         </div>
         {/* Actions */}
         <div style={{ display: "flex", gap: 10, padding: "8px 16px 28px" }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 14, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Prekliči")}</button>
-          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Potrdi")}</button>
+          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 15.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Prekliči")}</button>
+          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Potrdi")}</button>
         </div>
       </div>
     </div>
@@ -155,8 +155,8 @@ function BirthDatePicker({ value, onChange, onClose }) {
 
         {/* Selected date label */}
         <div style={{ padding: "4px 20px 12px", borderBottom: `1px solid ${C.border}` }}>
-          <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.22em" }}>{t("IZBRANI DATUM")}</Mono>
-          <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 19, color: C.text, marginTop: 4 }}>
+          <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.22em" }}>{t("IZBRANI DATUM")}</Mono>
+          <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 21.5, color: C.text, marginTop: 4 }}>
             {fmtSel()}
           </div>
         </div>
@@ -170,10 +170,10 @@ function BirthDatePicker({ value, onChange, onClose }) {
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 10, padding: "8px 16px 28px" }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 14, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 15.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
             {t("Prekliči")}
           </button>
-          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", transition: "background 0.2s", WebkitTapHighlightColor: "transparent" }}>
+          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", transition: "background 0.2s", WebkitTapHighlightColor: "transparent" }}>
             {t("Potrdi")}
           </button>
         </div>

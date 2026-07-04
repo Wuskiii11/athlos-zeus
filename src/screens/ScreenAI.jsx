@@ -123,13 +123,13 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
   const [done, setDone] = useState(null);
   const [pain, setPain] = useState([]);
   const ok = rpe != null && done != null;
-  const base = { fontFamily: C.display, fontSize: 13, cursor: "pointer", borderRadius: 999, transition: "all 0.15s", WebkitTapHighlightColor: "transparent" };
+  const base = { fontFamily: C.display, fontSize: 14.5, cursor: "pointer", borderRadius: 999, transition: "all 0.15s", WebkitTapHighlightColor: "transparent" };
   const chip = (active, extra = {}) => ({ ...base, padding: "7px 12px", border: `1.5px solid ${active ? C.accent : C.border}`, background: active ? `${C.accent}16` : C.surface, color: active ? C.accent : C.text2, fontWeight: active ? 700 : 500, ...extra });
   const togglePain = (p) =>
     setPain((arr) => p === "Brez"
       ? (arr.includes("Brez") ? [] : ["Brez"])
       : (arr.includes(p) ? arr.filter((x) => x !== p) : [...arr.filter((x) => x !== "Brez"), p]));
-  const row = { fontFamily: C.display, fontSize: 12, color: C.text2, fontWeight: 600, marginBottom: 7 };
+  const row = { fontFamily: C.display, fontSize: 13.5, color: C.text2, fontWeight: 600, marginBottom: 7 };
   const dark = C.name === "dark";
   return (
     <div style={{
@@ -138,8 +138,8 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
       background: dark ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)",
       border: `1px solid ${C.gold}44`,
     }}>
-      <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 15, color: C.text, letterSpacing: "0.02em" }}>{t("Kako je šlo zadnjič?")}</div>
-      <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 2, marginBottom: 13 }}>{t("Da te ZEUS bolje pozna in nadgradi naslednji trening.")}</div>
+      <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 17, color: C.text, letterSpacing: "0.02em" }}>{t("Kako je šlo zadnjič?")}</div>
+      <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 2, marginBottom: 13 }}>{t("Da te ZEUS bolje pozna in nadgradi naslednji trening.")}</div>
 
       <div style={row}>{t("Napor (RPE 1–10)")}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 13 }}>
@@ -161,11 +161,11 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-        <button onClick={onSkip} style={{ background: "none", border: "none", color: C.muted, fontFamily: C.display, fontSize: 12, cursor: "pointer", letterSpacing: "0.04em" }}>{t("Preskoči")}</button>
+        <button onClick={onSkip} style={{ background: "none", border: "none", color: C.muted, fontFamily: C.display, fontSize: 13.5, cursor: "pointer", letterSpacing: "0.04em" }}>{t("Preskoči")}</button>
         <Pressable
           onClick={() => ok && onSave({ rpe, completed: done !== false, pain: pain.filter((x) => x !== "Brez"), note: done === "delno" ? "delno opravljeno" : "" })}
           disabled={!ok} scale={0.96}
-          style={{ background: ok ? C.btn : C.surface3, color: ok ? C.btnText : C.muted, border: "none", borderRadius: 999, padding: "11px 20px", fontFamily: C.display, fontWeight: 700, fontSize: 13 }}
+          style={{ background: ok ? C.btn : C.surface3, color: ok ? C.btnText : C.muted, border: "none", borderRadius: 999, padding: "11px 20px", fontFamily: C.display, fontWeight: 700, fontSize: 14.5 }}
         >
           {t("Shrani")}
         </Pressable>
@@ -328,10 +328,10 @@ export default function ScreenAI({ user, profile }) {
           line above ZEUS. The status line doubles as the disclaimer, so
           there's no separate floating strip either. */}
       <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "18px 18px 14px", borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 28, letterSpacing: "0.12em", color: C.text, lineHeight: 1 }}>ZEUS</div>
+        <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 31.5, letterSpacing: "0.12em", color: C.text, lineHeight: 1 }}>ZEUS</div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: typing ? C.gold : C.accent2, boxShadow: typing ? "none" : `0 0 8px ${C.accent2}99`, flexShrink: 0 }} />
-          <span style={{ fontFamily: C.display, fontSize: 12, fontWeight: 600, color: typing ? C.gold : C.muted }}>
+          <span style={{ fontFamily: C.display, fontSize: 13.5, fontWeight: 600, color: typing ? C.gold : C.muted }}>
             {typing ? t("razmišlja…") : t("ATHLOS AI · ni nadomestilo za zdravnika")}
           </span>
         </div>
@@ -360,21 +360,21 @@ export default function ScreenAI({ user, profile }) {
                   <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: `radial-gradient(circle, ${C.accent2}29, transparent 70%)`, pointerEvents: "none" }} />
                 )}
                 <span style={{
-                  position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 15, lineHeight: 1.5, whiteSpace: "pre-wrap",
+                  position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17, lineHeight: 1.5, whiteSpace: "pre-wrap",
                   fontStyle: isMine ? "normal" : "italic",
                   color: isMine ? "#F4EFE6" : C.text,
                 }}>
                   {renderRich(t(m.t))}
                 </span>
               </div>
-              <Mono style={{ fontSize: 8, color: C.muted2, marginTop: 5, letterSpacing: "0.1em" }}>{m.time}</Mono>
+              <Mono style={{ fontSize: 9, color: C.muted2, marginTop: 5, letterSpacing: "0.1em" }}>{m.time}</Mono>
             </div>
           );
         })}
 
         {/* Saving to calendar — brief inline status while the auto-save runs */}
         {calSaving && (
-          <div style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 999, border: `1px solid ${C.border2}`, color: C.muted, fontFamily: C.display, fontSize: 12, animation: "athlosFade 0.2s ease" }}>
+          <div style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 999, border: `1px solid ${C.border2}`, color: C.muted, fontFamily: C.display, fontSize: 13.5, animation: "athlosFade 0.2s ease" }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.accent }} />
             <span style={{ display: "flex", color: C.gold }}><IcCalendar size={13} /></span> {t("Shranjujem v Koledar…")}
           </div>
@@ -403,7 +403,7 @@ export default function ScreenAI({ user, profile }) {
         {/* Suggestions (fresh start) — marble tablets, matching the chat list */}
         {showSugg && !typing && (
           <div style={{ marginTop: 8, animation: "athlosFade 0.35s ease" }}>
-            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.14em", display: "block", marginBottom: 12 }}>{t("predlagana vprašanja")}</Mono>
+            <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.14em", display: "block", marginBottom: 12 }}>{t("predlagana vprašanja")}</Mono>
             {SUGGESTIONS.map((s) => (
               <button key={s} onClick={() => send(s)} style={{
                 width: "100%",
@@ -411,7 +411,7 @@ export default function ScreenAI({ user, profile }) {
                 border: `1px solid ${dark ? C.border : "#D8CFBD"}`,
                 borderRadius: 16,
                 padding: "14px 16px", textAlign: "left", cursor: "pointer", marginBottom: 10,
-                color: C.text2, fontFamily: C.display, fontSize: 15, fontStyle: "italic", lineHeight: 1.4,
+                color: C.text2, fontFamily: C.display, fontSize: 17, fontStyle: "italic", lineHeight: 1.4,
                 WebkitTapHighlightColor: "transparent", transition: "border-color 0.15s, color 0.15s",
                 display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
               }}
@@ -436,7 +436,7 @@ export default function ScreenAI({ user, profile }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder={t("Vprašaj ZEUS-a...")}
-            style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 16, lineHeight: 1 }}
+            style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 18, lineHeight: 1 }}
           />
           <Pressable
             onClick={() => send()}

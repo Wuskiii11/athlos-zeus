@@ -39,11 +39,11 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 20, background: C.bg, display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease", overflowY: "auto" }}>
       {/* header */}
       <div style={{ padding: "12px 18px 14px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>←</button>
-        <span style={{ width: 42, height: 42, borderRadius: "50%", background: `${C.accent}1f`, border: `1.5px solid ${C.accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, color: C.accent, fontSize: 15, flexShrink: 0 }}>{athlete.ini}</span>
+        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>←</button>
+        <span style={{ width: 42, height: 42, borderRadius: "50%", background: `${C.accent}1f`, border: `1.5px solid ${C.accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, color: C.accent, fontSize: 17, flexShrink: 0 }}>{athlete.ini}</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text }}>{athlete.name}</div>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>{t(athlete.pos)}</Mono>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 19, color: C.text }}>{athlete.name}</div>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>{t(athlete.pos)}</Mono>
         </div>
         <button onClick={() => { onClose(); go("chat"); }} aria-label="Chat" style={{ padding: "8px 14px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text2, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", alignItems: "center" }}><IcChat size={15} /></button>
       </div>
@@ -52,21 +52,21 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
         {/* battery */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("READINESS · BATERIJA")}</Mono>
+            <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em" }}>{t("READINESS · BATERIJA")}</Mono>
             <span style={{ padding: "3px 9px", borderRadius: 999, background: `${batCol}1f`, border: `1px solid ${batCol}55` }}>
-              <Mono style={{ color: batCol, fontSize: 8 }}>{athlete.battery >= 70 ? "READY" : athlete.battery >= 40 ? "CAUTION" : "REST"}</Mono>
+              <Mono style={{ color: batCol, fontSize: 9 }}>{athlete.battery >= 70 ? "READY" : athlete.battery >= 40 ? "CAUTION" : "REST"}</Mono>
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
-            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 34, color: batCol, letterSpacing: "-0.02em" }}>{athlete.battery}</span>
-            <span style={{ fontFamily: C.mono, fontSize: 12, color: C.muted }}>/100</span>
+            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 38, color: batCol, letterSpacing: "-0.02em" }}>{athlete.battery}</span>
+            <span style={{ fontFamily: C.mono, fontSize: 13.5, color: C.muted }}>/100</span>
           </div>
           <BatteryBar pct={athlete.battery} C={C} />
           <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
             {[["Sprint", athlete.sprint], ["Počep 1RM", athlete.squat]].map(([l, v]) => (
               <div key={l}>
-                <Mono style={{ color: C.muted, fontSize: 8 }}>{t(l.toUpperCase())}</Mono>
-                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text, marginTop: 2 }}>{v}</div>
+                <Mono style={{ color: C.muted, fontSize: 9 }}>{t(l.toUpperCase())}</Mono>
+                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, marginTop: 2 }}>{v}</div>
               </div>
             ))}
           </div>
@@ -82,10 +82,10 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
         {/* wellness check-in — streak + raw answers (spec §04, coach view) */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("WELLNESS CHECK-IN")}</Mono>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: C.display, fontWeight: 800, fontSize: 15, color: athlete.streak > 0 ? C.text : C.muted2 }}>
+            <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em" }}>{t("WELLNESS CHECK-IN")}</Mono>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: C.display, fontWeight: 800, fontSize: 17, color: athlete.streak > 0 ? C.text : C.muted2 }}>
               <span style={{ display: "flex", color: athlete.streak > 0 ? C.gold : C.muted2 }}><IcFlame size={14} /></span>
-              {athlete.streak} <Mono style={{ color: C.muted, fontSize: 8 }}>{t("DNI ZAPORED")}</Mono>
+              {athlete.streak} <Mono style={{ color: C.muted, fontSize: 9 }}>{t("DNI ZAPORED")}</Mono>
             </span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -95,8 +95,8 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
               const col = good ? C.accent : bad ? (C.red || "#ef4444") : (C.yellow || "#f59e0b");
               return (
                 <div key={l} style={{ flex: 1, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "10px 4px", textAlign: "center" }}>
-                  <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: col }}>{v}<span style={{ fontSize: 10, color: C.muted2 }}>/5</span></div>
-                  <Mono style={{ color: C.muted, fontSize: 7 }}>{t(l.toUpperCase())}</Mono>
+                  <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: col }}>{v}<span style={{ fontSize: 11, color: C.muted2 }}>/5</span></div>
+                  <Mono style={{ color: C.muted, fontSize: 8 }}>{t(l.toUpperCase())}</Mono>
                 </div>
               );
             })}
@@ -105,7 +105,7 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
 
         {/* 7-day history */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 14 }}>
-          <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em", display: "block", marginBottom: 12 }}>{t("ZADNJIH 7 DNI")}</Mono>
+          <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em", display: "block", marginBottom: 12 }}>{t("ZADNJIH 7 DNI")}</Mono>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             {athlete.days.map((d, i) => {
               const col = d === 1 ? C.accent : (C.muted2 || C.muted);
@@ -114,7 +114,7 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
                   <div style={{ width: 32, height: 32, borderRadius: "50%", background: d === 1 ? `${C.accent}20` : C.surface3, border: `1.5px solid ${d === 1 ? C.accent : C.border2}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {d === 1 && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="3" strokeLinecap="round"><path d="M20 6L9 17l-5-5" /></svg>}
                   </div>
-                  <Mono style={{ color: col, fontSize: 7 }}>{DAY_LABELS[i]}</Mono>
+                  <Mono style={{ color: col, fontSize: 8 }}>{DAY_LABELS[i]}</Mono>
                 </div>
               );
             })}
@@ -122,28 +122,28 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
           <div style={{ display: "flex", gap: 16, marginTop: 12, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
             {[[athlete.days.filter(d => d === 1).length, t("Treningov"), C.accent], [athlete.days.filter(d => d === 0).length, t("Počitek"), C.muted]].map(([v, l, col]) => (
               <div key={l}>
-                <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: col }}>{v}</span>
-                <Mono style={{ color: C.muted, fontSize: 8, marginLeft: 4 }}>{l}</Mono>
+                <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: col }}>{v}</span>
+                <Mono style={{ color: C.muted, fontSize: 9, marginLeft: 4 }}>{l}</Mono>
               </div>
             ))}
           </div>
         </div>
 
         {/* last training */}
-        <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em", display: "block", marginBottom: 10 }}>{t("ZADNJI TRENING")}</Mono>
+        <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em", display: "block", marginBottom: 10 }}>{t("ZADNJI TRENING")}</Mono>
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: "6px 16px", marginBottom: 16 }}>
           {lastTraining.map((ex, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 0", borderBottom: i < lastTraining.length - 1 ? `1px solid ${C.border}` : "none" }}>
-              <span style={{ width: 28, height: 28, borderRadius: 8, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 10, color: C.muted, flexShrink: 0 }}>{i + 1}</span>
-              <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t(ex.name)}</span>
-              <Mono style={{ color: C.muted, fontSize: 9 }}>{ex.sets}×{ex.reps}</Mono>
-              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13, color: C.text2, marginLeft: 6 }}>{ex.load}</span>
+              <span style={{ width: 28, height: 28, borderRadius: 8, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 11, color: C.muted, flexShrink: 0 }}>{i + 1}</span>
+              <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t(ex.name)}</span>
+              <Mono style={{ color: C.muted, fontSize: 10 }}>{ex.sets}×{ex.reps}</Mono>
+              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14.5, color: C.text2, marginLeft: 6 }}>{ex.load}</span>
             </div>
           ))}
         </div>
 
         {/* assessment CTA */}
-        <button onClick={() => { onClose(); go("assessment"); }} style={{ width: "100%", padding: "16px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 14, cursor: "pointer", letterSpacing: "0.04em", WebkitTapHighlightColor: "transparent", display: "flex", alignItems: "center", justifyContent: "center", gap: 9 }}>
+        <button onClick={() => { onClose(); go("assessment"); }} style={{ width: "100%", padding: "16px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 15.5, cursor: "pointer", letterSpacing: "0.04em", WebkitTapHighlightColor: "transparent", display: "flex", alignItems: "center", justifyContent: "center", gap: 9 }}>
           <IcChart size={15} /> {t("Performans ocena")}
         </button>
       </div>
@@ -159,51 +159,51 @@ export default function ScreenClub({ go, profile }) {
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text }}>
-      <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.14em" }}>ATHLETE OS</Mono>
-      <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, margin: "8px 0 18px", letterSpacing: "-0.02em" }}>{t("Klub")}</h1>
+      <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.14em" }}>ATHLETE OS</Mono>
+      <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, margin: "8px 0 18px", letterSpacing: "-0.02em" }}>{t("Klub")}</h1>
 
       {/* club card */}
       <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 18, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, marginBottom: 18 }}>
         <span style={{ width: 52, height: 52, borderRadius: 14, background: `${C.gold}14`, border: `1px solid ${C.gold}45`, display: "flex", alignItems: "center", justifyContent: "center", color: C.gold }}><IcTrophy size={24} /></span>
         <div>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18 }}>{club}</div>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>U17 · {TEAM.length} {t("članov")}</Mono>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20 }}>{club}</div>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>U17 · {TEAM.length} {t("članov")}</Mono>
         </div>
       </div>
 
       {/* coach */}
-      <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 8, display: "block" }}>{t("TRENER")}</Mono>
+      <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 8, display: "block" }}>{t("TRENER")}</Mono>
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, marginBottom: 18 }}>
         <span style={{ width: 40, height: 40, borderRadius: "50%", background: `${C.accent}1f`, border: `1px solid ${C.accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, color: C.accent }}>M</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14 }}>Coach Matej</div>
-          <Mono style={{ color: C.muted, fontSize: 9 }}>{t("Glavni trener")}</Mono>
+          <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5 }}>Coach Matej</div>
+          <Mono style={{ color: C.muted, fontSize: 10 }}>{t("Glavni trener")}</Mono>
         </div>
       </div>
 
       {/* team */}
-      <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 8, display: "block" }}>{t("EKIPA")}</Mono>
+      <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 8, display: "block" }}>{t("EKIPA")}</Mono>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {TEAM.map((member, i) => {
           const batCol = member.battery >= 70 ? C.accent : member.battery >= 40 ? (C.yellow || "#f59e0b") : (C.red || "#ef4444");
           return (
             <button key={i} onClick={() => setDetail(member)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>
-              <span style={{ width: 38, height: 38, borderRadius: "50%", background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 700, fontSize: 12, color: C.muted, flexShrink: 0 }}>{member.ini}</span>
+              <span style={{ width: 38, height: 38, borderRadius: "50%", background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: C.muted, flexShrink: 0 }}>{member.ini}</span>
               <span style={{ flex: 1 }}>
-                <span style={{ display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{member.name}</span>
-                <Mono style={{ color: C.muted, fontSize: 8 }}>{t(member.pos)}</Mono>
+                <span style={{ display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{member.name}</span>
+                <Mono style={{ color: C.muted, fontSize: 9 }}>{t(member.pos)}</Mono>
               </span>
               {member.injury && <span style={{ display: "flex", color: C.red || "#B1452F" }}><IcBandage size={14} /></span>}
               <div style={{ textAlign: "right", minWidth: 34 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 3, fontFamily: C.display, fontWeight: 800, fontSize: 14, color: member.streak > 0 ? C.text : C.muted2 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 3, fontFamily: C.display, fontWeight: 800, fontSize: 15.5, color: member.streak > 0 ? C.text : C.muted2 }}>
                   <span style={{ display: "flex", color: member.streak > 0 ? C.gold : C.muted2 }}><IcFlame size={12} /></span>
                   {member.streak}
                 </div>
-                <Mono style={{ color: C.muted, fontSize: 7 }}>STREAK</Mono>
+                <Mono style={{ color: C.muted, fontSize: 8 }}>STREAK</Mono>
               </div>
               <div style={{ textAlign: "right", minWidth: 40 }}>
-                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: batCol }}>{member.battery}</div>
-                <Mono style={{ color: C.muted, fontSize: 7 }}>BAT</Mono>
+                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15.5, color: batCol }}>{member.battery}</div>
+                <Mono style={{ color: C.muted, fontSize: 8 }}>BAT</Mono>
               </div>
               <span style={{ color: C.muted, marginLeft: 2 }}>›</span>
             </button>

@@ -89,18 +89,18 @@ export default function ZeusFunnel({ onDone }) {
       <div style={{ padding: "16px 20px 0", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
         {step > 0 && (
           <button onClick={() => setStep((s) => Math.max(0, s - 1))}
-            style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "2px 4px" }}>‹</button>
+            style={{ background: "none", border: "none", color: C.muted, fontSize: 24.5, cursor: "pointer", lineHeight: 1, padding: "2px 4px" }}>‹</button>
         )}
         <div style={{ flex: 1, height: 3, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
           <div style={{ width: `${((step + 1) / total) * 100}%`, height: "100%", background: C.accent, borderRadius: 999, transition: "width 0.35s cubic-bezier(.2,.8,.2,1)" }} />
         </div>
-        <Mono style={{ color: C.muted, fontSize: 9 }}>{step + 1}/{total}</Mono>
+        <Mono style={{ color: C.muted, fontSize: 10 }}>{step + 1}/{total}</Mono>
       </div>
 
       {/* question */}
       <div key={step} style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "22px 20px 12px", display: "flex", flexDirection: "column", animation: "athlosScreen 0.28s cubic-bezier(.2,.8,.2,1)" }}>
-        <Mono style={{ color: C.accent, fontSize: 9 }}>{t(cur.sub)}</Mono>
-        <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 26, color: C.text, margin: "8px 0 22px", lineHeight: 1.12, letterSpacing: "0.01em" }}>{t(cur.q)}</h2>
+        <Mono style={{ color: C.accent, fontSize: 10 }}>{t(cur.sub)}</Mono>
+        <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 29, color: C.text, margin: "8px 0 22px", lineHeight: 1.12, letterSpacing: "0.01em" }}>{t(cur.q)}</h2>
 
         <div style={{ display: "grid", gridTemplateColumns: cur.type === "multi" || cur.options.length > 4 ? "repeat(2, minmax(0,1fr))" : "1fr", gap: 10 }}>
           {opts.map((o) => {
@@ -121,10 +121,10 @@ export default function ZeusFunnel({ onDone }) {
                 }}
               >
                 <span style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
-                  <span style={{ fontWeight: 600, fontSize: 15, letterSpacing: "0.01em" }}>{t(labelOf(o))}</span>
+                  <span style={{ fontWeight: 600, fontSize: 17, letterSpacing: "0.01em" }}>{t(labelOf(o))}</span>
                   {sel && <span style={{ marginLeft: "auto", color: C.accent, fontWeight: 800 }}>✓</span>}
                 </span>
-                {subOf(o) && <span style={{ fontSize: 12, color: C.muted }}>{t(subOf(o))}</span>}
+                {subOf(o) && <span style={{ fontSize: 13.5, color: C.muted }}>{t(subOf(o))}</span>}
               </button>
             );
           })}

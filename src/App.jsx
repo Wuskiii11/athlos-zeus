@@ -87,7 +87,7 @@ function SplashScreen({ C }) {
 
       {/* static wordmark over the lower part */}
       <div style={{ position: "absolute", left: 0, right: 0, bottom: "7vh", display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 34, letterSpacing: "0.38em", paddingLeft: "0.38em", color: "#1C1814" }}>
+        <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 38, letterSpacing: "0.38em", paddingLeft: "0.38em", color: "#1C1814" }}>
           ATHLOS
         </div>
         {/* grows outward from the center, like it's loading — as wide as the wordmark */}
@@ -96,7 +96,7 @@ function SplashScreen({ C }) {
           background: "#B08D57",
           transform: "scaleX(0)", transformOrigin: "center",
         }} />
-        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 15, letterSpacing: "0.12em", color: "rgba(28,24,20,0.5)" }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 17, letterSpacing: "0.12em", color: "rgba(28,24,20,0.5)" }}>
           sistem, ki pozna vsakega športnika
         </div>
       </div>
@@ -540,10 +540,10 @@ export default function AthlosApp() {
             <div style={{ margin: "0 14px 6px", padding: "12px 14px", borderRadius: 14, background: C.surface2, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12, animation: "athlosSlideDown 0.3s ease", flexShrink: 0 }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.accent, flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13, color: C.text }}>Trening čez 1 uro</div>
-                <Mono style={{ color: C.muted, fontSize: 9 }}>{reminder.title} · {reminder.time}</Mono>
+                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14.5, color: C.text }}>Trening čez 1 uro</div>
+                <Mono style={{ color: C.muted, fontSize: 10 }}>{reminder.title} · {reminder.time}</Mono>
               </div>
-              <button onClick={() => setReminder(null)} style={{ background: "none", border: "none", color: C.muted, fontSize: 20, cursor: "pointer", padding: "2px 6px", lineHeight: 1 }}>×</button>
+              <button onClick={() => setReminder(null)} style={{ background: "none", border: "none", color: C.muted, fontSize: 22.5, cursor: "pointer", padding: "2px 6px", lineHeight: 1 }}>×</button>
             </div>
           )}
 

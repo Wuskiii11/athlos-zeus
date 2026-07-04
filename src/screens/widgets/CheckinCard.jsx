@@ -52,7 +52,7 @@ const QUESTIONS = [
 function ScaleRow({ q, value, onPick, C, t }) {
   return (
     <div>
-      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, display: "block", marginBottom: 7 }}>{t(q.label)}</span>
+      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text, display: "block", marginBottom: 7 }}>{t(q.label)}</span>
       <div style={{ display: "flex", gap: 7 }}>
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} onClick={() => onPick(n)} style={{
@@ -60,7 +60,7 @@ function ScaleRow({ q, value, onPick, C, t }) {
             border: `1px solid ${value === n ? C.accent : C.border2}`,
             background: value === n ? `${C.accent}1f` : "transparent",
             color: value === n ? C.accent : C.muted,
-            fontFamily: C.mono, fontWeight: 700, fontSize: 13, WebkitTapHighlightColor: "transparent",
+            fontFamily: C.mono, fontWeight: 700, fontSize: 14.5, WebkitTapHighlightColor: "transparent",
           }}>{n}</button>
         ))}
       </div>
@@ -74,13 +74,13 @@ function StreakStrip({ days, C, t, lang, style }) {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, ...style }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ display: "flex", color: streak > 0 ? C.gold : C.muted2 }}><IcFlame size={19} /></span>
-        <span style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 22, color: C.text, lineHeight: 1 }}>{streak}</span>
-        <Mono style={{ color: C.muted, fontSize: 8, letterSpacing: "0.1em" }}>{t("DNI ZAPORED · STREAK")}</Mono>
+        <span style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 24.5, color: C.text, lineHeight: 1 }}>{streak}</span>
+        <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("DNI ZAPORED · STREAK")}</Mono>
       </div>
       <div style={{ display: "flex", gap: 6 }}>
         {weekDots(days, new Date(), lang).map((d, i) => (
           <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-            <Mono style={{ color: d.isToday ? C.text : C.muted2, fontSize: 8 }}>{d.label}</Mono>
+            <Mono style={{ color: d.isToday ? C.text : C.muted2, fontSize: 9 }}>{d.label}</Mono>
             <div style={{
               width: 8, height: 8, borderRadius: "50%",
               background: d.done ? C.accent : "transparent",
@@ -120,8 +120,8 @@ export default function CheckinCard({ C, t, lang, onSubmit }) {
 
   return (
     <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14 }}>
-      <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.12em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
-      <h3 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 19, color: C.text, margin: "8px 0 12px" }}>{t("Kako se počutiš?")}</h3>
+      <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.12em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
+      <h3 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 21.5, color: C.text, margin: "8px 0 12px" }}>{t("Kako se počutiš?")}</h3>
 
       <StreakStrip days={store.days} C={C} t={t} lang={lang} style={{ paddingBottom: 14, borderBottom: `1px solid ${C.border}`, marginBottom: 14 }} />
 
@@ -135,7 +135,7 @@ export default function CheckinCard({ C, t, lang, onSubmit }) {
         width: "100%", marginTop: 16, padding: "14px 0", borderRadius: 12, border: "none",
         cursor: complete ? "pointer" : "default",
         background: complete ? C.btn : C.surface3, color: complete ? C.btnText : C.muted,
-        fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase",
+        fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.1em", textTransform: "uppercase",
         transition: "background 0.2s, color 0.2s", WebkitTapHighlightColor: "transparent",
       }}>
         {t("Pošlji & posodobi readiness")} <span style={{ color: complete ? C.accent2 : C.muted2 }}>→</span>

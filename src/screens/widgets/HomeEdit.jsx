@@ -93,15 +93,15 @@ export function EditHomeSheet({ layout, onSave, onClose, C, t }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 30, background: C.bg, display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease" }}>
       {/* header */}
       <div style={{ padding: "16px 18px 14px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
+        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 17, color: C.text, margin: 0 }}>{t("Uredi home screen")}</h2>
-          <Mono style={{ color: C.muted, fontSize: 8, letterSpacing: "0.1em" }}>EDIT · ON</Mono>
+          <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 19, color: C.text, margin: 0 }}>{t("Uredi home screen")}</h2>
+          <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>EDIT · ON</Mono>
         </div>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 18px 24px" }} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
-        <p style={{ fontFamily: C.display, fontSize: 14, color: C.text2, margin: "0 0 16px", lineHeight: 1.5 }}>
+        <p style={{ fontFamily: C.display, fontSize: 15.5, color: C.text2, margin: "0 0 16px", lineHeight: 1.5 }}>
           {t("Izberi widgete, ki jih želiš imeti na home screenu. Vlečenje za vrstni red.")}
         </p>
 
@@ -123,12 +123,12 @@ export function EditHomeSheet({ layout, onSave, onClose, C, t }) {
                 {/* drag handle */}
                 <span
                   onPointerDown={onDown(idx)}
-                  style={{ cursor: "grab", touchAction: "none", color: C.muted, fontSize: 15, letterSpacing: "-2px", padding: "4px 2px", userSelect: "none" }}
+                  style={{ cursor: "grab", touchAction: "none", color: C.muted, fontSize: 17, letterSpacing: "-2px", padding: "4px 2px", userSelect: "none" }}
                 >⋮⋮</span>
                 <span style={{ display: "flex", color: C.gold }}>{meta.icon}</span>
-                <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>
+                <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>
                   {t(meta.label)}
-                  {meta.locked && <Mono style={{ color: C.muted2, fontSize: 8, marginLeft: 8 }}>{t("VEDNO PRIKAZAN")}</Mono>}
+                  {meta.locked && <Mono style={{ color: C.muted2, fontSize: 9, marginLeft: 8 }}>{t("VEDNO PRIKAZAN")}</Mono>}
                 </span>
                 {/* toggle */}
                 <button onClick={() => toggle(w.id)} disabled={meta.locked} aria-label={meta.label} style={{
