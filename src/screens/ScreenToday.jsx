@@ -129,10 +129,10 @@ function Medallion({ pct, color, C, size = 130 }) {
       borderRadius: "50%",
       background: dark
         ? "radial-gradient(circle at 38% 32%, #1F2420, #14120E 78%)"
-        : "radial-gradient(circle at 38% 32%, #FBF7EF, #EFE8D8 70%, #E2D8C2 100%)",
+        : "radial-gradient(circle at 38% 32%, #FCFBF7, #F0EEE6 70%, #E4E1D6 100%)",
       boxShadow: dark
         ? "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 3px rgba(255,255,255,0.06)"
-        : "0 16px 40px rgba(28,24,20,0.16), inset 0 2px 4px rgba(255,255,255,0.85), inset 0 -6px 14px rgba(140,120,80,0.24)",
+        : "0 16px 40px rgba(28,24,20,0.16), inset 0 2px 4px rgba(255,255,255,0.85), inset 0 -6px 14px rgba(31,122,82,0.18)",
     }}>
       {/* battery fill — the disc literally fills bottom-up to the score */}
       <div aria-hidden="true" style={{ position: "absolute", inset: size * 0.085, borderRadius: "50%", overflow: "hidden", pointerEvents: "none" }}>
@@ -147,7 +147,7 @@ function Medallion({ pct, color, C, size = 130 }) {
       {/* inner bronze ring */}
       <div style={{ position: "absolute", inset: size * 0.10, borderRadius: "50%", border: `1.5px solid ${C.gold}`, opacity: 0.4, pointerEvents: "none" }} />
       <svg viewBox="0 0 210 210" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-        <circle cx="105" cy="105" r={r} fill="none" stroke={dark ? "rgba(255,255,255,0.10)" : "#D8CDB6"} strokeWidth="3" />
+        <circle cx="105" cy="105" r={r} fill="none" stroke={dark ? "rgba(255,255,255,0.10)" : "#DAD6CB"} strokeWidth="3" />
         <circle
           cx="105" cy="105" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset}
