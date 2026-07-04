@@ -46,47 +46,6 @@ function getGreeting() {
   return "Dober večer";
 }
 
-// iOS-style status bar mock for the top of the home page — live time on the
-// left, signal / wifi / battery glyphs on the right, drawn in the theme ink.
-function PhoneStatusBar({ C }) {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 20000);
-    return () => clearInterval(id);
-  }, []);
-  const ink = C.text;
-  const sys = '-apple-system, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif';
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  return (
-    <div style={{ order: -1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px 12px", position: "relative", zIndex: 1 }}>
-      <span style={{ fontFamily: sys, fontWeight: 600, fontSize: 16, color: ink, letterSpacing: "0.01em" }}>{hh}:{mm}</span>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        {/* cellular signal */}
-        <svg width={18} height={11} viewBox="0 0 18 11" fill={ink} aria-hidden="true">
-          <rect x="0" y="7.5" width="3" height="3.5" rx="0.7" />
-          <rect x="5" y="5" width="3" height="6" rx="0.7" />
-          <rect x="10" y="2.5" width="3" height="8.5" rx="0.7" />
-          <rect x="15" y="0" width="3" height="11" rx="0.7" />
-        </svg>
-        {/* wifi */}
-        <svg width={16} height={12} viewBox="0 0 16 12" fill={ink} aria-hidden="true">
-          <path d="M8 2.1c2.6 0 5 1 6.8 2.7l-1.5 1.5A7.5 7.5 0 008 4.2 7.5 7.5 0 002.7 6.3L1.2 4.8A9.6 9.6 0 018 2.1z" />
-          <path d="M8 5.9c1.5 0 2.8.6 3.8 1.5l-1.6 1.6A3 3 0 008 8.1c-.8 0-1.6.3-2.2.9L4.2 7.4A5.2 5.2 0 018 5.9z" />
-          <circle cx="8" cy="10.2" r="1.2" />
-        </svg>
-        {/* battery */}
-        <div style={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <div style={{ width: 23, height: 11.5, borderRadius: 3, border: `1px solid ${ink}`, opacity: 0.9, padding: 1.5, boxSizing: "border-box" }}>
-            <div style={{ width: "82%", height: "100%", borderRadius: 1.5, background: ink }} />
-          </div>
-          <div style={{ width: 1.5, height: 4, borderRadius: 1, background: ink, opacity: 0.55 }} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function useCountUp(target, dur = 900, delay = 200) {
   const [n, setN] = useState(0);
   useEffect(() => {
@@ -516,8 +475,6 @@ export default function ScreenToday({ go, profile }) {
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-      {/* mock iOS status bar at the very top of home */}
-      <PhoneStatusBar C={C} />
       {/* antique classical-bust watermark behind the header */}
       <img src="/img/bust-ink.png" alt="" aria-hidden="true" style={{
         position: "absolute", top: -28, right: -34, width: 188, height: 188, objectFit: "contain",
