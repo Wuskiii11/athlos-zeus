@@ -20,11 +20,14 @@ const DEMO_INJURY = {
   coachNote: "Poročilo fizioterapevta: napredek po pričakovanjih. MRI kontrola 10. jul.",
 };
 
+// Each insight carries a semantic color for its icon badge: gold = neutral
+// info, green = good news, red = warning — the same vocabulary as the
+// readiness tone elsewhere on this screen.
 const DEMO_INSIGHTS = [
-  { id: "bodycomp", icon: <IcMeal size={18} />, kicker: "TELESNA KOMPOZICIJA", text: "Ta teden si izgubil 2,5 kg — priporočamo večji vnos beljakovin za +10 %." },
-  { id: "sleep", icon: <IcMoon size={18} />, kicker: "SPANJE", text: "Tvoj ritem spanja se je izboljšal skozi zadnjih 5 dni — keep going." },
-  { id: "progression", icon: <IcTrendUp size={18} />, kicker: "TRENING PROGRESIJA", text: "V zadnjih 4 treningih si počep dvignil za +7,5 kg. Naslednji teden predlagamo deload." },
-  { id: "hrv", icon: <IcAlert size={18} />, kicker: "OPOZORILA", text: "Tvoja HRV pada 3. dan zapored. Razmisli o lažjem treningu danes." },
+  { id: "bodycomp", icon: <IcMeal size={18} />, color: "gold", kicker: "TELESNA KOMPOZICIJA", text: "Ta teden si izgubil 2,5 kg — priporočamo večji vnos beljakovin za +10 %." },
+  { id: "sleep", icon: <IcMoon size={18} />, color: "accent", kicker: "SPANJE", text: "Tvoj ritem spanja se je izboljšal skozi zadnjih 5 dni — keep going." },
+  { id: "progression", icon: <IcTrendUp size={18} />, color: "accent", kicker: "TRENING PROGRESIJA", text: "V zadnjih 4 treningih si počep dvignil za +7,5 kg. Naslednji teden predlagamo deload." },
+  { id: "hrv", icon: <IcAlert size={18} />, color: "red", kicker: "OPOZORILA", text: "Tvoja HRV pada 3. dan zapored. Razmisli o lažjem treningu danes." },
 ];
 
 const CHECKIN_KEY = "athlos:checkin";

@@ -140,6 +140,21 @@ export async function changePassword(oldPassword, newPassword) {
   writeLS(next);
 }
 
+// Sends the real "reset your password" email via Supabase Auth.
+export async function requestPasswordReset(email) {
+  if (!hasSupabase) throw new Error("Ponastavitev gesla po e-pošti deluje samo v oblačni različici (Supabase).");
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+  if (error) throw new Error(error.message);
+}
+
+// Updates the login e-mail (Supabase sends a confirmation link to the new
+// address; the change only takes effect once it's clicked).
+export async function changeEmail(newEmail) {
+  if (!hasSupabase) throw new Error("Sprememba e-pošte deluje samo v oblačni različici (Supabase).");
+  const { error } = await supabase.auth.updateUser({ email: newEmail });
+  if (error) throw new Error(error.message);
+}
+
 // ── Profile ──────────────────────────────────────────────────
 export async function loadProfile(userId) {
   if (hasSupabase) {

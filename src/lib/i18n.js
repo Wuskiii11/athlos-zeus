@@ -75,6 +75,20 @@ const EN = {
   "Zapri": "Close",
   "Zamenjaj sliko": "Change photo",
 
+  // ── Settings → Account ──
+  "RAČUN": "ACCOUNT",
+  "Ime, e-pošta in geslo": "Name, e-mail and password",
+  "Račun": "Account",
+  "E-POŠTA": "E-MAIL",
+  "Ni nastavljeno": "Not set",
+  "Vnesi veljaven e-naslov.": "Enter a valid e-mail address.",
+  "✓ Poslali smo potrditveno povezavo na nov e-naslov.": "✓ We sent a confirmation link to the new address.",
+  "Napaka pri spremembi e-pošte.": "Error changing e-mail.",
+  "Pošiljam…": "Sending…",
+  "Ni e-naslova za ta račun.": "No e-mail on this account.",
+  "✓ Povezava za ponastavitev je bila poslana na e-naslov zgoraj.": "✓ A reset link was sent to the e-mail above.",
+  "Napaka pri pošiljanju.": "Error sending.",
+
   // ── Chat ──
   "Pogovori": "Chats",
   "Blokirano": "Blocked",

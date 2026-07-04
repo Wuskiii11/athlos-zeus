@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useTheme, LANDING_URL } from "../theme";
 import { Pressable, SettingsBlock, LanguageSwitcher } from "../components/UI";
-import { changePassword } from "../lib/api";
 import { useT } from "../lib/i18n";
 
 const PLANS = [
@@ -69,18 +68,10 @@ const FAQ_ITEMS = [
   { q: "Zakaj ne vidim napredka?", a: "Napredek se izračuna po vsaj 2 tednih rednega beleženja. Poskrbi, da redno vnaša treninge in spanje." },
 ];
 
-export default function ScreenSettings({ profile, setProfile, theme, setTheme, onPrivacy, onLogout }) {
+export default function ScreenSettings({ profile, setProfile, theme, setTheme, onPrivacy, onAccount, onLogout }) {
   const C = useTheme();
   const t = useT();
   const fileRef = React.useRef(null);
-  const [name, setName] = useState(profile.name);
-  const [editingName, setEditingName] = useState(false);
-
-  // Password change
-  const [changingPw, setChangingPw] = useState(false);
-  const [oldPw, setOldPw] = useState("");
-  const [newPw, setNewPw] = useState("");
-  const [pwMsg, setPwMsg] = useState("");
 
   // Plan — lives on the profile so it's saved per account (backend/localStorage)
   const currentPlan = profile.plan || "basic";
@@ -110,7 +101,7 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
   // Full-screen profile-photo preview (tap the avatar, TikTok-style)
   const [photoPreview, setPhotoPreview] = useState(false);
 
-  const initial = (name || "?").trim().charAt(0).toUpperCase();
+  const initial = (profile.name || "?").trim().charAt(0).toUpperCase();
 
   const onFile = (e) => {
     const f = e.target.files && e.target.files[0];
@@ -120,30 +111,12 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
     reader.readAsDataURL(f);
   };
 
-  const saveName = () => {
-    setProfile((p) => ({ ...p, name: name.trim() || "Športnik" }));
-    setEditingName(false);
-  };
-
-  const savePassword = async () => {
-    if (!oldPw || !newPw) { setPwMsg("Izpolni oba polja."); return; }
-    if (newPw.length < 6) { setPwMsg("Novo geslo mora imeti vsaj 6 znakov."); return; }
-    try {
-      await changePassword(oldPw, newPw);
-      setPwMsg("✓ Geslo uspešno posodobljeno.");
-      setTimeout(() => { setChangingPw(false); setOldPw(""); setNewPw(""); setPwMsg(""); }, 1800);
-    } catch (e) {
-      setPwMsg(e.message || "Napaka pri spremembi gesla.");
-    }
-  };
-
   const sendContact = () => {
     if (!contactMsg.trim()) return;
     setContactSent(true);
     setTimeout(() => { setContactOpen(false); setContactMsg(""); setContactSent(false); }, 2000);
   };
 
-  const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
   const inp = { width: "100%", padding: "14px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light", marginTop: 8 };
   const editBtn = { padding: "9px 16px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.accent, fontFamily: C.display, fontSize: 13, fontWeight: 700 };
   const primaryBtn = { borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
@@ -171,19 +144,15 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
         <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.95} style={editBtn}>{t("Slika")}</Pressable>
       </div>
 
-      {/* Username */}
-      <SettingsBlock title={t("UPORABNIŠKO IME")}>
-        {!editingName ? (
-          <div style={row}>
+      {/* Account — name, e-mail, password now live on their own screen */}
+      <SettingsBlock title={t("RAČUN")}>
+        <Pressable onClick={onAccount} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
+          <div>
             <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15, color: C.text }}>{profile.name}</span>
-            <Pressable onClick={() => { setName(profile.name); setEditingName(true); }} scale={0.95} style={editBtn}>{t("Uredi")}</Pressable>
+            <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>{t("Ime, e-pošta in geslo")}</div>
           </div>
-        ) : (
-          <div style={{ display: "flex", gap: 8 }}>
-            <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && saveName()} style={{ flex: 1, padding: "13px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15, outline: "none", boxSizing: "border-box" }} />
-            <Pressable onClick={saveName} scale={0.93} style={{ ...primaryBtn, padding: "0 20px" }}>{t("Shrani")}</Pressable>
-          </div>
-        )}
+          <span style={{ color: C.muted, fontSize: 18 }}>›</span>
+        </Pressable>
       </SettingsBlock>
 
       {/* Language */}
@@ -247,37 +216,6 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
         {notifPerm === "denied" && (
           <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 10, padding: "10px 12px", borderRadius: 10, background: C.surface2, lineHeight: 1.5 }}>
             {t("Odpri nastavitve naprave → Aplikacije → Brskalnik → Obvestila in jih dovoli.")}
-          </div>
-        )}
-      </SettingsBlock>
-
-      {/* Password */}
-      <SettingsBlock title={t("GESLO")}>
-        {!changingPw ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={row}>
-              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Spremeni geslo")}</span>
-              <Pressable onClick={() => setChangingPw(true)} scale={0.95} style={editBtn}>{t("Uredi")}</Pressable>
-            </div>
-            <div style={{ width: "100%", height: 1, background: C.border }} />
-            <div style={row}>
-              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text2 }}>{t("Pozabljeno geslo?")}</span>
-              <Pressable onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} scale={0.95} style={editBtn}>{t("Ponastavi")}</Pressable>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted }}>{t("TRENUTNO GESLO")}</span>
-            <input type="password" value={oldPw} onChange={(e) => setOldPw(e.target.value)} placeholder="••••••••" style={inp} />
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted, marginTop: 8 }}>{t("NOVO GESLO")}</span>
-            <input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="••••••••" style={inp} />
-            {pwMsg && (
-              <div style={{ padding: "11px 14px", borderRadius: 14, background: pwMsg.startsWith("✓") ? `${C.accent}14` : `${C.red}14`, border: `1px solid ${pwMsg.startsWith("✓") ? C.accent : C.red}40`, color: pwMsg.startsWith("✓") ? C.accent : C.red, fontFamily: C.display, fontSize: 13, marginTop: 10 }}>{t(pwMsg)}</div>
-            )}
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-              <button onClick={() => { setChangingPw(false); setOldPw(""); setNewPw(""); setPwMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "13px", fontSize: 13 }}>{t("Prekliči")}</button>
-              <button onClick={savePassword} style={{ ...primaryBtn, flex: 2, padding: "13px", fontSize: 13 }}>{t("Shrani geslo")}</button>
-            </div>
           </div>
         )}
       </SettingsBlock>

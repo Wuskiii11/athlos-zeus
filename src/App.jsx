@@ -12,6 +12,7 @@ import ScreenProfile from "./screens/ScreenProfile";
 import ScreenSeason from "./screens/ScreenSeason";
 import ScreenFuel from "./screens/ScreenFuel";
 import ScreenSettings from "./screens/ScreenSettings";
+import ScreenAccount from "./screens/ScreenAccount";
 import ScreenPrivacy from "./screens/ScreenPrivacy";
 import ScreenChat from "./screens/ScreenChat";
 import ScreenClub from "./screens/ScreenClub";
@@ -250,7 +251,7 @@ export default function AthlosApp() {
   }, [theme]);
 
   const navActive = ["train","session","report","fuel"].includes(screen) ? "today"
-    : screen === "profile" ? "settings"
+    : ["profile","account"].includes(screen) ? "settings"
     : screen;
 
   const go = (s) => {
@@ -323,7 +324,8 @@ export default function AthlosApp() {
       case "report":   return <ScreenReport go={go} />;
       case "profile":  return <ScreenProfile go={go} profile={profile} setProfile={setProfile} />;
       case "fuel":     return <ScreenFuel profile={profile} />;
-      case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} onPrivacy={() => setPrivacyOpen(true)} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
+      case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} onPrivacy={() => setPrivacyOpen(true)} onAccount={() => setScreen("account")} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
+      case "account":  return <ScreenAccount profile={profile} setProfile={setProfile} user={user} onBack={() => setScreen("settings")} />;
       case "season":   return <ScreenSeason go={go} profile={profile} user={user} />;
       case "chat":       return <ScreenChat user={user} profile={profile} />;
       case "club":       return <ScreenClub go={go} profile={profile} />;
