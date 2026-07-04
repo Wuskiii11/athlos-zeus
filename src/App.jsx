@@ -50,6 +50,10 @@ function SplashScreen({ C }) {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
+        @keyframes splashRule {
+          from { transform: scaleX(0); }
+          to   { transform: scaleX(1); }
+        }
       `}</style>
 
       {/* the god — quick fade-in only; the end state is fully visible, so it
@@ -72,7 +76,13 @@ function SplashScreen({ C }) {
         <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 34, letterSpacing: "0.38em", paddingLeft: "0.38em", color: "#1C1814" }}>
           ATHLOS
         </div>
-        <div style={{ width: 52, height: 1, margin: "14px 0 12px", background: "linear-gradient(90deg, transparent, #B08D57 50%, transparent)" }} />
+        {/* grows outward from the center, like it's loading */}
+        <div style={{
+          width: 52, height: 1, margin: "14px 0 12px",
+          background: "linear-gradient(90deg, transparent, #B08D57 50%, transparent)",
+          transform: "scaleX(0)",
+          animation: "splashRule 0.7s cubic-bezier(.22,.8,.28,1) 0.35s forwards",
+        }} />
         <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 15, letterSpacing: "0.12em", color: "rgba(28,24,20,0.5)" }}>
           sistem, ki pozna vsakega športnika
         </div>
