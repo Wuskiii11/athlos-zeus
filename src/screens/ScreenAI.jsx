@@ -87,6 +87,16 @@ function nowTime() {
   return `${n.getHours()}:${String(n.getMinutes()).padStart(2, "0")}`;
 }
 
+// Minimal **bold** rendering — ZEUS's replies use it for emphasis, and
+// showing the raw asterisks read as broken/unpolished.
+function renderRich(text) {
+  const parts = String(text).split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) => {
+    const m = p.match(/^\*\*([^*]+)\*\*$/);
+    return m ? <strong key={i}>{m[1]}</strong> : <React.Fragment key={i}>{p}</React.Fragment>;
+  });
+}
+
 // ZEUS greeting built from the learning memory — proves he "knows" the athlete.
 function buildWelcome(memory, profile, fresh) {
   const name = profile?.name && profile.name !== "NIK" ? profile.name : "";
@@ -120,8 +130,14 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
       ? (arr.includes("Brez") ? [] : ["Brez"])
       : (arr.includes(p) ? arr.filter((x) => x !== p) : [...arr.filter((x) => x !== "Brez"), p]));
   const row = { fontFamily: C.display, fontSize: 12, color: C.text2, fontWeight: 600, marginBottom: 7 };
+  const dark = C.name === "dark";
   return (
-    <div style={{ alignSelf: "stretch", background: C.surface, border: `1px solid ${C.gold}44`, borderRadius: 18, padding: "16px 16px 14px", margin: "2px 0", animation: "athlosMsgBot 0.32s cubic-bezier(0.22,1,0.36,1) both" }}>
+    <div style={{
+      alignSelf: "stretch", borderRadius: 18, padding: "16px 16px 14px", margin: "2px 0",
+      animation: "athlosMsgBot 0.32s cubic-bezier(0.22,1,0.36,1) both",
+      background: dark ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)",
+      border: `1px solid ${C.gold}44`,
+    }}>
       <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 15, color: C.text, letterSpacing: "0.02em" }}>{t("Kako je šlo zadnjič?")}</div>
       <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 2, marginBottom: 13 }}>{t("Da te ZEUS bolje pozna in nadgradi naslednji trening.")}</div>
 
@@ -321,20 +337,40 @@ export default function ScreenAI({ user, profile }) {
         </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages — the same marble dialogue as human chat: ZEUS speaks in
+          italic Cormorant on a marble tablet, your replies are engraved ink
+          panels with a faint green "oracle" breath, like an answered oracle. */}
       <div ref={scrollRef} style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "12px 18px 8px", display: "flex", flexDirection: "column", gap: 14 }}>
-        {msgs.map((m, i) => (
-          <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: m.from === "user" ? "flex-end" : "flex-start", animation: `${m.from === "user" ? "athlosMsgUser" : "athlosMsgBot"} 0.32s cubic-bezier(0.22,1,0.36,1) both` }}>
-            <div style={{
-              maxWidth: m.from === "user" ? "80%" : "88%", padding: "14px 16px", borderRadius: 18,
-              background: m.from === "user" ? C.surface2 : C.surface, border: `1px solid ${C.border}`,
-              color: m.from === "user" ? C.text : C.text2, fontFamily: C.display, fontSize: 14, lineHeight: 1.5, whiteSpace: "pre-wrap",
-            }}>
-              {t(m.t)}
+        {msgs.map((m, i) => {
+          const isMine = m.from === "user";
+          return (
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: isMine ? "flex-end" : "flex-start", animation: `${isMine ? "athlosMsgUser" : "athlosMsgBot"} 0.32s cubic-bezier(0.22,1,0.36,1) both` }}>
+              <div style={{
+                position: "relative", maxWidth: isMine ? "80%" : "88%", padding: "14px 16px", overflow: "hidden",
+                borderRadius: isMine ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                background: isMine
+                  ? "linear-gradient(160deg, #26221C, #1C1814)"
+                  : (dark ? "rgba(255,255,255,0.07)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)"),
+                border: isMine
+                  ? "1px solid rgba(244,239,230,0.10)"
+                  : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
+                boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
+              }}>
+                {isMine && (
+                  <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: `radial-gradient(circle, ${C.accent2}29, transparent 70%)`, pointerEvents: "none" }} />
+                )}
+                <span style={{
+                  position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 15, lineHeight: 1.5, whiteSpace: "pre-wrap",
+                  fontStyle: isMine ? "normal" : "italic",
+                  color: isMine ? "#F4EFE6" : C.text,
+                }}>
+                  {renderRich(t(m.t))}
+                </span>
+              </div>
+              <Mono style={{ fontSize: 8, color: C.muted2, marginTop: 5, letterSpacing: "0.1em" }}>{m.time}</Mono>
             </div>
-            <span style={{ fontFamily: C.display, fontSize: 11, color: C.muted2, marginTop: 5 }}>{m.time}</span>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Saving to calendar — brief inline status while the auto-save runs */}
         {calSaving && (
@@ -349,62 +385,73 @@ export default function ScreenAI({ user, profile }) {
           <FeedbackCard C={C} t={t} onSave={onSaveFeedback} onSkip={() => setShowFeedback(false)} />
         )}
 
-        {/* Typing dots */}
+        {/* Typing dots — same marble tablet as a ZEUS reply */}
         {typing && (
           <div style={{ display: "flex", animation: "athlosFade 0.2s ease" }}>
-            <div style={{ padding: "16px 18px", borderRadius: 18, background: C.surface, border: `1px solid ${C.border}`, display: "flex", gap: 6, alignItems: "center" }}>
+            <div style={{
+              padding: "16px 18px", borderRadius: "18px 18px 18px 4px", display: "flex", gap: 6, alignItems: "center",
+              background: dark ? "rgba(255,255,255,0.07)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)",
+              border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
+            }}>
               {[0, 0.2, 0.4].map((d, i) => (
-                <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.muted, animation: "athlosDot 1.2s infinite", animationDelay: `${d}s`, display: "block" }} />
+                <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold, animation: "athlosDot 1.2s infinite", animationDelay: `${d}s`, display: "block" }} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Suggestions (fresh start) */}
+        {/* Suggestions (fresh start) — marble tablets, matching the chat list */}
         {showSugg && !typing && (
           <div style={{ marginTop: 8, animation: "athlosFade 0.35s ease" }}>
-            <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted, marginBottom: 12 }}>{t("predlagana vprašanja")}</div>
+            <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.14em", display: "block", marginBottom: 12 }}>{t("predlagana vprašanja")}</Mono>
             {SUGGESTIONS.map((s) => (
               <button key={s} onClick={() => send(s)} style={{
-                width: "100%", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
+                width: "100%",
+                background: dark ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)",
+                border: `1px solid ${dark ? C.border : "#D8CFBD"}`,
+                borderRadius: 16,
                 padding: "14px 16px", textAlign: "left", cursor: "pointer", marginBottom: 10,
-                color: C.text2, fontFamily: C.display, fontSize: 14, lineHeight: 1.4,
+                color: C.text2, fontFamily: C.display, fontSize: 15, fontStyle: "italic", lineHeight: 1.4,
                 WebkitTapHighlightColor: "transparent", transition: "border-color 0.15s, color 0.15s",
                 display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
               }}
-                onPointerEnter={(e) => { e.currentTarget.style.borderColor = C.accent + "66"; e.currentTarget.style.color = C.text; }}
-                onPointerLeave={(e) => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.text2; }}
+                onPointerEnter={(e) => { e.currentTarget.style.borderColor = C.gold + "88"; e.currentTarget.style.color = C.text; }}
+                onPointerLeave={(e) => { e.currentTarget.style.borderColor = dark ? C.border : "#D8CFBD"; e.currentTarget.style.color = C.text2; }}
               >
                 <span>{t(s)}</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Input */}
-      <div style={{ flexShrink: 0, padding: "10px 18px 18px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 6px 6px 16px", background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 16 }}>
+      {/* Input — same serif-on-marble composer as human chat, ink send button
+          with the signature electric-green arrow */}
+      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "10px 18px 18px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 6px 6px 16px", background: dark ? C.surface2 : "rgba(255,255,255,0.55)", border: `1px solid ${dark ? C.border : "#D8CFBD"}`, borderRadius: 16 }}>
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder={t("Vprašaj ZEUS-a...")}
-            style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontSize: 16, lineHeight: 1 }}
+            style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 16, lineHeight: 1 }}
           />
           <Pressable
             onClick={() => send()}
             scale={0.86}
             disabled={!input.trim() || typing}
             style={{
-              width: 40, height: 40, borderRadius: 999, border: "none",
-              background: input.trim() && !typing ? C.accent : C.surface3,
-              display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s",
+              width: 38, height: 38, borderRadius: 999, border: "1px solid rgba(244,239,230,0.12)",
+              background: "linear-gradient(160deg, #26221C, #14120E)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              opacity: input.trim() && !typing ? 1 : 0.4,
+              boxShadow: input.trim() && !typing ? "0 6px 16px rgba(28,24,20,0.28)" : "none",
+              transition: "opacity 0.2s, box-shadow 0.2s",
             }}
           >
-            <SendIcon color={input.trim() && !typing ? "#ffffff" : C.muted} />
+            <SendIcon color={input.trim() && !typing ? C.accent2 : "rgba(244,239,230,0.6)"} />
           </Pressable>
         </div>
       </div>
