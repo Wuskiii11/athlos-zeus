@@ -93,7 +93,7 @@ function SplashScreen({ C }) {
         {/* grows outward from the center, like it's loading — as wide as the wordmark */}
         <div className="athlos-splash-rule" style={{
           width: 220, maxWidth: "60vw", height: 1, margin: "14px 0 12px",
-          background: "#B08D57",
+          background: "#1F7A52",
           transform: "scaleX(0)", transformOrigin: "center",
         }} />
         <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 17, letterSpacing: "0.12em", color: "rgba(28,24,20,0.5)" }}>

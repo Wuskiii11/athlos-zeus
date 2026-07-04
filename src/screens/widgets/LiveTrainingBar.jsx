@@ -49,7 +49,7 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
         <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: "#F4EFE6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {live.block} · {t(live.exName)}
         </span>
-        <Mono style={{ color: restLeft ? "#C8A24A" : "rgba(244,239,230,0.55)", fontSize: 10, letterSpacing: "0.08em" }}>
+        <Mono style={{ color: restLeft ? "#00FF87" : "rgba(244,239,230,0.55)", fontSize: 10, letterSpacing: "0.08em" }}>
           {restLeft
             ? <>{t("ODMOR")} {restLeft}s{live.nextName ? ` · ${t("nato")}: ${t(live.nextName)}` : ""}</>
             : <>SET {Math.min(live.setDone + 1, live.setsTotal)}/{live.setsTotal}{live.load ? ` · ${live.load} ${live.unit}` : ""} · {live.reps} {t("pon.")}</>}

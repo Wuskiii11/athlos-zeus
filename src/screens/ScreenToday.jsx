@@ -543,7 +543,7 @@ export default function ScreenToday({ go, profile }) {
         </div>
         <div style={{ position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, overflow: "hidden" }}>
         {/* fluted-column texture (.at-flute) */}
-        <div aria-hidden="true" style={{ position: "absolute", top: 0, right: 0, width: 90, height: "100%", pointerEvents: "none", backgroundImage: "repeating-linear-gradient(90deg, rgba(176,141,87,0.07) 0 6px, transparent 6px 14px)", opacity: 0.7 }} />
+        <div aria-hidden="true" style={{ position: "absolute", top: 0, right: 0, width: 90, height: "100%", pointerEvents: "none", backgroundImage: "repeating-linear-gradient(90deg, rgba(31,122,82,0.07) 0 6px, transparent 6px 14px)", opacity: 0.7 }} />
         <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.18em" }}>AGON · {t("AI PROGRAM DANES")} · 17:00</Mono>
         <h2 style={{ fontFamily: C.cond, fontWeight: 800, fontSize: 33.5, margin: "8px 0 12px", color: C.text, textTransform: "uppercase", lineHeight: 0.95, letterSpacing: "0.01em" }}>{t("Moč · Spodnji del")}</h2>
         <div style={{ display: "flex", gap: 18, marginBottom: 16 }}>

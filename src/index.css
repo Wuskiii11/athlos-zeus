@@ -29,7 +29,7 @@
   --accent: rgba(31, 122, 82, 0.1);
   --accent-foreground: #1f7a52;
 
-  --gold: #b08d57;
+  --gold: #1F7A52;
 
   --destructive: #b1452f;
   --destructive-foreground: #ffffff;
@@ -61,7 +61,7 @@
   --accent: rgba(0, 255, 135, 0.12);
   --accent-foreground: #33ffa3;
 
-  --gold: #c8a24a;
+  --gold: #00FF87;
 
   --destructive: #c95a3f;
   --destructive-foreground: #ffffff;
@@ -126,7 +126,7 @@
 
 /* Greek-key (meander) band — repeating fret pattern, used as a top/bottom rule */
 .greek-key {
-  --gk: var(--gold, #b08d57);
+  --gk: var(--gold, #1F7A52);
   height: 12px;
   background-image:
     repeating-linear-gradient(90deg,
@@ -190,7 +190,7 @@
 .ray-burst-light::before {
   content: ""; position: absolute; inset: -42%; z-index: 0; pointer-events: none;
   background: repeating-conic-gradient(from 0deg at 50% 46%,
-    rgba(176,141,87,0.14) 0deg 0.45deg, transparent 0.45deg 2.4deg);
+    rgba(31,122,82,0.14) 0deg 0.45deg, transparent 0.45deg 2.4deg);
   -webkit-mask: radial-gradient(closest-side, #000 0%, #000 22%, transparent 64%);
           mask: radial-gradient(closest-side, #000 0%, #000 22%, transparent 64%);
   animation: rayspin 140s linear infinite;

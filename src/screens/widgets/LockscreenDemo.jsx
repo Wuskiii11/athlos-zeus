@@ -59,7 +59,7 @@ export default function LockscreenDemo({ onClose, t }) {
             <div style={{ fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 800, fontSize: 29, textTransform: "uppercase", color: "#F4EFE6", lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {live ? `${live.block} · ${t(live.exName)}` : "A1 · Počep"}
             </div>
-            <Mono style={{ color: restLeft ? "#C8A24A" : "rgba(244,239,230,0.55)", fontSize: 11, letterSpacing: "0.08em", marginTop: 6, display: "block" }}>
+            <Mono style={{ color: restLeft ? "#00FF87" : "rgba(244,239,230,0.55)", fontSize: 11, letterSpacing: "0.08em", marginTop: 6, display: "block" }}>
               {restLeft
                 ? `${t("ODMOR")} ${restLeft}s${live?.nextName ? ` · ${t("nato")}: ${t(live.nextName)}` : ""}`
                 : live
