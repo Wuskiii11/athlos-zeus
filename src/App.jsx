@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { ThemeContext, THEMES, DatePickerContext, TimePickerContext } from "./theme";
 import { Pressable, Mono, TabButton, SkeletonBlock, Emblem, Wordmark } from "./components/UI";
 import DatePicker from "./components/DatePicker";
@@ -184,6 +184,7 @@ export default function AthlosApp() {
   const touchCurY    = useRef(0);
   const swipeBlocked = useRef(false);
   const scrollRef    = useRef(null);
+  const scrollPos    = useRef({}); // per-screen scroll memory, so back returns where you were
   const profileLoaded = useRef(false);
 
   // Apply an auth session: load the user's profile and route to setup or app.
@@ -256,11 +257,20 @@ export default function AthlosApp() {
     : screen;
 
   const go = (s) => {
+    // Remember where we were on the current screen, so returning restores it.
+    if (scrollRef.current) scrollPos.current[screen] = scrollRef.current.scrollTop;
     const ids = NAV.map(n => n.id);
     const from = ids.indexOf(screen), to = ids.indexOf(s);
     setNavDir(from !== -1 && to !== -1 && from !== to ? (to > from ? "next" : "prev") : null);
     setScreen(s);
   };
+
+  // Restore the saved scroll position after a screen change (the scroll node is
+  // re-keyed per screen, so it mounts at 0 — put it back where the user was).
+  useLayoutEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollPos.current[screen] || 0;
+    // eslint-disable-next-line
+  }, [screen]);
 
   const tabIds = NAV.map(n => n.id);
 
