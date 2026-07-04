@@ -138,6 +138,12 @@ const getPlatform = () => {
 };
 const PLATFORM = getPlatform();
 
+// The phone's own light/dark preference — used as the default until the user
+// makes an explicit choice (Settings or their saved account theme).
+const getSystemTheme = () =>
+  (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ? "dark" : "light";
+
 // Device-level prefs (theme, consent). Auth + profile live in lib/api (key athlos:v1).
 const PREFS_KEY = "athlos:prefs";
 function loadPrefs() {
@@ -159,8 +165,9 @@ export default function AthlosApp() {
   const [screen, setScreen]           = useState("today");
   const [transitioning, setTransitioning] = useState(false);
   const [navDir, setNavDir]           = useState(null); // "next" | "prev" | null — drives the slide direction
-  // Light marble is the default; the user's explicit Settings choice sticks.
-  const [theme, setThemeState]        = useState(() => loadPrefs().themePref || "light");
+  // Follow the phone's light/dark preference by default; an explicit Settings /
+  // account choice overrides it and sticks.
+  const [theme, setThemeState]        = useState(() => loadPrefs().themePref || getSystemTheme());
   const themeExplicit                 = useRef(!!loadPrefs().themePref);
   // Persist the theme both on-device (prefs) and on the account (profile.theme),
   // so it follows the user across logins/devices.
@@ -257,6 +264,16 @@ export default function AthlosApp() {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
   }, [theme]);
+
+  // Live-follow the phone's light/dark preference — but only while the user
+  // hasn't made an explicit choice (that choice always wins).
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e) => { if (!themeExplicit.current) setThemeState(e.matches ? "dark" : "light"); };
+    mq.addEventListener ? mq.addEventListener("change", onChange) : mq.addListener(onChange);
+    return () => { mq.removeEventListener ? mq.removeEventListener("change", onChange) : mq.removeListener(onChange); };
+  }, []);
 
   const navActive = ["train","session","report","fuel"].includes(screen) ? "today"
     : ["profile","account"].includes(screen) ? "settings"
