@@ -466,7 +466,14 @@ export default function AthlosApp() {
 
       {/* ── SETUP ── */}
       {!splash && authReady && needsSetup && (
-        <SetupFlow profile={profile} setProfile={setProfile} onDone={(info) => {
+        <SetupFlow profile={profile} setProfile={setProfile} onBack={() => {
+          // Back from step 0 → return to the login screen
+          profileLoaded.current = false;
+          setUser(null);
+          setRegistered(false);
+          setNeedsSetup(false);
+          apiSignOut().catch(() => {});
+        }} onDone={(info) => {
           const np = {
             ...profile, name: info.username, birth: info.birth, height: info.height, weight: info.weight, sport: info.sport || profile.sport,
             // extended onboarding (spec §01)

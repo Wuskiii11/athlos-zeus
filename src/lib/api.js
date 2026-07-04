@@ -156,18 +156,30 @@ export async function changeEmail(newEmail) {
 }
 
 // ── Profile ──────────────────────────────────────────────────
+const hasProfileData = (p) => !!(p && (p.name || p.sport || p.birth || p.role === "coach"));
+
 export async function loadProfile(userId) {
   if (hasSupabase) {
-    const { data, error } = await supabase
-      .from("profiles").select("*").eq("id", userId).maybeSingle();
-    if (error) throw new Error(error.message);
-    return data || null;
+    try {
+      const { data, error } = await supabase
+        .from("profiles").select("*").eq("id", userId).maybeSingle();
+      // Use the cloud row only if it actually holds a completed profile; a bare
+      // auto-created row (no name/sport/birth) would otherwise force setup again.
+      if (!error && hasProfileData(data)) return data;
+    } catch {}
+    // Cloud empty or failed → fall back to the local cache so a completed setup
+    // survives even when the Supabase write didn't land. Keyed per user.
+    return readLS().profileCache?.[userId] || null;
   }
   return readLS().profile || null;
 }
 
 export async function saveProfile(userId, profile) {
   if (hasSupabase) {
+    // Always cache locally first, so a finished profile is never lost to a
+    // failed/blocked cloud write (which is what kept sending users back to setup).
+    const cache = readLS().profileCache || {};
+    writeLS({ profileCache: { ...cache, [userId]: profile } });
     // `club` is derived (from the athletes table), not a profiles column — don't write it.
     const { club, ...rest } = profile;
     const row = { id: userId, ...rest, updated_at: new Date().toISOString() };

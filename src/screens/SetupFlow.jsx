@@ -33,7 +33,7 @@ const EQUIPMENT_OPTIONS = ["Fitnes klub", "Domače uteži / ročke", "Drog za zg
 const SETUP_KEY = "athlos:setup";
 const loadSaved = () => { try { return JSON.parse(localStorage.getItem(SETUP_KEY) || "{}"); } catch { return {}; } };
 
-export default function SetupFlow({ profile, setProfile, onDone }) {
+export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const C = useTheme();
   const saved = useRef(loadSaved()).current;
   const [step, setStep] = useState(() => Math.min(saved.step || 0, FLOW.length - 1));
@@ -204,9 +204,8 @@ export default function SetupFlow({ profile, setProfile, onDone }) {
 
       {/* Progress bar — bronze, clear of the compact language pill */}
       <div style={{ padding: "12px 112px 0 24px", display: "flex", alignItems: "center", gap: 10 }}>
-        {step > 0 && (
-          <button onClick={back} style={{ background: "none", border: "none", color: C.muted, fontSize: 24.5, cursor: "pointer", lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>‹</button>
-        )}
+        {/* Back — earlier step, or out to the login screen on step 0 */}
+        <button onClick={() => (step > 0 ? back() : onBack?.())} style={{ background: "none", border: "none", color: C.muted, fontSize: 24.5, cursor: "pointer", lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>‹</button>
         <div style={{ flex: 1, height: 3, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
           <div style={{ width: `${((step + 1) / total) * 100}%`, height: "100%", background: C.gold, borderRadius: 999, transition: "width 0.35s cubic-bezier(.2,.8,.2,1)" }} />
         </div>
