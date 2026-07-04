@@ -145,12 +145,12 @@ export default function ScreenFuel({ go }) {
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text }}>
-      <div style={{ marginBottom: 8 }}>
+      <header style={{ marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div>
+          <span style={label}>{t("HRANA")}</span>
+          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 28, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj jedilnik")}</h2>
+        </div>
         <BackBtn onClick={() => go?.("today")} />
-      </div>
-      <header style={{ marginBottom: 16 }}>
-        <span style={label}>{t("HRANA")}</span>
-        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 28, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj jedilnik")}</h2>
       </header>
 
       <div style={{ display: "flex", alignItems: "center", gap: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 16, marginBottom: 14 }}>
