@@ -36,12 +36,13 @@ const NAV = [
 const ATHLOS_LETTERS = ["A","T","H","L","O","S"];
 
 function SplashScreen({ C }) {
-  // #F3ECE3 = the exact plate color of greek-god.png, so the engraving sits
-  // on a seamless full-phone canvas. Only the image animates.
+  // Plate color of greek-god.png so the engraving sits on a seamless canvas.
+  // On dark theme the image is inverted, so the canvas flips to match.
+  const dark = C.name === "dark";
   return (
     <div style={{
       position: "fixed", inset: 0,
-      background: "#F3ECE3",
+      background: dark ? "#0C131C" : "#F3ECE3",
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       zIndex: 999, overflow: "hidden",
@@ -80,6 +81,7 @@ function SplashScreen({ C }) {
         style={{
           position: "absolute", top: 0, left: 0, right: 0, width: "100%", height: "76%",
           objectFit: "contain", objectPosition: "center 30%",
+          filter: dark ? "invert(1)" : "none",
           pointerEvents: "none",
           userSelect: "none",
         }}
@@ -87,16 +89,16 @@ function SplashScreen({ C }) {
 
       {/* static wordmark over the lower part */}
       <div style={{ position: "absolute", left: 0, right: 0, bottom: "7vh", display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 38, letterSpacing: "0.38em", paddingLeft: "0.38em", color: "#1C1814" }}>
+        <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 38, letterSpacing: "0.38em", paddingLeft: "0.38em", color: dark ? "#F4EFE6" : "#1C1814" }}>
           ATHLOS
         </div>
         {/* grows outward from the center, like it's loading — as wide as the wordmark */}
         <div className="athlos-splash-rule" style={{
           width: 220, maxWidth: "60vw", height: 1, margin: "14px 0 12px",
-          background: "#1F7A52",
+          background: dark ? "#00FF87" : "#1F7A52",
           transform: "scaleX(0)", transformOrigin: "center",
         }} />
-        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 17, letterSpacing: "0.12em", color: "rgba(28,24,20,0.5)" }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 17, letterSpacing: "0.12em", color: dark ? "rgba(244,239,230,0.55)" : "rgba(28,24,20,0.5)" }}>
           sistem, ki pozna vsakega športnika
         </div>
       </div>
@@ -160,7 +162,9 @@ export default function AthlosApp() {
   // Light marble is the default; the user's explicit Settings choice sticks.
   const [theme, setThemeState]        = useState(() => loadPrefs().themePref || "light");
   const themeExplicit                 = useRef(!!loadPrefs().themePref);
-  const setTheme = (val) => { themeExplicit.current = true; setThemeState(val); };
+  // Persist the theme both on-device (prefs) and on the account (profile.theme),
+  // so it follows the user across logins/devices.
+  const setTheme = (val) => { themeExplicit.current = true; setThemeState(val); setProfile((p) => ({ ...p, theme: val })); };
   const C = THEMES[theme];
   const [consented, setConsented]     = useState(() => !!loadPrefs().consented);
   const [registered, setRegistered]   = useState(false);
@@ -195,6 +199,8 @@ export default function AthlosApp() {
       try { prof = await loadProfile(session.user.id); } catch {}
       if (prof && (prof.name || prof.sport || prof.birth || prof.role === "coach")) {
         setProfile((p) => ({ ...p, ...cleanProfile(prof) }));
+        // Restore the account's saved theme.
+        if (prof.theme === "dark" || prof.theme === "light") { themeExplicit.current = true; setThemeState(prof.theme); }
         profileLoaded.current = true;
         setNeedsSetup(false);
         setRegistered(true);

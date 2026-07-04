@@ -158,32 +158,43 @@ export async function changeEmail(newEmail) {
 // ── Profile ──────────────────────────────────────────────────
 const hasProfileData = (p) => !!(p && (p.name || p.sport || p.birth || p.role === "coach"));
 
+// Real columns on the `profiles` table. Everything else the app keeps on the
+// profile object (goals, injuries, equipment, …) lives only in the local cache —
+// sending it to Supabase would 400 the whole upsert on the unknown column.
+const PROFILE_COLUMNS = ["name", "sport", "birth", "height", "weight", "photo", "plan", "lang", "role", "theme"];
+
 export async function loadProfile(userId) {
+  const cached = readLS().profileCache?.[userId] || null;
   if (hasSupabase) {
     try {
       const { data, error } = await supabase
         .from("profiles").select("*").eq("id", userId).maybeSingle();
-      // Use the cloud row only if it actually holds a completed profile; a bare
-      // auto-created row (no name/sport/birth) would otherwise force setup again.
-      if (!error && hasProfileData(data)) return data;
+      // Cloud is the source of truth for its columns (name, lang, theme, …); the
+      // cache carries the extra fields. Only trust a completed row (else a bare
+      // auto-created row with no name would force setup again).
+      if (!error && hasProfileData(data)) return { ...(cached || {}), ...data };
     } catch {}
-    // Cloud empty or failed → fall back to the local cache so a completed setup
-    // survives even when the Supabase write didn't land. Keyed per user.
-    return readLS().profileCache?.[userId] || null;
+    // Cloud empty/unreachable → the local cache (a finished setup survives).
+    return cached;
   }
   return readLS().profile || null;
 }
 
 export async function saveProfile(userId, profile) {
   if (hasSupabase) {
-    // Always cache locally first, so a finished profile is never lost to a
-    // failed/blocked cloud write (which is what kept sending users back to setup).
+    // Cache the FULL profile locally first, so nothing is lost to a partial or
+    // blocked cloud write.
     const cache = readLS().profileCache || {};
     writeLS({ profileCache: { ...cache, [userId]: profile } });
-    // `club` is derived (from the athletes table), not a profiles column — don't write it.
-    const { club, ...rest } = profile;
-    const row = { id: userId, ...rest, updated_at: new Date().toISOString() };
-    const { error } = await supabase.from("profiles").upsert(row);
+    // Send only real columns; extra keys would fail the whole upsert.
+    const row = { id: userId, updated_at: new Date().toISOString() };
+    for (const k of PROFILE_COLUMNS) if (profile[k] != null) row[k] = profile[k];
+    let { error } = await supabase.from("profiles").upsert(row);
+    // `theme` column may not be migrated yet — retry without it rather than fail.
+    if (error && /theme/i.test(error.message || "")) {
+      const { theme, ...rest } = row;
+      ({ error } = await supabase.from("profiles").upsert(rest));
+    }
     if (error) throw new Error(error.message);
     return;
   }

@@ -20,6 +20,7 @@ create table if not exists public.profiles (
 alter table public.profiles add column if not exists plan text default 'basic';
 alter table public.profiles add column if not exists lang text default 'sl';
 alter table public.profiles add column if not exists role text default 'athlete';
+alter table public.profiles add column if not exists theme text; -- 'light' | 'dark' (per-account)
 -- Nekoga narediš za coacha (zamenjaj e-naslov):
 --   update public.profiles set role = 'coach'
 --   where id = (select id from auth.users where email = 'coach@primer.si');
