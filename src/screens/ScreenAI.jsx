@@ -299,29 +299,35 @@ export default function ScreenAI({ user, profile }) {
 
   // ── Chat ──
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg }}>
-      {/* Header — same marble language as the splash: the engraving sits
-          quietly on the brand's own plate color, no dark panel, no giant
-          overlapping type. Dark theme keeps the same layout on the obsidian
-          surface instead. */}
-      <div style={{ position: "relative", height: 132, flexShrink: 0, overflow: "hidden", background: dark ? C.surface2 : "#F3ECE3" }}>
-        <img src="/img/greek-god.png" alt="" aria-hidden="true" style={{ position: "absolute", right: -30, top: "50%", transform: "translateY(-46%)", height: 210, pointerEvents: "none", filter: dark ? "invert(1) brightness(0.82)" : "none" }} />
-        {/* fade so text stays legible over the statue's shoulder */}
-        <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: dark ? `linear-gradient(90deg, ${C.bg} 46%, transparent 88%)` : "linear-gradient(90deg, #F3ECE3 46%, rgba(243,236,227,0.55) 68%, transparent 88%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", left: 18, bottom: 16, maxWidth: "62%" }}>
-          <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.34em" }}>ΑΘΛΟΣ · ORAKELJ</Mono>
-          <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 30, letterSpacing: "0.12em", color: C.text, lineHeight: 1, marginTop: 4 }}>ZEUS</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: typing ? C.gold : C.accent2, boxShadow: typing ? "none" : `0 0 8px ${C.accent2}99`, flexShrink: 0 }} />
-            <span style={{ fontFamily: C.display, fontSize: 12, fontWeight: 600, color: typing ? C.gold : C.muted }}>
-              {typing ? t("razmišlja…") : t("te pozna")}
-            </span>
-          </div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, position: "relative", overflow: "hidden" }}>
+      {/* Statue watermark — sits behind the whole chat (header + messages),
+          the same quiet treatment as the bust watermark on Today, instead of
+          a hard-edged image cropped into the header strip. */}
+      <img src="/img/greek-god.png" alt="" aria-hidden="true" style={{
+        position: "absolute", top: -10, right: -70, height: 340, opacity: dark ? 0.06 : 0.05,
+        filter: dark ? "invert(1)" : "none", pointerEvents: "none", userSelect: "none", zIndex: 0,
+      }} />
+
+      {/* Header — flat, calm bar. No image, no hard color edge. */}
+      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "18px 18px 14px", borderBottom: `1px solid ${C.border}` }}>
+        <Mono style={{ color: C.gold, fontSize: 8, letterSpacing: "0.34em" }}>ΑΘΛΟΣ · ORAKELJ</Mono>
+        <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 28, letterSpacing: "0.12em", color: C.text, lineHeight: 1, marginTop: 5 }}>ZEUS</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: typing ? C.gold : C.accent2, boxShadow: typing ? "none" : `0 0 8px ${C.accent2}99`, flexShrink: 0 }} />
+          <span style={{ fontFamily: C.display, fontSize: 12, fontWeight: 600, color: typing ? C.gold : C.muted }}>
+            {typing ? t("razmišlja…") : t("te pozna")}
+          </span>
         </div>
       </div>
 
+      {/* Disclaimer — a quiet permanent strip under the header, not floating
+          above the tab bar where it looked disconnected from everything. */}
+      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, textAlign: "center", padding: "8px 18px", borderBottom: `1px solid ${C.border}` }}>
+        <Mono style={{ color: C.muted2, fontSize: 8, letterSpacing: "0.1em" }}>{t("ATHLOS AI · ni nadomestilo za zdravnika")}</Mono>
+      </div>
+
       {/* Messages */}
-      <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "12px 18px 8px", display: "flex", flexDirection: "column", gap: 14 }}>
+      <div ref={scrollRef} style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "12px 18px 8px", display: "flex", flexDirection: "column", gap: 14 }}>
         {msgs.map((m, i) => (
           <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: m.from === "user" ? "flex-end" : "flex-start", animation: `${m.from === "user" ? "athlosMsgUser" : "athlosMsgBot"} 0.32s cubic-bezier(0.22,1,0.36,1) both` }}>
             <div style={{
@@ -405,9 +411,6 @@ export default function ScreenAI({ user, profile }) {
           >
             <SendIcon color={input.trim() && !typing ? "#ffffff" : C.muted} />
           </Pressable>
-        </div>
-        <div style={{ textAlign: "center", marginTop: 10 }}>
-          <span style={{ fontFamily: C.display, fontSize: 12, color: C.muted2 }}>{t("ATHLOS AI · ni nadomestilo za zdravnika")}</span>
         </div>
       </div>
     </div>
