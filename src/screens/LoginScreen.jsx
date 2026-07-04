@@ -171,7 +171,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         value={curLang}
         onChange={(lang) => setProfile((p) => ({ ...p, lang }))}
         variant="floating"
-        style={{ position: "fixed", top: "max(env(safe-area-inset-top, 14px), 14px)", right: "max(20px, calc((100vw - 430px) / 2 + 20px))", zIndex: 3 }}
+        style={{ position: "fixed", top: "max(env(safe-area-inset-top, 14px), 14px)", right: "max(20px, calc((100vw - 430px) / 2 + 20px))", zIndex: 3, transform: "scale(0.82)", transformOrigin: "top right" }}
       />
 
       <div style={{ flex: 1, minHeight: 0, width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 28px 12px", position: "relative", zIndex: 1 }}>
