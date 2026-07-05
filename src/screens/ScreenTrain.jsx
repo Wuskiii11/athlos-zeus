@@ -447,31 +447,28 @@ export default function ScreenTrain({ go, user }) {
   /* ───────── active session (mockups 1 & 3) ───────── */
   return (
     <div style={{ padding: "8px 18px 28px" }}>
-      {/* header — compact controls row first, then the full-width title, so
-          the kicker doesn't wrap in a squeezed column next to the timer */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+      {/* header — one compact row: back · title (kicker never wraps, it
+          ellipsizes) · lock · timer. No stacked rows, no dead air. */}
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
         <BackBtn onClick={() => setStarted(false)} />
-        <div style={{ flex: 1 }} />
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ flex: 1, minWidth: 0, marginRight: 8 }}>
+          <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.1em", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t("TRENING")} {SESSION.no} · {ex.block} · {t(ex.cat)}</Mono>
+          <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 25, margin: "3px 0 0", color: C.text, letterSpacing: "-0.02em", textTransform: "uppercase", lineHeight: 1.05, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t(ex.name)}</h1>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           {/* mock lockscreen Live Activity demo (spec §07) */}
-          <button onClick={() => setLockDemo(true)} aria-label="Live Activity demo" style={{ width: 38, height: 38, borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>
+          <button onClick={() => setLockDemo(true)} aria-label="Live Activity demo" style={{ width: 34, height: 34, borderRadius: 11, border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </button>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", background: C.surface, border: `1px solid ${paused ? C.border2 : `${C.accent}55`}`, borderRadius: 14 }}>
-            <button onClick={togglePause} aria-label={paused ? t("Nadaljuj") : t("Pavza")} style={{ width: 24, height: 24, borderRadius: "50%", border: `1.5px solid ${paused ? C.muted : C.accent}`, background: "none", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "5px 10px", background: C.surface, border: `1px solid ${paused ? C.border2 : `${C.accent}55`}`, borderRadius: 12, flexShrink: 0 }}>
+            <button onClick={togglePause} aria-label={paused ? t("Nadaljuj") : t("Pavza")} style={{ width: 22, height: 22, borderRadius: "50%", border: `1.5px solid ${paused ? C.muted : C.accent}`, background: "none", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, WebkitTapHighlightColor: "transparent" }}>
               {paused
                 ? <svg width="9" height="9" viewBox="0 0 24 24" fill={C.muted} style={{ marginLeft: 2 }}><path d="M5 3l14 9-14 9V3z" /></svg>
                 : <svg width="9" height="9" viewBox="0 0 24 24" fill={C.accent}><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>}
             </button>
-            <div><Mono style={{ color: C.muted, fontSize: 9 }}>{paused ? t("PAVZA") : t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 15.5, color: paused ? C.muted : C.accent }}>{fmtTime(elapsed)}</div></div>
+            <div><Mono style={{ color: C.muted, fontSize: 8.5 }}>{paused ? t("PAVZA") : t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 14, color: paused ? C.muted : C.accent, lineHeight: 1.1 }}>{fmtTime(elapsed)}</div></div>
           </div>
         </div>
-      </div>
-
-      {/* exercise title — full width under the controls */}
-      <div style={{ marginBottom: 16 }}>
-        <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.1em" }}>{t("TRENING")} {SESSION.no} · {ex.block} · {t(ex.cat)}</Mono>
-        <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em", textTransform: "uppercase" }}>{t(ex.name)}</h1>
       </div>
 
       {lockDemo && <LockscreenDemo t={t} onClose={() => setLockDemo(false)} />}
