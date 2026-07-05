@@ -378,7 +378,8 @@ export default function ScreenTrain({ go, user }) {
 
         {/* slide to start */}
         <div style={{ marginTop: 22 }}>
-          <div style={{ position: "relative", height: 58, borderRadius: 999, background: C.accent, overflow: "hidden", boxShadow: C.glow }}>
+          {/* dimmed green on dark (no neon, no glow) — quiet flat shadow */}
+          <div style={{ position: "relative", height: 58, borderRadius: 999, background: C.name === "dark" ? "#00B368" : C.accent, overflow: "hidden", boxShadow: "0 3px 12px rgba(0,0,0,0.25)" }}>
             <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, fontSize: 17, color: "#ffffff", letterSpacing: "0.04em", opacity: 1 - slide }}>
               {t("POVLECI ZA ZAČETEK")} →
             </span>
