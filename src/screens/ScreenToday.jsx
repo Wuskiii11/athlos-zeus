@@ -489,10 +489,14 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-      {/* antique classical-bust watermark behind the header */}
-      <img src="/img/bust-ink.png" alt="" aria-hidden="true" style={{
-        position: "absolute", top: -28, right: -34, width: 188, height: 188, objectFit: "contain",
-        opacity: 0.07, pointerEvents: "none", zIndex: 0,
+      {/* thunder-god watermark behind the whole home — the same quiet
+          treatment as the statue in the ZEUS chat (ink-on-transparent PNG,
+          inverted to light strokes on the dark theme) */}
+      <img src="/img/god-thunder.png" alt="" aria-hidden="true" style={{
+        position: "absolute", top: -10, right: -60, height: 430, objectFit: "contain",
+        opacity: C.name === "dark" ? 0.07 : 0.055,
+        filter: C.name === "dark" ? "invert(1)" : "none",
+        pointerEvents: "none", userSelect: "none", zIndex: 0,
       }} />
 
       {/* notifications bell — top-left, quiet ring, badge only when something waits */}
