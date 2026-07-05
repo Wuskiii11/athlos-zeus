@@ -162,7 +162,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
       // empty band at the bottom. The bg now equals the app/body bg, so any
       // sliver below 100dvh is seamless rather than a two-tone strip.
       position: "fixed", top: 0, left: 0, right: 0,
-      height: "100svh", // smallest-visible viewport → never leaves a gap in Safari's chrome
+      height: "100dvh", // full visible viewport (= whole screen in a standalone PWA) so the form centres on the real screen
       background: L.bg,
       backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(31,122,82,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
