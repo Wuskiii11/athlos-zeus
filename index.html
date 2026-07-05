@@ -23,6 +23,13 @@
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    <!-- Fill html+body (incl. iOS safe areas) with the theme bg so no white band
+         shows through the fixed app shell; matches the OS theme before React mounts. -->
+    <style>
+      html, body { background: #FAF7F0; }
+      @media (prefers-color-scheme: dark) { html, body { background: #0A0A09; } }
+    </style>
+
     <!-- Design-system fonts (athlos-design-system): Cinzel = engraved headings,
          Cormorant Garamond = body/quotes, Barlow Condensed = big display labels,
          JetBrains Mono = data/metrics -->
@@ -35,7 +42,7 @@
 
     <title>ATHLOS</title>
   </head>
-  <body style="margin:0;padding:0;background:#FAF7F0;overscroll-behavior:none;">
+  <body style="margin:0;padding:0;overscroll-behavior:none;">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

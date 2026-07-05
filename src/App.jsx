@@ -354,7 +354,7 @@ export default function AthlosApp() {
 
   const globalStyles = `
     *, *::before, *::after { box-sizing: border-box; }
-    html, body, #root { height: 100%; margin: 0; padding: 0; overscroll-behavior: none; overflow-x: hidden; }
+    html, body, #root { height: 100%; margin: 0; padding: 0; overscroll-behavior: none; overflow-x: hidden; background: ${C.bg}; }
     body { -webkit-font-smoothing: antialiased; background: ${C.bg}; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 
     /* True full-screen on phones: fill the visual viewport (so bottom nav/CTAs clear the mobile browser chrome) */
