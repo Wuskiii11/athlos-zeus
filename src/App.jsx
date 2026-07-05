@@ -171,6 +171,8 @@ export default function AthlosApp() {
   const scrollRef    = useRef(null);
   const scrollPos    = useRef({}); // per-screen scroll memory, so back returns where you were
   const profileLoaded = useRef(false);
+  const shellRef     = useRef(null);
+  const [dbg, setDbg] = useState("");
 
   // Apply an auth session: load the user's profile and route to setup or app.
   const applySession = async (session) => {
@@ -238,6 +240,40 @@ export default function AthlosApp() {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
   }, [theme]);
+
+  // TEMP diagnostics + iOS standalone viewport hedge (remove once the bottom-gap
+  // hunt is closed). If the installed PWA under-reports the viewport
+  // (innerHeight < screen.height), force the shell to the physical screen height
+  // via JS — CSS units can't reach past a lying layout viewport.
+  useEffect(() => {
+    const el = shellRef.current;
+    const standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    const apply = () => {
+      if (el) {
+        if (standalone && window.screen && window.innerHeight < window.screen.height) {
+          el.style.height = window.screen.height + "px";
+          el.style.bottom = "auto";
+        } else {
+          el.style.height = "";
+          el.style.bottom = "0";
+        }
+      }
+      let sab = "";
+      try { sab = getComputedStyle(document.documentElement).getPropertyValue("--sab").trim(); } catch {}
+      setDbg(`dbg1 ${standalone ? "pwa" : "web"} ih:${window.innerHeight} sh:${window.screen ? window.screen.height : "?"} shell:${el ? Math.round(el.getBoundingClientRect().height) : "?"} sab:${sab}`);
+    };
+    apply();
+    const t1 = setTimeout(apply, 600);
+    const t2 = setTimeout(apply, 2000);
+    window.addEventListener("resize", apply);
+    window.visualViewport && window.visualViewport.addEventListener("resize", apply);
+    return () => {
+      clearTimeout(t1); clearTimeout(t2);
+      window.removeEventListener("resize", apply);
+      window.visualViewport && window.visualViewport.removeEventListener("resize", apply);
+    };
+  }, []);
 
   // Live-follow the phone's light/dark preference — but only while the user
   // hasn't made an explicit choice (that choice always wins).
@@ -353,6 +389,7 @@ export default function AthlosApp() {
 
   const globalStyles = `
     *, *::before, *::after { box-sizing: border-box; }
+    :root { --sab: env(safe-area-inset-bottom, 0px); }
     html, body, #root { height: 100%; margin: 0; padding: 0; overscroll-behavior: none; overflow-x: hidden; background: ${C.bg}; }
     body { -webkit-font-smoothing: antialiased; background: ${C.bg}; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 
@@ -459,7 +496,7 @@ export default function AthlosApp() {
       {/* Phone shell — centers the app at a phone-like width on wide (desktop) screens.
           The transform makes this the containing block for descendant position:fixed
           screens, so they fill the shell instead of the full browser window. */}
-      <div data-platform={PLATFORM} style={{
+      <div ref={shellRef} data-platform={PLATFORM} style={{
         position: "fixed", top: 0, bottom: 0, left: "50%",
         width: "min(100%, 430px)",
         transform: "translateX(-50%)",
@@ -635,6 +672,14 @@ export default function AthlosApp() {
       {/* Privacy policy — a dismissable popup reachable from Login or Settings,
           not a navigation target, so it works regardless of the current screen. */}
       {privacyOpen && <ScreenPrivacy onClose={() => setPrivacyOpen(false)} />}
+
+      {/* ── TEMP DIAGNOSTICS (remove after the bottom-gap hunt) ─────────────
+          Red line = the shell's true bottom edge. The readout proves which
+          build the device runs + all the viewport numbers. */}
+      <div aria-hidden="true" style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "red", zIndex: 99999, pointerEvents: "none" }} />
+      <div aria-hidden="true" style={{ position: "absolute", top: 70, left: 8, zIndex: 99999, pointerEvents: "none", fontFamily: "monospace", fontSize: 10, lineHeight: 1.3, color: "#fff", background: "rgba(0,0,0,0.62)", padding: "3px 7px", borderRadius: 6, whiteSpace: "pre" }}>
+        {dbg}
+      </div>
 
       </div>
     </TimePickerContext.Provider>
