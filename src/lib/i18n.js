@@ -297,6 +297,15 @@ const EN = {
   "Naslednji obrok": "Next meal",
   "3 dni": "3 days",
 
+  // ── Notifications (bell on home) ──
+  "Obvestila": "Notifications",
+  "Jutranji check-in": "Morning check-in",
+  "Odgovori na 4 vprašanja in posodobi baterijo.": "Answer 4 questions to update your battery.",
+  "Nova sporočila": "New messages",
+  "Današnji trening": "Today's session",
+  "Moč · spodnji del ob 17:00.": "Strength · lower body at 17:00.",
+  "Nič novega.": "Nothing new.",
+
   // ── Login ──
   "ALI": "OR",
   "E-POŠTA": "EMAIL",

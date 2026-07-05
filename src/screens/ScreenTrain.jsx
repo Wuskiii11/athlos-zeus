@@ -49,7 +49,7 @@ function RepsSlider({ value, max, onChange, accent, track, dim }) {
       style={{ position: "relative", height: 34, borderRadius: 10, background: track, cursor: "pointer", touchAction: "none", overflow: "hidden", userSelect: "none" }}
     >
       <div style={{ position: "absolute", inset: 0, width: `${pct * 100}%`, background: `linear-gradient(90deg, ${accent}22, ${accent}55)`, borderRadius: 10, transition: "width 0.08s linear" }} />
-      <div style={{ position: "absolute", top: "50%", left: `calc(${pct * 100}% )`, transform: "translate(-50%,-50%)", width: 30, height: 26, borderRadius: 8, background: accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 14px ${accent}99`, color: "#ffffff", fontWeight: 800, fontSize: 13.5, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", top: "50%", left: `calc(${pct * 100}% )`, transform: "translate(-50%,-50%)", width: 30, height: 26, borderRadius: 8, background: accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,0.22)", color: "#ffffff", fontWeight: 800, fontSize: 13.5, pointerEvents: "none" }}>
         ‹›
       </div>
     </div>
@@ -510,7 +510,7 @@ export default function ScreenTrain({ go, user }) {
       </button>
 
       {/* next exercise */}
-      <Pressable onClick={nextExercise} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: C.glow, letterSpacing: "0.02em" }}>
+      <Pressable onClick={nextExercise} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: C.accent, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 3px 12px rgba(28,24,20,0.16)", letterSpacing: "0.02em" }}>
         {exIdx >= SESSION.block.length - 1 ? t("KONČAJ TRENING") : t("NASLEDNJA VAJA")} →
       </Pressable>
     </div>

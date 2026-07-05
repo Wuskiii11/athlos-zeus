@@ -128,7 +128,18 @@ function seedProtoConvs(userId) {
 }
 
 // ─── Avatar ──────────────────────────────────────────────────
-// Marble disc with a bronze ring — engraved initials, like a small medallion.
+// Latin → Greek monogram, transliterated by sound. Lowercase glyphs on
+// purpose: half the Greek capitals share the Latin shape (Α, Ε, Μ, Τ…),
+// so only the lowercase alphabet reads unmistakably Greek.
+const GREEK = {
+  A: "α", B: "β", C: "κ", Č: "κ", Ć: "κ", D: "δ", E: "ε", F: "φ", G: "γ",
+  H: "η", I: "ι", J: "ι", K: "κ", L: "λ", M: "μ", N: "ν", O: "ο", P: "π",
+  Q: "κ", R: "ρ", S: "σ", Š: "σ", T: "τ", U: "υ", V: "υ", W: "ω", X: "χ",
+  Y: "υ", Z: "ζ", Ž: "ζ",
+};
+export const toGreek = (s) => String(s).split("").map((ch) => GREEK[ch.toUpperCase()] || ch).join("");
+
+// Marble disc with a ring — engraved Greek monogram, like a small medallion.
 function Avatar({ initials = "?", size = 44, isGroup }) {
   const C = useTheme();
   const dark = C.name === "dark";
@@ -144,7 +155,9 @@ function Avatar({ initials = "?", size = 44, isGroup }) {
       border: `1.5px solid ${C.gold}55`,
       boxShadow: dark ? "inset 0 1px 1px rgba(255,255,255,0.06)" : "inset 0 1px 2px rgba(255,255,255,0.7), 0 2px 7px rgba(28,24,20,0.10)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: C.heading, fontWeight: 700, fontSize: size * 0.4,
+      // Georgia fallback carries the Greek glyphs (Cinzel is Latin-only);
+      // regular weight so the glyph reads as a thin engraved stroke
+      fontFamily: C.heading, fontWeight: 400, fontSize: size * 0.48, lineHeight: 1,
       color: isGroup ? C.gold : (dark ? C.text : "#1C1814"),
     }}>
       {isGroup ? (
@@ -152,7 +165,7 @@ function Avatar({ initials = "?", size = 44, isGroup }) {
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
           <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
         </svg>
-      ) : initials}
+      ) : toGreek(initials)}
     </div>
   );
 }
@@ -298,7 +311,7 @@ function ProfileSheet({ user, C, t, onClose, onMessage, onBlock }) {
             background: `${C.accent}18`, border: `2px solid ${C.accent}45`,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: C.heading, fontSize: 29, fontWeight: 700, color: C.accent,
-          }}>{user?.initials || "?"}</div>
+          }}>{toGreek(user?.initials || "?")}</div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontFamily: C.heading, fontSize: 21.5, fontWeight: 700, color: C.text, letterSpacing: "0.04em" }}>
               {user?.name}

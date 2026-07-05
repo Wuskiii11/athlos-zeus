@@ -156,7 +156,7 @@ export function LanguageSwitcher({ value = "sl", onChange, style, variant = "def
           ? (C.name === "dark" ? "rgba(8,11,10,0.72)" : "rgba(255,255,255,0.72)")
           : C.surface2,
         border: `1px solid ${floating ? (C.name === "dark" ? "rgba(255,255,255,0.10)" : "rgba(15,23,42,0.10)") : C.border2}`,
-        boxShadow: floating ? (C.name === "dark" ? "0 14px 34px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.06)" : "0 12px 28px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.80)") : "none",
+        boxShadow: floating ? (C.name === "dark" ? "0 6px 16px rgba(0,0,0,0.35)" : "0 6px 16px rgba(28,24,20,0.12)") : "none",
         backdropFilter: floating ? "blur(18px)" : undefined,
         WebkitBackdropFilter: floating ? "blur(18px)" : undefined,
         minHeight: floating ? 38 : compact ? 30 : 44,
@@ -186,7 +186,7 @@ export function LanguageSwitcher({ value = "sl", onChange, style, variant = "def
               fontWeight: active ? 800 : 700,
               fontSize: floating ? 11 : compact ? 10.5 : 12,
               letterSpacing: "0.04em",
-              boxShadow: active && floating ? `0 0 0 1px ${C.accent}30, 0 8px 18px ${C.accent}20` : "none",
+              boxShadow: active && floating ? `0 0 0 1px ${C.accent}30` : "none",
               transition: "background 0.18s, color 0.18s, box-shadow 0.18s",
               WebkitTapHighlightColor: "transparent",
             }}
@@ -215,7 +215,7 @@ export const PrimaryBtn = ({ children, onClick, style, disabled }) => {
         fontFamily: C.display, fontWeight: 700, textTransform: "none",
         letterSpacing: "0.01em", fontSize: 17,
         cursor: disabled ? "default" : "pointer",
-        boxShadow: pressed ? "none" : (C.name === "dark" ? "0 10px 30px rgba(0,0,0,0.45)" : "0 8px 22px rgba(0,0,0,0.18)"),
+        boxShadow: pressed ? "none" : (C.name === "dark" ? "0 4px 14px rgba(0,0,0,0.35)" : "0 3px 12px rgba(28,24,20,0.14)"),
         WebkitTapHighlightColor: "transparent",
         transition: "transform 0.12s ease, box-shadow 0.12s ease",
         transform: pressed ? "scale(0.98)" : "scale(1)",
@@ -260,7 +260,8 @@ export const Icon = ({ name, color, size = 22 }) => {
 };
 
 // Flat, fixed-size tab — no animations, same icon size for every tab.
-export function TabButton({ n, active, onClick }) {
+// `dot` marks the tab with a small badge (e.g. unread chat messages).
+export function TabButton({ n, active, onClick, dot }) {
   const C = useTheme();
   const color = active ? C.accent : C.muted;
   return (
@@ -274,8 +275,9 @@ export function TabButton({ n, active, onClick }) {
         padding: "6px 2px", WebkitTapHighlightColor: "transparent",
       }}
     >
-      <div key={active ? `${n.id}-on` : n.id} style={{ animation: active ? "athlosTabPop 0.35s ease" : "none", display: "flex" }}>
+      <div key={active ? `${n.id}-on` : n.id} style={{ animation: active ? "athlosTabPop 0.35s ease" : "none", display: "flex", position: "relative" }}>
         <Icon name={n.icon} color={color} size={22} />
+        {dot && <span aria-hidden="true" style={{ position: "absolute", top: -2, right: -5, width: 7, height: 7, borderRadius: "50%", background: C.red }} />}
       </div>
       <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, letterSpacing: "0.01em", color, whiteSpace: "nowrap", transition: "color 0.2s" }}>
         {n.label}

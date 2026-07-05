@@ -21,6 +21,7 @@ import LoginScreen from "./screens/LoginScreen";
 import SetupFlow from "./screens/SetupFlow";
 import ConsentScreen from "./screens/ConsentScreen";
 import { getSession, onAuthChange, signOut as apiSignOut, loadProfile, saveProfile, getAthleteClub } from "./lib/api";
+import { countUnreadChats } from "./lib/notifications";
 import { LangContext, makeT } from "./lib/i18n";
 import CoachApp from "./coach/CoachApp";
 import LiveTrainingBar from "./screens/widgets/LiveTrainingBar";
@@ -153,6 +154,7 @@ export default function AthlosApp() {
   const [profile, setProfile]         = useState(() => ({ name: "NIK", sport: "Nogomet", photo: null, lang: loadPrefs().lang || "sl", role: "athlete" }));
   const lang = profile.lang === "en" ? "en" : "sl";
   const [user, setUser]               = useState(null);
+  const [chatUnread, setChatUnread]   = useState(0); // conversations with unread messages → nav dot + home bell
   const [authReady, setAuthReady]     = useState(false);
   const [reminder, setReminder]       = useState(null);
   const [dp, setDp]                   = useState(null);
@@ -301,6 +303,17 @@ export default function AthlosApp() {
     // eslint-disable-next-line
   }, [screen]);
 
+  // Unread-chat badge: re-checked on every screen change (opening a
+  // conversation marks it read on-device) and every 30 s while running.
+  useEffect(() => {
+    if (!user) { setChatUnread(0); return; }
+    let live = true;
+    const check = () => countUnreadChats(user.id).then((n) => { if (live) setChatUnread(n); }).catch(() => {});
+    check();
+    const iv = setInterval(check, 30000);
+    return () => { live = false; clearInterval(iv); };
+  }, [user, screen]);
+
   const tabIds = NAV.map(n => n.id);
 
   const onTouchStart = (e) => {
@@ -366,7 +379,7 @@ export default function AthlosApp() {
 
   const render = () => {
     switch (screen) {
-      case "today":    return <ScreenToday go={go} profile={profile} />;
+      case "today":    return <ScreenToday go={go} profile={profile} chatUnread={chatUnread} />;
       case "train":    return <ScreenTrain go={go} user={user} />;
       case "session":  return <ScreenSession go={go} />;
       case "ai":       return <ScreenAI user={user} profile={profile} />;
@@ -653,7 +666,7 @@ export default function AthlosApp() {
             }}>
               {NAV.map(n => {
                 const active = navActive === n.id;
-                return <TabButton key={n.id} n={{ ...n, label: t(n.label) }} active={active} onClick={() => go(n.id)} />;
+                return <TabButton key={n.id} n={{ ...n, label: t(n.label) }} active={active} onClick={() => go(n.id)} dot={n.id === "chat" && chatUnread > 0} />;
               })}
             </nav>
           </div>

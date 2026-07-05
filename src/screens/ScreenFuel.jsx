@@ -36,11 +36,18 @@ function buildMealPlan(goal, mass) {
 const GOAL_LABEL = { izguba: "Izguba teže", vzdrzevanje: "Vzdrževanje", pridobitev: "Pridobitev teže" };
 const MASS_LABEL = { mascoba: "Energija / volumen", misice: "Mišična masa" };
 
-const MACRO_COLORS = { p: "#4ADE80", c: "#60A5FA", f: "#FBBF24" };
+// Green-family trio — brand green (protein), laurel olive (carbs),
+// terracotta (fat) — distinct hues, all inside the app's own palette.
+const macroColors = (C) => ({
+  p: C.accent,
+  c: "#7A8B5C",
+  f: C.red,
+});
 
 function MacroPie({ macros, eaten, target }) {
   const C = useTheme();
   const t = useT();
+  const MC = macroColors(C);
   const r = 42, sw = 9, cx = 52, cy = 52;
   const circ = 2 * Math.PI * r;
 
@@ -58,21 +65,21 @@ function MacroPie({ macros, eaten, target }) {
         {/* Track */}
         <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.surface3} strokeWidth={sw} />
         {/* Protein */}
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke={MACRO_COLORS.p} strokeWidth={sw}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={MC.p} strokeWidth={sw}
           strokeLinecap="round"
           strokeDasharray={`${Math.max(0, pLen - gap)} ${circ - (pLen - gap)}`}
           strokeDashoffset={0}
           style={{ transition: "stroke-dasharray 0.8s cubic-bezier(.2,.8,.2,1)" }}
         />
         {/* Carbs */}
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke={MACRO_COLORS.c} strokeWidth={sw}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={MC.c} strokeWidth={sw}
           strokeLinecap="round"
           strokeDasharray={`${Math.max(0, cLen - gap)} ${circ - (cLen - gap)}`}
           strokeDashoffset={-(pLen)}
           style={{ transition: "stroke-dasharray 0.8s cubic-bezier(.2,.8,.2,1)" }}
         />
         {/* Fat */}
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke={MACRO_COLORS.f} strokeWidth={sw}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={MC.f} strokeWidth={sw}
           strokeLinecap="round"
           strokeDasharray={`${Math.max(0, fLen - gap)} ${circ - (fLen - gap)}`}
           strokeDashoffset={-(pLen + cLen)}
@@ -116,7 +123,7 @@ function EatenForm({ onAdd }) {
     <div style={{ display: "flex", gap: 8, margin: "10px 0 12px" }}>
       <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder={t("npr. Sendvič")} style={{ ...inp, flex: 1 }} />
       <input value={kcal} onChange={(e) => setKcal(e.target.value.replace(/[^0-9]/g, ""))} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="kcal" inputMode="numeric" style={{ ...inp, width: 70, textAlign: "center" }} />
-      <Pressable onClick={submit} scale={0.9} style={{ width: 46, borderRadius: 14, border: "none", background: C.accent, color: "#ffffff", fontWeight: 800, fontSize: 24.5, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>+</Pressable>
+      <Pressable onClick={submit} scale={0.9} style={{ width: 46, borderRadius: 14, border: "none", background: C.accent, color: C.btnText, fontWeight: 800, fontSize: 24.5, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>+</Pressable>
     </div>
   );
 }
@@ -142,6 +149,7 @@ export default function ScreenFuel({ go }) {
     }, 900);
   };
   const label = { fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, display: "block" };
+  const MC = macroColors(C);
 
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text }}>
@@ -159,9 +167,9 @@ export default function ScreenFuel({ go }) {
           <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{remaining}<span style={{ fontSize: 14.5, color: C.muted, fontWeight: 600 }}> kcal</span></div>
           <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.muted, display: "block", marginTop: 4 }}>{t("ŠE NA VOLJO DANES")}</span>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 14 }}>
-            <MacroMini label={t("Proteini")} v={plan.macros.p} color={MACRO_COLORS.p} />
-            <MacroMini label={t("Ogljikohidrati")} v={plan.macros.c} color={MACRO_COLORS.c} />
-            <MacroMini label={t("Maščobe")} v={plan.macros.f} color={MACRO_COLORS.f} />
+            <MacroMini label={t("Proteini")} v={plan.macros.p} color={MC.p} />
+            <MacroMini label={t("Ogljikohidrati")} v={plan.macros.c} color={MC.c} />
+            <MacroMini label={t("Maščobe")} v={plan.macros.f} color={MC.f} />
           </div>
         </div>
       </div>
@@ -177,13 +185,13 @@ export default function ScreenFuel({ go }) {
           <span style={label}>{t("CILJ")}</span>
           <div style={{ display: "flex", gap: 8, margin: "8px 0 16px" }}>
             {["izguba", "vzdrzevanje", "pridobitev"].map((g) => (
-              <button key={g} onClick={() => setGoal(g)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: goal === g ? C.accent : C.surface2, color: goal === g ? "#04130a" : C.muted, fontFamily: C.display, fontSize: 12.5, textTransform: "lowercase", cursor: "pointer", fontWeight: goal === g ? 700 : 500 }}>{t(GOAL_LABEL[g]).split(" ")[0]}</button>
+              <button key={g} onClick={() => setGoal(g)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: goal === g ? C.accent : C.surface2, color: goal === g ? C.btnText : C.muted, fontFamily: C.display, fontSize: 12.5, textTransform: "lowercase", cursor: "pointer", fontWeight: goal === g ? 700 : 500 }}>{t(GOAL_LABEL[g]).split(" ")[0]}</button>
             ))}
           </div>
           <span style={label}>{t("FOKUS")}</span>
           <div style={{ display: "flex", gap: 8, margin: "8px 0 18px" }}>
             {["mascoba", "misice"].map((mm) => (
-              <button key={mm} onClick={() => setMass(mm)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: mass === mm ? C.accent : C.surface2, color: mass === mm ? "#04130a" : C.muted, fontFamily: C.display, fontSize: 12.5, textTransform: "lowercase", cursor: "pointer", fontWeight: mass === mm ? 700 : 500 }}>{t(MASS_LABEL[mm])}</button>
+              <button key={mm} onClick={() => setMass(mm)} style={{ flex: 1, padding: "10px 4px", borderRadius: 999, border: "none", background: mass === mm ? C.accent : C.surface2, color: mass === mm ? C.btnText : C.muted, fontFamily: C.display, fontSize: 12.5, textTransform: "lowercase", cursor: "pointer", fontWeight: mass === mm ? 700 : 500 }}>{t(MASS_LABEL[mm])}</button>
             ))}
           </div>
           <PrimaryBtn onClick={generate}>{loading ? t("Sestavljam...") : t("Sestavi jedilnik")}</PrimaryBtn>
@@ -191,7 +199,7 @@ export default function ScreenFuel({ go }) {
       )}
 
       <div style={{ display: "flex", gap: 8, marginBottom: 22, flexWrap: "wrap" }}>
-        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, fontSize: 13.5 }}>{t(GOAL_LABEL[goal])}</span>
+        <span style={{ padding: "7px 13px", borderRadius: 999, background: C.accent, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 13.5 }}>{t(GOAL_LABEL[goal])}</span>
         <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 13.5 }}>{t(MASS_LABEL[mass])}</span>
         <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 13.5 }}>{plan.target} KCAL</span>
       </div>

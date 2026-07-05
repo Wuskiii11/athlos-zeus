@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../theme";
-import { Mono } from "../components/UI";
+import { Mono, Icon } from "../components/UI";
 import { useT, useLang } from "../lib/i18n";
 import { readinessFromCheckin, recommendation, DEFAULT_CHECKIN } from "../lib/readiness";
+import { checkinPendingToday } from "../lib/notifications";
 import InjuryWidget from "./widgets/InjuryWidget";
 import ReflectionWidget from "./widgets/ReflectionWidget";
 import CheckinCard from "./widgets/CheckinCard";
@@ -233,22 +234,22 @@ function QuickAddSheet({ C, t, onClose, onSave }) {
 // ── Body stats (tapping the readiness circle) ────────────────
 const STAT_METRICS = [
   {
-    key: "weight", label: "Teža", labelEn: "Weight", unit: "kg", color: "#818cf8",
+    key: "weight", label: "Teža", labelEn: "Weight", unit: "kg", color: "#1F7A52",
     data: [83.2, 82.8, 82.5, 82.1, 81.9, 82.3, 81.7, 81.4, 81.1, 80.9, 80.6, 80.8, 80.3, 80.1],
     trendSL: "−3.1 kg za 14 dni", trendEN: "−3.1 kg over 14 days", good: "down",
   },
   {
-    key: "sleep", label: "Spanje", labelEn: "Sleep", unit: "h", color: "#a78bfa",
+    key: "sleep", label: "Spanje", labelEn: "Sleep", unit: "h", color: "#7A8B5C",
     data: [7.2, 6.5, 8.1, 7.8, 6.9, 7.5, 8.2, 7.0, 6.8, 7.9, 8.0, 7.3, 7.6, 7.4],
     trendSL: "Ø 7.4h / noč", trendEN: "Avg 7.4h / night", good: "up",
   },
   {
-    key: "hrv", label: "HRV", labelEn: "HRV", unit: "ms", color: "#22d3ee",
+    key: "hrv", label: "HRV", labelEn: "HRV", unit: "ms", color: "#00C878",
     data: [62, 58, 65, 71, 68, 55, 60, 63, 67, 72, 69, 64, 66, 70],
     trendSL: "+13% za 14 dni", trendEN: "+13% over 14 days", good: "up",
   },
   {
-    key: "soreness", label: "Sornost", labelEn: "Soreness", unit: "/5", color: "#fb923c",
+    key: "soreness", label: "Sornost", labelEn: "Soreness", unit: "/5", color: "#C95A3F",
     data: [3, 2, 4, 3, 2, 1, 3, 4, 3, 2, 2, 3, 2, 2],
     trendSL: "Povprečje 2.6/5", trendEN: "Average 2.6/5", good: "down",
   },
@@ -421,12 +422,13 @@ function DragSheet({ children, onClose, style }) {
   );
 }
 
-export default function ScreenToday({ go, profile }) {
+export default function ScreenToday({ go, profile, chatUnread = 0 }) {
   const C = useTheme();
   const t = useT();
   const lang = useLang();
   const [openStats, setOpenStats] = useState(false);
   const [openBattery, setOpenBattery] = useState(false); // battery-info sheet (tap the medallion)
+  const [openNotifs, setOpenNotifs] = useState(false);   // notifications sheet (bell, top-left)
   const [checkin, setCheckin] = useState(loadCheckin);
   const [quickAdd, setQuickAdd] = useState(false);
   const [injury, setInjury] = useState(DEMO_INJURY);
@@ -456,6 +458,35 @@ export default function ScreenToday({ go, profile }) {
   };
   const ord = (id) => ({ order: 10 + Math.max(0, layout.findIndex((w) => w.id === id)) });
 
+  // ── Notifications (bell, top-left) — built from state the app already has:
+  // today's check-in, unread chats, and the upcoming session. Recomputed every
+  // render, so submitting the questionnaire (a state update) clears its row.
+  const checkinPending = checkinPendingToday();
+  const chatLine = chatUnread === 0 ? "" : lang === "en"
+    ? `${chatUnread} unread conversation${chatUnread === 1 ? "" : "s"}.`
+    : chatUnread === 1 ? "1 neprebran pogovor."
+    : chatUnread === 2 ? "2 neprebrana pogovora."
+    : chatUnread <= 4 ? `${chatUnread} neprebrani pogovori.`
+    : `${chatUnread} neprebranih pogovorov.`;
+  const notifs = [
+    checkinPending && {
+      id: "checkin", color: C.accent, icon: <IconFace size={17} color={C.accent} />,
+      title: t("Jutranji check-in"), text: t("Odgovori na 4 vprašanja in posodobi baterijo."),
+      onTap: () => setOpenNotifs(false),
+    },
+    chatUnread > 0 && {
+      id: "chat", color: C.gold, icon: <Icon name="chat" color={C.gold} size={17} />,
+      title: t("Nova sporočila"), text: chatLine,
+      onTap: () => { setOpenNotifs(false); go("chat"); },
+    },
+    now.getHours() < 17 && {
+      id: "train", color: C.red, icon: <Icon name="train" color={C.red} size={17} />,
+      title: t("Današnji trening"), text: t("Moč · spodnji del ob 17:00."),
+      onTap: () => { setOpenNotifs(false); go("train"); },
+    },
+  ].filter(Boolean);
+  const bellDot = checkinPending || chatUnread > 0;
+
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {/* antique classical-bust watermark behind the header */}
@@ -463,6 +494,21 @@ export default function ScreenToday({ go, profile }) {
         position: "absolute", top: -28, right: -34, width: 188, height: 188, objectFit: "contain",
         opacity: 0.07, pointerEvents: "none", zIndex: 0,
       }} />
+
+      {/* notifications bell — top-left, quiet ring, badge only when something waits */}
+      <button onClick={() => setOpenNotifs(true)} aria-label={t("Obvestila")} style={{
+        position: "absolute", top: 14, left: 18, zIndex: 2,
+        width: 38, height: 38, borderRadius: "50%", cursor: "pointer",
+        background: C.surface, border: `1px solid ${C.border}`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: C.text, WebkitTapHighlightColor: "transparent",
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.7 21a2 2 0 01-3.4 0" />
+        </svg>
+        {bellDot && <span aria-hidden="true" style={{ position: "absolute", top: 3, right: 3, width: 8, height: 8, borderRadius: "50%", background: C.red, border: `1.5px solid ${C.bg}` }} />}
+      </button>
       {/* engraved brand block — exactly like the reference mock (nothing above it) */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "4px 0 20px", position: "relative", zIndex: 1, order: 1, ...rise(0.03) }}>
         {/* column-capital marks */}
@@ -612,6 +658,48 @@ export default function ScreenToday({ go, profile }) {
 
       {quickAdd && <QuickAddSheet C={C} t={t} onClose={() => setQuickAdd(false)} onSave={(inj) => setInjury(inj)} />}
       {openStats && <StatsSheet C={C} lang={lang} onClose={() => setOpenStats(false)} />}
+
+      {/* ── NOTIFICATIONS — bottom sheet, opens from the bell ── */}
+      {openNotifs && (
+        <div onClick={(e) => { if (e.target === e.currentTarget) setOpenNotifs(false); }} style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(20,18,14,0.55)" }}>
+          <DragSheet onClose={() => setOpenNotifs(false)} style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, maxHeight: "70%", overflowY: "auto",
+            background: C.bg, borderRadius: "24px 24px 0 0", padding: "16px 20px",
+            paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
+            animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
+          }}>
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 18px" }} />
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("Obvestila")}</span>
+              <span style={{ flex: 1, height: 1, background: C.border }} />
+            </div>
+
+            {notifs.length === 0 && (
+              <div style={{ textAlign: "center", padding: "26px 20px 32px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 16.5 }}>
+                {t("Nič novega.")}
+              </div>
+            )}
+
+            {notifs.map((nf) => (
+              <button key={nf.id} onClick={nf.onTap} style={{
+                width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", marginBottom: 10,
+                background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
+                cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent",
+              }}>
+                <span style={{ width: 34, height: 34, borderRadius: 10, background: `${nf.color}1c`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {nf.icon}
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{nf.title}</span>
+                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted, marginTop: 2, lineHeight: 1.35 }}>{nf.text}</span>
+                </span>
+                <span style={{ color: C.muted, flexShrink: 0 }}>›</span>
+              </button>
+            ))}
+          </DragSheet>
+        </div>
+      )}
 
       {/* ── BATTERY INFO — bottom sheet, opens from the medallion ── */}
       {openBattery && (
