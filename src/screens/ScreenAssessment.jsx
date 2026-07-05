@@ -128,8 +128,8 @@ export default function ScreenAssessment({ go, profile }) {
       <header style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <BackBtn onClick={() => go("report")} />
         <div>
-          <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.12em" }}>PERFORMANS</Mono>
-          <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22.5, color: C.text }}>
+          <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.12em", display: "block", marginBottom: 3 }}>PERFORMANS</Mono>
+          <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22.5, color: C.text, lineHeight: 1 }}>
             {t("Ocena")}
           </span>
         </div>

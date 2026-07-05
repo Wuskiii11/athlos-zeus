@@ -48,7 +48,7 @@ export default function ScreenReport({ go }) {
         <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, display: "block", marginBottom: 12 }}>{t("AI ANALIZA")}</span>
         <p style={{ margin: 0, color: C.text2, fontSize: 15.5, lineHeight: 1.5 }}>{t("Močan trening. Povečaj breme za 2.5 kg na počepu naslednji teden. Tehnika je stabilna — idealen čas za napredovanje.")}</p>
         <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
-          <span style={{ padding: "7px 13px", borderRadius: 999, background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, fontSize: 13.5 }}>+5 {t("KG / TEDEN")}</span>
+          <span style={{ padding: "7px 13px", borderRadius: 999, background: C.name === "dark" ? "#4DFFA6" : "#2E9E6B", color: C.name === "dark" ? "#0A1A10" : "#FFFFFF", fontFamily: C.display, fontWeight: 800, fontSize: 13.5 }}>+5 {t("KG / TEDEN")}</span>
           <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 13.5 }}>{t("TEHNIKA STABILNA")}</span>
           <span style={{ padding: "7px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 13.5 }}>{t("FOKUS: HITROST")}</span>
         </div>
