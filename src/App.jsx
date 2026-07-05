@@ -35,74 +35,35 @@ const NAV = [
 ];
 
 function SplashScreen({ C }) {
-  // Plate color of greek-god.png so the engraving sits on a seamless canvas.
-  // On dark theme the image is inverted, so the canvas flips to match.
+  // Nothing but the engraving, full-bleed: the ink-on-transparent PNG covers
+  // the whole screen (cover = no bands, no plate), no wordmark, no text.
   const dark = C.name === "dark";
   return (
     <div style={{
       position: "fixed", inset: 0,
       background: dark ? "#0C131C" : "#F3ECE3",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
       zIndex: 999, overflow: "hidden",
     }}>
       <style>{`
-        @keyframes splashGod {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @keyframes splashRule {
-          from { transform: scaleX(0); }
-          to   { transform: scaleX(1); }
-        }
-        /* The app-wide reduced-motion reset (App.jsx global styles) forces
-           every animation-duration to ~0 via !important, which silently ate
-           this one-time, under-2-second brand reveal too - that's why the
-           rule looked static instead of growing. !important beats a plain
-           inline animation regardless of specificity, so the only way to
-           win it back is with an equally-important, explicit duration.
-           Scoped to just these two elements - everything else in the app
-           still honors reduced-motion untouched. */
-        .athlos-splash-god {
-          animation: splashGod 0.55s ease-out forwards !important;
-        }
-        .athlos-splash-rule {
-          animation: splashRule 1.1s cubic-bezier(.16,.9,.2,1) 0.3s forwards !important;
-        }
+        @keyframes splashGod { from { opacity: 0; } to { opacity: 1; } }
+        /* The app-wide reduced-motion reset forces animation-duration to ~0
+           via !important; this one-time fade wins it back, scoped here only. */
+        .athlos-splash-god { animation: splashGod 0.55s ease-out forwards !important; }
       `}</style>
-
-      {/* god + wordmark as one vertically-centred group, so the space above and
-          below is balanced (no big empty band at the bottom) */}
       <img
         className="athlos-splash-god"
         src="/img/greek-god.png"
         alt=""
         style={{
-          width: "auto", maxWidth: "92%", height: "min(56vh, 500px)",
-          objectFit: "contain",
-          // greek-god.png is ink-on-transparent (the paper plate was cut off
-          // in the asset itself), so no rectangle can appear on any theme;
-          // dark simply inverts the ink strokes to light.
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          objectFit: "cover", objectPosition: "center",
+          // dark theme just inverts the ink strokes to light
           filter: dark ? "invert(1)" : "none",
           pointerEvents: "none",
           userSelect: "none",
         }}
       />
-
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 8 }}>
-        <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 38, letterSpacing: "0.38em", paddingLeft: "0.38em", color: dark ? "#F4EFE6" : "#1C1814" }}>
-          ATHLOS
-        </div>
-        {/* grows outward from the center, like it's loading — as wide as the wordmark */}
-        <div className="athlos-splash-rule" style={{
-          width: 220, maxWidth: "60vw", height: 1, margin: "14px 0 12px",
-          background: dark ? "#00FF87" : "#1F7A52",
-          transform: "scaleX(0)", transformOrigin: "center",
-        }} />
-        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontStyle: "italic", fontWeight: 500, fontSize: 17, letterSpacing: "0.12em", color: dark ? "rgba(244,239,230,0.55)" : "rgba(28,24,20,0.5)" }}>
-          sistem, ki pozna vsakega športnika
-        </div>
-      </div>
     </div>
   );
 }
