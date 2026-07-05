@@ -80,7 +80,12 @@ function SplashScreen({ C }) {
         style={{
           width: "auto", maxWidth: "92%", height: "min(56vh, 500px)",
           objectFit: "contain",
+          // The PNG carries its own paper plate. Blend it away instead of
+          // color-matching: dark = inverted engraving, `screen` drops its
+          // near-black plate; light = ink on cream, `multiply` drops the
+          // light plate. No visible rectangle on either theme.
           filter: dark ? "invert(1)" : "none",
+          mixBlendMode: dark ? "screen" : "multiply",
           pointerEvents: "none",
           userSelect: "none",
         }}
