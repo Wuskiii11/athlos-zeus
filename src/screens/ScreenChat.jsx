@@ -518,6 +518,7 @@ export default function ScreenChat({ user, profile }) {
   const msgsEndRef   = useRef(null);
   const fileInputRef = useRef(null);
   const pollRef      = useRef(null);
+  const detailSwipe  = useRef(null); // start point of a swipe inside an open conversation
 
   // ── Load conversations ──────────────────────────────────────
   const loadConvs = useCallback(async () => {
@@ -900,7 +901,25 @@ export default function ScreenChat({ user, profile }) {
 
       {/* ════════════════ DETAIL (full-screen) ═════════════════ */}
       {view === "detail" && activeConv && (
-        <div style={{
+        <div
+          // data-noswipe keeps the app-level tab swipe out of an open
+          // conversation; a right swipe here closes the conversation first
+          // (iOS-style back), instead of jumping straight to another tab.
+          data-noswipe
+          onTouchStart={(e) => {
+            // don't hijack drags that belong to a control (text selection in the input)
+            detailSwipe.current = e.target.closest && e.target.closest("input, textarea")
+              ? null : { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          }}
+          onTouchEnd={(e) => {
+            const s = detailSwipe.current;
+            detailSwipe.current = null;
+            if (!s) return;
+            const dx = e.changedTouches[0].clientX - s.x;
+            const dy = e.changedTouches[0].clientY - s.y;
+            if (dx > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) setView("list");
+          }}
+          style={{
           position: "fixed", inset: 0, zIndex: 15,
           background: bgColor,
           display: "flex", flexDirection: "column",
