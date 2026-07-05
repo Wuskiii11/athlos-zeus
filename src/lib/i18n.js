@@ -304,6 +304,7 @@ const EN = {
   "Pozabljeno geslo?": "Forgot password?",
   "Prijava": "Log in",
   "Ustvari račun": "Create account",
+  "Vstopi": "Sign in",
   "Počakaj…": "Please wait…",
   "Še nimaš računa?": "Don't have an account?",
   "Že imaš račun?": "Already have an account?",

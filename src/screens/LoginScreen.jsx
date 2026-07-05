@@ -243,12 +243,14 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
           {t("Pozabljeno geslo?")}
         </button>
 
-        {/* ── Primary CTA ── */}
+        {/* ── Primary CTA — flat, professional: solid laurel (light) / electric
+            on ink (dark), quiet shadow, no gloss ── */}
         <button onClick={submit} disabled={busy} style={{
           marginTop: 14, width: "100%", padding: "15px", borderRadius: 14, border: "none", cursor: busy ? "default" : "pointer",
-          background: `linear-gradient(180deg, ${L.accent2}, ${L.accent})`, color: "#FFFFFF",
+          background: L.accent, color: dark ? "#04130A" : "#FFFFFF",
           fontFamily: L.heading, fontWeight: 700, fontSize: 15.5, letterSpacing: "0.16em", textTransform: "uppercase",
-          boxShadow: `0 10px 26px ${L.accent}44, inset 0 1px 0 rgba(255,255,255,0.3)`, opacity: busy ? 0.6 : 1,
+          boxShadow: `0 6px 16px ${L.accent}30`, opacity: busy ? 0.6 : 1,
+          transition: "opacity 0.2s",
           WebkitTapHighlightColor: "transparent",
         }}>
           {busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}
