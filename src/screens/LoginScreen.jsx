@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { LANDING_URL } from "../theme";
-import { LanguageSwitcher } from "../components/UI";
+import { LanguageSwitcher, PrimaryBtn } from "../components/UI";
 import { signIn, signUp, signInWithProvider } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -243,36 +243,11 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
           {t("Pozabljeno geslo?")}
         </button>
 
-        {/* ── Primary CTA — the design system's premium "ink seal" pill, same
-            language as ZAČNI TRENING on Today: dark ink panel, engraved marble
-            caps, electric-green signal triangle + faint oracle breath ── */}
-        <style>{`
-          .athlos-cta { transition: transform .15s ease, opacity .2s; }
-          .athlos-cta:active { transform: scale(.98); }
-        `}</style>
-        <button className="athlos-cta" onClick={submit} disabled={busy} style={{
-          marginTop: 16, width: "100%", padding: "17px 16px", borderRadius: 999,
-          border: dark ? "1px solid rgba(0,255,135,0.28)" : "1px solid rgba(244,239,230,0.12)",
-          cursor: busy ? "default" : "pointer",
-          background: "linear-gradient(160deg, #26221C, #16130F)",
-          color: "#F4EFE6",
-          fontFamily: L.heading, fontWeight: 700, fontSize: 15, letterSpacing: "0.24em", textTransform: "uppercase",
-          position: "relative", overflow: "hidden",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 11,
-          boxShadow: dark
-            ? "0 0 26px rgba(0,255,135,0.14), 0 10px 24px rgba(0,0,0,0.40)"
-            : "0 12px 26px rgba(28,24,20,0.24), inset 0 1px 0 rgba(244,239,230,0.07)",
-          opacity: busy ? 0.65 : 1,
-          WebkitTapHighlightColor: "transparent",
-        }}>
-          {/* oracle breath in the corner — the brand's signature on ink panels */}
-          <span aria-hidden="true" style={{ position: "absolute", right: -18, top: -18, width: 72, height: 72, background: "radial-gradient(circle, rgba(0,255,135,0.18), transparent 70%)", pointerEvents: "none" }} />
-          {/* electric-green signal triangle (same as ZAČNI TRENING) */}
-          <svg width="10" height="12" viewBox="0 0 11 12" fill="#00FF87" aria-hidden="true" style={{ flexShrink: 0 }}>
-            <path d="M1 1.3v9.4c0 .8.9 1.3 1.6.9l7.6-4.7c.6-.4.6-1.4 0-1.8L2.6.4C1.9 0 1 .5 1 1.3z"/>
-          </svg>
-          <span style={{ paddingLeft: "0.24em" }}>{busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}</span>
-        </button>
+        {/* ── Primary CTA — the app's standard PrimaryBtn (flat ink pill, same
+            button as everywhere else in the app; no gradient) ── */}
+        <PrimaryBtn onClick={submit} disabled={busy} style={{ marginTop: 16, opacity: busy ? 0.65 : 1 }}>
+          {busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}
+        </PrimaryBtn>
 
         <p style={{ textAlign: "center", color: L.muted, fontSize: 14.5, marginTop: 12, marginBottom: 0, fontFamily: L.display, lineHeight: 1.5 }}>
           {mode === "signup" ? t("Že imaš račun?") : t("Še nimaš računa?")}{" "}
