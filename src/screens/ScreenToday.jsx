@@ -493,7 +493,7 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
           treatment as the statue in the ZEUS chat (ink-on-transparent PNG,
           inverted to light strokes on the dark theme) */}
       <img src="/img/god-thunder.png" alt="" aria-hidden="true" style={{
-        position: "absolute", top: -10, right: -60, height: 430, objectFit: "contain",
+        position: "absolute", top: -10, right: -90, height: 645, objectFit: "contain",
         opacity: C.name === "dark" ? 0.07 : 0.055,
         filter: C.name === "dark" ? "invert(1)" : "none",
         pointerEvents: "none", userSelect: "none", zIndex: 0,
@@ -501,7 +501,7 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
       {/* second figure — standing Zeus on the LEFT, anchored to the bottom of
           the page (visible when scrolled down), mirrored to face the content */}
       <img src="/img/greek-god.png" alt="" aria-hidden="true" style={{
-        position: "absolute", bottom: -20, left: -70, height: 400, objectFit: "contain",
+        position: "absolute", bottom: -30, left: -105, height: 600, objectFit: "contain",
         opacity: C.name === "dark" ? 0.07 : 0.055,
         transform: "scaleX(-1)",
         filter: C.name === "dark" ? "invert(1)" : "none",
