@@ -330,8 +330,8 @@ export default function ScreenAI({ user, profile }) {
       {/* Statue watermark — sits behind the whole chat (header + messages),
           the same quiet treatment as the bust watermark on Today, instead of
           a hard-edged image cropped into the header strip. */}
-      <img src="/img/greek-god.png" alt="" aria-hidden="true" style={{
-        position: "absolute", top: -10, right: -70, height: 340, opacity: dark ? 0.06 : 0.05,
+      <img src="/img/god-bolt.png" alt="" aria-hidden="true" style={{
+        position: "absolute", top: -10, right: -70, height: 360, opacity: dark ? 0.06 : 0.05,
         filter: dark ? "invert(1)" : "none", pointerEvents: "none", userSelect: "none", zIndex: 0,
       }} />
 
