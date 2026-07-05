@@ -336,7 +336,9 @@ export default function ScreenTrain({ go, user }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
             <div>
               <Mono style={{ color: C.muted, fontSize: 10 }}>{t("PREGLED TRENINGA")}</Mono>
-              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, marginTop: 2 }}>3 {t("BLOKI")} · 9 {t("VAJ")}</div>
+              {/* Cinzel: Cormorant's old-style 3/9 hang below the caps line;
+                  the engraved face keeps digits at full cap height */}
+              <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 17.5, color: C.text, marginTop: 3 }}>3 {t("BLOKI")} · 9 {t("VAJ")}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 999, background: `${C.accent}1a`, border: `1px solid ${C.accent}40` }}>
               <svg width="16" height="10" viewBox="0 0 26 14" fill="none"><rect x="0.5" y="0.5" width="22" height="13" rx="3" stroke={C.accent} /><rect x="23" y="4" width="2.5" height="6" rx="1" fill={C.accent} /><rect x="2" y="2" width="16" height="10" rx="1.5" fill={C.accent} /></svg>
