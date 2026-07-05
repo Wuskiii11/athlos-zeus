@@ -498,6 +498,15 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         filter: C.name === "dark" ? "invert(1)" : "none",
         pointerEvents: "none", userSelect: "none", zIndex: 0,
       }} />
+      {/* second figure — standing Zeus on the LEFT, anchored to the bottom of
+          the page (visible when scrolled down), mirrored to face the content */}
+      <img src="/img/greek-god.png" alt="" aria-hidden="true" style={{
+        position: "absolute", bottom: -20, left: -70, height: 400, objectFit: "contain",
+        opacity: C.name === "dark" ? 0.07 : 0.055,
+        transform: "scaleX(-1)",
+        filter: C.name === "dark" ? "invert(1)" : "none",
+        pointerEvents: "none", userSelect: "none", zIndex: 0,
+      }} />
 
       {/* notifications bell — top-left, quiet ring, badge only when something waits */}
       <button onClick={() => setOpenNotifs(true)} aria-label={t("Obvestila")} style={{
