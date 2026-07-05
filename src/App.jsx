@@ -102,7 +102,12 @@ const cleanProfile = (o) =>
 
 export default function AthlosApp() {
   const [splash, setSplash]           = useState(true);
-  const [screen, setScreen]           = useState("today");
+  // Refresh keeps you on the same tab (per-tab memory; a fresh app start
+  // still opens on "today")
+  const [screen, setScreen]           = useState(() => {
+    try { return sessionStorage.getItem("athlos:screen") || "today"; } catch { return "today"; }
+  });
+  useEffect(() => { try { sessionStorage.setItem("athlos:screen", screen); } catch {} }, [screen]);
   const [navDir, setNavDir]           = useState(null); // "next" | "prev" | null — drives the slide direction
   // Follow the phone's light/dark preference by default; an explicit Settings /
   // account choice overrides it and sticks.

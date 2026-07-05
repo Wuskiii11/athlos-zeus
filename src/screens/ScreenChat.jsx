@@ -477,16 +477,26 @@ function MsgMenu({ msg, C, t, onDelete, onClose }) {
   );
 }
 
+// Survives a page refresh: the open conversation is remembered per tab, so a
+// reload lands back inside the chat instead of kicking the user to the list.
+const CHAT_RESTORE_KEY = "athlos:chat-open";
+const loadOpenConv = () => {
+  try { return JSON.parse(sessionStorage.getItem(CHAT_RESTORE_KEY) || "null"); } catch { return null; }
+};
+
 // ─── Main Screen ─────────────────────────────────────────────
 export default function ScreenChat({ user, profile }) {
   const C = useTheme();
   const t = useT();
 
   const userId = user?.id;
+  // Only restore a conversation saved by THIS account (tab may switch users)
+  const restoredRaw = useRef(loadOpenConv()).current;
+  const restored = restoredRaw && restoredRaw.uid === userId ? restoredRaw : null;
 
-  const [view, setView]             = useState("list");
+  const [view, setView]             = useState(restored?.conv ? "detail" : "list");
   const [convs, setConvs]           = useState([]);
-  const [activeConv, setActiveConv] = useState(null);
+  const [activeConv, setActiveConv] = useState(restored?.conv || null);
   const [messages, setMessages]     = useState([]);
   const [input, setInput]           = useState("");
   const [stickerOpen, setStickerOpen] = useState(false);
@@ -499,7 +509,7 @@ export default function ScreenChat({ user, profile }) {
   const [groupSelected, setGroupSelected] = useState([]);
   const [groupName, setGroupName]   = useState("");
   const [loadingConvs, setLoadingConvs] = useState(true);
-  const [convBg, setConvBg]         = useState("default");
+  const [convBg, setConvBg]         = useState(restored?.conv?.background || "default");
   const [search, setSearch]         = useState("");
   const [reads, setReads]           = useState(() => loadChatReads());
   const [userQ, setUserQ]           = useState("");   // "new chat" name search
@@ -550,6 +560,14 @@ export default function ScreenChat({ user, profile }) {
     listBlocks(userId).then(setBlocks).catch(() => {});
     listClubmates(userId).then(setClubmates).catch(() => {});
   }, [userId]);
+
+  // ── Persist the open conversation so a refresh lands back in it ──
+  useEffect(() => {
+    try {
+      if (view === "detail" && activeConv) sessionStorage.setItem(CHAT_RESTORE_KEY, JSON.stringify({ uid: userId, conv: activeConv }));
+      else sessionStorage.removeItem(CHAT_RESTORE_KEY);
+    } catch {}
+  }, [view, activeConv]);
 
   // ── Name search (new chat) — debounced, min 2 characters ────
   useEffect(() => {
