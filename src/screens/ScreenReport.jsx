@@ -1,11 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "../theme";
 import { BackBtn } from "../components/UI";
 import { useT } from "../lib/i18n";
 
+// The daily report is valid for the calendar day — it expires at midnight,
+// when the next day's report takes over. Seconds until then:
+const untilMidnight = () => {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return Math.max(0, Math.floor((midnight - now) / 1000));
+};
+const fmtHMS = (s) =>
+  `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
 export default function ScreenReport({ go }) {
   const C = useTheme();
   const t = useT();
+
+  const [left, setLeft] = useState(untilMidnight);
+  useEffect(() => {
+    const iv = setInterval(() => setLeft(untilMidnight()), 1000);
+    return () => clearInterval(iv);
+  }, []);
+
   return (
     <div style={{ padding: "10px 18px 28px", color: C.text }}>
       <header style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
@@ -15,7 +32,8 @@ export default function ScreenReport({ go }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: "14px 16px", marginBottom: 16 }}>
         <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted }}>{t("POTEČE ČEZ")}</span>
-        <span style={{ fontFamily: C.mono, fontSize: 15.5, color: C.text }}>11:04:35</span>
+        {/* live countdown to midnight; the last hour turns terracotta */}
+        <span style={{ fontFamily: C.mono, fontSize: 15.5, color: left < 3600 ? C.red : C.text }}>{fmtHMS(left)}</span>
       </div>
 
       <div style={{ marginBottom: 18 }}>
