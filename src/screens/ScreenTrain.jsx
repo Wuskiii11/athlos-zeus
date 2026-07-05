@@ -249,11 +249,31 @@ export default function ScreenTrain({ go, user }) {
   const [vbtEx, setVbtEx] = useState(null); // index of exercise showing VBT sheet, or null
   const [lockDemo, setLockDemo] = useState(false); // mock lockscreen overlay (spec §07)
 
+  // Pause actually stops the clock; on resume the start epoch shifts forward
+  // by the paused span, so wall-clock consumers (live bar, resume-from-store)
+  // agree with the on-screen total.
+  const [paused, setPaused] = useState(false);
+  const pausedAt = useRef(null);
+
   useEffect(() => {
-    if (!started || finished) return;
+    if (!started || finished || paused) return;
     const iv = setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => clearInterval(iv);
-  }, [started, finished]);
+  }, [started, finished, paused]);
+
+  const togglePause = () => {
+    setPaused((p) => {
+      if (!p) {
+        pausedAt.current = Date.now();
+        setLive({ paused: true });
+      } else if (pausedAt.current && startedAt.current) {
+        startedAt.current += Date.now() - pausedAt.current;
+        pausedAt.current = null;
+        setLive({ startedAt: startedAt.current, paused: false });
+      }
+      return !p;
+    });
+  };
 
   const ex = SESSION.block[exIdx];
   const exLogs = logs[exIdx];
@@ -441,11 +461,13 @@ export default function ScreenTrain({ go, user }) {
           <button onClick={() => setLockDemo(true)} aria-label="Live Activity demo" style={{ width: 38, height: 38, borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </button>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", background: C.surface, border: `1px solid ${C.accent}55`, borderRadius: 14, boxShadow: C.glowSoft }}>
-            <span style={{ width: 24, height: 24, borderRadius: "50%", border: `1.5px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill={C.accent}><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
-            </span>
-            <div><Mono style={{ color: C.muted, fontSize: 9 }}>{t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 15.5, color: C.accent }}>{fmtTime(elapsed)}</div></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", background: C.surface, border: `1px solid ${paused ? C.border2 : `${C.accent}55`}`, borderRadius: 14 }}>
+            <button onClick={togglePause} aria-label={paused ? t("Nadaljuj") : t("Pavza")} style={{ width: 24, height: 24, borderRadius: "50%", border: `1.5px solid ${paused ? C.muted : C.accent}`, background: "none", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+              {paused
+                ? <svg width="9" height="9" viewBox="0 0 24 24" fill={C.muted} style={{ marginLeft: 2 }}><path d="M5 3l14 9-14 9V3z" /></svg>
+                : <svg width="9" height="9" viewBox="0 0 24 24" fill={C.accent}><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>}
+            </button>
+            <div><Mono style={{ color: C.muted, fontSize: 9 }}>{paused ? t("PAVZA") : t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 15.5, color: paused ? C.muted : C.accent }}>{fmtTime(elapsed)}</div></div>
           </div>
         </div>
       </div>

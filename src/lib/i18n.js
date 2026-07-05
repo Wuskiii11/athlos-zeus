@@ -298,6 +298,11 @@ const EN = {
   "Naslednji obrok": "Next meal",
   "3 dni": "3 days",
 
+  // ── Training timer pause ──
+  "PAVZA": "PAUSED",
+  "Pavza": "Pause",
+  "Nadaljuj": "Resume",
+
   // ── Chat: user search + unique names ──
   "IŠČI PO IMENU": "SEARCH BY NAME",
   "Vpiši ime …": "Type a name …",
