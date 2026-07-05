@@ -447,15 +447,11 @@ export default function ScreenTrain({ go, user }) {
   /* ───────── active session (mockups 1 & 3) ───────── */
   return (
     <div style={{ padding: "8px 18px 28px" }}>
-      {/* header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
-        <div style={{ display: "flex", gap: 10 }}>
-          <BackBtn onClick={() => setStarted(false)} />
-          <div>
-            <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.1em" }}>{t("TRENING")} {SESSION.no} · {ex.block} · {t(ex.cat)}</Mono>
-            <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em", textTransform: "uppercase" }}>{t(ex.name)}</h1>
-          </div>
-        </div>
+      {/* header — compact controls row first, then the full-width title, so
+          the kicker doesn't wrap in a squeezed column next to the timer */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <BackBtn onClick={() => setStarted(false)} />
+        <div style={{ flex: 1 }} />
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {/* mock lockscreen Live Activity demo (spec §07) */}
           <button onClick={() => setLockDemo(true)} aria-label="Live Activity demo" style={{ width: 38, height: 38, borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>
@@ -470,6 +466,12 @@ export default function ScreenTrain({ go, user }) {
             <div><Mono style={{ color: C.muted, fontSize: 9 }}>{paused ? t("PAVZA") : t("PRETEČENO")}</Mono><div style={{ fontFamily: C.mono, fontWeight: 700, fontSize: 15.5, color: paused ? C.muted : C.accent }}>{fmtTime(elapsed)}</div></div>
           </div>
         </div>
+      </div>
+
+      {/* exercise title — full width under the controls */}
+      <div style={{ marginBottom: 16 }}>
+        <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.1em" }}>{t("TRENING")} {SESSION.no} · {ex.block} · {t(ex.cat)}</Mono>
+        <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em", textTransform: "uppercase" }}>{t(ex.name)}</h1>
       </div>
 
       {lockDemo && <LockscreenDemo t={t} onClose={() => setLockDemo(false)} />}
