@@ -261,7 +261,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
         )}
         {msg.type === "text" && (
           <span style={{
-            fontFamily: C.display, fontSize: isMine ? 17 : 17.5, fontWeight: 500, lineHeight: 1.45,
+            fontFamily: C.display, fontSize: 17.5, fontWeight: 500, lineHeight: 1.45,
             fontStyle: isMine ? "normal" : "italic", position: "relative",
           }}>
             {msg.content}
@@ -601,14 +601,16 @@ export default function ScreenChat({ user, profile }) {
       setMessages(prev => prev.map(m => m.id === optimistic.id ? saved : m));
       loadConvs();
 
-      // Demo auto-reply (local/demo mode)
+      // Demo auto-reply (local/demo mode). Capture the target conversation in
+      // locals so a mid-delay switch to another chat doesn't misfile the reply.
       if (!hasSupabase && activeConv.type === "direct" && type === "text" && Math.random() > 0.3) {
+        const replyConvId = activeConv.id;
         const otherId = activeConv.otherUser?.user_id;
         if (otherId) {
           setTimeout(async () => {
             const reply = DEMO_AUTO_REPLIES[Math.floor(Math.random() * DEMO_AUTO_REPLIES.length)];
-            await sendMessage(activeConv.id, otherId, "text", reply);
-            loadMsgs(activeConv.id);
+            await sendMessage(replyConvId, otherId, "text", reply);
+            loadMsgs(replyConvId);
           }, 1400 + Math.random() * 1800);
         }
       }

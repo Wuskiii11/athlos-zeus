@@ -103,44 +103,10 @@ function Legend({ color, label }) {
   );
 }
 
-function EventRow({ ev, onDelete }) {
-  const C = useTheme();
-  const t = useT();
-  const lang = useLang();
-  const [pressed, setPressed] = useState(false);
-  const color = evColor(C, ev.type) || C.accent;
-  const done = !!ev.completed;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${done ? `${C.accent}40` : C.border}`, borderRadius: 16, opacity: done ? 0.85 : 1 }}>
-      <div style={{ width: 4, height: 40, borderRadius: 999, background: color, flexShrink: 0 }} />
-      {done ? (
-        <div style={{ width: 26, height: 26, borderRadius: "50%", background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-        </div>
-      ) : null}
-      <div style={{ flex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text, textDecoration: done ? "line-through" : "none" }}>{ev.title}</span>
-          <span style={{ fontFamily: C.display, fontSize: 12.5, fontWeight: 600, textTransform: "lowercase", color, background: `${color}1f`, padding: "3px 10px", borderRadius: 999 }}>{t(EV_LABEL[ev.type])}</span>
-          {done && (
-            <span style={{ fontFamily: C.display, fontSize: 12.5, fontWeight: 700, textTransform: "lowercase", color: C.accent, background: `${C.accent}1f`, padding: "3px 10px", borderRadius: 999 }}>{t("opravljeno")}</span>
-          )}
-        </div>
-        <span style={{ display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, marginTop: 4 }}>{fmtDate(ev.date, lang)} · {ev.time}</span>
-      </div>
-      <button onClick={onDelete} onPointerDown={() => setPressed(true)} onPointerUp={() => setPressed(false)} onPointerLeave={() => setPressed(false)}
-        style={{ background: "none", border: "none", color: pressed ? C.red : C.muted2, fontSize: 22.5, cursor: "pointer", padding: 6, transition: "color 0.15s, transform 0.12s", transform: pressed ? "scale(0.85)" : "scale(1)" }}>
-        ×
-      </button>
-    </div>
-  );
-}
-
 function AddEventForm({ onAdd, onCancel }) {
   const C = useTheme();
   const t = useT();
   const lang = useLang();
-  const DAYS = lang === "en" ? DAY_NAMES_EN : DAY_NAMES;
   const openDP = useDatePicker();
   const openTP = useTimePicker();
   const [type, setType] = useState("trening");
@@ -379,8 +345,6 @@ function getMonthGrid(year, month) {
 
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 
-// ── Load constants ────────────────────────────────────────────
-const EV_LOAD = { trening: 480, tekma: 680, recovery: 120 };
 
 // ── Weekly view ───────────────────────────────────────────────
 function WeekView({ C, t, lang, weekOffset, setWeekOffset, events, onDelete, onAddManual }) {

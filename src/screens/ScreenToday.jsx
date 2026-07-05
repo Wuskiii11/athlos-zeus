@@ -38,13 +38,6 @@ const DAYS_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const MONTHS_SL = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AVG", "SEP", "OKT", "NOV", "DEC"];
 const MONTHS_EN = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 6) return "Pozna noč";
-  if (h < 12) return "Dobro jutro";
-  if (h < 17) return "Dober dan";
-  return "Dober večer";
-}
 
 function useCountUp(target, dur = 900, delay = 200) {
   const [n, setN] = useState(0);
@@ -103,15 +96,6 @@ const IconScales = ({ size = 20, color }) => (
     <path d="M4.5 9.5l4 7h-8l4-7z" />
     <path d="M19.5 9.5l-4 7h8l-4-7z" />
   </svg>
-);
-const GreekOrnament = ({ C }) => (
-  <div style={{ opacity: 0.4, display: "flex", alignItems: "center", gap: 10 }}>
-    <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${C.gold})` }} />
-    <svg width="10" height="10" viewBox="0 0 10 10" style={{ flexShrink: 0 }}>
-      <rect x="1.5" y="1.5" width="7" height="7" transform="rotate(45 5 5)" fill="none" stroke={C.gold} strokeWidth="1" />
-    </svg>
-    <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${C.gold})` }} />
-  </div>
 );
 
 // Bronze marble medallion per the reference mock: engraved serif score on a
@@ -451,7 +435,6 @@ export default function ScreenToday({ go, profile }) {
   useEffect(() => { try { localStorage.setItem(CHECKIN_KEY, JSON.stringify(checkin)); } catch {} }, [checkin]);
   const setC = (k, v) => setCheckin((p) => ({ ...p, [k]: v }));
 
-  const initial = (profile.name || "?").trim().charAt(0).toUpperCase();
   const now = new Date();
   const DAYS = lang === "en" ? DAYS_EN : DAYS_SL;
   const MONTHS = lang === "en" ? MONTHS_EN : MONTHS_SL;

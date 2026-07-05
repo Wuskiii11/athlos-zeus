@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { ThemeContext, THEMES, DatePickerContext, TimePickerContext } from "./theme";
-import { Pressable, Mono, TabButton, SkeletonBlock, Emblem, Wordmark } from "./components/UI";
+import { Mono, TabButton, SkeletonBlock } from "./components/UI";
 import DatePicker from "./components/DatePicker";
 import TimePicker from "./components/TimePicker";
 import ScreenToday from "./screens/ScreenToday";
@@ -32,8 +32,6 @@ const NAV = [
   { id: "chat",     label: "Chat",    icon: "chat" },
   { id: "settings", label: "Profil",  icon: "profile" },
 ];
-
-const ATHLOS_LETTERS = ["A","T","H","L","O","S"];
 
 function SplashScreen({ C }) {
   // Plate color of greek-god.png so the engraving sits on a seamless canvas.
@@ -106,28 +104,6 @@ function SplashScreen({ C }) {
   );
 }
 
-function ScreenSkeleton({ C }) {
-  return (
-    <div style={{ padding: "10px 20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <SkeletonBlock width={80} height={10} />
-          <SkeletonBlock width={180} height={26} radius={10} />
-        </div>
-        <SkeletonBlock width={42} height={42} radius={21} />
-      </div>
-      <SkeletonBlock height={130} radius={16} />
-      <SkeletonBlock height={120} radius={16} />
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <SkeletonBlock width={100} height={10} />
-        <SkeletonBlock height={72} radius={14} />
-        <SkeletonBlock height={72} radius={14} />
-        <SkeletonBlock height={72} radius={14} />
-      </div>
-    </div>
-  );
-}
-
 // Detect the device platform once at module load — never changes after load.
 const getPlatform = () => {
   if (typeof navigator === "undefined") return "web";
@@ -163,7 +139,6 @@ const cleanProfile = (o) =>
 export default function AthlosApp() {
   const [splash, setSplash]           = useState(true);
   const [screen, setScreen]           = useState("today");
-  const [transitioning, setTransitioning] = useState(false);
   const [navDir, setNavDir]           = useState(null); // "next" | "prev" | null — drives the slide direction
   // Follow the phone's light/dark preference by default; an explicit Settings /
   // account choice overrides it and sticks.
@@ -367,7 +342,7 @@ export default function AthlosApp() {
       case "report":   return <ScreenReport go={go} />;
       case "profile":  return <ScreenProfile go={go} profile={profile} setProfile={setProfile} />;
       case "fuel":     return <ScreenFuel go={go} profile={profile} />;
-      case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} onPrivacy={() => setPrivacyOpen(true)} onAccount={() => setScreen("account")} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
+      case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} theme={theme} setTheme={setTheme} onPrivacy={() => setPrivacyOpen(true)} onAccount={() => setScreen("account")} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setConsented(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
       case "account":  return <ScreenAccount profile={profile} setProfile={setProfile} user={user} onBack={() => setScreen("settings")} />;
       case "season":   return <ScreenSeason go={go} profile={profile} user={user} />;
       case "chat":       return <ScreenChat user={user} profile={profile} />;

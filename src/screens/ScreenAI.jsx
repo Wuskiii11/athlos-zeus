@@ -63,16 +63,6 @@ const SUGGESTIONS = [
   "Imam bolečino v kolenu",
 ];
 
-function AvatarIcon({ size = 36, accent, gold = "#C9A23E" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 36 36" fill="none">
-      <rect width="36" height="36" rx="11" fill={accent + "14"} />
-      <rect x="0.5" y="0.5" width="35" height="35" rx="10.5" stroke={gold} strokeWidth="1" fill="none" opacity="0.55" />
-      {/* Zeus' thunderbolt */}
-      <path d="M21 6 L13.4 19.6 H18 L16 30 L23.6 16.4 H18.9 L21.7 6 Z" fill={gold} stroke={gold} strokeWidth="0.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function SendIcon({ color }) {
   return (
@@ -381,7 +371,7 @@ export default function ScreenAI({ user, profile }) {
                   <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: `radial-gradient(circle, ${C.accent2}29, transparent 70%)`, pointerEvents: "none" }} />
                 )}
                 <span style={{
-                  position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17, lineHeight: 1.5, whiteSpace: "pre-wrap",
+                  position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17.5, lineHeight: 1.5, whiteSpace: "pre-wrap",
                   fontStyle: isMine ? "normal" : "italic",
                   color: isMine ? "#F4EFE6" : C.text,
                 }}>
