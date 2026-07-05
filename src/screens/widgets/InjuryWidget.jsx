@@ -16,7 +16,7 @@ export default function InjuryWidget({ injury, C, t, isCoach = false }) {
   const showCoachNote = isCoach && coachView && injury.coachNote;
 
   return (
-    <div style={{ background: `linear-gradient(165deg, ${C.red}0d, ${C.surface})`, border: `1px solid ${C.red}40`, borderRadius: 20, padding: 18, marginBottom: 14 }}>
+    <div style={{ background: C.surface, border: `1px solid ${C.red}40`, borderRadius: 20, padding: 18, marginBottom: 14 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <Mono style={{ color: C.red, fontSize: 10, letterSpacing: "0.12em" }}>{t("AKTIVNA POŠKODBA")}</Mono>
         {isCoach && (

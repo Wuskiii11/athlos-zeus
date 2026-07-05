@@ -64,7 +64,6 @@ function LaunchAnimation({ onDone, p, dark }) {
   return (
     <div className="app-fullscreen" style={{
       position: "fixed", inset: 0, zIndex: 1000, background: p.bg,
-      backgroundImage: "radial-gradient(120% 80% at 50% 6%, rgba(31,122,82,0.12), transparent 60%)",
       display: "grid", placeItems: "center", overflow: "hidden",
       animation: "athlosSplashFade 1.22s cubic-bezier(.2,.8,.2,1) forwards",
     }}>
@@ -160,7 +159,6 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
       // No viewport units — iOS dvh/svh under-report and were the bottom band.
       position: "fixed", inset: 0,
       background: L.bg,
-      backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(31,122,82,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
       // 60% of the safe area is enough clearance for a non-critical footer link —
       // pulls the content visibly closer to the bottom edge without sitting on
@@ -181,7 +179,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 10, flexShrink: 1, minHeight: 0 }}>
           <HeroFigure h="min(26dvh, 250px)" dark={dark} />
           <div style={{ marginTop: -4 }}><Wordmark size={28} p={L} /></div>
-          <div style={{ width: 54, height: 1, margin: "10px 0 8px", background: `linear-gradient(90deg, transparent, ${L.gold}, transparent)` }} />
+          <div style={{ width: 40, height: 1, margin: "10px 0 8px", background: L.gold, opacity: 0.7 }} />
           <div style={{ fontFamily: L.heading, fontSize: 11, color: L.muted, textAlign: "center", letterSpacing: "0.30em", textTransform: "uppercase" }}>
             {t("sistem, ki pozna vsakega športnika")}
           </div>

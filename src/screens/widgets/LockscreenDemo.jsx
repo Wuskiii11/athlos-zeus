@@ -25,7 +25,7 @@ export default function LockscreenDemo({ onClose, t }) {
   return (
     <div onClick={onClose} style={{
       position: "fixed", inset: 0, zIndex: 60, cursor: "pointer",
-      background: "radial-gradient(120% 90% at 50% 0%, #2a3038 0%, #14171c 55%, #0a0c0f 100%)",
+      background: "#14171C",
       display: "flex", flexDirection: "column", alignItems: "center",
       paddingTop: "max(env(safe-area-inset-top, 24px), 24px)",
       animation: "athlosFade 0.25s ease", color: "#fff", userSelect: "none",
@@ -42,11 +42,10 @@ export default function LockscreenDemo({ onClose, t }) {
       {/* Live Activity card */}
       <div style={{
         width: "min(92%, 380px)", marginTop: 38, borderRadius: 24, padding: "16px 18px",
-        background: "linear-gradient(160deg, rgba(31,36,32,0.94), rgba(20,18,14,0.94))",
+        background: "rgba(24,28,24,0.94)",
         border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(20px)",
         boxShadow: "0 18px 44px rgba(0,0,0,0.5)", position: "relative", overflow: "hidden",
       }}>
-        <span aria-hidden="true" style={{ position: "absolute", right: -20, top: -20, width: 110, height: 110, background: "radial-gradient(circle, rgba(0,255,135,0.20), transparent 70%)", pointerEvents: "none" }} />
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <span style={{ width: 26, height: 26, borderRadius: 8, background: "rgba(0,255,135,0.14)", border: "1px solid rgba(0,255,135,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cinzel',serif", fontWeight: 800, fontSize: 14.5, color: "#00FF87" }}>A</span>

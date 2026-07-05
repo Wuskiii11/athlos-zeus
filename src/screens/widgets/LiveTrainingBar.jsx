@@ -30,7 +30,7 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
     <button onClick={onOpen} style={{
       width: "100%", maxWidth: 560, marginInline: "auto", marginBottom: 8,
       display: "flex", alignItems: "center", gap: 12, padding: "11px 16px",
-      background: "linear-gradient(160deg, #1f2420, #14120e)",
+      background: "#1A1E19",
       border: `1px solid ${C.accent2}40`, borderRadius: 18,
       boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
       cursor: "pointer", textAlign: "left", pointerEvents: "auto",
@@ -38,7 +38,6 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
       position: "relative", overflow: "hidden",
     }}>
       {/* signal-tinted "oracle" halo, same language as the AI panels */}
-      <span aria-hidden="true" style={{ position: "absolute", right: -18, top: -18, width: 90, height: 90, background: `radial-gradient(circle, ${C.accent2}33, transparent 70%)`, pointerEvents: "none" }} />
 
       {/* pulsing live dot */}
       <span style={{ position: "relative", width: 9, height: 9, flexShrink: 0 }}>

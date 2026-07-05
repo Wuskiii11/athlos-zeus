@@ -113,8 +113,8 @@ function Medallion({ pct, color, C, size = 130 }) {
       width: size, height: size, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       borderRadius: "50%",
       background: dark
-        ? "radial-gradient(circle at 38% 32%, #1F2420, #14120E 78%)"
-        : "radial-gradient(circle at 38% 32%, #FCFBF7, #F0EEE6 70%, #E4E1D6 100%)",
+        ? "#181C18"
+        : "#F4F2EA",
       boxShadow: dark
         ? "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 3px rgba(255,255,255,0.06)"
         : "0 16px 40px rgba(28,24,20,0.16), inset 0 2px 4px rgba(255,255,255,0.85), inset 0 -6px 14px rgba(31,122,82,0.18)",
@@ -124,7 +124,7 @@ function Medallion({ pct, color, C, size = 130 }) {
         <div style={{
           position: "absolute", left: 0, right: 0, bottom: 0,
           height: `${Math.max(pct, 2)}%`,
-          background: `linear-gradient(180deg, ${color}30, ${color}16)`,
+          background: `${color}22`,
           borderTop: `1.5px solid ${color}77`,
           transition: "height 0.9s cubic-bezier(.22,1,.36,1)",
         }} />

@@ -29,8 +29,8 @@ export const THEMES = {
   dark: {
     name: "dark",
     bg: "#0A0A09",
-    bgImage:
-      "radial-gradient(130% 55% at 50% -14%, rgba(0,255,135,0.10) 0%, transparent 52%), linear-gradient(180deg, #131312 0%, #0A0A09 52%, #050505 100%)",
+    // flat canvas — depth comes from surfaces and hairlines, not colour washes
+    bgImage: "none",
     btn: "#E8FFF2",
     btnText: "#091A0D",
     surface: "rgba(255,255,255,0.045)",
@@ -60,8 +60,8 @@ export const THEMES = {
   light: {
     name: "light",
     bg: "#FAF7F0",
-    bgImage:
-      "radial-gradient(ellipse 60% 30% at 20% 8%, rgba(216,207,189,0.22), transparent 60%), radial-gradient(ellipse 50% 40% at 85% 25%, rgba(216,207,189,0.18), transparent 55%), linear-gradient(180deg, #FDFBF7 0%, #F8F4EC 100%)",
+    // flat parchment — the halftone dot texture alone carries the print feel
+    bgImage: "none",
     btn: "#1C1814",
     btnText: "#F4EFE6",
     surface: "#FCF9F2",

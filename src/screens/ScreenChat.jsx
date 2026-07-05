@@ -149,9 +149,7 @@ function Avatar({ initials = "?", size = 44, isGroup }) {
       // filled "greige" disc (like Apple's grey avatars, warmed to the marble
       // palette) so the icon reads as a solid chip against the cream page —
       // not just a ring blending into the background
-      background: dark
-        ? "radial-gradient(circle at 38% 30%, #3B3833, #26241F 78%, #1D1B17 100%)"
-        : "radial-gradient(circle at 38% 30%, #ECE7DD, #D7CFC0 66%, #C4BAA5 100%)",
+      background: dark ? "#26241F" : "#DDD6C7",
       border: `1.5px solid ${C.gold}55`,
       boxShadow: dark ? "inset 0 1px 1px rgba(255,255,255,0.06)" : "inset 0 1px 2px rgba(255,255,255,0.7), 0 2px 7px rgba(28,24,20,0.10)",
       display: "flex", alignItems: "center", justifyContent: "center",
@@ -214,8 +212,8 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
   // the BUBBLE surface, never to the conversation backdrop — that's what kept
   // making white-on-marble unreadable on dark chat backgrounds.
   const bgBubble = isMine
-    ? "linear-gradient(160deg, #26221C, #1C1814)"
-    : (darkBg ? "rgba(255,255,255,0.09)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)");
+    ? "#1C1814"
+    : (darkBg ? "rgba(255,255,255,0.09)" : "#FCF9F2");
   const bubbleBorder = isMine
     ? `1px solid ${darkBg ? "rgba(244,239,230,0.22)" : "rgba(244,239,230,0.10)"}`
     : `1px solid ${darkBg ? "rgba(255,255,255,0.16)" : "#D8CFBD"}`;
@@ -245,7 +243,6 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
       >
         {/* faint oracle breath in the corner of my ink panels */}
         {isMine && msg.type === "text" && (
-          <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: `radial-gradient(circle, ${C.accent2}29, transparent 70%)`, pointerEvents: "none" }} />
         )}
         {isImage && msg.attachment_url && (
           <img
@@ -998,7 +995,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             style={{
               flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 2,
               ...(convBg === "default" && C.name !== "dark" ? {
-                backgroundImage: "radial-gradient(rgba(28,24,20,0.045) 0.8px, transparent 1.2px), radial-gradient(ellipse 60% 30% at 20% 8%, rgba(216,207,189,0.35), transparent 60%), radial-gradient(ellipse 50% 40% at 85% 30%, rgba(216,207,189,0.28), transparent 55%)",
+                backgroundImage: "radial-gradient(rgba(28,24,20,0.045) 0.8px, transparent 1.2px)",
                 backgroundSize: "5px 5px, 100% 100%, 100% 100%",
               } : {}),
             }}
@@ -1135,7 +1132,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
               onClick={() => doSend()}
               disabled={!input.trim()}
               style={{
-                background: "linear-gradient(160deg, #26221C, #14120E)", borderRadius: 50,
+                background: "#1C1814", borderRadius: 50,
                 width: 38, height: 38, border: "1px solid rgba(244,239,230,0.12)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 opacity: input.trim() ? 1 : 0.35, flexShrink: 0,

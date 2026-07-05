@@ -48,7 +48,7 @@ function RepsSlider({ value, max, onChange, accent, track, dim }) {
       onPointerMove={(e) => { if (e.buttons) setFromX(e.clientX); }}
       style={{ position: "relative", height: 34, borderRadius: 10, background: track, cursor: "pointer", touchAction: "none", overflow: "hidden", userSelect: "none" }}
     >
-      <div style={{ position: "absolute", inset: 0, width: `${pct * 100}%`, background: `linear-gradient(90deg, ${accent}22, ${accent}55)`, borderRadius: 10, transition: "width 0.08s linear" }} />
+      <div style={{ position: "absolute", inset: 0, width: `${pct * 100}%`, background: `${accent}33`, borderRadius: 10, transition: "width 0.08s linear" }} />
       <div style={{ position: "absolute", top: "50%", left: `calc(${pct * 100}% )`, transform: "translate(-50%,-50%)", width: 30, height: 26, borderRadius: 8, background: accent, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(0,0,0,0.22)", color: "#ffffff", fontWeight: 800, fontSize: 13.5, pointerEvents: "none" }}>
         ‹›
       </div>

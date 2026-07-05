@@ -86,9 +86,9 @@ function BenchmarkCard({ m, C, t }) {
         {/* team avg */}
         <div style={{ position: "absolute", left: `${pos(m.team) * 100}%`, top: -1, width: 1, height: 8, background: C.muted, borderRadius: 1 }} />
         {/* fill to mine */}
-        <div style={{ width: `${pos(m.mine) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${col}55, ${col})`, borderRadius: 999 }} />
+        <div style={{ width: `${pos(m.mine) * 100}%`, height: "100%", background: col, borderRadius: 999 }} />
         {/* my marker */}
-        <div style={{ position: "absolute", top: -4, left: `${pos(m.mine) * 100}%`, transform: "translateX(-50%)", width: 14, height: 14, borderRadius: "50%", background: col, border: `2px solid ${C.bg}`, boxShadow: `0 0 8px ${col}66` }} />
+        <div style={{ position: "absolute", top: -4, left: `${pos(m.mine) * 100}%`, transform: "translateX(-50%)", width: 14, height: 14, borderRadius: "50%", background: col, border: `2px solid ${C.bg}`, boxShadow: "0 1px 3px rgba(0,0,0,0.25)" }} />
       </div>
 
       {/* legend */}

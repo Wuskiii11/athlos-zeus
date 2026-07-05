@@ -154,10 +154,9 @@
 
 /* ── Antique engraving layer ─────────────────────────────────── */
 
-/* deep ink ground for dramatic dark heroes */
+/* deep ink ground for dramatic dark heroes — flat ink */
 .ink-ground {
-  background:
-    radial-gradient(120% 85% at 50% -8%, #1a2a1e 0%, #11201a 34%, #0c1612 64%, #07100c 100%);
+  background: #0d1712;
 }
 
 /* radiant sunburst of fine rays — sits behind a figure/emblem */

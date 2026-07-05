@@ -125,7 +125,7 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
     <div style={{
       alignSelf: "stretch", borderRadius: 18, padding: "16px 16px 14px", margin: "2px 0",
       animation: "athlosMsgBot 0.32s cubic-bezier(0.22,1,0.36,1) both",
-      background: dark ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)",
+      background: dark ? C.surface : "#FCF9F2",
       border: `1px solid ${C.gold}44`,
     }}>
       <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 17, color: C.text, letterSpacing: "0.02em" }}>{t("Kako je šlo zadnjič?")}</div>
@@ -360,15 +360,14 @@ export default function ScreenAI({ user, profile }) {
                 position: "relative", maxWidth: isMine ? "80%" : "88%", padding: "14px 16px", overflow: "hidden",
                 borderRadius: isMine ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
                 background: isMine
-                  ? "linear-gradient(160deg, #26221C, #1C1814)"
-                  : (dark ? "rgba(255,255,255,0.07)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)"),
+                  ? "#1C1814"
+                  : (dark ? "rgba(255,255,255,0.07)" : "#FCF9F2"),
                 border: isMine
                   ? "1px solid rgba(244,239,230,0.10)"
                   : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
                 boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
               }}>
                 {isMine && (
-                  <span aria-hidden="true" style={{ position: "absolute", right: -14, top: -14, width: 56, height: 56, background: `radial-gradient(circle, ${C.accent2}29, transparent 70%)`, pointerEvents: "none" }} />
                 )}
                 <span style={{
                   position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17.5, lineHeight: 1.5, whiteSpace: "pre-wrap",
@@ -401,7 +400,7 @@ export default function ScreenAI({ user, profile }) {
           <div style={{ display: "flex", animation: "athlosFade 0.2s ease" }}>
             <div style={{
               padding: "16px 18px", borderRadius: "18px 18px 18px 4px", display: "flex", gap: 6, alignItems: "center",
-              background: dark ? "rgba(255,255,255,0.07)" : "linear-gradient(170deg, #FCF9F2, #F0E9DA)",
+              background: dark ? "rgba(255,255,255,0.07)" : "#FCF9F2",
               border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
             }}>
               {[0, 0.2, 0.4].map((d, i) => (
@@ -418,7 +417,7 @@ export default function ScreenAI({ user, profile }) {
             {SUGGESTIONS.map((s) => (
               <button key={s} onClick={() => send(s)} style={{
                 width: "100%",
-                background: dark ? C.surface : "linear-gradient(170deg, #FCF9F2, #F3ECDD)",
+                background: dark ? C.surface : "#FCF9F2",
                 border: `1px solid ${dark ? C.border : "#D8CFBD"}`,
                 borderRadius: 16,
                 padding: "14px 16px", textAlign: "left", cursor: "pointer", marginBottom: 10,
@@ -455,7 +454,7 @@ export default function ScreenAI({ user, profile }) {
             disabled={!input.trim() || typing}
             style={{
               width: 38, height: 38, borderRadius: 999, border: "1px solid rgba(244,239,230,0.12)",
-              background: "linear-gradient(160deg, #26221C, #14120E)",
+              background: "#1C1814",
               display: "flex", alignItems: "center", justifyContent: "center",
               opacity: input.trim() && !typing ? 1 : 0.4,
               boxShadow: input.trim() && !typing ? "0 6px 16px rgba(28,24,20,0.28)" : "none",
