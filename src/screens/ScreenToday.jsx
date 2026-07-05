@@ -493,7 +493,7 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
           treatment as the statue in the ZEUS chat (ink-on-transparent PNG,
           inverted to light strokes on the dark theme) */}
       <img src="/img/god-thunder.png" alt="" aria-hidden="true" style={{
-        position: "absolute", top: -10, right: -90, height: 645, objectFit: "contain",
+        position: "absolute", top: -10, right: -60, height: 430, objectFit: "contain",
         opacity: C.name === "dark" ? 0.07 : 0.055,
         filter: C.name === "dark" ? "invert(1)" : "none",
         pointerEvents: "none", userSelect: "none", zIndex: 0,
