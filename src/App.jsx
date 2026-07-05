@@ -124,6 +124,7 @@ export default function AthlosApp() {
   const lang = profile.lang === "en" ? "en" : "sl";
   const [user, setUser]               = useState(null);
   const [chatUnread, setChatUnread]   = useState(0); // conversations with unread messages → nav dot + home bell
+  const [chatConvOpen, setChatConvOpen] = useState(false); // full-screen chat subview open → hide the bottom nav
   const [authReady, setAuthReady]     = useState(false);
   const [reminder, setReminder]       = useState(null);
   const [dp, setDp]                   = useState(null);
@@ -358,7 +359,7 @@ export default function AthlosApp() {
       case "settings": return <ScreenSettings profile={profile} setProfile={setProfile} user={user} theme={theme} setTheme={setTheme} onPrivacy={() => setPrivacyOpen(true)} onAccount={() => setScreen("account")} onLogout={() => { profileLoaded.current = false; setUser(null); setRegistered(false); setNeedsSetup(false); setConsented(false); setProfile((p) => ({ ...p, role: "athlete" })); setScreen("today"); apiSignOut().catch(() => {}); }} />;
       case "account":  return <ScreenAccount profile={profile} setProfile={setProfile} user={user} onBack={() => setScreen("settings")} />;
       case "season":   return <ScreenSeason go={go} profile={profile} user={user} />;
-      case "chat":       return <ScreenChat user={user} profile={profile} />;
+      case "chat":       return <ScreenChat user={user} profile={profile} onConvOpenChange={setChatConvOpen} />;
       case "club":       return <ScreenClub go={go} profile={profile} />;
       case "assessment": return <ScreenAssessment go={go} profile={profile} />;
       default:         return <ScreenToday go={go} profile={profile} />;
@@ -607,8 +608,10 @@ export default function AthlosApp() {
             {render()}
           </div>
 
-          {/* Tab bar — truly floating pill, absolutely positioned */}
-          <div style={{
+          {/* Tab bar — truly floating pill, absolutely positioned.
+              Hidden while a full-screen chat subview (open conversation,
+              new chat) is up, so it can't cover the message input. */}
+          {!(screen === "chat" && chatConvOpen) && <div style={{
             position: "absolute",
             bottom: 0, left: 0, right: 0, zIndex: 2,
             padding: "8px 16px",
@@ -638,7 +641,7 @@ export default function AthlosApp() {
                 return <TabButton key={n.id} n={{ ...n, label: t(n.label) }} active={active} onClick={() => go(n.id)} dot={n.id === "chat" && chatUnread > 0} />;
               })}
             </nav>
-          </div>
+          </div>}
 
           {/* Pickers */}
           {dp && <DatePicker value={dp.value} onChange={v => { dp.onChange(v); setDp(null); }} onClose={() => setDp(null)} futureDays={dp.futureDays} />}

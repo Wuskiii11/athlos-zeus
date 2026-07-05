@@ -485,7 +485,7 @@ const loadOpenConv = () => {
 };
 
 // ─── Main Screen ─────────────────────────────────────────────
-export default function ScreenChat({ user, profile }) {
+export default function ScreenChat({ user, profile, onConvOpenChange }) {
   const C = useTheme();
   const t = useT();
 
@@ -561,6 +561,13 @@ export default function ScreenChat({ user, profile }) {
     listBlocks(userId).then(setBlocks).catch(() => {});
     listClubmates(userId).then(setClubmates).catch(() => {});
   }, [userId]);
+
+  // ── Tell the app when a full-screen chat subview is open (conversation,
+  // new chat, new group) so it can hide the bottom nav ──
+  useEffect(() => {
+    onConvOpenChange?.(view !== "list");
+    return () => onConvOpenChange?.(false);
+  }, [view, onConvOpenChange]);
 
   // ── Persist the open conversation so a refresh lands back in it ──
   useEffect(() => {
