@@ -7,7 +7,7 @@ import { useT } from "../lib/i18n";
 // ── Entry-experience palettes: light "marble" + dark "obsidian" ──
 const FONTS = { heading: "'Cinzel',Georgia,serif", display: "'Cormorant Garamond',Georgia,serif" };
 const LIGHT = {
-  bg: "#F4EFE6", text: "#1C1814", text2: "rgba(28,24,20,0.78)", muted: "rgba(28,24,20,0.52)", muted2: "rgba(28,24,20,0.34)",
+  bg: "#FAF7F0", text: "#1C1814", text2: "rgba(28,24,20,0.78)", muted: "rgba(28,24,20,0.52)", muted2: "rgba(28,24,20,0.34)",
   surface: "#FCF9F2", surface2: "#FFFFFF", border: "rgba(28,24,20,0.16)",
   accent: "#1F7A52", accent2: "#00FF87", gold: "#1F7A52", red: "#B1452F", ...FONTS,
 };
@@ -156,10 +156,12 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
 
   return (
     <div className="app-fullscreen" style={{
-      // anchor top AND bottom so the screen fills the full phone-shell height —
-      // without `bottom` it only got 100dvh, leaving an empty strip at the
-      // bottom on mobile where the shell (top:0/bottom:0) is taller
-      position: "fixed", inset: 0,
+      // Height = 100dvh (the VISIBLE area) so the centered content stays centred
+      // on the real screen. `inset:0` filled the full phone-shell (which on iOS
+      // is taller than the visible area), pushing the form up and leaving an
+      // empty band at the bottom. The bg now equals the app/body bg, so any
+      // sliver below 100dvh is seamless rather than a two-tone strip.
+      position: "fixed", top: 0, left: 0, right: 0,
       background: L.bg,
       backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(31,122,82,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
