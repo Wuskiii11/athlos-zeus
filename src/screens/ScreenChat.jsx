@@ -741,18 +741,23 @@ export default function ScreenChat({ user, profile }) {
         const shown = convs.filter(c => convName(c).toLowerCase().includes(q));
         return (
         <div style={{ paddingBottom: 20 }}>
-          {/* Title + compose on one row (Apple Messages layout, marble theme) */}
-          <div style={{ padding: "10px 16px 0" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "2px 0 12px" }}>
-              <h1 style={{ fontFamily: C.heading, fontSize: 33.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", margin: 0, color: C.text }}>
-                {t("Pogovori")}
-              </h1>
+          {/* Header — engraved kicker + title with the compose seal on the same
+              baseline; calmer scale and a steady 14px rhythm down to the list */}
+          <div style={{ padding: "18px 16px 0" }}>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+              <div style={{ minWidth: 0 }}>
+                <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.22em", display: "block", marginBottom: 6 }}>{t("KLUB · EKIPA")}</Mono>
+                <h1 style={{ fontFamily: C.heading, fontSize: 27, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0, color: C.text, lineHeight: 1 }}>
+                  {t("Pogovori")}
+                </h1>
+              </div>
               <Pressable
                 onClick={() => setView("new-chat")}
                 scale={0.9}
                 style={{
                   background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 50, flexShrink: 0,
-                  width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: C.accent,
+                  width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: C.accent,
+                  boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.06)",
                 }}
               >
                 <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
@@ -760,14 +765,16 @@ export default function ScreenChat({ user, profile }) {
                 </svg>
               </Pressable>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 14, padding: "9px 12px", marginBottom: 6 }}>
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth={2.4} strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <div style={{ display: "flex", alignItems: "center", gap: 9, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 999, padding: "11px 16px", marginBottom: 10, boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.04)" }}>
+              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth={2.2} strokeLinecap="round" style={{ flexShrink: 0 }}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder={t("Iskanje")}
+                className="athlos-conv-search"
                 style={{ flex: 1, border: "none", background: "none", outline: "none", fontFamily: C.display, fontWeight: 500, color: C.text, minWidth: 0 }}
               />
+              <style>{`.athlos-conv-search::placeholder { color: ${C.muted2}; font-style: italic; }`}</style>
               {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 20, lineHeight: 1 }}>×</button>}
             </div>
           </div>
@@ -807,30 +814,33 @@ export default function ScreenChat({ user, profile }) {
                 key={conv.id}
                 onClick={() => openConv(conv)}
                 style={{
-                  width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 6,
-                  padding: "0 0 0 6px", background: "none", border: "none",
+                  width: "100%", textAlign: "left", display: "flex", alignItems: "center",
+                  padding: 0, background: "none", border: "none",
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                   opacity: isBlocked ? 0.45 : 1,
                 }}
               >
-                {/* unread dot sits in the left margin */}
-                <span style={{ width: 9, height: 9, borderRadius: "50%", background: unread ? C.accent : "transparent", flexShrink: 0 }} />
-                <span style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0, padding: "0 16px 0 4px" }}>
+                {/* fixed left rail keeps the unread dot centred, never clipped */}
+                <span style={{ width: 22, display: "flex", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: unread ? C.accent : "transparent", boxShadow: unread ? `0 0 8px ${C.accent}66` : "none" }} />
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: 13, flex: 1, minWidth: 0, paddingRight: 16 }}>
                   <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} size={52} />
-                  <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "11px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
-                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 18.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "14px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
+                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                      <span style={{ fontFamily: C.display, fontWeight: unread ? 800 : 700, fontSize: 17.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {convName(conv)}
                       </span>
-                      <span style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
-                        <span style={{ fontFamily: C.mono, fontSize: 11, color: C.muted2, letterSpacing: "0.04em" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                        <span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted2, letterSpacing: "0.08em" }}>
                           {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
                         </span>
-                        <svg width={7} height={12} viewBox="0 0 8 13" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M1.5 1.5L6.5 6.5L1.5 11.5"/></svg>
+                        <svg width={6} height={11} viewBox="0 0 8 13" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}><path d="M1.5 1.5L6.5 6.5L1.5 11.5"/></svg>
                       </span>
                     </span>
                     <span style={{
-                      fontFamily: C.display, fontSize: 15.5, fontWeight: 500, color: C.muted, marginTop: 3, lineHeight: 1.3,
+                      fontFamily: C.display, fontSize: 15, fontWeight: 500, fontStyle: "italic",
+                      color: unread ? C.text2 : C.muted, marginTop: 4, lineHeight: 1.35,
                       display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                     }}>
                       {isBlocked ? t("Blokirano") : lastMsgLabel(conv)}

@@ -92,6 +92,9 @@ const EN = {
 
   // ── Chat ──
   "Pogovori": "Chats",
+  "KLUB · EKIPA": "CLUB · TEAM",
+  "Iskanje": "Search",
+  "Ni zadetkov": "No results",
   "Blokirano": "Blocked",
   "VČERAJ": "YESTERDAY",
 
