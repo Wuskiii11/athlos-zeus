@@ -201,6 +201,19 @@ export async function saveProfile(userId, profile) {
   writeLS({ profile });
 }
 
+// Upload the avatar to Storage and return its public URL — a tiny string that
+// always fits profiles.photo. (Base64 data URLs from phone cameras are
+// megabytes and made the profile upsert fail silently, losing the picture.)
+export async function uploadAvatar(userId, blob) {
+  if (!hasSupabase) return null;
+  const path = `${userId}/avatar-${Date.now()}.jpg`;
+  const { error } = await supabase.storage.from("avatars")
+    .upload(path, blob, { contentType: "image/jpeg", upsert: true });
+  if (error) throw new Error(error.message);
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  return data?.publicUrl || null;
+}
+
 // The athlete's club name (via the athletes table) — null if they're not in one.
 // Enables the "Klub" tab. Safe if the tables don't exist yet.
 export async function getAthleteClub(userId) {

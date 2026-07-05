@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTheme, LANDING_URL } from "../theme";
 import { Pressable, SettingsBlock } from "../components/UI";
+import { uploadAvatar } from "../lib/api";
 import { useT } from "../lib/i18n";
 
 const FAQ_ITEMS = [
@@ -12,7 +13,7 @@ const FAQ_ITEMS = [
   { q: "Zakaj ne vidim napredka?", a: "Napredek se izračuna po vsaj 2 tednih rednega beleženja. Poskrbi, da redno vnaša treninge in spanje." },
 ];
 
-export default function ScreenSettings({ profile, setProfile, theme, setTheme, onPrivacy, onAccount, onLogout }) {
+export default function ScreenSettings({ profile, setProfile, user, theme, setTheme, onPrivacy, onAccount, onLogout }) {
   const C = useTheme();
   const t = useT();
   const fileRef = React.useRef(null);
@@ -30,12 +31,45 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
 
   const initial = (profile.name || "?").trim().charAt(0).toUpperCase();
 
-  const onFile = (e) => {
+  // Downscale to ≤512px JPEG — uploads stay small and the offline fallback
+  // (data URL) fits in the profile cache without breaking the cloud upsert.
+  const compressImage = (file) => new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const max = 512;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("compress failed"))), "image/jpeg", 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad image")); };
+    img.src = url;
+  });
+
+  const onFile = async (e) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
-    const reader = new FileReader();
-    reader.onload = () => setProfile((p) => ({ ...p, photo: reader.result }));
-    reader.readAsDataURL(f);
+    try {
+      const blob = await compressImage(f);
+      // Cloud first: a Storage URL persists on the account across devices.
+      // If the upload fails (offline, no bucket), fall back to a local data URL.
+      let photo = null;
+      if (user?.id && user.id !== "local") {
+        try { photo = await uploadAvatar(user.id, blob); } catch {}
+      }
+      if (!photo) {
+        photo = await new Promise((res) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.readAsDataURL(blob);
+        });
+      }
+      setProfile((p) => ({ ...p, photo }));
+    } catch {}
   };
 
   const sendContact = () => {

@@ -18,6 +18,21 @@ function fmtBirth(iso, lang) {
   return `${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// A birth date is accepted only if it's a REAL calendar date in a sane range
+// (1940 … min-age 10). The picker can't produce anything else, but this also
+// guards restored localStorage state and any future input path — 42. 25. 1001
+// can never reach the profile.
+function validBirth(iso) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return false;
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  // JS rolls invalid dates over (32. 1. → 1. 2.) — reject anything that moved
+  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return false;
+  const max = new Date();
+  max.setFullYear(max.getFullYear() - 10);
+  return y >= 1940 && dt <= max;
+}
+
 // ── Typeform-style flow per spec §01: one step per screen, big "Naprej",
 // optional steps can be skipped, progress persists locally so closing the
 // app resumes from the last step. ──
@@ -39,7 +54,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const [step, setStep] = useState(() => Math.min(saved.step || 0, FLOW.length - 1));
   const [username, setUsername] = useState(saved.username || "");
   const [acquisition, setAcquisition] = useState(saved.acquisition || "");
-  const [birth, setBirth] = useState(saved.birth || "");
+  const [birth, setBirth] = useState(validBirth(saved.birth) ? saved.birth : "");
   const [gender, setGender] = useState(saved.gender || "");
   const [height, setHeight] = useState(saved.height || 175);
   const [weight, setWeight] = useState(saved.weight || 70);
@@ -266,7 +281,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
               </svg>
             </button>
             <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={() => birth && next()} style={{ opacity: birth ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <PrimaryBtn onClick={() => validBirth(birth) && next()} style={{ opacity: validBirth(birth) ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
           </>
         )}
 
@@ -450,7 +465,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
       {pickerOpen && (
         <DatePicker
           value={birth}
-          onChange={(v) => { setBirth(v); setPickerOpen(false); }}
+          onChange={(v) => { if (validBirth(v)) setBirth(v); setPickerOpen(false); }}
           onClose={() => setPickerOpen(false)}
         />
       )}
