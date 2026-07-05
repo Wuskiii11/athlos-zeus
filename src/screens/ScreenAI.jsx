@@ -367,8 +367,6 @@ export default function ScreenAI({ user, profile }) {
                   : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
                 boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
               }}>
-                {isMine && (
-                )}
                 <span style={{
                   position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17.5, lineHeight: 1.5, whiteSpace: "pre-wrap",
                   fontStyle: isMine ? "normal" : "italic",

@@ -241,9 +241,6 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
           boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (darkBg ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
         }}
       >
-        {/* faint oracle breath in the corner of my ink panels */}
-        {isMine && msg.type === "text" && (
-        )}
         {isImage && msg.attachment_url && (
           <img
             src={msg.attachment_url} alt=""
