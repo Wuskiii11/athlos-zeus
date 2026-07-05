@@ -7,7 +7,7 @@ import {
   listConversations, listMessages, sendMessage, listClubmates,
   getOrCreateDirectConversation, createGroupConversation,
   blockUser, listBlocks, updateConversationBackground,
-  uploadChatFile, hasSupabase, loadChatReads, markChatRead,
+  uploadChatFile, hasSupabase, loadChatReads, markChatRead, searchUsers,
 } from "../lib/api";
 
 // ─── Constants ───────────────────────────────────────────────
@@ -502,6 +502,8 @@ export default function ScreenChat({ user, profile }) {
   const [convBg, setConvBg]         = useState("default");
   const [search, setSearch]         = useState("");
   const [reads, setReads]           = useState(() => loadChatReads());
+  const [userQ, setUserQ]           = useState("");   // "new chat" name search
+  const [userHits, setUserHits]     = useState([]);
 
   const msgsEndRef   = useRef(null);
   const fileInputRef = useRef(null);
@@ -510,8 +512,9 @@ export default function ScreenChat({ user, profile }) {
   // ── Load conversations ──────────────────────────────────────
   const loadConvs = useCallback(async () => {
     if (!userId) return;
-    // Seed prototype conversations into localStorage on first load
-    seedProtoConvs(userId);
+    // Demo conversations exist only in local demo mode — real accounts start
+    // with an empty chat list and find people via the name search.
+    if (!hasSupabase) seedProtoConvs(userId);
     try {
       const remote = await listConversations(userId);
       // Also pull from localStorage (prototype / locally sent messages)
@@ -527,6 +530,9 @@ export default function ScreenChat({ user, profile }) {
           const otherUser = conv.otherUser || PROTO_PEOPLE.find(p => p.user_id === otherId) || null;
           return { ...conv, lastMsg, otherUser };
         }).sort((a, b) => new Date(b.lastMsg?.created_at || b.created_at) - new Date(a.lastMsg?.created_at || a.created_at));
+        // With a real backend, hide previously-seeded prototype conversations
+        // (devices that ran an older build still carry them in localStorage).
+        if (hasSupabase) localConvs = localConvs.filter(c => !String(c.id).includes("proto-"));
       } catch {}
       // Merge: remote takes precedence, local fills in the rest
       const remoteIds = new Set(remote.map(c => c.id));
@@ -544,6 +550,13 @@ export default function ScreenChat({ user, profile }) {
     listBlocks(userId).then(setBlocks).catch(() => {});
     listClubmates(userId).then(setClubmates).catch(() => {});
   }, [userId]);
+
+  // ── Name search (new chat) — debounced, min 2 characters ────
+  useEffect(() => {
+    if (view !== "new-chat" || userQ.trim().length < 2) { setUserHits([]); return; }
+    const tmr = setTimeout(() => { searchUsers(userQ).then(setUserHits).catch(() => {}); }, 300);
+    return () => clearTimeout(tmr);
+  }, [userQ, view]);
 
   // ── Load messages + poll ────────────────────────────────────
   const loadMsgs = useCallback(async (convId) => {
@@ -1139,7 +1152,48 @@ export default function ScreenChat({ user, profile }) {
               </svg>
             </button>
 
+            {/* Search anyone by display name (RPC — works across clubs) */}
             <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginBottom: 10, letterSpacing: "0.12em" }}>
+              {t("IŠČI PO IMENU")}
+            </Mono>
+            <input
+              value={userQ}
+              onChange={(e) => setUserQ(e.target.value)}
+              placeholder={t("Vpiši ime …")}
+              style={{
+                width: "100%", padding: "13px 16px", borderRadius: 14, boxSizing: "border-box",
+                border: `1px solid ${C.border2}`, background: C.surface2, color: C.text,
+                fontFamily: C.display, fontWeight: 600, fontSize: 16.5, outline: "none",
+                marginBottom: 6,
+              }}
+            />
+            {userHits.filter(u => u.user_id !== userId && !blocks.includes(u.user_id)).map(u => (
+              <button
+                key={u.user_id}
+                onClick={() => { setUserQ(""); setUserHits([]); startChat(u.user_id, u); }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 14,
+                  padding: "12px 0", background: "none", border: "none",
+                  borderBottom: `1px solid ${C.border}`,
+                  cursor: "pointer", WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                <Avatar initials={u.initials} size={42} />
+                <div style={{ flex: 1, textAlign: "left", fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
+                  {u.name}
+                </div>
+                <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth={2} strokeLinecap="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            ))}
+            {userQ.trim().length >= 2 && userHits.length === 0 && (
+              <div style={{ textAlign: "center", padding: "14px 0 4px", fontFamily: C.display, fontStyle: "italic", color: C.muted, fontSize: 14.5 }}>
+                {t("Ni zadetkov")}
+              </div>
+            )}
+
+            <Mono style={{ color: C.muted, fontSize: 11, display: "block", margin: "22px 0 10px", letterSpacing: "0.12em" }}>
               SOTEKMOVALCI
             </Mono>
 
@@ -1172,8 +1226,8 @@ export default function ScreenChat({ user, profile }) {
             ))}
 
             {clubmates.length === 0 && (
-              <div style={{ textAlign: "center", padding: 40, fontFamily: C.display, color: C.muted, fontSize: 15.5 }}>
-                Ni sotekmovalcev v klubu
+              <div style={{ textAlign: "center", padding: "24px 20px", fontFamily: C.display, color: C.muted, fontSize: 15.5 }}>
+                {t("Nisi še v klubu — poišči prijatelja po imenu zgoraj.")}
               </div>
             )}
           </div>

@@ -5,6 +5,7 @@ import { useLang, useT } from "../lib/i18n";
 import { SPORTS } from "./ScreenProfile";
 import DatePicker from "../components/DatePicker";
 import WheelColumn from "../components/WheelPicker";
+import { isNameTaken } from "../lib/api";
 import { IcChart } from "../components/Icons";
 
 const HEIGHTS = Array.from({ length: 131 }, (_, i) => 100 + i); // 100–230 cm
@@ -53,6 +54,8 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const saved = useRef(loadSaved()).current;
   const [step, setStep] = useState(() => Math.min(saved.step || 0, FLOW.length - 1));
   const [username, setUsername] = useState(saved.username || "");
+  const [nameMsg, setNameMsg] = useState("");
+  const [checkingName, setCheckingName] = useState(false);
   const [acquisition, setAcquisition] = useState(saved.acquisition || "");
   const [birth, setBirth] = useState(validBirth(saved.birth) ? saved.birth : "");
   const [gender, setGender] = useState(saved.gender || "");
@@ -94,6 +97,19 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const key = FLOW[step];
   const next = () => setStep((s) => Math.min(s + 1, total - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
+
+  // Display names are unique across accounts — check with the server before
+  // moving on (offline/demo mode skips silently, isNameTaken returns false).
+  const tryName = async () => {
+    const n = username.trim();
+    if (!n || checkingName) return;
+    setCheckingName(true);
+    const taken = await isNameTaken(n).catch(() => false);
+    setCheckingName(false);
+    if (taken) { setNameMsg("To ime je že zasedeno — izberi drugo."); return; }
+    setNameMsg("");
+    next();
+  };
   const finish = () => {
     const finalSport = sport === "Drugo" ? (customSport.trim() || "Drugo") : sport;
     const finalGoals = [...goals, ...(customGoal.trim() ? [customGoal.trim()] : [])];
@@ -241,9 +257,10 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         {key === "name" && (
           <>
             <Mono style={{ color: C.muted, fontSize: 10 }}>{t("UPORABNIŠKO IME")}</Mono>
-            <input value={username} onChange={(e) => setUsername(e.target.value)} onKeyDown={(e) => e.key === "Enter" && username.trim() && next()} placeholder={t("npr. Nik")} style={inp} />
+            <input value={username} onChange={(e) => { setUsername(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && tryName()} placeholder={t("npr. Nik")} style={{ ...inp, ...(nameMsg ? { borderColor: C.red } : {}) }} />
+            {nameMsg && <span style={{ color: C.red, fontFamily: C.display, fontSize: 13.5, marginTop: 6, display: "block" }}>{t(nameMsg)}</span>}
             <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={() => username.trim() && next()} style={{ opacity: username.trim() ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            <PrimaryBtn onClick={tryName} style={{ opacity: username.trim() && !checkingName ? 1 : 0.5 }}>{checkingName ? t("Preverjam…") : t("Nadaljuj")}</PrimaryBtn>
           </>
         )}
 

@@ -36,6 +36,35 @@ create policy "own profile read"   on public.profiles for select using (auth.uid
 create policy "own profile write"  on public.profiles for insert with check (auth.uid() = id);
 create policy "own profile update" on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
 
+-- Prikazna imena so unikatna (brez razlike med velikimi/malimi črkami).
+-- Če index javi duplikate, jih najprej poglej:
+--   select name, count(*) from public.profiles group by name having count(*) > 1;
+create unique index if not exists profiles_name_unique
+  on public.profiles (lower(name)) where name is not null;
+
+-- Iskanje uporabnikov po imenu (za "Nov pogovor" v chatu). SECURITY DEFINER,
+-- ker RLS dovoli branje samo lastnega profila — funkcija vrne zgolj id + ime.
+create or replace function public.search_users(q text)
+returns table (user_id uuid, name text)
+language sql security definer as $$
+  select id, name from public.profiles
+  where name is not null
+    and length(trim(q)) >= 2
+    and name ilike '%' || trim(q) || '%'
+    and id <> auth.uid()
+  order by name
+  limit 20;
+$$;
+
+-- Ali prikazno ime že uporablja kdo drug?
+create or replace function public.name_taken(n text)
+returns boolean language sql security definer as $$
+  select exists (
+    select 1 from public.profiles
+    where lower(name) = lower(trim(n)) and id <> auth.uid()
+  );
+$$;
+
 -- Ko se ustvari nov uporabnik, samodejno naredi prazno vrstico profila
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer as $$

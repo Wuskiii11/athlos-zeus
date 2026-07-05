@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTheme } from "../theme";
 import { Pressable, SettingsBlock, BackBtn, Mono, LanguageSwitcher } from "../components/UI";
-import { changePassword, requestPasswordReset, changeEmail } from "../lib/api";
+import { changePassword, requestPasswordReset, changeEmail, isNameTaken } from "../lib/api";
 import { useT } from "../lib/i18n";
 
 const PLANS = [
@@ -86,6 +86,7 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
 
   const [name, setName] = useState(profile.name);
   const [editingName, setEditingName] = useState(false);
+  const [nameMsg, setNameMsg] = useState("");
 
   const [email, setEmail] = useState(user?.email || "");
   const [editingEmail, setEditingEmail] = useState(false);
@@ -106,8 +107,16 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
   const outlineBtn = { borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
   const msgBox = (ok) => ({ padding: "11px 14px", borderRadius: 14, background: ok ? `${C.accent}14` : `${C.red}14`, border: `1px solid ${ok ? C.accent : C.red}40`, color: ok ? C.accent : C.red, fontFamily: C.display, fontSize: 14.5, marginTop: 10 });
 
-  const saveName = () => {
-    setProfile((p) => ({ ...p, name: name.trim() || "Športnik" }));
+  const saveName = async () => {
+    const n = name.trim();
+    if (!n) return;
+    // Display names are unique across accounts (matches the DB unique index)
+    if (n.toLowerCase() !== (profile.name || "").toLowerCase() && await isNameTaken(n).catch(() => false)) {
+      setNameMsg("To ime je že zasedeno — izberi drugo.");
+      return;
+    }
+    setNameMsg("");
+    setProfile((p) => ({ ...p, name: n }));
     setEditingName(false);
   };
 
@@ -162,10 +171,13 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
             <Pressable onClick={() => { setName(profile.name); setEditingName(true); }} scale={0.95} style={editBtn}>{t("Uredi")}</Pressable>
           </div>
         ) : (
-          <div style={{ display: "flex", gap: 8 }}>
-            <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && saveName()} style={{ flex: 1, padding: "13px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box" }} />
-            <Pressable onClick={saveName} scale={0.93} style={{ ...primaryBtn, padding: "0 20px" }}>{t("Shrani")}</Pressable>
-          </div>
+          <>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input value={name} onChange={(e) => { setName(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && saveName()} style={{ flex: 1, padding: "13px 16px", borderRadius: 14, border: `1px solid ${nameMsg ? C.red : C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box" }} />
+              <Pressable onClick={saveName} scale={0.93} style={{ ...primaryBtn, padding: "0 20px" }}>{t("Shrani")}</Pressable>
+            </div>
+            {nameMsg && <div style={msgBox(false)}>{t(nameMsg)}</div>}
+          </>
         )}
       </SettingsBlock>
 

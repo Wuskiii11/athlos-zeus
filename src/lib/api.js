@@ -201,6 +201,27 @@ export async function saveProfile(userId, profile) {
   writeLS({ profile });
 }
 
+// ── User search & unique names ───────────────────────────────
+// Both go through SECURITY DEFINER RPCs on the server, because the profiles
+// RLS is "own row only" — a direct select could never find other people.
+export async function searchUsers(q) {
+  if (!hasSupabase || !q || q.trim().length < 2) return [];
+  const { data, error } = await supabase.rpc("search_users", { q: q.trim() });
+  if (error) return [];
+  return (data || []).map((r) => ({
+    user_id: r.user_id,
+    name: r.name,
+    initials: (r.name || "?").trim().charAt(0).toUpperCase() || "?",
+  }));
+}
+
+// True when someone ELSE already uses this display name (case-insensitive).
+export async function isNameTaken(n) {
+  if (!hasSupabase || !n?.trim()) return false;
+  const { data, error } = await supabase.rpc("name_taken", { n: n.trim() });
+  return !error && !!data;
+}
+
 // Upload the avatar to Storage and return its public URL — a tiny string that
 // always fits profiles.photo. (Base64 data URLs from phone cameras are
 // megabytes and made the profile upsert fail silently, losing the picture.)

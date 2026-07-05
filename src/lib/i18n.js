@@ -298,6 +298,13 @@ const EN = {
   "Naslednji obrok": "Next meal",
   "3 dni": "3 days",
 
+  // ── Chat: user search + unique names ──
+  "IŠČI PO IMENU": "SEARCH BY NAME",
+  "Vpiši ime …": "Type a name …",
+  "Nisi še v klubu — poišči prijatelja po imenu zgoraj.": "You're not in a club yet — find a friend by name above.",
+  "To ime je že zasedeno — izberi drugo.": "That name is already taken — pick another.",
+  "Preverjam…": "Checking…",
+
   // ── Notifications (bell on home) ──
   "Obvestila": "Notifications",
   "Jutranji check-in": "Morning check-in",
