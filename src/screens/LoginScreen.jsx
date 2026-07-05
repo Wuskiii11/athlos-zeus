@@ -162,7 +162,10 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
       background: L.bg,
       backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(31,122,82,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
-      paddingTop: "env(safe-area-inset-top, 24px)", paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      // 60% of the safe area is enough clearance for a non-critical footer link —
+      // pulls the content visibly closer to the bottom edge without sitting on
+      // the home indicator itself
+      paddingTop: "env(safe-area-inset-top, 24px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) * 0.6)",
       overflow: "hidden", color: L.text,
     }}>
       <LanguageSwitcher
@@ -172,7 +175,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
         style={{ position: "fixed", top: "max(env(safe-area-inset-top, 14px), 14px)", right: "max(20px, calc((100vw - 430px) / 2 + 20px))", zIndex: 3, transform: "scale(0.82)", transformOrigin: "top right" }}
       />
 
-      <div style={{ flex: 1, minHeight: 0, width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 28px 12px", position: "relative", zIndex: 1 }}>
+      <div style={{ flex: 1, minHeight: 0, width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 28px 4px", position: "relative", zIndex: 1 }}>
 
         {/* ── Hero — sized in viewport units so the page always fits without scrolling ── */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 10, flexShrink: 1, minHeight: 0 }}>
