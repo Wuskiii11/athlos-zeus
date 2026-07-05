@@ -17,17 +17,6 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
   const t = useT();
   const fileRef = React.useRef(null);
 
-  // Notification permission
-  const [notifPerm, setNotifPerm] = useState(() => {
-    if (typeof window !== "undefined" && "Notification" in window) return Notification.permission;
-    return "unsupported";
-  });
-  const toggleNotifs = async () => {
-    if (!("Notification" in window) || notifPerm === "denied" || notifPerm === "granted") return;
-    const perm = await Notification.requestPermission();
-    setNotifPerm(perm);
-  };
-
   // FAQ
   const [openFaq, setOpenFaq] = useState(null);
 
@@ -88,7 +77,7 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
         <Pressable onClick={onAccount} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
           <div>
             <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 17, color: C.text }}>{profile.name}</span>
-            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 3 }}>{t("Ime, e-pošta, geslo, jezik in plan")}</div>
+            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 3 }}>{t("Ime, e-pošta, geslo, jezik, obvestila in plan")}</div>
           </div>
           <span style={{ color: C.muted, fontSize: 20 }}>›</span>
         </Pressable>
@@ -106,52 +95,6 @@ export default function ScreenSettings({ profile, setProfile, theme, setTheme, o
             {t("Svetla")}
           </button>
         </div>
-      </SettingsBlock>
-
-      {/* Notifications */}
-      <SettingsBlock title={t("OBVESTILA")}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Potisna obvestila")}</span>
-            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 3 }}>
-              {notifPerm === "granted"
-                ? t("Vklopljeno")
-                : notifPerm === "denied"
-                ? t("Blokirano — dovoli v nastavitvah naprave")
-                : notifPerm === "unsupported"
-                ? t("Ni podprto v tem brskalniku")
-                : t("Izklopljeno")}
-            </div>
-          </div>
-          {notifPerm !== "unsupported" && (
-            <button
-              onClick={toggleNotifs}
-              disabled={notifPerm === "denied"}
-              style={{
-                width: 50, height: 28, borderRadius: 999, flexShrink: 0,
-                background: notifPerm === "granted" ? C.accent : C.surface2,
-                border: `1px solid ${notifPerm === "granted" ? C.accent : C.border2}`,
-                cursor: notifPerm === "denied" ? "not-allowed" : "pointer",
-                position: "relative", transition: "background 0.22s", padding: 0,
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <span style={{
-                position: "absolute", top: 3,
-                left: notifPerm === "granted" ? 24 : 3,
-                width: 22, height: 22, borderRadius: "50%",
-                background: "#fff", transition: "left 0.22s",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
-                display: "block",
-              }} />
-            </button>
-          )}
-        </div>
-        {notifPerm === "denied" && (
-          <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 10, padding: "10px 12px", borderRadius: 10, background: C.surface2, lineHeight: 1.5 }}>
-            {t("Odpri nastavitve naprave → Aplikacije → Brskalnik → Obvestila in jih dovoli.")}
-          </div>
-        )}
       </SettingsBlock>
 
       {/* FAQ */}

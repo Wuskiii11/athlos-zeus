@@ -62,13 +62,24 @@ const PLANS = [
 
 // Account identity + security — split out of the main Settings list so that
 // list doesn't have to carry name/email/password/language/plan alongside
-// theme/notifications/legal. Reached from Settings via the "Račun" row.
+// theme/legal. Reached from Settings via the "Račun" row.
 export default function ScreenAccount({ profile, setProfile, user, onBack }) {
   const C = useTheme();
   const t = useT();
 
   const curLang = profile.lang === "en" ? "en" : "sl";
   const setLang = (lang) => setProfile((p) => ({ ...p, lang }));
+
+  // Push-notification permission (device-level, via the browser API)
+  const [notifPerm, setNotifPerm] = useState(() => {
+    if (typeof window !== "undefined" && "Notification" in window) return Notification.permission;
+    return "unsupported";
+  });
+  const toggleNotifs = async () => {
+    if (!("Notification" in window) || notifPerm === "denied" || notifPerm === "granted") return;
+    const perm = await Notification.requestPermission();
+    setNotifPerm(perm);
+  };
 
   const currentPlan = profile.plan || "basic";
   const [planOpen, setPlanOpen] = useState(false);
@@ -213,6 +224,53 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
       {/* Language */}
       <SettingsBlock title={t("JEZIK")}>
         <LanguageSwitcher value={curLang} onChange={setLang} />
+      </SettingsBlock>
+
+      {/* Notifications — moved here from Settings so the account screen owns
+          everything personal (identity, security, language, notifications, plan) */}
+      <SettingsBlock title={t("OBVESTILA")}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Potisna obvestila")}</span>
+            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 3 }}>
+              {notifPerm === "granted"
+                ? t("Vklopljeno")
+                : notifPerm === "denied"
+                ? t("Blokirano — dovoli v nastavitvah naprave")
+                : notifPerm === "unsupported"
+                ? t("Ni podprto v tem brskalniku")
+                : t("Izklopljeno")}
+            </div>
+          </div>
+          {notifPerm !== "unsupported" && (
+            <button
+              onClick={toggleNotifs}
+              disabled={notifPerm === "denied"}
+              style={{
+                width: 50, height: 28, borderRadius: 999, flexShrink: 0,
+                background: notifPerm === "granted" ? C.accent : C.surface2,
+                border: `1px solid ${notifPerm === "granted" ? C.accent : C.border2}`,
+                cursor: notifPerm === "denied" ? "not-allowed" : "pointer",
+                position: "relative", transition: "background 0.22s", padding: 0,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <span style={{
+                position: "absolute", top: 3,
+                left: notifPerm === "granted" ? 24 : 3,
+                width: 22, height: 22, borderRadius: "50%",
+                background: "#fff", transition: "left 0.22s",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+                display: "block",
+              }} />
+            </button>
+          )}
+        </div>
+        {notifPerm === "denied" && (
+          <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 10, padding: "10px 12px", borderRadius: 10, background: C.surface2, lineHeight: 1.5 }}>
+            {t("Odpri nastavitve naprave → Aplikacije → Brskalnik → Obvestila in jih dovoli.")}
+          </div>
+        )}
       </SettingsBlock>
 
       {/* Plan — current plan only, tap to reveal its info */}

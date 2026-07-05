@@ -156,6 +156,24 @@ create policy "own coach_memory update" on public.coach_memory for update using 
 -- Chat — conversations, members, messages, blocks
 -- ════════════════════════════════════════════════════════════
 
+-- Tables first — the helper function below references conversation_members,
+-- and Postgres validates SQL function bodies at creation time.
+create table if not exists public.conversations (
+  id          uuid primary key default gen_random_uuid(),
+  type        text not null check (type in ('direct', 'group')),
+  name        text,
+  background  text default 'default',
+  created_by  uuid references auth.users(id) on delete set null,
+  created_at  timestamptz default now()
+);
+
+create table if not exists public.conversation_members (
+  conversation_id uuid not null references public.conversations(id) on delete cascade,
+  user_id         uuid not null references auth.users(id) on delete cascade,
+  joined_at       timestamptz default now(),
+  primary key (conversation_id, user_id)
+);
+
 -- Security-definer helper: true when auth.uid() is a member of a conversation.
 -- Used in RLS policies to avoid infinite recursion.
 create or replace function public.is_conversation_member(conv_id uuid)
@@ -166,34 +184,20 @@ returns boolean language sql security definer as $$
   );
 $$;
 
-create table if not exists public.conversations (
-  id          uuid primary key default gen_random_uuid(),
-  type        text not null check (type in ('direct', 'group')),
-  name        text,
-  background  text default 'default',
-  created_by  uuid references auth.users(id) on delete set null,
-  created_at  timestamptz default now()
-);
-
 alter table public.conversations enable row level security;
 
 drop policy if exists "conv member select" on public.conversations;
 drop policy if exists "conv member insert" on public.conversations;
 drop policy if exists "conv member update" on public.conversations;
 
+-- creator must see the row too: the app inserts the conversation and reads it
+-- back BEFORE adding members, so member-only select would break creation
 create policy "conv member select" on public.conversations
-  for select using (public.is_conversation_member(id));
+  for select using (created_by = auth.uid() or public.is_conversation_member(id));
 create policy "conv member insert" on public.conversations
   for insert with check (created_by = auth.uid());
 create policy "conv member update" on public.conversations
   for update using (public.is_conversation_member(id)) with check (public.is_conversation_member(id));
-
-create table if not exists public.conversation_members (
-  conversation_id uuid not null references public.conversations(id) on delete cascade,
-  user_id         uuid not null references auth.users(id) on delete cascade,
-  joined_at       timestamptz default now(),
-  primary key (conversation_id, user_id)
-);
 
 alter table public.conversation_members enable row level security;
 
