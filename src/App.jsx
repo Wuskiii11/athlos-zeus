@@ -356,8 +356,12 @@ export default function AthlosApp() {
     html, body, #root { height: 100%; margin: 0; padding: 0; overscroll-behavior: none; overflow-x: hidden; background: ${C.bg}; }
     body { -webkit-font-smoothing: antialiased; background: ${C.bg}; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 
-    /* True full-screen on phones: fill the visual viewport (so bottom nav/CTAs clear the mobile browser chrome) */
-    .app-fullscreen { height: 100vh; height: 100dvh; }
+    /* True full-screen: size against the phone shell (fixed top:0/bottom:0 — the
+       only reliably full-height box). NO viewport units here: an explicit
+       100vh/100dvh height OVERRIDES the bottom:0 anchor (CSS ignores bottom when
+       top+height are set), and iOS under-reports dvh in both Safari and installed
+       PWAs — that was the permanent empty band at the bottom of every screen. */
+    .app-fullscreen { height: 100%; }
     button { font-family: inherit; }
     input, textarea { font-family: inherit; }
     ::selection { background: rgba(22,104,179,0.22); }

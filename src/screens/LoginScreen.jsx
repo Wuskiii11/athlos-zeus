@@ -63,7 +63,7 @@ function LaunchAnimation({ onDone, p, dark }) {
   }, [onDone]);
   return (
     <div className="app-fullscreen" style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, background: p.bg,
+      position: "fixed", inset: 0, zIndex: 1000, background: p.bg,
       backgroundImage: "radial-gradient(120% 80% at 50% 6%, rgba(31,122,82,0.12), transparent 60%)",
       display: "grid", placeItems: "center", overflow: "hidden",
       animation: "athlosSplashFade 1.22s cubic-bezier(.2,.8,.2,1) forwards",
@@ -156,13 +156,9 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
 
   return (
     <div className="app-fullscreen" style={{
-      // Height = 100dvh (the VISIBLE area) so the centered content stays centred
-      // on the real screen. `inset:0` filled the full phone-shell (which on iOS
-      // is taller than the visible area), pushing the form up and leaving an
-      // empty band at the bottom. The bg now equals the app/body bg, so any
-      // sliver below 100dvh is seamless rather than a two-tone strip.
-      position: "fixed", top: 0, left: 0, right: 0,
-      height: "100dvh", // full visible viewport (= whole screen in a standalone PWA) so the form centres on the real screen
+      // Fill the phone shell (top+bottom anchors, height from .app-fullscreen:100%).
+      // No viewport units — iOS dvh/svh under-report and were the bottom band.
+      position: "fixed", inset: 0,
       background: L.bg,
       backgroundImage: "radial-gradient(125% 70% at 50% 2%, rgba(31,122,82,0.10) 0%, transparent 52%), radial-gradient(90% 50% at 88% 0%, rgba(31,122,82,0.08) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
