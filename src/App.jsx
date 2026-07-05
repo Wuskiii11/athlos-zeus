@@ -70,23 +70,22 @@ function SplashScreen({ C }) {
         }
       `}</style>
 
-      {/* the god — quick fade-in only; the end state is fully visible, so it
-          can never get stuck invisible (also safe with reduced motion) */}
+      {/* god + wordmark as one vertically-centred group, so the space above and
+          below is balanced (no big empty band at the bottom) */}
       <img
         className="athlos-splash-god"
         src="/img/greek-god.png"
         alt=""
         style={{
-          position: "absolute", top: 0, left: 0, right: 0, width: "100%", height: "76%",
-          objectFit: "contain", objectPosition: "center 30%",
+          width: "auto", maxWidth: "92%", height: "min(56vh, 500px)",
+          objectFit: "contain",
           filter: dark ? "invert(1)" : "none",
           pointerEvents: "none",
           userSelect: "none",
         }}
       />
 
-      {/* static wordmark over the lower part */}
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: "7vh", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 8 }}>
         <div style={{ fontFamily: "'Cinzel', Georgia, serif", fontWeight: 700, fontSize: 38, letterSpacing: "0.38em", paddingLeft: "0.38em", color: dark ? "#F4EFE6" : "#1C1814" }}>
           ATHLOS
         </div>
