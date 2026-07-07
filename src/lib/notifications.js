@@ -37,6 +37,8 @@ export async function countUnreadChats(userId) {
   const reads = loadChatReads();
   return convs.filter((c) =>
     c.lastMsg && c.lastMsg.sender_id && c.lastMsg.sender_id !== userId
+    // prototype-seeded demo messages are days old — never count them as new
+    && !String(c.lastMsg.id || "").startsWith("proto-")
     && (!reads[c.id] || new Date(c.lastMsg.created_at) > new Date(reads[c.id]))
   ).length;
 }

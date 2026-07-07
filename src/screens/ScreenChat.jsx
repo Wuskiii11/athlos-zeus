@@ -852,7 +852,9 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
             // Unread = their latest message is newer than the last time we opened
             // this conversation (opening it marks it read → clears the dot).
+            // Prototype-seeded demo messages are days old — never mark them unread.
             const unread = !!conv.lastMsg && conv.lastMsg.sender_id && conv.lastMsg.sender_id !== userId
+              && !String(conv.lastMsg.id || "").startsWith("proto-")
               && (!reads[conv.id] || new Date(conv.lastMsg.created_at) > new Date(reads[conv.id]));
             const last = i === shown.length - 1;
             return (
