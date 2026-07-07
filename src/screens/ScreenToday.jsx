@@ -566,7 +566,7 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
             </span>
           ))}
         </div>
-        <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 36, letterSpacing: "0.18em", color: C.text, paddingLeft: "0.18em", marginTop: 10, lineHeight: 1 }}>
+        <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: 36, letterSpacing: "0.18em", color: C.text, paddingLeft: "0.18em", marginTop: 10, lineHeight: 1 }}>
           ATHL<span style={{ color: C.gold }}>·</span>OS
         </div>
         <div style={{ fontFamily: C.serif, fontStyle: "italic", fontWeight: 500, fontSize: 15, color: C.muted, marginTop: 8 }}>

@@ -90,11 +90,12 @@ export const Emblem = ({ size = 40, glow = false }) => {
   );
 };
 
-// ── Wordmark — inscriptional Cinzel caps, gold "OS" ──
+// ── Wordmark — inscriptional Cinzel caps, gold "OS" (the one place the
+// engraved brand face survives the app-wide Poppins switch) ──
 export const Wordmark = ({ size = 30, style }) => {
   const C = useTheme();
   return (
-    <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: size, letterSpacing: "0.18em", color: C.text, ...style }}>
+    <span style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: size, letterSpacing: "0.18em", color: C.text, ...style }}>
       ATHL<span style={{ color: C.gold }}>OS</span>
     </span>
   );

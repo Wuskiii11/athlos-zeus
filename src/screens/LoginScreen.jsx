@@ -29,7 +29,7 @@ function HeroFigure({ h = 300, dark }) {
 
 function Wordmark({ size = 34, p }) {
   return (
-    <div style={{ fontFamily: p.heading, fontWeight: 700, fontSize: size, letterSpacing: "0.30em", color: p.text, paddingLeft: "0.30em" }}>
+    <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: size, letterSpacing: "0.30em", color: p.text, paddingLeft: "0.30em" }}>
       ATHL<span style={{ color: p.gold }}>OS</span>
     </div>
   );
