@@ -617,7 +617,11 @@ export default function AthlosApp() {
             style={{
               flex: 1, overflowY: "auto", overflowX: "hidden",
               width: "100%",
-              paddingBottom: "calc(80px + env(safe-area-inset-bottom, 12px))",
+              // clearance for the floating nav — released while typing, so
+              // bottom-anchored bars (ZEUS composer, chat input) sit flush
+              // against the keyboard with nothing under them
+              paddingBottom: kbOpen ? "6px" : "calc(80px + env(safe-area-inset-bottom, 12px))",
+              transition: "padding-bottom 0.32s cubic-bezier(.22,1,.36,1)",
               animation: navDir === "next" ? "athlosSlideNext 0.26s cubic-bezier(0.22,1,0.36,1)"
                 : navDir === "prev" ? "athlosSlidePrev 0.26s cubic-bezier(0.22,1,0.36,1)"
                 : "athlosFade 0.22s ease",
