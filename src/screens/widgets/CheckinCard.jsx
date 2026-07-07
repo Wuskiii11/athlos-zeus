@@ -102,7 +102,7 @@ export default function CheckinCard({ C, t, lang, onSubmit }) {
   // Done for today → questionnaire is gone, only the streak strip stays.
   if (doneToday) {
     return (
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: "14px 18px", marginBottom: 14 }}>
+      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: "14px 18px", marginBottom: 12 }}>
         <StreakStrip days={store.days} C={C} t={t} lang={lang} />
       </div>
     );
@@ -119,9 +119,15 @@ export default function CheckinCard({ C, t, lang, onSubmit }) {
   };
 
   return (
-    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14 }}>
-      <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.12em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
-      <h3 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 21.5, color: C.text, margin: "8px 0 12px" }}>{t("Kako se počutiš?")}</h3>
+    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: 18, marginBottom: 12 }}>
+      {/* icon-chip header row, matching the rest of the home cards */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <span style={{ width: 36, height: 36, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8M9 10h.01M15 10h.01" /></svg>
+        </span>
+        <span style={{ flex: 1, fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{t("Kako se počutiš?")}</span>
+        <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.1em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
+      </div>
 
       <StreakStrip days={store.days} C={C} t={t} lang={lang} style={{ paddingBottom: 14, borderBottom: `1px solid ${C.border}`, marginBottom: 14 }} />
 
@@ -132,10 +138,10 @@ export default function CheckinCard({ C, t, lang, onSubmit }) {
       </div>
 
       <button onClick={submit} disabled={!complete} style={{
-        width: "100%", marginTop: 16, padding: "14px 0", borderRadius: 12, border: "none",
+        width: "100%", marginTop: 16, padding: "15px 0", borderRadius: 999, border: "none",
         cursor: complete ? "pointer" : "default",
         background: complete ? C.btn : C.surface3, color: complete ? C.btnText : C.muted,
-        fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.1em", textTransform: "uppercase",
+        fontFamily: C.display, fontWeight: 700, fontSize: 15,
         transition: "background 0.2s, color 0.2s", WebkitTapHighlightColor: "transparent",
       }}>
         {t("Pošlji & posodobi readiness")} <span style={{ color: complete ? C.accent2 : C.muted2 }}>→</span>

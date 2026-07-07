@@ -609,30 +609,35 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         </div>
       )}
 
-      {/* workout — styled after the reference "Današnja preizkušnja" card */}
+      {/* workout — soft reference-style card: icon-chip header row inside the
+          card, sentence-case title, outlined metric pills, dark pill CTA */}
       <div style={{ ...ord("workout"), ...rise(0.18) }}>
-        {/* engraved section header with trailing rule (.at-sec) */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "6px 0 10px" }}>
-          <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("Današnja preizkušnja")}</span>
-          <span style={{ flex: 1, height: 1, background: C.border }} />
-        </div>
-        <div style={{ position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, overflow: "hidden" }}>
-        {/* fluted-column texture (.at-flute) */}
-        <div aria-hidden="true" style={{ position: "absolute", top: 0, right: 0, width: 90, height: "100%", pointerEvents: "none", backgroundImage: "repeating-linear-gradient(90deg, rgba(31,122,82,0.07) 0 6px, transparent 6px 14px)", opacity: 0.7 }} />
-        <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.18em" }}>AGON · {t("AI PROGRAM DANES")} · 17:00</Mono>
-        <h2 style={{ fontFamily: C.cond, fontWeight: 800, fontSize: 33.5, margin: "8px 0 12px", color: C.text, textTransform: "uppercase", lineHeight: 0.95, letterSpacing: "0.01em" }}>{t("Moč · Spodnji del")}</h2>
-        <div style={{ display: "flex", gap: 18, marginBottom: 16 }}>
-          {[["62", t("min")], ["7", t("vaj")], ["~480", "kcal"]].map(([v, l], i) => (
-            <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 14.5, color: C.text2 }}>{v}</span>
-              <Mono style={{ color: C.muted, fontSize: 10 }}>{l}</Mono>
-            </div>
-          ))}
-        </div>
-        <button onClick={() => go("train")} style={{ width: "100%", padding: "15px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.12em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill={C.accent2}><path d="M5 3l14 9-14 9V3z" /></svg>
-          {t("Začni trening")}
-        </button>
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: 18, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+            <span style={{ width: 36, height: 36, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.9" strokeLinecap="round"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12" /></svg>
+            </span>
+            <span style={{ flex: 1, fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{t("Današnja preizkušnja")}</span>
+            <span style={{ padding: "6px 12px", borderRadius: 999, border: `1px solid ${C.border}`, background: C.surface2, fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted }}>17:00</span>
+          </div>
+          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 23, margin: "0 0 12px", color: C.text, lineHeight: 1.15 }}>{t("Moč · Spodnji del")}</h2>
+          {/* outlined metric pills, like the reference's 14.5km / 110kcal / 95bpm */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+            {[
+              ["M12 6v6l4 2", "62 min", true],
+              ["M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12", `7 ${t("vaj")}`, false],
+              ["M13 2L4 14h6l-1 8 9-12h-6l1-8z", "~480 kcal", false],
+            ].map(([d, txt, circ]) => (
+              <span key={txt} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 999, border: `1px solid ${C.border}`, background: C.surface2 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{circ && <circle cx="12" cy="12" r="9" />}<path d={d} /></svg>
+                <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12.5, color: C.text2 }}>{txt}</span>
+              </span>
+            ))}
+          </div>
+          <button onClick={() => go("train")} style={{ width: "100%", padding: "15px", borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={C.accent2}><path d="M5 3l14 9-14 9V3z" /></svg>
+            {t("Začni trening")}
+          </button>
         </div>
       </div>
 
@@ -662,7 +667,7 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
           right: "18:30",
         },
       ].map((r) => isOn(r.id) && (
-        <button key={r.id} onClick={() => go(r.dest)} style={{ width: "100%", display: "flex", alignItems: "flex-start", gap: 14, padding: "15px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(r.id), ...rise(0.24) }}>
+        <button key={r.id} onClick={() => go(r.dest)} style={{ width: "100%", display: "flex", alignItems: "flex-start", gap: 14, padding: "15px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(r.id), ...rise(0.24) }}>
           {/* solid colour badge with a knocked-out icon — fitness-app reference look */}
           <span style={{ width: 44, height: 44, borderRadius: 14, background: r.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 6px 16px ${r.color}40` }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.name === "dark" ? "#0A0A09" : "#FFFFFF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={r.icon} /></svg>
@@ -694,31 +699,44 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         const sleep7 = [7.2, 6.8, 8.1, 7.4, 6.5, 7.9, checkin.sleepH];
         const avg = (sleep7.reduce((a, b) => a + b, 0) / 7).toFixed(1);
         const letters = lang === "en" ? ["M","T","W","T","F","S","S"] : ["P","T","S","Č","P","S","N"];
+        const track = C.name === "dark" ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.06)";
         return (
-          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, ...ord("sleep") }}>
-            <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em" }}>{t("SPANJE · ZADNJIH 7 DNI")}</Mono>
-            <div style={{ display: "flex", gap: 6, alignItems: "flex-end", height: 64, marginTop: 12 }}>
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: 18, marginBottom: 12, ...ord("sleep") }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <span style={{ width: 36, height: 36, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" /></svg>
+              </span>
+              <span style={{ flex: 1, fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{t("Spanje")}</span>
+              <span style={{ padding: "6px 12px", borderRadius: 999, border: `1px solid ${C.border}`, background: C.surface2, fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted }}>Ø {avg}h</span>
+            </div>
+            {/* pill bars on quiet tracks, like the reference "Workout Progress" chart */}
+            <div style={{ display: "flex", gap: 8, height: 88 }}>
               {sleep7.map((h, i) => (
-                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, height: "100%", justifyContent: "flex-end" }}>
-                  <div style={{ width: "100%", height: `${Math.round((h / 10) * 100)}%`, borderRadius: 6, background: h >= 7.5 ? C.accent : h >= 6.5 ? C.yellow : C.red, opacity: i === 6 ? 1 : 0.7 }} />
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                  <div style={{ flex: 1, width: "100%", borderRadius: 999, background: track, position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: `${Math.round((h / 10) * 100)}%`, borderRadius: 999, background: h >= 7.5 ? C.accent : h >= 6.5 ? C.yellow : C.red, opacity: i === 6 ? 1 : 0.55 }} />
+                  </div>
                   <Mono style={{ color: i === 6 ? C.text : C.muted2, fontSize: 8 }}>{letters[i]}</Mono>
                 </div>
               ))}
             </div>
-            <Mono style={{ color: C.muted, fontSize: 10, marginTop: 10, display: "block" }}>{t("POVPREČJE")} {avg}h · {t("CILJ")} 8h</Mono>
+            <Mono style={{ color: C.muted, fontSize: 10, marginTop: 10, display: "block" }}>{t("CILJ")} 8h</Mono>
           </div>
         );
       })()}
 
       {/* hydration (optional widget, spec §06) */}
       {isOn("hydration") && (
-        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14, ...ord("hydration") }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-            <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em" }}>{t("HIDRACIJA")}</Mono>
-            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: checkin.hydration >= 80 ? C.accent : checkin.hydration >= 50 ? C.yellow : C.red }}>{checkin.hydration}%</span>
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: 18, marginBottom: 12, ...ord("hydration") }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+            <span style={{ width: 36, height: 36, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.7l5.7 8a7 7 0 11-11.4 0z" /></svg>
+            </span>
+            <span style={{ flex: 1, fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{t("Hidracija")}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: checkin.hydration >= 80 ? C.accent : checkin.hydration >= 50 ? C.yellow : C.red }}>{checkin.hydration}%</span>
           </div>
-          <div style={{ height: 6, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
-            <div style={{ width: `${Math.min(checkin.hydration, 100)}%`, height: "100%", borderRadius: 999, background: checkin.hydration >= 80 ? C.accent : checkin.hydration >= 50 ? C.yellow : C.red }} />
+          <div style={{ height: 10, borderRadius: 999, background: C.name === "dark" ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.06)", overflow: "hidden" }}>
+            <div style={{ width: `${Math.min(checkin.hydration, 100)}%`, height: "100%", borderRadius: 999, background: checkin.hydration >= 80 ? C.accent : checkin.hydration >= 50 ? C.yellow : C.red, transition: "width 0.6s ease" }} />
           </div>
           <Mono style={{ color: C.muted, fontSize: 10, marginTop: 10, display: "block" }}>~{((checkin.hydration / 100) * 3).toFixed(1)} L / 3.0 L {t("danes")}</Mono>
         </div>
