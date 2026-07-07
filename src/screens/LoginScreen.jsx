@@ -1,26 +1,21 @@
 import React, { useState } from "react";
 import { LANDING_URL } from "../theme";
-import { LanguageSwitcher, PrimaryBtn } from "../components/UI";
+import { LanguageSwitcher } from "../components/UI";
 import { signIn, signUp, signInWithProvider } from "../lib/api";
 import { useT } from "../lib/i18n";
 
-// ── Entry-experience palettes: light "marble" + dark "obsidian" ──
+// ── Entry experience: full-bleed gym photo, always-dark chrome on top ──
 const FONTS = { heading: "'Cinzel',Georgia,serif", display: "'Cormorant Garamond',Georgia,serif" };
-const LIGHT = {
-  bg: "#FFFFFF", text: "#1C1814", text2: "rgba(28,24,20,0.78)", muted: "rgba(28,24,20,0.52)", muted2: "rgba(28,24,20,0.34)",
-  surface: "#FFFFFF", surface2: "#FFFFFF", border: "rgba(28,24,20,0.16)",
-  accent: "#1F7A52", accent2: "#00FF87", gold: "#1F7A52", red: "#B1452F", ...FONTS,
-};
 const DARK = {
-  bg: "#0A0A09", text: "#F2F5F2", text2: "rgba(242,245,242,0.80)", muted: "rgba(242,245,242,0.52)", muted2: "rgba(242,245,242,0.34)",
+  bg: "#0A0A09", text: "#F2F5F2", text2: "rgba(242,245,242,0.80)", muted: "rgba(242,245,242,0.55)", muted2: "rgba(242,245,242,0.38)",
   surface: "rgba(255,255,255,0.05)", surface2: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.14)",
   accent: "#00FF87", accent2: "#33FFA3", gold: "#00FF87", red: "#C95A3F", ...FONTS,
 };
 
 const HERO = "/img/hero-zeus-ink.png";
+const BG = "/img/login-gym.jpg";
 
-// The blue Zeus engraving — ink lines on the marble; inverted on dark so the
-// dark ink doesn't vanish into a dark canvas.
+// The Zeus engraving — used by the launch animation after a successful login.
 function HeroFigure({ h = 300, dark }) {
   return (
     <div className="ray-burst-light" style={{ position: "relative", display: "inline-grid", placeItems: "center" }}>
@@ -44,10 +39,10 @@ function SocialBtn({ onClick, children, p }) {
   return (
     <button onClick={onClick} style={{
       flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-      padding: "14px 10px", borderRadius: 14, border: `1px solid ${p.border}`, background: p.surface2,
+      padding: "13px 10px", borderRadius: 14, border: `1px solid ${p.border}`, background: p.surface2,
       color: p.text, fontFamily: p.display, fontWeight: 600, fontSize: 15.5,
-      cursor: "pointer", WebkitTapHighlightColor: "transparent", transition: "border-color 0.15s, box-shadow 0.15s",
-      boxShadow: "0 1px 2px rgba(22,52,90,0.06)",
+      cursor: "pointer", WebkitTapHighlightColor: "transparent", transition: "border-color 0.15s",
+      backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
     }}
     onPointerEnter={(e) => { e.currentTarget.style.borderColor = `${p.accent}66`; }}
     onPointerLeave={(e) => { e.currentTarget.style.borderColor = p.border; }}>
@@ -56,7 +51,7 @@ function SocialBtn({ onClick, children, p }) {
   );
 }
 
-function LaunchAnimation({ onDone, p, dark }) {
+function LaunchAnimation({ onDone, p }) {
   React.useEffect(() => {
     const timer = setTimeout(onDone, 1220);
     return () => clearTimeout(timer);
@@ -78,16 +73,16 @@ function LaunchAnimation({ onDone, p, dark }) {
         @media (prefers-reduced-motion: reduce) { .athlos-launch *{animation-duration:.001ms!important} }
       `}</style>
       <div className="athlos-launch" style={{ animation: "athlosHeroOpen 1.22s cubic-bezier(.18,.86,.24,1) forwards" }}>
-        <HeroFigure h={220} dark={dark} />
+        <HeroFigure h={220} dark />
       </div>
     </div>
   );
 }
 
-export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, theme }) {
+export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy }) {
   const t = useT();
-  const dark = theme === "dark";
-  const L = dark ? DARK : LIGHT;
+  // The photo backdrop is dark in both app themes — the login chrome is always dark.
+  const L = DARK;
   const [mode, setMode] = useState("login"); // "login" | "signup"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -140,17 +135,23 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
     }
   };
 
+  // Minimal underline fields, like the reference mock — transparent box,
+  // hairline bottom border that lights up green on focus.
   const inp = {
-    width: "100%", padding: "15px 18px", borderRadius: 14,
-    border: `1px solid ${L.border}`, background: L.surface2,
-    color: L.text, fontFamily: L.display, fontWeight: 500,
-    fontSize: 17, outline: "none", boxSizing: "border-box",
-    marginTop: 8, transition: "border-color 0.2s, box-shadow 0.2s",
-    boxShadow: "inset 0 1px 2px rgba(22,52,90,0.05)",
+    width: "100%", padding: "10px 2px", marginTop: 6, boxSizing: "border-box",
+    background: "transparent", border: "none", borderRadius: 0,
+    borderBottom: "1px solid rgba(255,255,255,0.30)",
+    color: L.text, fontFamily: L.display, fontWeight: 500, fontSize: 17.5,
+    outline: "none", transition: "border-color 0.2s", caretColor: L.accent,
   };
-  const label = { fontFamily: L.heading, fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: L.muted };
+  const label = { fontFamily: L.heading, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: L.muted };
+  const bigBtn = {
+    width: "100%", padding: "16px", borderRadius: 14,
+    fontFamily: L.heading, fontWeight: 700, fontSize: 14, letterSpacing: "0.16em", textTransform: "uppercase",
+    cursor: "pointer", WebkitTapHighlightColor: "transparent", transition: "opacity 0.2s, transform 0.1s",
+  };
 
-  if (launching) return <LaunchAnimation onDone={() => onLogin(pendingUser)} p={L} dark={dark} />;
+  if (launching) return <LaunchAnimation onDone={() => onLogin(pendingUser)} p={L} />;
   const curLang = profile?.lang === "en" ? "en" : "sl";
 
   return (
@@ -158,14 +159,22 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
       // Fill the phone shell (top+bottom anchors, height from .app-fullscreen:100%).
       // No viewport units — iOS dvh/svh under-report and were the bottom band.
       position: "fixed", inset: 0,
-      background: L.bg,
+      background: "#060807",
       display: "flex", flexDirection: "column",
-      // 60% of the safe area is enough clearance for a non-critical footer link —
-      // pulls the content visibly closer to the bottom edge without sitting on
-      // the home indicator itself
-      paddingTop: "env(safe-area-inset-top, 24px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) * 0.6)",
       overflow: "hidden", color: L.text,
     }}>
+      {/* photo backdrop — the athlete stays visible through the upper half */}
+      <img src={BG} alt="" aria-hidden="true" style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", objectPosition: "center top",
+        pointerEvents: "none", userSelect: "none",
+      }} />
+      {/* legibility gradient — light at the top, near-solid behind the form */}
+      <div aria-hidden="true" style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(180deg, rgba(4,7,5,0.60) 0%, rgba(4,7,5,0.22) 26%, rgba(4,7,5,0.44) 48%, rgba(4,7,5,0.88) 70%, rgba(4,7,5,0.97) 100%)",
+      }} />
+
       <LanguageSwitcher
         value={curLang}
         onChange={(lang) => setProfile((p) => ({ ...p, lang }))}
@@ -173,20 +182,92 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
         style={{ position: "fixed", top: "max(env(safe-area-inset-top, 14px), 14px)", right: "max(20px, calc((100vw - 430px) / 2 + 20px))", zIndex: 3, transform: "scale(0.82)", transformOrigin: "top right" }}
       />
 
-      <div style={{ flex: 1, minHeight: 0, width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 28px 4px", position: "relative", zIndex: 1 }}>
+      <div style={{
+        position: "relative", zIndex: 1, flex: 1, minHeight: 0,
+        width: "100%", maxWidth: 430, margin: "0 auto",
+        display: "flex", flexDirection: "column",
+        padding: "calc(env(safe-area-inset-top, 24px) + 16px) 28px calc(env(safe-area-inset-bottom, 0px) * 0.6 + 10px)",
+      }}>
 
-        {/* ── Hero — sized in viewport units so the page always fits without scrolling ── */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 10, flexShrink: 1, minHeight: 0 }}>
-          <HeroFigure h="min(26dvh, 250px)" dark={dark} />
-          <div style={{ marginTop: -4 }}><Wordmark size={28} p={L} /></div>
-          <div style={{ width: 40, height: 1, margin: "10px 0 8px", background: L.gold, opacity: 0.7 }} />
-          <div style={{ fontFamily: L.heading, fontSize: 11, color: L.muted, textAlign: "center", letterSpacing: "0.30em", textTransform: "uppercase" }}>
-            {t("sistem, ki pozna vsakega športnika")}
-          </div>
+        {/* ── Wordmark, top center — the photo carries the rest ── */}
+        <div style={{ display: "flex", justifyContent: "center", flexShrink: 0 }}>
+          <Wordmark size={23} p={L} />
         </div>
 
+        <div style={{ flex: 1, minHeight: 0 }} />
+
+        {/* ── Title block, anchored to the form like the reference ── */}
+        <div style={{ fontFamily: L.heading, fontWeight: 800, fontSize: 33, letterSpacing: "0.05em", textTransform: "uppercase", color: "#FFFFFF", lineHeight: 1.05 }}>
+          {mode === "signup" ? t("Registracija") : t("Prijava")}
+        </div>
+        <p style={{ fontFamily: L.display, fontStyle: "italic", fontSize: 15.5, color: L.muted, margin: "7px 0 22px", lineHeight: 1.4 }}>
+          {t("sistem, ki pozna vsakega športnika")}
+        </p>
+
+        {/* ── Email ── */}
+        <div style={{ marginBottom: 18 }}>
+          <span style={label}>{t("E-POŠTA")}</span>
+          <input type="email" value={email}
+            onChange={e => { setEmail(e.target.value); setError(""); }}
+            onKeyDown={e => e.key === "Enter" && submit()}
+            onFocus={e => e.target.style.borderBottomColor = L.accent}
+            onBlur={e => e.target.style.borderBottomColor = "rgba(255,255,255,0.30)"}
+            placeholder="ime@email.com" autoComplete="email" style={inp} />
+        </div>
+
+        {/* ── Password ── */}
+        <div style={{ marginBottom: 2, position: "relative" }}>
+          <span style={label}>{t("GESLO")}</span>
+          <input type={showPass ? "text" : "password"} value={password}
+            onChange={e => { setPassword(e.target.value); setError(""); }}
+            onKeyDown={e => e.key === "Enter" && submit()}
+            onFocus={e => e.target.style.borderBottomColor = L.accent}
+            onBlur={e => e.target.style.borderBottomColor = "rgba(255,255,255,0.30)"}
+            placeholder="••••••••" autoComplete={mode === "signup" ? "new-password" : "current-password"} style={{ ...inp, paddingRight: 40 }} />
+          <button onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 0, bottom: 9, background: "none", border: "none", color: L.muted, cursor: "pointer", padding: 4, lineHeight: 0 }}>
+            {showPass
+              ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10 10 0 0112 20c-7 0-11-8-11-8a18.1 18.1 0 015.06-5.94M9.9 4.24A9 9 0 0112 4c7 0 11 8 11 8a18.1 18.1 0 01-2.14 2.86M1 1l22 22"/></svg>
+              : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>}
+          </button>
+        </div>
+
+        {error && (
+          <div style={{ color: "#FF8A75", fontSize: 14, marginTop: 12, fontFamily: L.display, padding: "10px 12px", borderRadius: 10, background: "rgba(201,90,63,0.14)", border: "1px solid rgba(201,90,63,0.4)" }}>
+            {t(error)}
+          </div>
+        )}
+
+        <button onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} style={{ alignSelf: "flex-end", background: "none", border: "none", color: L.muted, fontFamily: L.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 10, padding: 0 }}>
+          {t("Pozabljeno geslo?")}
+        </button>
+
+        {/* ── Primary CTA — solid brand green, like the reference ── */}
+        <button onClick={submit} disabled={busy} style={{
+          ...bigBtn, marginTop: 14, border: "none",
+          background: L.accent, color: "#04130A",
+          boxShadow: "0 12px 30px rgba(0,255,135,0.22)",
+          opacity: busy ? 0.65 : 1,
+        }}>
+          {busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}
+        </button>
+
+        {/* ── Secondary — outlined glass, toggles login/signup ── */}
+        <button onClick={() => { setMode(m => (m === "signup" ? "login" : "signup")); setError(""); }} style={{
+          ...bigBtn, marginTop: 10,
+          border: "1px solid rgba(255,255,255,0.32)", background: "rgba(255,255,255,0.05)",
+          color: L.text, fontWeight: 600,
+          backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+        }}>
+          {mode === "signup" ? t("Prijava") : t("Registracija")}
+        </button>
+
         {/* ── Social ── */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "14px 0 10px" }}>
+          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.16)" }} />
+          <span style={{ ...label, fontSize: 10 }}>{t("ALI")}</span>
+          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.16)" }} />
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
           <SocialBtn onClick={() => social("apple")} p={L}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
             Apple
@@ -197,70 +278,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy, t
           </SocialBtn>
         </div>
 
-        {/* ── Divider ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-          <div style={{ flex: 1, height: 1, background: L.border }} />
-          <span style={{ ...label, fontSize: 10 }}>{t("ALI")}</span>
-          <div style={{ flex: 1, height: 1, background: L.border }} />
-        </div>
-
-        {/* ── Email ── */}
-        <div style={{ marginBottom: 10 }}>
-          <span style={label}>{t("E-POŠTA")}</span>
-          <input type="email" value={email}
-            onChange={e => { setEmail(e.target.value); setError(""); }}
-            onKeyDown={e => e.key === "Enter" && submit()}
-            onFocus={e => e.target.style.borderColor = `${L.accent}99`}
-            onBlur={e => e.target.style.borderColor = L.border}
-            placeholder="ime@email.com" autoComplete="email" style={inp} />
-        </div>
-
-        {/* ── Password ── */}
-        <div style={{ marginBottom: 4, position: "relative" }}>
-          <span style={label}>{t("GESLO")}</span>
-          <input type={showPass ? "text" : "password"} value={password}
-            onChange={e => { setPassword(e.target.value); setError(""); }}
-            onKeyDown={e => e.key === "Enter" && submit()}
-            onFocus={e => e.target.style.borderColor = `${L.accent}99`}
-            onBlur={e => e.target.style.borderColor = L.border}
-            placeholder="••••••••" autoComplete={mode === "signup" ? "new-password" : "current-password"} style={{ ...inp, paddingRight: 44 }} />
-          <button onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 12, bottom: 13, background: "none", border: "none", color: L.muted, cursor: "pointer", padding: 4, lineHeight: 0 }}>
-            {showPass
-              ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10 10 0 0112 20c-7 0-11-8-11-8a18.1 18.1 0 015.06-5.94M9.9 4.24A9 9 0 0112 4c7 0 11 8 11 8a18.1 18.1 0 01-2.14 2.86M1 1l22 22"/></svg>
-              : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>}
-          </button>
-        </div>
-
-        {error && (
-          <div style={{ color: L.red, fontSize: 14, marginTop: 10, fontFamily: L.display, padding: "10px 12px", borderRadius: 10, background: `${L.red}12`, border: `1px solid ${L.red}3a` }}>
-            {t(error)}
-          </div>
-        )}
-
-        <button onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} style={{ alignSelf: "flex-end", background: "none", border: "none", color: L.muted, fontFamily: L.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 10, padding: 0 }}>
-          {t("Pozabljeno geslo?")}
-        </button>
-
-        {/* ── Primary CTA — the app's standard PrimaryBtn (flat ink pill, same
-            button as everywhere else in the app; no gradient) ── */}
-        <PrimaryBtn onClick={submit} disabled={busy} style={{ marginTop: 16, opacity: busy ? 0.65 : 1 }}>
-          {busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}
-        </PrimaryBtn>
-
-        <p style={{ textAlign: "center", color: L.muted, fontSize: 14.5, marginTop: 12, marginBottom: 0, fontFamily: L.display, lineHeight: 1.5 }}>
-          {mode === "signup" ? t("Že imaš račun?") : t("Še nimaš računa?")}{" "}
-          {mode === "signup" ? (
-            <button onClick={() => { setMode("login"); setError(""); }} style={{ background: "none", border: "none", padding: 0, color: L.accent, fontWeight: 700, fontFamily: L.display, fontSize: 14.5, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
-              {t("Prijava")}
-            </button>
-          ) : (
-            <button onClick={() => { setMode("signup"); setError(""); }} style={{ background: "none", border: "none", padding: 0, color: L.accent, fontWeight: 700, fontFamily: L.display, fontSize: 14.5, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
-              {t("Registracija")}
-            </button>
-          )}
-        </p>
-
-        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: L.muted2, fontFamily: L.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 8, padding: 0, textAlign: "center", width: "100%" }}>
+        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: L.muted2, fontFamily: L.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 12, padding: 0, textAlign: "center", width: "100%" }}>
           {t("Politika zasebnosti")}
         </button>
       </div>
