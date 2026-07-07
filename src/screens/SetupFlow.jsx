@@ -305,6 +305,40 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
             <Mono style={{ color: C.muted, fontSize: 10 }}>{t("UPORABNIŠKO IME")}</Mono>
             <input value={username} onChange={(e) => { setUsername(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && tryName()} placeholder={t("npr. Nik")} style={{ ...inp, ...(nameMsg ? { borderColor: C.red } : {}) }} />
             {nameMsg && <span style={{ color: C.red, fontFamily: C.display, fontSize: 13.5, marginTop: 6, display: "block" }}>{t(nameMsg)}</span>}
+
+            {/* live preview — the profile row teammates will actually see */}
+            <div style={{ marginTop: 22, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13 }}>
+              <span style={{ width: 46, height: 46, borderRadius: "50%", background: `${C.gold}1a`, border: `1.5px solid ${C.gold}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, fontSize: 19, color: C.gold, flexShrink: 0, transition: "border-color 0.2s" }}>
+                {(username.trim()[0] || "?").toUpperCase()}
+              </span>
+              <span style={{ minWidth: 0 }}>
+                <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 17, color: username.trim() ? C.text : C.muted2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {username.trim() || t("Tvoje ime")}
+                </span>
+                <span style={{ display: "block", fontFamily: C.display, fontSize: 12.5, color: C.muted, marginTop: 2 }}>{t("Tako te bodo videli soigralci in trener")}</span>
+              </span>
+            </div>
+
+            {/* what the name is for — quiet rows so the step doesn't feel empty */}
+            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 13 }}>
+              {[
+                ["M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z|dot", "Vidno v klepetu, na lestvicah in pri trenerju."],
+                ["M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z", "Ime lahko kadarkoli spremeniš v Profilu."],
+                ["M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z", "Vsako ime je unikatno — preverimo ga ob nadaljevanju."],
+              ].map(([p, txt]) => {
+                const [d, extra] = p.split("|");
+                return (
+                  <span key={txt} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+                      <path d={d} />
+                      {extra === "dot" && <circle cx="12" cy="12" r="3" />}
+                    </svg>
+                    <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 13.5, color: C.text2, lineHeight: 1.45 }}>{t(txt)}</span>
+                  </span>
+                );
+              })}
+            </div>
+
             <div style={{ flex: 1 }} />
             <PrimaryBtn onClick={tryName} style={{ opacity: username.trim() && !checkingName ? 1 : 0.5 }}>{checkingName ? t("Preverjam…") : t("Nadaljuj")}</PrimaryBtn>
           </>
