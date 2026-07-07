@@ -422,16 +422,22 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
                 <span style={{ color: C.gold }}>{t("najboljšo sezono")}</span>
               </h2>
 
-              {/* figure — the brand engraving, tinted per theme, with callouts */}
+              {/* figure — a bold dumbbell silhouette in the brand green, with callouts */}
               <div style={{ position: "relative", flex: 1, minHeight: 250, margin: "16px 0 8px" }}>
-                <div aria-hidden="true" style={{
-                  position: "absolute", inset: 0,
-                  background: dark ? "#2E8F66" : "#1F7A52",
-                  WebkitMaskImage: "url(/img/greek-god.png)", maskImage: "url(/img/greek-god.png)",
-                  WebkitMaskSize: "contain", maskSize: "contain",
-                  WebkitMaskPosition: "center", maskPosition: "center",
-                  WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat",
-                }} />
+                <svg viewBox="0 0 220 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true" style={{
+                  position: "absolute", inset: 0, width: "100%", height: "100%",
+                  filter: `drop-shadow(0 0 26px ${dark ? "rgba(46,143,102,0.35)" : "rgba(31,122,82,0.25)"})`,
+                }}>
+                  <g transform="rotate(-28 110 110)" fill={dark ? "#2E8F66" : "#1F7A52"}>
+                    <rect x="74" y="103" width="72" height="14" rx="7" />
+                    <rect x="58" y="80" width="16" height="60" rx="6" />
+                    <rect x="146" y="80" width="16" height="60" rx="6" />
+                    <rect x="38" y="68" width="16" height="84" rx="6" />
+                    <rect x="166" y="68" width="16" height="84" rx="6" />
+                    <rect x="27" y="92" width="9" height="36" rx="4.5" />
+                    <rect x="184" y="92" width="9" height="36" rx="4.5" />
+                  </g>
+                </svg>
                 <Callout label={t("READINESS 8.4")} style={{ top: "9%", right: "1%" }} />
                 <Callout label={t("MOČ +12 %")} style={{ top: "46%", left: "0%" }} />
                 <Callout label={t("REGENERACIJA 92 %")} style={{ bottom: "10%", right: "3%" }} />
