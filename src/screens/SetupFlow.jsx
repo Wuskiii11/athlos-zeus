@@ -422,22 +422,21 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
                 <span style={{ color: C.gold }}>{t("najboljšo sezono")}</span>
               </h2>
 
-              {/* figure — a bold dumbbell silhouette in the brand green, with callouts */}
+              {/* figure — real dumbbell cutout (CC0, rawpixel) over a soft green
+                  halo so the black steel reads on the dark theme too */}
               <div style={{ position: "relative", flex: 1, minHeight: 250, margin: "16px 0 8px" }}>
-                <svg viewBox="0 0 220 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true" style={{
+                <div aria-hidden="true" style={{
+                  position: "absolute", inset: "10%",
+                  background: `radial-gradient(circle, ${dark ? "rgba(0,255,135,0.15)" : "rgba(31,122,82,0.10)"} 0%, transparent 68%)`,
+                }} />
+                <img src="/img/dumbbell.png" alt="" style={{
                   position: "absolute", inset: 0, width: "100%", height: "100%",
-                  filter: `drop-shadow(0 0 26px ${dark ? "rgba(46,143,102,0.35)" : "rgba(31,122,82,0.25)"})`,
-                }}>
-                  <g transform="rotate(-28 110 110)" fill={dark ? "#2E8F66" : "#1F7A52"}>
-                    <rect x="74" y="103" width="72" height="14" rx="7" />
-                    <rect x="58" y="80" width="16" height="60" rx="6" />
-                    <rect x="146" y="80" width="16" height="60" rx="6" />
-                    <rect x="38" y="68" width="16" height="84" rx="6" />
-                    <rect x="166" y="68" width="16" height="84" rx="6" />
-                    <rect x="27" y="92" width="9" height="36" rx="4.5" />
-                    <rect x="184" y="92" width="9" height="36" rx="4.5" />
-                  </g>
-                </svg>
+                  objectFit: "contain",
+                  filter: dark
+                    ? "drop-shadow(0 0 24px rgba(0,255,135,0.30))"
+                    : "drop-shadow(0 16px 30px rgba(28,24,20,0.28))",
+                  pointerEvents: "none", userSelect: "none",
+                }} />
                 <Callout label={t("READINESS 8.4")} style={{ top: "9%", right: "1%" }} />
                 <Callout label={t("MOČ +12 %")} style={{ top: "46%", left: "0%" }} />
                 <Callout label={t("REGENERACIJA 92 %")} style={{ bottom: "10%", right: "3%" }} />
