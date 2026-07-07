@@ -102,9 +102,16 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
     <div style={{ padding: "10px 18px 28px" }}>
       <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />
 
-      {/* ── Hero — big ringed avatar with a pencil badge, name centered ── */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 8px", marginBottom: 14 }}>
-        <div style={{ position: "relative" }}>
+      {/* ── Hero — big ringed avatar with a pencil badge, name centered.
+          Three stacked shades, like the reference: page bg → tinted sheet
+          (starts at the avatar's waist) → menu card below. ── */}
+      <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 18px", marginBottom: 14 }}>
+        <div aria-hidden="true" style={{
+          position: "absolute", top: 72, left: 0, right: 0, bottom: 0,
+          borderRadius: 28,
+          background: dark ? "rgba(0,255,135,0.05)" : "rgba(31,122,82,0.07)",
+        }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
           <Pressable
             onClick={() => (profile.photo ? setPhotoPreview(true) : fileRef.current?.click())}
             scale={0.96}
@@ -131,7 +138,7 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg>
           </button>
         </div>
-        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 21.5, color: C.text, marginTop: 26 }}>{profile.name}</div>
+        <div style={{ position: "relative", zIndex: 1, fontFamily: C.display, fontWeight: 800, fontSize: 21.5, color: C.text, marginTop: 26 }}>{profile.name}</div>
       </div>
 
       {/* ── Menu card ── */}
