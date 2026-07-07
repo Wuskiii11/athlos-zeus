@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme, LANDING_URL } from "../theme";
-import { Pressable } from "../components/UI";
+import { Pressable, SettingsBlock } from "../components/UI";
 import { uploadAvatar } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -17,7 +17,6 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
   const C = useTheme();
   const t = useT();
   const fileRef = React.useRef(null);
-  const dark = C.name === "dark";
 
   // FAQ
   const [openFaq, setOpenFaq] = useState(null);
@@ -79,153 +78,167 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
     setTimeout(() => { setContactOpen(false); setContactMsg(""); setContactSent(false); }, 2000);
   };
 
-  const inp = { width: "100%", padding: "14px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box", colorScheme: dark ? "dark" : "light", marginTop: 8 };
+  const inp = { width: "100%", padding: "14px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light", marginTop: 8 };
+  const editBtn = { padding: "9px 16px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.accent, fontFamily: C.display, fontSize: 14.5, fontWeight: 700 };
   const primaryBtn = { borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
   const outlineBtn = { borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
 
-  // ── Menu row — tinted icon chip · label · arrow (the reference list) ──
-  const Row = ({ d, label, onClick, danger, right }) => (
-    <Pressable onClick={onClick} scale={0.99} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 2px", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}>
-      <span style={{ width: 40, height: 40, borderRadius: 13, background: danger ? `${C.red}16` : `${C.accent}14`, color: danger ? C.red : C.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{d}</svg>
-      </span>
-      <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: danger ? C.red : C.text }}>{label}</span>
-      {right || (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
-      )}
-    </Pressable>
-  );
-
   return (
     <div style={{ padding: "10px 18px 28px" }}>
+      <header style={{ marginBottom: 22 }}>
+        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Nastavitve")}</h2>
+      </header>
+
       <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />
 
-      {/* ── Hero — big ringed avatar with a pencil badge, name centered.
-          Three stacked shades, like the reference: page bg → tinted sheet
-          (starts at the avatar's waist) → menu card below. ── */}
-      <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 18px", marginBottom: 14 }}>
-        <div aria-hidden="true" style={{
-          position: "absolute", top: 72, left: 0, right: 0, bottom: 0,
-          borderRadius: 28,
-          background: dark ? "rgba(0,255,135,0.05)" : "rgba(31,122,82,0.07)",
-        }} />
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <Pressable
-            onClick={() => (profile.photo ? setPhotoPreview(true) : fileRef.current?.click())}
-            scale={0.96}
-            style={{
-              width: 112, height: 112, borderRadius: "50%", padding: 0, overflow: "hidden",
-              border: `4px solid ${C.surface}`,
-              boxShadow: `0 12px 30px rgba(0,0,0,${dark ? 0.4 : 0.14}), 0 0 0 1px ${C.border}`,
-              background: `${C.accent}1a`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: C.accent, fontWeight: 800, fontSize: 42, fontFamily: C.display, flexShrink: 0,
-            }}
-          >
-            {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
-          </Pressable>
-          {/* pencil badge — straight to the photo picker */}
-          <button onClick={() => fileRef.current?.click()} aria-label={t("Zamenjaj sliko")} style={{
-            position: "absolute", left: "50%", bottom: -13, transform: "translateX(-50%)",
-            width: 36, height: 36, borderRadius: "50%", cursor: "pointer",
-            background: C.surface, border: `1px solid ${C.border}`,
-            boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
-            color: C.accent, display: "flex", alignItems: "center", justifyContent: "center",
-            WebkitTapHighlightColor: "transparent",
-          }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg>
-          </button>
+      {/* Profile row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, marginBottom: 16 }}>
+        {/* Tap the avatar to preview it full-screen (TikTok-style); with no
+            photo yet there's nothing to preview, so it opens the picker instead. */}
+        <Pressable onClick={() => (profile.photo ? setPhotoPreview(true) : fileRef.current?.click())} scale={0.94} style={{ position: "relative", width: 60, height: 60, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.accent, fontWeight: 800, fontSize: 27, fontFamily: C.display, flexShrink: 0 }}>
+          {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
+        </Pressable>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text }}>{profile.name}</div>
+          <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, marginTop: 2 }}>{profile.sport || "—"}</div>
         </div>
-        <div style={{ position: "relative", zIndex: 1, fontFamily: C.display, fontWeight: 800, fontSize: 21.5, color: C.text, marginTop: 26 }}>{profile.name}</div>
+        <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.95} style={editBtn}>{t("Slika")}</Pressable>
       </div>
 
-      {/* ── Menu card ── */}
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: "8px 16px", boxShadow: dark ? "none" : "0 10px 30px rgba(28,24,20,0.06)" }}>
-        <Row
-          d={<><circle cx="12" cy="8" r="3.6" /><path d="M5 20v-1a7 7 0 0114 0v1" /></>}
-          label={t("Uredi profil")}
-          onClick={onAccount}
-        />
-        <Row
-          d={theme === "dark"
-            ? <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-            : <><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" /></>}
-          label={`${t("Tema")} · ${theme === "dark" ? t("Temna") : t("Svetla")}`}
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        />
-        <Row
-          d={<><circle cx="12" cy="12" r="9" /><path d="M9.1 9a3 3 0 015.8 1c0 2-3 2.2-3 4M12 17h.01" /></>}
-          label={t("Pogosta vprašanja")}
-          onClick={() => setOpenFaq(openFaq === null ? true : null)}
-        />
-        {openFaq !== null && (
-          <div style={{ animation: "athlosFade 0.2s ease", padding: "0 2px 12px" }}>
-            {FAQ_ITEMS.map((item, i) => (
-              <div key={i}>
-                <Pressable
-                  onClick={() => setOpenFaq(openFaq === i ? true : i)}
-                  scale={0.99}
-                  style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: "11px 0", gap: 12 }}
-                >
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.text, flex: 1 }}>{t(item.q)}</span>
-                  <span style={{ color: C.muted, fontSize: 17, transition: "transform 0.2s", transform: openFaq === i ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>›</span>
-                </Pressable>
-                {openFaq === i && (
-                  <div style={{ padding: "0 0 12px", animation: "athlosFade 0.2s ease" }}>
-                    <p style={{ fontFamily: C.display, fontSize: 14, color: C.text2, lineHeight: 1.6, margin: 0 }}>{t(item.a)}</p>
-                  </div>
-                )}
-                {i < FAQ_ITEMS.length - 1 && <div style={{ height: 1, background: C.border }} />}
-              </div>
-            ))}
+      {/* Account — name, e-mail, password, language and plan now live on
+          their own screen */}
+      <SettingsBlock title={t("RAČUN")}>
+        <Pressable onClick={onAccount} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
+          <div>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 17, color: C.text }}>{profile.name}</span>
+            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 3 }}>{t("Ime, e-pošta, geslo, jezik, obvestila in plan")}</div>
+          </div>
+          <span style={{ color: C.muted, fontSize: 20 }}>›</span>
+        </Pressable>
+      </SettingsBlock>
+
+      {/* Theme */}
+      <SettingsBlock title={t("TEMA")}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => setTheme("dark")} style={{ flex: 1, padding: "13px", borderRadius: 14, cursor: "pointer", border: `1px solid ${theme === "dark" ? C.accent : C.border}`, background: theme === "dark" ? `${C.accent}14` : "transparent", color: theme === "dark" ? C.accent : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 14.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, WebkitTapHighlightColor: "transparent" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
+            {t("Temna")}
+          </button>
+          <button onClick={() => setTheme("light")} style={{ flex: 1, padding: "13px", borderRadius: 14, cursor: "pointer", border: `1px solid ${theme === "light" ? C.accent : C.border}`, background: theme === "light" ? `${C.accent}14` : "transparent", color: theme === "light" ? C.accent : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 14.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, WebkitTapHighlightColor: "transparent" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" /></svg>
+            {t("Svetla")}
+          </button>
+        </div>
+      </SettingsBlock>
+
+      {/* FAQ */}
+      <SettingsBlock title={t("POMOČ")}>
+        {!openFaq ? (
+          <Pressable
+            onClick={() => setOpenFaq(true)}
+            scale={0.99}
+            style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}
+          >
+            <div>
+              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Pogosta vprašanja")}</span>
+              <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, textTransform: "lowercase", marginTop: 3 }}>{FAQ_ITEMS.length} {t("vprašanj in odgovorov")}</div>
+            </div>
+            <span style={{ color: C.muted, fontSize: 20 }}>›</span>
+          </Pressable>
+        ) : (
+          <div style={{ animation: "athlosFade 0.2s ease" }}>
+            <Pressable
+              onClick={() => { setOpenFaq(null); }}
+              scale={0.99}
+              style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", padding: "0 0 14px", cursor: "pointer" }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted }}>{t("ZAPRI")}</span>
+            </Pressable>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {FAQ_ITEMS.map((item, i) => (
+                <div key={i}>
+                  <Pressable
+                    onClick={() => setOpenFaq(openFaq === i ? true : i)}
+                    scale={0.99}
+                    style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: "11px 0", gap: 12 }}
+                  >
+                    <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text, flex: 1 }}>{t(item.q)}</span>
+                    <span style={{ color: C.muted, fontSize: 18, transition: "transform 0.2s", transform: openFaq === i ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>›</span>
+                  </Pressable>
+                  {openFaq === i && (
+                    <div style={{ padding: "0 0 12px", animation: "athlosFade 0.2s ease" }}>
+                      <p style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, lineHeight: 1.6, margin: 0 }}>{t(item.a)}</p>
+                    </div>
+                  )}
+                  {i < FAQ_ITEMS.length - 1 && <div style={{ height: 1, background: C.border }} />}
+                </div>
+              ))}
+            </div>
           </div>
         )}
-        <Row
-          d={<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>}
-          label={t("Pošlji sporočilo")}
-          onClick={() => { setContactOpen((v) => !v); setContactSent(false); }}
-        />
-        {contactOpen && (contactSent ? (
-          <div style={{ padding: 18, margin: "0 2px 12px", borderRadius: 14, background: `${C.accent}14`, border: `1px solid ${C.accent}40`, textAlign: "center", animation: "athlosFade 0.2s ease" }}>
+      </SettingsBlock>
+
+      {/* Contact */}
+      <SettingsBlock title={t("KONTAKTIRAJ OSEBJE")}>
+        {!contactOpen ? (
+          <Pressable
+            onClick={() => setContactOpen(true)}
+            scale={0.99}
+            style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}
+          >
+            <div>
+              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Pošlji sporočilo")}</span>
+              <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, textTransform: "lowercase", marginTop: 3 }}>{t("odgovorimo v 24 urah")}</div>
+            </div>
+            <span style={{ color: C.muted, fontSize: 20 }}>›</span>
+          </Pressable>
+        ) : contactSent ? (
+          <div style={{ padding: 18, borderRadius: 14, background: `${C.accent}14`, border: `1px solid ${C.accent}40`, textAlign: "center", animation: "athlosFade 0.2s ease" }}>
             <div style={{ fontSize: 27, marginBottom: 8 }}>✓</div>
             <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.accent }}>{t("Sporočilo poslano!")}</div>
             <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, marginTop: 4 }}>{t("Odgovorili vam bomo v 24 urah.")}</div>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 2px 12px", animation: "athlosFade 0.2s ease" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, animation: "athlosFade 0.2s ease" }}>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.muted }}>{t("VAŠE SPOROČILO")}</span>
             <textarea
               value={contactMsg}
               onChange={(e) => setContactMsg(e.target.value)}
               placeholder={t("Opišite vašo težavo ali vprašanje...")}
               rows={4}
-              style={{ ...inp, resize: "none", lineHeight: 1.5, marginTop: 0 }}
+              style={{ ...inp, resize: "none", lineHeight: 1.5 }}
             />
             <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
               <button onClick={() => { setContactOpen(false); setContactMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "13px", fontSize: 14.5 }}>{t("Prekliči")}</button>
               <button onClick={sendContact} style={{ ...primaryBtn, flex: 2, padding: "13px", fontSize: 14.5, opacity: contactMsg.trim() ? 1 : 0.4 }}>{t("Pošlji")}</button>
             </div>
           </div>
-        ))}
-        <Row
-          d={<><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /></>}
-          label={t("Politika zasebnosti")}
-          onClick={onPrivacy}
-        />
-        <Row
-          d={<><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>}
-          label={t("Spletna stran")}
-          onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")}
-        />
-        <Row
-          danger
-          d={<><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></>}
-          label={t("Odjava")}
-          onClick={onLogout}
-        />
-      </div>
+        )}
+      </SettingsBlock>
 
+      {/* Legal */}
+      <SettingsBlock title={t("PRAVNO")}>
+        <Pressable onClick={onPrivacy} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
+          <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Politika zasebnosti")}</span>
+          <span style={{ color: C.muted, fontSize: 20 }}>›</span>
+        </Pressable>
+      </SettingsBlock>
+
+      {/* Website */}
+      <SettingsBlock title={t("SPLETNA STRAN")}>
+        <Pressable onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
+          <div>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>ATHLOS</span>
+            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, textTransform: "lowercase", marginTop: 3 }}>{t("odpre v brskalniku")}</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </Pressable>
+      </SettingsBlock>
+
+      <Pressable onClick={onLogout} scale={0.98} style={{ width: "100%", marginTop: 24, padding: 15, borderRadius: 999, border: `1px solid ${C.red}40`, background: `${C.red}14`, color: C.red, fontFamily: C.display, fontWeight: 700, fontSize: 15.5 }}>{t("Odjava")}</Pressable>
       <p style={{ textAlign: "center", color: C.muted2, fontFamily: C.display, fontSize: 13.5, marginTop: 22 }}>ATHLOS v0.6 · © 2026</p>
 
       {/* Full-screen photo preview — TikTok-style: tap the avatar, see it big,
