@@ -68,6 +68,10 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
           height: "100%", overflowY: "scroll", scrollSnapType: "y mandatory",
           WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none",
           cursor: "grab",
+          // fade the rows themselves toward the edges (a mask, not painted
+          // overlays — so any backdrop shows through, no solid box)
+          WebkitMaskImage: `linear-gradient(to bottom, transparent 0, #000 ${ITEM_H * pad}px, #000 calc(100% - ${ITEM_H * pad}px), transparent 100%)`,
+          maskImage: `linear-gradient(to bottom, transparent 0, #000 ${ITEM_H * pad}px, #000 calc(100% - ${ITEM_H * pad}px), transparent 100%)`,
         }}
       >
         <style>{`.athlos-wheel-scroll::-webkit-scrollbar{display:none}`}</style>
@@ -95,9 +99,6 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
         })}
         <div style={{ height: ITEM_H * pad }} />
       </div>
-      {/* top/bottom fade — matches the sheet/screen background it sits on */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: ITEM_H * pad, background: `linear-gradient(to bottom, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 3 }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: ITEM_H * pad, background: `linear-gradient(to top, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 3 }} />
     </div>
   );
 }
