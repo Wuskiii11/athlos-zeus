@@ -38,7 +38,7 @@ function validBirth(iso) {
 // ── Typeform-style flow per spec §01: one step per screen, big "Naprej",
 // optional steps can be skipped, progress persists locally so closing the
 // app resumes from the last step. ──
-const FLOW = ["name", "acq", "birth", "gender", "body", "waist", "quote", "sport", "goals", "exp", "injuries", "equipment", "test"];
+const FLOW = ["name", "acq", "vision", "birth", "gender", "body", "waist", "quote", "sport", "goals", "exp", "injuries", "equipment", "test"];
 
 const ACQ_OPTIONS = ["Instagram", "Prijatelj / soigralec", "Google", "TikTok", "Trener / klub", "Drugo"];
 const GENDERS = ["Moški", "Ženski", "Drugo"];
@@ -178,6 +178,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     acq:       { title: "Kako si\nslišal za nas?", sub: "DA VEMO, OD KOD PRIHAJAŠ" },
     birth:     { title: "Datum\nrojstva",          sub: "ZA PRILAGODITEV PROGRAMA" },
     gender:    { title: "Spol",                    sub: "ZA IZRAČUN NORM IN KALORIJ" },
+    vision:    { title: "",                        sub: "" }, // custom render — hero figure with callouts
     body:      { title: "Višina\n& teža",          sub: "ZA IZRAČUN BREMEN IN KALORIJ" },
     waist:     { title: "Obseg pasu\n& body fat",  sub: "ČE VEŠ — DRUGAČE PRESKOČI" },
     quote:     { title: "",                        sub: "" }, // custom render
@@ -290,7 +291,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
       {/* Step content */}
       <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 24px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
-        {key !== "quote" && (
+        {key !== "quote" && key !== "vision" && (
           <div style={{ marginBottom: 28 }}>
             <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.18em" }}>{t(STEP_TITLES[key].sub)}</Mono>
             <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, textTransform: "uppercase", margin: "8px 0 0", color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
@@ -317,6 +318,55 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
             <SkipBtn onClick={next} />
           </>
         )}
+
+        {/* ── Vision step — hero figure with floating metric callouts, like the
+            fitness-app reference welcome screen, in the brand's engraving. ── */}
+        {key === "vision" && (() => {
+          const dark = C.name === "dark";
+          const Callout = ({ label, style }) => (
+            <span style={{
+              position: "absolute", zIndex: 2, display: "flex", alignItems: "center", gap: 6,
+              padding: "7px 11px", borderRadius: 999,
+              background: dark ? "rgba(10,14,11,0.78)" : "rgba(255,255,255,0.9)",
+              border: `1px solid ${C.gold}55`,
+              backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+              boxShadow: dark ? "0 6px 18px rgba(0,0,0,0.4)" : "0 6px 18px rgba(28,24,20,0.14)",
+              fontFamily: C.display, fontWeight: 600, fontSize: 11.5, color: C.text, whiteSpace: "nowrap",
+              ...style,
+            }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: C.gold, boxShadow: `0 0 8px ${C.gold}`, flexShrink: 0 }} />
+              {label}
+            </span>
+          );
+          return (
+            <div data-gsap-list="true" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, color: C.text, margin: "4px 0 0", lineHeight: 1.15, letterSpacing: "-0.01em", textAlign: "center" }}>
+                {t("Dobrodošel v svojo")}<br />
+                <span style={{ color: C.gold }}>{t("najboljšo sezono")}</span>
+              </h2>
+
+              {/* figure — the brand engraving, tinted per theme, with callouts */}
+              <div style={{ position: "relative", flex: 1, minHeight: 250, margin: "16px 0 8px" }}>
+                <div aria-hidden="true" style={{
+                  position: "absolute", inset: 0,
+                  background: dark ? "#2E8F66" : "#1F7A52",
+                  WebkitMaskImage: "url(/img/greek-god.png)", maskImage: "url(/img/greek-god.png)",
+                  WebkitMaskSize: "contain", maskSize: "contain",
+                  WebkitMaskPosition: "center", maskPosition: "center",
+                  WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat",
+                }} />
+                <Callout label={t("READINESS 8.4")} style={{ top: "9%", right: "1%" }} />
+                <Callout label={t("MOČ +12 %")} style={{ top: "46%", left: "0%" }} />
+                <Callout label={t("REGENERACIJA 92 %")} style={{ bottom: "10%", right: "3%" }} />
+              </div>
+
+              <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted, textAlign: "center", margin: "0 8px 16px", lineHeight: 1.55 }}>
+                {t("ATHLOS spremlja tvojo moč, hitrost in regeneracijo — in program prilagaja vsak dan.")}
+              </p>
+              <PrimaryBtn onClick={next}>{t("Naprej")} →</PrimaryBtn>
+            </div>
+          );
+        })()}
 
         {key === "birth" && (
           <>
