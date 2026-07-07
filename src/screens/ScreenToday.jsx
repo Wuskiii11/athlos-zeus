@@ -644,9 +644,10 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         ["match", t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z", C.red],
         ["meal", t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3", C.gold],
       ].map(([id, title, val, dest, path, color]) => isOn(id) && (
-        <button key={id} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(id), ...rise(0.24) }}>
-          <span style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+        <button key={id} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 14px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(id), ...rise(0.24) }}>
+          {/* solid colour badge with a knocked-out icon — fitness-app reference look */}
+          <span style={{ width: 44, height: 44, borderRadius: 14, background: color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 6px 16px ${color}40` }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.name === "dark" ? "#0A0A09" : "#FFFFFF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
           </span>
           <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{title}</span>
           <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text }}>{val}</span>
