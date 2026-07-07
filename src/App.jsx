@@ -620,22 +620,31 @@ export default function AthlosApp() {
             {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
             {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
 
-            {/* compact icon-only glass pill — hugs its content, centered */}
+            {/* compact icon-only liquid-glass pill — a light-catching translucent
+                material: heavy blur+saturation, lit top rim, and a diagonal sheen */}
             <nav style={{
               display: "flex", justifyContent: "center", alignItems: "center", gap: 8,
               width: "fit-content", marginInline: "auto",
               padding: "6px 10px",
-              background: theme === "dark" ? "rgba(10,12,11,0.28)" : "rgba(255,255,255,0.10)",
-              backdropFilter: "blur(24px) saturate(180%)",
-              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              position: "relative", overflow: "hidden",
+              background: theme === "dark" ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.32)",
+              backdropFilter: "blur(28px) saturate(200%)",
+              WebkitBackdropFilter: "blur(28px) saturate(200%)",
               borderRadius: 999,
-              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.45)"}`,
+              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.20)" : "rgba(255,255,255,0.65)"}`,
               boxShadow: theme === "dark"
-                // outer lift + top rim highlight = the "lit glass edge"
-                ? "0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.22)"
-                : "0 8px 32px rgba(28,24,20,0.18), inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px rgba(28,24,20,0.05)",
+                // outer lift + lit top rim + faint bottom edge = glass slab
+                ? "0 12px 36px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(255,255,255,0.07)"
+                : "0 12px 36px rgba(28,24,20,0.16), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(255,255,255,0.3), 0 0 0 1px rgba(28,24,20,0.04)",
               pointerEvents: "auto",
             }}>
+              {/* diagonal light sheen across the glass */}
+              <span aria-hidden="true" style={{
+                position: "absolute", inset: 0, borderRadius: 999, pointerEvents: "none",
+                background: theme === "dark"
+                  ? "linear-gradient(115deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 38%, transparent 55%, rgba(255,255,255,0.05) 100%)"
+                  : "linear-gradient(115deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 40%, transparent 58%, rgba(255,255,255,0.2) 100%)",
+              }} />
               {NAV.map(n => {
                 const active = navActive === n.id;
                 return <TabButton key={n.id} n={{ ...n, label: t(n.label) }} active={active} onClick={() => go(n.id)} dot={n.id === "chat" && chatUnread > 0} />;
