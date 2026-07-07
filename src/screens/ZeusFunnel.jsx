@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTheme } from "../theme";
 import { Mono, PrimaryBtn } from "../components/UI";
+import RulerSlider from "../components/RulerSlider";
 import { useT } from "../lib/i18n";
 
 // ── ZEUS funnel ───────────────────────────────────────────────────────────────
@@ -29,8 +30,8 @@ const STEPS = [
     options: ["Polna telovadnica", "Domača oprema", "Samo telesna teža", "Stadion + travnik", "Bazen"] },
   { key: "daysPerWeek", type: "single", q: "Koliko dni na teden treniraš?", sub: "REALNO, NE IDEALNO",
     options: [{ v: 3, label: "3 dni" }, { v: 4, label: "4 dni" }, { v: 5, label: "5 dni" }, { v: 6, label: "6 dni" }] },
-  { key: "sessionMinutes", type: "single", q: "Koliko časa imaš za trening?", sub: "POVPREČNO TRAJANJE TRENINGA",
-    options: [{ v: 45, label: "45 min" }, { v: 60, label: "60 min" }, { v: 75, label: "75 min" }, { v: 90, label: "90 min" }] },
+  { key: "sessionMinutes", type: "slider", q: "Koliko časa imaš za trening?", sub: "POVPREČNO TRAJANJE TRENINGA",
+    min: 30, max: 120, step: 5, options: [] },
   { key: "injuries", type: "multi", q: "Imaš kakšne poškodbe ali omejitve?", sub: "ZEUS SE JIM BO IZOGNIL", none: "Brez poškodb",
     options: ["Koleno", "Rama", "Spodnji hrbet", "Gleženj", "Komolec", "Kolk", "Zapestje", "Vrat"] },
 ];
@@ -43,7 +44,8 @@ export default function ZeusFunnel({ onDone, profile }) {
   const C = useTheme();
   const t = useT();
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({});
+  // the slider step starts at its default, so just pressing "Nadaljuj" commits 60
+  const [answers, setAnswers] = useState({ sessionMinutes: 60 });
 
   // The signup onboarding (SetupFlow) already asked about goals, equipment
   // and injuries — never ask the same thing twice. A step is dropped when
@@ -114,6 +116,18 @@ export default function ZeusFunnel({ onDone, profile }) {
         <Mono style={{ color: C.accent, fontSize: 10 }}>{t(cur.sub)}</Mono>
         <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 29, color: C.text, margin: "8px 0 22px", lineHeight: 1.12, letterSpacing: "0.01em" }}>{t(cur.q)}</h2>
 
+        {cur.type === "slider" && (
+          <div style={{ marginTop: 26 }}>
+            <RulerSlider
+              min={cur.min} max={cur.max} step={cur.step}
+              value={answers[cur.key] ?? 60}
+              onChange={(v) => setAnswers((a) => ({ ...a, [cur.key]: v }))}
+              C={C}
+              format={(v) => `${v} min`}
+            />
+          </div>
+        )}
+
         <div style={{ display: "grid", gridTemplateColumns: cur.type === "multi" || cur.options.length > 4 ? "repeat(2, minmax(0,1fr))" : "1fr", gap: 10 }}>
           {opts.map((o) => {
             const sel = isSel(o);
@@ -143,8 +157,8 @@ export default function ZeusFunnel({ onDone, profile }) {
         </div>
       </div>
 
-      {/* footer — single steps auto-advance; multi + last step need a button */}
-      {(cur.type === "multi" || step === total - 1) && (
+      {/* footer — single steps auto-advance; multi/slider + last step need a button */}
+      {(cur.type === "multi" || cur.type === "slider" || step === total - 1) && (
         <div style={{ flexShrink: 0, padding: "10px 20px 18px", background: `linear-gradient(to top, ${C.bg} 72%, transparent)` }}>
           <PrimaryBtn onClick={advance} disabled={!multiOk} style={{ opacity: multiOk ? 1 : 0.45 }}>
             {step === total - 1 ? t("Aktiviraj ZEUS") : t("Nadaljuj")}
