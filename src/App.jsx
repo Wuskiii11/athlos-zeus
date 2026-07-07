@@ -34,14 +34,13 @@ const NAV = [
   { id: "settings", label: "Profil",  icon: "profile" },
 ];
 
-function SplashScreen({ C }) {
-  // Nothing but the engraving, full-bleed: the ink-on-transparent PNG covers
-  // the whole screen (cover = no bands, no plate), no wordmark, no text.
-  const dark = C.name === "dark";
+function SplashScreen() {
+  // One artwork for both themes: green-on-black Zeus statue, frameless, on a
+  // pure black field — cover fills the screen edge to edge.
   return (
     <div style={{
       position: "fixed", inset: 0,
-      background: dark ? "#0C131C" : "#F3ECE3",
+      background: "#000609",
       zIndex: 999, overflow: "hidden",
     }}>
       <style>{`
@@ -52,14 +51,12 @@ function SplashScreen({ C }) {
       `}</style>
       <img
         className="athlos-splash-god"
-        src="/img/greek-god.png"
+        src="/img/splash-zeus.png"
         alt=""
         style={{
           position: "absolute", inset: 0,
           width: "100%", height: "100%",
           objectFit: "cover", objectPosition: "center",
-          // dark theme just inverts the ink strokes to light
-          filter: dark ? "invert(1)" : "none",
           pointerEvents: "none",
           userSelect: "none",
         }}
@@ -483,7 +480,7 @@ export default function AthlosApp() {
       }}>
 
       {/* ── SPLASH ── (stays up until the auth session is resolved) */}
-      {(splash || !authReady) && <SplashScreen C={C} />}
+      {(splash || !authReady) && <SplashScreen />}
 
       {/* ── LOGIN ── */}
       {!splash && authReady && !registered && !needsSetup && (
@@ -615,7 +612,7 @@ export default function AthlosApp() {
             position: "absolute",
             bottom: 0, left: 0, right: 0, zIndex: 2,
             padding: "8px 16px",
-            paddingBottom: "max(env(safe-area-inset-bottom, 12px), 12px)",
+            paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 10px), 12px)",
             // no solid backdrop here — real glass needs the app content to show
             // THROUGH the bar (blurred), so nothing opaque may sit behind it
             pointerEvents: "none",
@@ -623,17 +620,20 @@ export default function AthlosApp() {
             {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
             {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
 
-            {/* Plain floating nav — clean translucent pill, no colour */}
+            {/* iOS liquid-glass nav — frosted translucent pill the content blurs through */}
             <nav style={{
               display: "flex", justifyContent: "space-around", alignItems: "center",
               width: "100%", maxWidth: 560, marginInline: "auto",
-              padding: "7px 6px",
-              background: theme === "dark" ? "rgba(20,22,20,0.88)" : "rgba(252,249,242,0.90)",
-              backdropFilter: "blur(18px)",
-              WebkitBackdropFilter: "blur(18px)",
-              borderRadius: 999,
-              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(28,24,20,0.08)"}`,
-              boxShadow: theme === "dark" ? "0 12px 30px rgba(0,0,0,0.40)" : "0 12px 30px rgba(28,24,20,0.10)",
+              padding: "7px 8px",
+              background: theme === "dark" ? "rgba(10,12,11,0.28)" : "rgba(255,255,255,0.10)",
+              backdropFilter: "blur(24px) saturate(180%)",
+              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              borderRadius: 28,
+              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.45)"}`,
+              boxShadow: theme === "dark"
+                // outer lift + top rim highlight = the "lit glass edge"
+                ? "0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.22)"
+                : "0 8px 32px rgba(28,24,20,0.18), inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px rgba(28,24,20,0.05)",
               pointerEvents: "auto",
             }}>
               {NAV.map(n => {

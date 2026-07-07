@@ -372,47 +372,80 @@ function StatsSheet({ C, lang, onClose }) {
 // as iOS/Google Maps sheets ("scroll down and it goes away").
 function DragSheet({ children, onClose, style }) {
   const scrollRef = useRef(null);
-  const drag = useRef({ active: false, startY: 0, atTop: false });
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
-  const onTouchStart = (e) => {
-    drag.current.startY = e.touches[0].clientY;
-    drag.current.atTop = (scrollRef.current?.scrollTop || 0) <= 0;
-  };
-  const onTouchMove = (e) => {
-    const dy = e.touches[0].clientY - drag.current.startY;
-    if (drag.current.atTop && dy > 0) {
-      drag.current.active = true;
+  // Native non-passive listeners: React registers its touch handlers as
+  // passive, so e.preventDefault() there can't stop the native scroll — and
+  // without it the dismiss drag and the scroll fight over the same gesture.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const g = { startX: 0, startY: 0, active: false, decided: false, dy: 0 };
+    const onStart = (e) => {
+      // the sheet owns its touches — nothing behind it (pull-to-refresh,
+      // tab swipes) may react to them
       e.stopPropagation();
-      setDragging(true);
-      setDragY(dy);
-    } else if (drag.current.active) {
+      g.startX = e.touches[0].clientX;
+      g.startY = e.touches[0].clientY;
+      g.active = false;
+      g.decided = false;
+      g.dy = 0;
+    };
+    const onMove = (e) => {
       e.stopPropagation();
-      setDragY(Math.max(0, dy));
-    }
-  };
-  const onTouchEnd = () => {
-    if (drag.current.active && dragY > 90) {
-      setDragY(800); // slide fully off, then unmount
-      setTimeout(onClose, 220);
-    } else {
-      setDragY(0);
-    }
-    drag.current.active = false;
-    setDragging(false);
-  };
+      const dx = e.touches[0].clientX - g.startX;
+      const dy = e.touches[0].clientY - g.startY;
+      if (!g.active) {
+        if (!g.decided && dy > 6 && Math.abs(dx) < dy && el.scrollTop <= 0) {
+          // downward pull with the content at the top → dismiss drag;
+          // rebase so the sheet follows from where the pull was armed
+          g.active = true;
+          g.startY = e.touches[0].clientY;
+          setDragging(true);
+        } else {
+          // horizontal move (sliders), upward move or scrolled content →
+          // a normal gesture; stay out of the way until the finger lifts
+          if (Math.abs(dx) > 8 || dy < -8 || el.scrollTop > 0) g.decided = true;
+          return;
+        }
+      }
+      e.preventDefault(); // the drag owns the gesture — no scroll under it
+      g.dy = Math.max(0, e.touches[0].clientY - g.startY);
+      setDragY(g.dy);
+    };
+    const onEnd = (e) => {
+      e.stopPropagation();
+      if (g.active && g.dy > 90) {
+        setDragY(800); // slide fully off, then unmount
+        setTimeout(() => closeRef.current(), 220);
+      } else {
+        setDragY(0);
+      }
+      g.active = false;
+      setDragging(false);
+    };
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd);
+    el.addEventListener("touchcancel", onEnd);
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+      el.removeEventListener("touchcancel", onEnd);
+    };
+  }, []);
 
   return (
     <div
       ref={scrollRef}
       className="athlos-scroll"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchEnd}
       style={{
         ...style,
+        overscrollBehavior: "contain",
         transform: dragY ? `translateY(${dragY}px)` : undefined,
         transition: dragging ? "none" : "transform 0.28s cubic-bezier(.22,1,.36,1)",
       }}
@@ -470,17 +503,17 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
     : `${chatUnread} neprebranih pogovorov.`;
   const notifs = [
     checkinPending && {
-      id: "checkin", color: C.accent, icon: <IconFace size={17} color={C.accent} />,
+      id: "checkin", color: C.accent, icon: <IconFace size={25} color={C.accent} />,
       title: t("Jutranji check-in"), text: t("Odgovori na 4 vprašanja in posodobi baterijo."),
       onTap: () => setOpenNotifs(false),
     },
     chatUnread > 0 && {
-      id: "chat", color: C.gold, icon: <Icon name="chat" color={C.gold} size={17} />,
+      id: "chat", color: C.gold, icon: <Icon name="chat" color={C.gold} size={25} />,
       title: t("Nova sporočila"), text: chatLine,
       onTap: () => { setOpenNotifs(false); go("chat"); },
     },
     now.getHours() < 17 && {
-      id: "train", color: C.red, icon: <Icon name="train" color={C.red} size={17} />,
+      id: "train", color: C.red, icon: <Icon name="train" color={C.red} size={25} />,
       title: t("Današnji trening"), text: t("Moč · spodnji del ob 17:00."),
       onTap: () => { setOpenNotifs(false); go("train"); },
     },
@@ -603,17 +636,17 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         </div>
       </div>
 
-      {/* quick-access rows — each is its own home widget (spec §06); a tinted
-          icon badge per row (performance green / match red / nutrition gold)
-          instead of flat gray, so the section reads in the app's own palette. */}
+      {/* quick-access rows — each is its own home widget (spec §06); a bare
+          coloured icon per row (performance green / match red / nutrition gold),
+          so the section reads in the app's own palette. */}
       {[
         ["report", t("Včerajšnje poročilo"), "92", "report", "M3 3v18h18M7 14l3-3 3 3 4-5", C.accent],
         ["match", t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z", C.red],
         ["meal", t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3", C.gold],
       ].map(([id, title, val, dest, path, color]) => isOn(id) && (
         <button key={id} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "15px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(id), ...rise(0.24) }}>
-          <span style={{ width: 34, height: 34, borderRadius: 10, background: `${color}1c`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+          <span style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
           </span>
           <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{title}</span>
           <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text }}>{val}</span>
@@ -700,7 +733,7 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
                 background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
                 cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent",
               }}>
-                <span style={{ width: 34, height: 34, borderRadius: 10, background: `${nf.color}1c`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   {nf.icon}
                 </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
