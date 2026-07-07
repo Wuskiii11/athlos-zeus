@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
 import { useTheme } from "../theme";
 import { Mono, PrimaryBtn, LanguageSwitcher } from "../components/UI";
 import { useLang, useT } from "../lib/i18n";
@@ -49,6 +50,14 @@ const EQUIPMENT_OPTIONS = ["Fitnes klub", "Domače uteži / ročke", "Drog za zg
 const SETUP_KEY = "athlos:setup";
 const loadSaved = () => { try { return JSON.parse(localStorage.getItem(SETUP_KEY) || "{}"); } catch { return {}; } };
 
+// GSAP drives the onboarding motion; a single guard keeps it off for
+// users who asked the OS for reduced motion.
+const reduceMotion = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+// tactile pop on the option the user just picked
+const popPick = (el) => {
+  if (!reduceMotion && el) gsap.fromTo(el, { scale: 0.96 }, { scale: 1, duration: 0.35, ease: "back.out(2.5)", clearProps: "transform" });
+};
+
 export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const C = useTheme();
   const saved = useRef(loadSaved()).current;
@@ -91,6 +100,42 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   // Reset scroll to top on every step change
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [step]);
+
+  // GSAP step entrance — the step's building blocks (kicker, title, fields,
+  // buttons; individual options inside data-gsap-list containers) slide up
+  // with a stagger, Typeform-style.
+  useEffect(() => {
+    if (reduceMotion) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const targets = [];
+    const walk = (node) => {
+      for (const kid of Array.from(node.children)) {
+        if (kid.hasAttribute("data-gsap-list")) targets.push(...Array.from(kid.children));
+        else if (kid.querySelector?.("[data-gsap-list]")) walk(kid);
+        else targets.push(kid);
+      }
+    };
+    walk(el);
+    if (!targets.length) return;
+    const tween = gsap.fromTo(targets,
+      { y: 26, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", stagger: { each: 0.05 }, clearProps: "transform,opacity" });
+    return () => tween.kill();
+  }, [step]);
+
+  // Quote step — the gold progress line draws itself across the chart
+  const quotePathRef = useRef(null);
+  useEffect(() => {
+    if (reduceMotion || FLOW[step] !== "quote") return;
+    const p = quotePathRef.current;
+    if (!p) return;
+    const len = p.getTotalLength();
+    const tween = gsap.fromTo(p,
+      { strokeDasharray: len, strokeDashoffset: len },
+      { strokeDashoffset: 0, duration: 1.5, ease: "power2.inOut", delay: 0.25 });
+    return () => tween.kill();
   }, [step]);
 
   const total = FLOW.length;
@@ -150,11 +195,11 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
   const hairline = C.name === "dark" ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.08)";
   const Choice = ({ options, value, onPick, subs, labels }) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div data-gsap-list="true" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {options.map((o, i) => {
         const active = value === o;
         return (
-          <button key={o} onClick={() => onPick(o)} style={{
+          <button key={o} onClick={(e) => { popPick(e.currentTarget); onPick(o); }} style={{
             width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14,
             padding: "15px 16px", borderRadius: 16, cursor: "pointer",
             background: active
@@ -181,11 +226,11 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
   // multi-select chips
   const MultiChips = ({ options, values, onToggle }) => (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+    <div data-gsap-list="true" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
       {options.map((o) => {
         const active = values.includes(o);
         return (
-          <button key={o} onClick={() => onToggle(o)} style={{
+          <button key={o} onClick={(e) => { popPick(e.currentTarget); onToggle(o); }} style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             padding: "12px 20px", borderRadius: 999, cursor: "pointer",
             border: `1.5px solid ${active ? `${C.gold}99` : C.border2}`,
@@ -244,7 +289,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
       </div>
 
       {/* Step content */}
-      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 24px", display: "flex", flexDirection: "column", animation: "athlosScreen 0.28s cubic-bezier(.2,.8,.2,1)", overflowY: "auto", scrollbarWidth: "none" }}>
+      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 24px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
         {key !== "quote" && (
           <div style={{ marginBottom: 28 }}>
             <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.18em" }}>{t(STEP_TITLES[key].sub)}</Mono>
@@ -358,12 +403,12 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
         {/* ── Quote step ── */}
         {key === "quote" && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", animation: "athlosScreen 0.3s cubic-bezier(.2,.8,.2,1)" }}>
+          <div data-gsap-list="true" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
             {/* Animated progress line */}
             <div style={{ marginBottom: 32 }}>
               <svg viewBox="0 0 300 80" width="100%" height="80" style={{ overflow: "visible" }}>
                 {[20, 40, 60].map(y => <line key={y} x1="0" y1={y} x2="300" y2={y} stroke={C.border} strokeWidth="1" strokeDasharray="4 6"/>)}
-                <path d="M0 15 C30 15, 50 55, 80 45 S130 20, 160 35 S210 55, 240 40 S280 25, 300 30" fill="none" stroke={C.gold} strokeWidth="2.5" strokeLinecap="round"/>
+                <path ref={quotePathRef} d="M0 15 C30 15, 50 55, 80 45 S130 20, 160 35 S210 55, 240 40 S280 25, 300 30" fill="none" stroke={C.gold} strokeWidth="2.5" strokeLinecap="round"/>
                 <line x1="0" y1="65" x2="300" y2="65" stroke={C.gold} strokeWidth="1.5" strokeDasharray="6 5" strokeOpacity="0.4"/>
                 <circle cx="0" cy="15" r="5" fill={C.gold}/>
                 <text x="2" y="76" fill={C.muted} fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">{t("DANES")}</text>
