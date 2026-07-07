@@ -640,18 +640,52 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
           coloured icon per row (performance green / match red / nutrition gold),
           so the section reads in the app's own palette. */}
       {[
-        ["report", t("Včerajšnje poročilo"), "92", "report", "M3 3v18h18M7 14l3-3 3 3 4-5", C.accent],
-        ["match", t("Naslednja tekma"), t("3 dni"), "season", "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z", C.red],
-        ["meal", t("Naslednji obrok"), "680", "fuel", "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3", C.gold],
-      ].map(([id, title, val, dest, path, color]) => isOn(id) && (
-        <button key={id} onClick={() => go(dest)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 14px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(id), ...rise(0.24) }}>
+        {
+          id: "report", dest: "report", color: C.accent,
+          icon: "M3 3v18h18M7 14l3-3 3 3 4-5",
+          title: t("Včerajšnje poročilo"),
+          meta: [["M12 6v6l4 2|circle", "62 min"], ["M13 2L4 14h6l-1 8 9-12h-6l1-8z", "480 kcal"]],
+          right: t("OCENA · 92"),
+        },
+        {
+          id: "match", dest: "season", color: C.red,
+          icon: "M8 2v4M16 2v4M3 9h18M3 5h18v16H3z",
+          title: t("Naslednja tekma"),
+          meta: [["M12 6v6l4 2|circle", t("sobota · 17:00")]],
+          right: t("ČEZ 3 DNI"),
+        },
+        {
+          id: "meal", dest: "fuel", color: C.gold,
+          icon: "M4 3v8a3 3 0 003 3v7M18 3c-1.5 0-3 1.5-3 5s1.5 5 3 5v3",
+          title: t("Naslednji obrok"),
+          meta: [["M13 2L4 14h6l-1 8 9-12h-6l1-8z", "680 kcal"]],
+          right: "18:30",
+        },
+      ].map((r) => isOn(r.id) && (
+        <button key={r.id} onClick={() => go(r.dest)} style={{ width: "100%", display: "flex", alignItems: "flex-start", gap: 14, padding: "15px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent", ...ord(r.id), ...rise(0.24) }}>
           {/* solid colour badge with a knocked-out icon — fitness-app reference look */}
-          <span style={{ width: 44, height: 44, borderRadius: 14, background: color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 6px 16px ${color}40` }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.name === "dark" ? "#0A0A09" : "#FFFFFF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>
+          <span style={{ width: 44, height: 44, borderRadius: 14, background: r.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 6px 16px ${r.color}40` }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.name === "dark" ? "#0A0A09" : "#FFFFFF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={r.icon} /></svg>
           </span>
-          <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{title}</span>
-          <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text }}>{val}</span>
-          <span style={{ color: C.muted }}>›</span>
+          {/* title + icon meta line, like "45-60 Minutes · 120 Kcal" */}
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, lineHeight: 1.25 }}>{r.title}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 6 }}>
+              {r.meta.map(([p, txt]) => {
+                const [d, extra] = p.split("|");
+                return (
+                  <span key={txt} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={r.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {extra === "circle" && <circle cx="12" cy="12" r="9" />}
+                      <path d={d} />
+                    </svg>
+                    <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12, color: C.muted }}>{txt}</span>
+                  </span>
+                );
+              })}
+            </span>
+          </span>
+          <Mono style={{ color: C.muted2, fontSize: 9.5, letterSpacing: "0.08em", marginTop: 3, flexShrink: 0 }}>{r.right}</Mono>
         </button>
       ))}
 
