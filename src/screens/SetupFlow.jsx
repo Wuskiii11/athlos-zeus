@@ -386,12 +386,24 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     </button>
   );
 
+  const dark = C.name === "dark";
   return (
     <div className="app-fullscreen" style={{
       // top+bottom so it fills the whole phone shell (no empty strip at the
       // bottom on mobile, where 100dvh can be shorter than the shell)
       position: "fixed", inset: 0,
-      background: C.bg,
+      // aurora backdrop — layered low-opacity radial glows blooming from the
+      // top, a soft vignette at the edges, base colour underneath
+      background: dark
+        ? `radial-gradient(ellipse 130% 100% at 50% 55%, transparent 55%, rgba(0,0,0,0.55) 100%),
+           radial-gradient(ellipse 90% 55% at 50% -8%, rgba(0,255,135,0.16), transparent 60%),
+           radial-gradient(ellipse 65% 42% at 72% 5%, rgba(46,143,102,0.13), transparent 65%),
+           radial-gradient(ellipse 60% 40% at 22% 16%, rgba(0,255,135,0.06), transparent 70%),
+           ${C.bg}`
+        : `radial-gradient(ellipse 130% 100% at 50% 55%, transparent 60%, rgba(28,24,20,0.05) 100%),
+           radial-gradient(ellipse 90% 55% at 50% -8%, rgba(31,122,82,0.10), transparent 60%),
+           radial-gradient(ellipse 65% 42% at 72% 5%, rgba(31,122,82,0.06), transparent 65%),
+           ${C.bg}`,
       display: "flex", flexDirection: "column",
       overflow: "hidden",
       paddingTop: "env(safe-area-inset-top, 0px)",
