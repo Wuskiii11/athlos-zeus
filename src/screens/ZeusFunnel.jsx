@@ -39,13 +39,23 @@ const valOf = (o) => (typeof o === "object" ? o.v : o);
 const labelOf = (o) => (typeof o === "object" ? (o.label || o.v) : o);
 const subOf = (o) => (typeof o === "object" ? o.sub : null);
 
-export default function ZeusFunnel({ onDone }) {
+export default function ZeusFunnel({ onDone, profile }) {
   const C = useTheme();
   const t = useT();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
-  const total = STEPS.length;
-  const cur = STEPS[step];
+
+  // The signup onboarding (SetupFlow) already asked about goals, equipment
+  // and injuries — never ask the same thing twice. A step is dropped when
+  // the profile carries a real answer; finish() seeds the setup from it.
+  const answered = {
+    goal: (profile?.goals || []).length > 0,
+    equipment: (profile?.equipment || []).length > 0,
+    injuries: (profile?.injuries || []).length > 0 || !!(profile?.injuryNote || "").trim(),
+  };
+  const steps = STEPS.filter((s) => !answered[s.key]);
+  const total = steps.length;
+  const cur = steps[step];
 
   const advance = () => {
     if (step < total - 1) setStep((s) => s + 1);
@@ -53,13 +63,15 @@ export default function ZeusFunnel({ onDone }) {
   };
   const finish = () => {
     const setup = {
-      goal: answers.goal || "",
+      goal: answers.goal || (profile?.goals || [])[0] || "",
       level: answers.level || "",
       seasonPhase: answers.seasonPhase || "",
-      equipment: answers.equipment || [],
+      equipment: (answers.equipment?.length ? answers.equipment : profile?.equipment) || [],
       daysPerWeek: answers.daysPerWeek || null,
       sessionMinutes: answers.sessionMinutes || null,
-      injuries: (answers.injuries || []).filter((x) => x !== "Brez poškodb"),
+      injuries: answers.injuries
+        ? answers.injuries.filter((x) => x !== "Brez poškodb")
+        : (profile?.injuries || []),
     };
     onDone(setup);
   };

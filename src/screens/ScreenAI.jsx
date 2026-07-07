@@ -322,7 +322,7 @@ export default function ScreenAI({ user, profile }) {
       </div>
     </div>
   );
-  if (gate === "funnel") return <ZeusFunnel onDone={onFunnelDone} />;
+  if (gate === "funnel") return <ZeusFunnel onDone={onFunnelDone} profile={profile} />;
 
   // ── Chat ──
   return (
