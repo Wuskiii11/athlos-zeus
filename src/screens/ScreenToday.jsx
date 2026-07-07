@@ -114,7 +114,7 @@ function Medallion({ pct, color, C, size = 130 }) {
       borderRadius: "50%",
       background: dark
         ? "#181C18"
-        : "#F4F2EA",
+        : "#FFFFFF",
       boxShadow: dark
         ? "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 3px rgba(255,255,255,0.06)"
         : "0 16px 40px rgba(28,24,20,0.16), inset 0 2px 4px rgba(255,255,255,0.85), inset 0 -6px 14px rgba(31,122,82,0.18)",
