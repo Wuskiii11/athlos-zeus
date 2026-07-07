@@ -36,6 +36,8 @@ const EN = {
   "Dobrodošel nazaj": "Welcome back",
   "Dobrodošel,": "Welcome,",
   "OCENA · 92": "SCORE · 92",
+  "LET": "YEARS",
+  "Potrdi datum": "Confirm date",
   "Tvoje ime": "Your name",
   "Tako te bodo videli soigralci in trener": "This is how teammates and your coach see you",
   "Vidno v klepetu, na lestvicah in pri trenerju.": "Visible in chat, leaderboards and to your coach.",

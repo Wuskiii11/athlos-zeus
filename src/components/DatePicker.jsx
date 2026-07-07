@@ -137,46 +137,76 @@ function BirthDatePicker({ value, onChange, onClose }) {
     return `${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()}`;
   };
 
+  // Live age — the number this screen actually exists for (it drives the
+  // program's norms), so it gets the hero treatment.
+  const now = new Date();
+  let age = now.getFullYear() - year;
+  if (now.getMonth() < month || (now.getMonth() === month && now.getDate() < day)) age -= 1;
+
+  const dark = C.name === "dark";
+
   return (
-    <div
-      onClick={onClose}
-      style={{ position: "absolute", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}
-    >
-      <style>{`@keyframes dpUp { from { transform:translateY(100%); opacity:0; } to { transform:translateY(0); opacity:1; } }`}</style>
+    <div style={{
+      position: "absolute", inset: 0, zIndex: 60,
+      background: C.bg, color: C.text,
+      display: "flex", flexDirection: "column",
+      paddingTop: "max(env(safe-area-inset-top, 16px), 16px)",
+      paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)",
+      animation: "dpFull 0.34s cubic-bezier(.22,1,.36,1)",
+      overflow: "hidden",
+    }}>
+      <style>{`@keyframes dpFull { from { transform:translateY(5%); opacity:0; } to { transform:translateY(0); opacity:1; } }`}</style>
 
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{ position: "relative", zIndex: 1, background: C.bg, borderRadius: "26px 26px 0 0", border: `1px solid ${C.border2}`, borderBottom: "none", overflow: "hidden", animation: "dpUp 0.3s cubic-bezier(.2,.8,.2,1)" }}
-      >
-        {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
-          <div style={{ width: 36, height: 4, borderRadius: 999, background: C.border2 }} />
-        </div>
+      {/* quiet accent aura behind the age numeral */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: "-6%", left: "50%", transform: "translateX(-50%)",
+        width: 420, height: 320, pointerEvents: "none",
+        background: `radial-gradient(closest-side, ${dark ? "rgba(0,255,135,0.12)" : "rgba(31,122,82,0.09)"} 0%, transparent 72%)`,
+      }} />
 
-        {/* Selected date label */}
-        <div style={{ padding: "4px 20px 12px", borderBottom: `1px solid ${C.border}` }}>
-          <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.22em" }}>{t("IZBRANI DATUM")}</Mono>
-          <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 21.5, color: C.text, marginTop: 4 }}>
-            {fmtSel()}
-          </div>
-        </div>
+      {/* close */}
+      <button onClick={onClose} aria-label={t("Prekliči")} style={{
+        position: "absolute", top: "max(env(safe-area-inset-top, 14px), 14px)", left: 18, zIndex: 2,
+        width: 38, height: 38, borderRadius: "50%", cursor: "pointer",
+        background: C.surface, border: `1px solid ${C.border}`,
+        color: C.text, fontSize: 21, lineHeight: 1,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        WebkitTapHighlightColor: "transparent",
+      }}>×</button>
 
-        {/* Sliding wheel columns — day / month / year */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 4, padding: "10px 14px" }}>
-          <WheelColumn items={days} value={day} onChange={setDay} width={56} C={C} />
-          <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width={128} C={C} render={(m) => months[m]} />
-          <WheelColumn items={years} value={year} onChange={setYear} width={72} C={C} />
+      {/* hero — the age counts live while the wheels spin */}
+      <div style={{ textAlign: "center", padding: "40px 24px 8px", position: "relative" }}>
+        <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.26em" }}>{t("DATUM ROJSTVA")}</Mono>
+        <div key={age} style={{
+          fontFamily: C.display, fontWeight: 800, fontSize: 88, lineHeight: 1,
+          color: C.text, marginTop: 10, letterSpacing: "-0.03em",
+          animation: "dpAgePop 0.24s cubic-bezier(.34,1.56,.64,1)",
+        }}>
+          {age}
         </div>
+        <style>{`@keyframes dpAgePop { from { transform:scale(0.94); opacity:0.4; } to { transform:scale(1); opacity:1; } }`}</style>
+        <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15, color: C.muted, marginTop: 8 }}>
+          {t("LET")} · {fmtSel()}
+        </div>
+      </div>
 
-        {/* Actions */}
-        <div style={{ display: "flex", gap: 10, padding: "8px 16px 28px" }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 15.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
-            {t("Prekliči")}
-          </button>
-          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", transition: "background 0.2s", WebkitTapHighlightColor: "transparent" }}>
-            {t("Potrdi")}
-          </button>
-        </div>
+      {/* wheels — day / month / year, centered in the remaining space */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 14px" }}>
+        <WheelColumn items={days} value={day} onChange={setDay} width={62} C={C} />
+        <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width={140} C={C} render={(m) => months[m]} />
+        <WheelColumn items={years} value={year} onChange={setYear} width={78} C={C} />
+      </div>
+
+      {/* confirm — one full-width pill; × is the way out */}
+      <div style={{ padding: "10px 24px 6px" }}>
+        <button onClick={confirm} style={{
+          width: "100%", padding: "16px", borderRadius: 999, border: "none",
+          background: C.btn, color: C.btnText,
+          fontFamily: C.display, fontWeight: 700, fontSize: 15.5,
+          cursor: "pointer", WebkitTapHighlightColor: "transparent",
+        }}>
+          {t("Potrdi datum")}
+        </button>
       </div>
     </div>
   );
