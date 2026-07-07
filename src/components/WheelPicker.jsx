@@ -6,7 +6,8 @@ import React, { useRef, useEffect, useCallback } from "react";
 const ITEM_H = 40;
 const PAD = 2; // rows above/below center → 5-row visible window
 
-export default function WheelColumn({ items, value, onChange, render, width = 64, C }) {
+export default function WheelColumn({ items, value, onChange, render, width = 64, C, align = "center", showBand = true, activeColor }) {
+  const justify = align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
   const ref = useRef(null);
   const settleTimer = useRef(null);
   const drag = useRef(null); // mouse-drag scrolling (touch keeps native momentum)
@@ -39,12 +40,13 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
 
   return (
     <div style={{ position: "relative", height: visibleH, width, flexShrink: 0 }}>
-      {/* center selection band — engraved bronze rules */}
-      <div style={{
+      {/* center selection band — engraved bronze rules (hidden when a parent
+          draws its own full-width highlight bar instead) */}
+      {showBand && <div style={{
         position: "absolute", top: ITEM_H * PAD, left: 0, right: 0, height: ITEM_H,
         borderTop: `1px solid ${C.gold}77`, borderBottom: `1px solid ${C.gold}77`,
         pointerEvents: "none", zIndex: 2,
-      }} />
+      }} />}
       <div
         ref={ref}
         onScroll={onScroll}
@@ -78,10 +80,10 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
               onClick={() => { if (drag.current?.moved) return; scrollToIdx(i); onChange(it); }}
               style={{
                 height: ITEM_H, scrollSnapAlign: "center",
-                display: "flex", alignItems: "center", justifyContent: "center",
+                display: "flex", alignItems: "center", justifyContent: justify,
                 fontFamily: C.heading, fontWeight: active ? 800 : 400,
                 fontSize: active ? 21.5 : 17,
-                color: active ? C.text : C.muted,
+                color: active ? (activeColor || C.text) : C.muted,
                 opacity: active ? 1 : 0.5,
                 transition: "font-size 0.15s, color 0.15s, opacity 0.15s, font-weight 0.15s",
                 cursor: "pointer", userSelect: "none", WebkitUserSelect: "none",

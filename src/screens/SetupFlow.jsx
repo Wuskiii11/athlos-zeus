@@ -4,7 +4,6 @@ import { useTheme } from "../theme";
 import { Mono, PrimaryBtn, LanguageSwitcher } from "../components/UI";
 import { useLang, useT } from "../lib/i18n";
 import { SPORTS } from "./ScreenProfile";
-import DatePicker from "../components/DatePicker";
 import WheelColumn from "../components/WheelPicker";
 import { isNameTaken } from "../lib/api";
 import { IcChart } from "../components/Icons";
@@ -14,11 +13,8 @@ const WEIGHTS = Array.from({ length: 221 }, (_, i) => 30 + i);  // 30–250 kg
 
 const MONTHS_SL_SHORT = ["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"];
 const MONTHS_EN_SHORT = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
-function fmtBirth(iso, lang) {
-  const d = new Date(iso);
-  const months = lang === "en" ? MONTHS_EN_SHORT : MONTHS_SL_SHORT;
-  return `${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()}`;
-}
+const MONTHS_SL_FULL = ["Januar","Februar","Marec","April","Maj","Junij","Julij","Avgust","September","Oktober","November","December"];
+const MONTHS_EN_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 // A birth date is accepted only if it's a REAL calendar date in a sane range
 // (1940 … min-age 10). The picker can't produce anything else, but this also
@@ -50,6 +46,52 @@ const EQUIPMENT_OPTIONS = ["Fitnes klub", "Domače uteži / ročke", "Drog za zg
 const SETUP_KEY = "athlos:setup";
 const loadSaved = () => { try { return JSON.parse(localStorage.getItem(SETUP_KEY) || "{}"); } catch { return {}; } };
 
+// ── Inline birth-date wheels — no tap-to-open sheet: the three columns sit
+// right on the step, with one full-width accent bar across the selected row
+// (month | day | year), like a boarding-pass row. ──
+function BirthWheelInline({ value, onChange, C, lang }) {
+  const months = lang === "en" ? MONTHS_EN_FULL : MONTHS_SL_FULL;
+  const maxD = new Date();
+  maxD.setFullYear(maxD.getFullYear() - 10); // min age 10
+  const init = value && validBirth(value) ? new Date(value) : new Date(2005, 5, 15);
+
+  const startY = 1940;
+  const endY = maxD.getFullYear();
+  const years = Array.from({ length: endY - startY + 1 }, (_, i) => startY + i);
+  const monthIdxs = Array.from({ length: 12 }, (_, i) => i);
+
+  const [day, setDay] = useState(init.getDate());
+  const [month, setMonth] = useState(init.getMonth());
+  const [year, setYear] = useState(Math.min(init.getFullYear(), endY));
+
+  const dim = new Date(year, month + 1, 0).getDate();
+  const days = Array.from({ length: dim }, (_, i) => i + 1);
+
+  // clamp to real dates and to the min-age ceiling
+  useEffect(() => { if (day > dim) setDay(dim); }, [dim]); // eslint-disable-line
+  useEffect(() => { if (year === endY && month > maxD.getMonth()) setMonth(maxD.getMonth()); }, [year]); // eslint-disable-line
+  useEffect(() => { if (year === endY && month === maxD.getMonth() && day > maxD.getDate()) setDay(maxD.getDate()); }, [year, month]); // eslint-disable-line
+
+  useEffect(() => {
+    onChange(`${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
+  }, [day, month, year]); // eslint-disable-line
+
+  const dark = C.name === "dark";
+  const onBar = dark ? "#04130A" : "#FFFFFF";
+
+  return (
+    <div style={{ position: "relative", margin: "6px -28px 0" }}>
+      {/* full-width selection bar behind the middle row */}
+      <div aria-hidden="true" style={{ position: "absolute", top: 80, left: 0, right: 0, height: 40, background: C.accent, zIndex: 0 }} />
+      <div style={{ position: "relative", zIndex: 1, display: "flex", padding: "0 26px" }}>
+        <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width="46%" C={C} render={(m) => months[m]} align="left" showBand={false} activeColor={onBar} />
+        <WheelColumn items={days} value={day} onChange={setDay} width="18%" C={C} align="center" showBand={false} activeColor={onBar} />
+        <WheelColumn items={years} value={year} onChange={setYear} width="36%" C={C} align="right" showBand={false} activeColor={onBar} />
+      </div>
+    </div>
+  );
+}
+
 // GSAP drives the onboarding motion; a single guard keeps it off for
 // users who asked the OS for reduced motion.
 const reduceMotion = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -80,7 +122,6 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const [injuries, setInjuries] = useState(saved.injuries || []);
   const [injuryNote, setInjuryNote] = useState(saved.injuryNote || "");
   const [equipment, setEquipment] = useState(saved.equipment || []);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const scrollRef = useRef(null);
   const t = useT();
   const lang = useLang();
@@ -452,28 +493,17 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
         {key === "birth" && (
           <>
-            <Mono style={{ color: C.muted, fontSize: 10 }}>{t("DATUM ROJSTVA")}</Mono>
-            <button
-              onClick={() => setPickerOpen(true)}
-              style={{
-                width: "100%", marginTop: 8, padding: "16px 18px",
-                borderRadius: 12,
-                border: `1px solid ${birth ? `${C.gold}88` : C.border2}`,
-                background: C.surface,
-                color: birth ? C.text : C.muted,
-                fontFamily: C.display, fontWeight: birth ? 700 : 500, fontSize: 18,
-                textAlign: "left", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                transition: "border-color 0.2s, background 0.2s",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <span>{birth ? fmtBirth(birth, lang) : t("Izberi datum")}</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={birth ? C.gold : C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="17" rx="2"/>
-                <path d="M3 9h18M8 2v4M16 2v4"/>
-              </svg>
-            </button>
+            <BirthWheelInline value={birth} onChange={setBirth} C={C} lang={lang} />
+            {validBirth(birth) && (
+              <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.14em", textAlign: "center", display: "block", marginTop: 16 }}>
+                {(() => {
+                  const b = new Date(birth); const n = new Date();
+                  let a = n.getFullYear() - b.getFullYear();
+                  if (n.getMonth() < b.getMonth() || (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) a -= 1;
+                  return `${a} ${t("LET")}`;
+                })()}
+              </Mono>
+            )}
             <div style={{ flex: 1 }} />
             <PrimaryBtn onClick={() => validBirth(birth) && next()} style={{ opacity: validBirth(birth) ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
           </>
@@ -674,14 +704,6 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         </div>
       )}
 
-      {/* DatePicker — rendered inside this phone shell (position:absolute, clipped by overflow:hidden) */}
-      {pickerOpen && (
-        <DatePicker
-          value={birth}
-          onChange={(v) => { if (validBirth(v)) setBirth(v); setPickerOpen(false); }}
-          onClose={() => setPickerOpen(false)}
-        />
-      )}
     </div>
   );
 }
