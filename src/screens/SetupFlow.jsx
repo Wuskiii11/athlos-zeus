@@ -8,8 +8,80 @@ import WheelColumn from "../components/WheelPicker";
 import { isNameTaken } from "../lib/api";
 import { IcChart } from "../components/Icons";
 
-const HEIGHTS = Array.from({ length: 131 }, (_, i) => 100 + i); // 100–230 cm
-const WEIGHTS = Array.from({ length: 221 }, (_, i) => 30 + i);  // 30–250 kg
+// ── Ruler slider — horizontal track with a value bubble on the thumb and a
+// tick ruler underneath (the reference "Select your height/weight" control) ──
+function RulerSlider({ label, min, max, value, onChange, C }) {
+  const trackRef = useRef(null);
+  const clamp = (v) => Math.max(min, Math.min(max, v));
+  const toVal = (clientX) => {
+    const r = trackRef.current?.getBoundingClientRect();
+    if (!r) return value;
+    return clamp(Math.round(min + ((clientX - r.left) / r.width) * (max - min)));
+  };
+  const pct = ((clamp(value) - min) / (max - min)) * 100;
+  const ticks = Array.from({ length: 6 }, (_, i) => Math.round(min + (i * (max - min)) / 5));
+  const dark = C.name === "dark";
+  return (
+    <div style={{ marginBottom: 30 }}>
+      <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.text2, marginBottom: 40 }}>{label}</div>
+      <div
+        ref={trackRef}
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); onChange(toVal(e.clientX)); }}
+        onPointerMove={(e) => { if (e.buttons > 0) onChange(toVal(e.clientX)); }}
+        style={{ position: "relative", height: 26, cursor: "pointer", touchAction: "none" }}
+      >
+        {/* rail + filled part */}
+        <div style={{ position: "absolute", top: 12, left: 0, right: 0, height: 2, borderRadius: 999, background: dark ? "rgba(255,255,255,0.16)" : "rgba(28,24,20,0.14)" }} />
+        <div style={{ position: "absolute", top: 11.5, left: 0, width: `${pct}%`, height: 3, borderRadius: 999, background: C.text }} />
+        {/* value bubble above the thumb */}
+        <div style={{ position: "absolute", top: -36, left: `${pct}%`, transform: "translateX(-50%)", background: C.btn, color: C.btnText, borderRadius: 9, padding: "5px 10px", fontFamily: C.mono, fontWeight: 700, fontSize: 12.5, whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(0,0,0,0.25)" }}>
+          {clamp(value)}
+          <span aria-hidden="true" style={{ position: "absolute", left: "50%", bottom: -3, width: 8, height: 8, background: C.btn, transform: "translateX(-50%) rotate(45deg)" }} />
+        </div>
+        {/* thumb */}
+        <div style={{ position: "absolute", top: 5, left: `${pct}%`, transform: "translateX(-50%)", width: 16, height: 16, borderRadius: "50%", background: C.btn, border: `2.5px solid ${C.bg}`, boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }} />
+      </div>
+      {/* tick ruler */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+        {ticks.map((v) => (
+          <div key={v} style={{ textAlign: "center" }}>
+            <div style={{ width: 1, height: 7, background: dark ? "rgba(255,255,255,0.25)" : "rgba(28,24,20,0.25)", margin: "0 auto 4px" }} />
+            <span style={{ fontFamily: C.mono, fontSize: 9.5, color: C.muted2 }}>{v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── BMI gauge — semicircle dial with a needle, recomputed live ──
+function BmiGauge({ height, weight, C, t }) {
+  const bmi = weight / Math.pow(height / 100, 2);
+  const p = Math.max(0, Math.min(1, (bmi - 15) / (40 - 15)));
+  const r = 78, cx = 100, cy = 96;
+  const semi = Math.PI * r;
+  const ang = Math.PI * (1 - p);
+  const nx = cx + Math.cos(ang) * (r - 16);
+  const ny = cy - Math.sin(ang) * (r - 16);
+  const dark = C.name === "dark";
+  return (
+    <div style={{ position: "relative", margin: "4px auto 0", maxWidth: 290, width: "100%" }}>
+      <svg viewBox="0 0 200 104" width="100%" style={{ display: "block" }}>
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke={dark ? "rgba(255,255,255,0.12)" : "rgba(28,24,20,0.10)"} strokeWidth="10" strokeLinecap="round" />
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke={C.text} strokeWidth="10" strokeLinecap="round"
+          strokeDasharray={semi} strokeDashoffset={semi * (1 - p)} style={{ transition: "stroke-dashoffset 0.2s ease" }} />
+        <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={C.text} strokeWidth="2.5" strokeLinecap="round" style={{ transition: "all 0.2s ease" }} />
+      </svg>
+      {/* center readout + end labels */}
+      <div style={{ position: "absolute", left: 0, right: 0, top: "38%", textAlign: "center", pointerEvents: "none" }}>
+        <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12, color: C.muted }}>{t("Tvoj ITM")}</div>
+        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, color: C.text, lineHeight: 1.15 }}>{(Math.round(bmi * 10) / 10).toFixed(1)}</div>
+      </div>
+      <span style={{ position: "absolute", left: -4, bottom: -14, fontFamily: C.mono, fontSize: 8.5, color: C.muted2, letterSpacing: "0.04em" }}>{t("PODHRANJENOST")}</span>
+      <span style={{ position: "absolute", right: -4, bottom: -14, fontFamily: C.mono, fontSize: 8.5, color: C.muted2, letterSpacing: "0.04em" }}>{t("DEBELOST")}</span>
+    </div>
+  );
+}
 
 const MONTHS_SL_SHORT = ["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"];
 const MONTHS_EN_SHORT = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
@@ -536,17 +608,10 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
         {key === "body" && (
           <>
-            <div style={{ display: "flex", justifyContent: "space-around", gap: 8 }}>
-              <div style={{ textAlign: "center" }}>
-                <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 8 }}>{t("VIŠINA (CM)")}</Mono>
-                <WheelColumn items={HEIGHTS} value={height} onChange={setHeight} width={84} C={C} render={(h) => `${h} cm`} />
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 8 }}>{t("TEŽA (KG)")}</Mono>
-                <WheelColumn items={WEIGHTS} value={weight} onChange={setWeight} width={84} C={C} render={(w) => `${w} kg`} />
-              </div>
-            </div>
-            <div style={{ flex: 1 }} />
+            <RulerSlider label={t("Izberi višino (cm)")} min={130} max={220} value={height} onChange={setHeight} C={C} />
+            <RulerSlider label={t("Izberi težo (kg)")} min={40} max={150} value={weight} onChange={setWeight} C={C} />
+            <BmiGauge height={height} weight={weight} C={C} t={t} />
+            <div style={{ flex: 1, minHeight: 20 }} />
             <PrimaryBtn onClick={next}>{t("Nadaljuj")}</PrimaryBtn>
           </>
         )}
