@@ -59,7 +59,7 @@ export const THEMES = {
   // ── LIGHT (default / hero) — "Parian marble": warm cream + bronze + classical laurel ──
   light: {
     name: "light",
-    bg: "#FAF7F0",
+    bg: "#FFFFFF",
     // flat parchment — the halftone dot texture alone carries the print feel
     bgImage: "none",
     btn: "#1C1814",
