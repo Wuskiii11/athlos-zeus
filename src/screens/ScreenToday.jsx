@@ -541,46 +541,46 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         pointerEvents: "none", userSelect: "none", zIndex: 0,
       }} />
 
-      {/* notifications bell — top-left, quiet ring, badge only when something waits */}
-      <button onClick={() => setOpenNotifs(true)} aria-label={t("Obvestila")} style={{
-        position: "absolute", top: 14, left: 18, zIndex: 2,
-        width: 38, height: 38, borderRadius: "50%", cursor: "pointer",
-        background: C.surface, border: `1px solid ${C.border}`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: C.text, WebkitTapHighlightColor: "transparent",
-      }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.7 21a2 2 0 01-3.4 0" />
-        </svg>
-        {bellDot && <span aria-hidden="true" style={{ position: "absolute", top: 3, right: 3, width: 8, height: 8, borderRadius: "50%", background: C.red, border: `1.5px solid ${C.bg}` }} />}
-      </button>
-      {/* engraved brand block — exactly like the reference mock (nothing above it) */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", margin: "4px 0 20px", position: "relative", zIndex: 1, order: 1, ...rise(0.03) }}>
-        {/* column-capital marks */}
-        <div aria-hidden="true" style={{ display: "flex", gap: 9, marginBottom: 8 }}>
-          {Array.from({ length: 6 }, (_, i) => (
-            <span key={i} style={{ display: "flex", gap: 2.5 }}>
-              <span style={{ width: 2, height: i % 2 ? 7 : 9, background: C.text, opacity: 0.65 }} />
-              <span style={{ width: 2, height: i % 2 ? 9 : 7, background: C.text, opacity: 0.65 }} />
-            </span>
-          ))}
+      {/* header row — bell · welcome + name · avatar (reference layout) */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "4px 0 0", position: "relative", zIndex: 2, order: 1, ...rise(0.03) }}>
+        <button onClick={() => setOpenNotifs(true)} aria-label={t("Obvestila")} style={{
+          width: 40, height: 40, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
+          background: C.surface, border: `1px solid ${C.border}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: C.text, WebkitTapHighlightColor: "transparent", position: "relative",
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.7 21a2 2 0 01-3.4 0" />
+          </svg>
+          {bellDot && <span aria-hidden="true" style={{ position: "absolute", top: 2, right: 2, width: 8, height: 8, borderRadius: "50%", background: C.red, border: `1.5px solid ${C.bg}` }} />}
+        </button>
+        <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
+          <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, lineHeight: 1.3 }}>{t("Dobrodošel,")}</div>
+          <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {(profile?.name || "Športnik").trim().split(/\s+/)[0]}
+          </div>
         </div>
-        <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: 36, letterSpacing: "0.18em", color: C.text, paddingLeft: "0.18em", marginTop: 10, lineHeight: 1 }}>
+        <button onClick={() => go("settings")} aria-label={t("Profil")} style={{
+          width: 40, height: 40, borderRadius: "50%", padding: 0, overflow: "hidden", flexShrink: 0,
+          border: `1.5px solid ${C.accent}66`, boxShadow: `0 0 14px ${C.accent}33`,
+          background: C.surface2, cursor: "pointer", WebkitTapHighlightColor: "transparent",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {profile?.photo
+            ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            : <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.accent }}>{(profile?.name || "A").trim()[0].toUpperCase()}</span>}
+        </button>
+      </div>
+
+      {/* brand headline — the ATHLOS logotype takes the reference's big-greeting spot */}
+      <div style={{ margin: "16px 0 20px", position: "relative", zIndex: 1, order: 1, ...rise(0.05) }}>
+        <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: 34, letterSpacing: "0.16em", color: C.text, lineHeight: 1 }}>
           ATHL<span style={{ color: C.gold }}>·</span>OS
         </div>
-        <div style={{ fontFamily: C.serif, fontStyle: "italic", fontWeight: 500, fontSize: 15, color: C.muted, marginTop: 8 }}>
+        <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 7 }}>
           {t("sistem, ki pozna vsakega športnika")}
         </div>
-        {/* laurel sprig */}
-        <svg aria-hidden="true" width="26" height="16" viewBox="0 0 26 16" fill="none" stroke={C.gold} strokeWidth="1.1" strokeLinecap="round" style={{ marginTop: 9, opacity: 0.8 }}>
-          <path d="M13 15V4" />
-          <path d="M13 13C9.5 12.5 7.5 10.5 7 7.5 10.5 8 12.5 10 13 13z" />
-          <path d="M13 13c3.5-.5 5.5-2.5 6-5.5C15.5 8 13.5 10 13 13z" />
-          <path d="M13 8C10.5 7.5 9 6 8.7 3.8 11.2 4.3 12.6 5.8 13 8z" />
-          <path d="M13 8c2.5-.5 4-2 4.3-4.2C14.8 4.3 13.4 5.8 13 8z" />
-          <circle cx="13" cy="2.5" r="1" fill={C.gold} stroke="none" />
-        </svg>
       </div>
 
       {/* morning wellness questionnaire + streak (spec §04) — answers feed the battery */}

@@ -34,6 +34,7 @@ const EN = {
   "sistem, ki pozna vsakega športnika": "the system that knows every athlete",
   "pripravljam tvoj sistem": "preparing your system",
   "Dobrodošel nazaj": "Welcome back",
+  "Dobrodošel,": "Welcome,",
   "preverjam profil": "checking profile",
   "sinhroniziram podatke": "syncing data",
   "kalibriram trening": "calibrating training",
