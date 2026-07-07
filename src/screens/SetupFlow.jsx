@@ -756,14 +756,14 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         <div aria-hidden="true" style={{
           position: "absolute", left: 0, right: 0,
           bottom: "max(env(safe-area-inset-bottom, 10px), 10px)",
-          display: "flex", justifyContent: "center", gap: 6,
+          display: "flex", gap: 6, padding: "0 16px",
           zIndex: 4, pointerEvents: "none",
         }}>
           {QUESTION_FLOW.map((k, i) => (
             <span key={k} style={{
-              width: i === qIndex ? 22 : 8, height: 4, borderRadius: 999,
+              flex: i === qIndex ? 2.4 : 1, height: 4, borderRadius: 999,
               background: i <= qIndex ? C.gold : (C.name === "dark" ? "rgba(255,255,255,0.16)" : "rgba(28,24,20,0.16)"),
-              transition: "width 0.3s ease, background 0.3s ease",
+              transition: "flex 0.3s ease, background 0.3s ease",
             }} />
           ))}
         </div>
