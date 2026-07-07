@@ -37,7 +37,6 @@ function validBirth(iso) {
 const FLOW = ["name", "acq", "vision", "birth", "gender", "body", "waist", "quote", "sport", "goals", "exp", "injuries", "equipment", "test"];
 
 const ACQ_OPTIONS = ["Instagram", "Prijatelj / soigralec", "Google", "TikTok", "Trener / klub", "Drugo"];
-const GENDERS = ["Moški", "Ženski", "Drugo"];
 const GOAL_OPTIONS = ["Moč", "Mišična masa", "Eksplozivnost", "Hitrost", "Vzdržljivost", "Izguba maščobe", "Preventiva poškodb", "Splošna kondicija"];
 const EXP_OPTIONS = ["0–1 let", "1–3 let", "3–5 let", "5+ let"];
 const INJURY_OPTIONS = ["Koleno", "Gleženj", "Rama", "Hrbet", "Kolk", "Hamstring", "Zapestje"];
@@ -499,13 +498,42 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
           </>
         )}
 
-        {key === "gender" && (
-          <>
-            <Choice options={GENDERS.map(t)} value={t(gender)} onPick={setGender} />
-            <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={() => gender && next()} style={{ opacity: gender ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
-          </>
-        )}
+        {key === "gender" && (() => {
+          const card = (active) => ({
+            borderRadius: 26, cursor: "pointer",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14,
+            background: active ? `${C.gold}12` : (C.name === "dark" ? C.surface : "#FFFFFF"),
+            border: `1.5px solid ${active ? `${C.gold}99` : (C.name === "dark" ? C.border : "#D8CFBD")}`,
+            boxShadow: C.name === "dark" ? "none" : "0 3px 10px rgba(28,24,20,0.05)",
+            transition: "background 0.15s, border-color 0.15s",
+            WebkitTapHighlightColor: "transparent",
+          });
+          const sign = (d, active) => (
+            <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke={active ? C.gold : C.text} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.15s" }}>
+              {d}
+            </svg>
+          );
+          return (
+            <>
+              <div data-gsap-list="true" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+                {/* two tall cards — Mars / Venus, like the reference */}
+                <button onClick={(e) => { popPick(e.currentTarget); setGender("Moški"); }} style={{ ...card(gender === "Moški"), flex: 1, minHeight: 150 }}>
+                  {sign(<><circle cx="10" cy="14" r="5.5" /><path d="M14 10l6.5-6.5M20.5 3.5H15M20.5 3.5V9" /></>, gender === "Moški")}
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>{t("Moški")}</span>
+                </button>
+                <button onClick={(e) => { popPick(e.currentTarget); setGender("Ženski"); }} style={{ ...card(gender === "Ženski"), flex: 1, minHeight: 150 }}>
+                  {sign(<><circle cx="12" cy="8.5" r="5.5" /><path d="M12 14v7M8.5 17.5h7" /></>, gender === "Ženski")}
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>{t("Ženski")}</span>
+                </button>
+                {/* Drugo — slim row under the two cards */}
+                <button onClick={(e) => { popPick(e.currentTarget); setGender("Drugo"); }} style={{ ...card(gender === "Drugo"), flexDirection: "row", gap: 8, padding: "15px 16px" }}>
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Drugo")}</span>
+                </button>
+              </div>
+              <PrimaryBtn onClick={() => gender && next()} style={{ marginTop: 14, opacity: gender ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            </>
+          );
+        })()}
 
         {key === "body" && (
           <>
