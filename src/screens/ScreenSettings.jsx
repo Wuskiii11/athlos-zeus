@@ -13,28 +13,11 @@ const FAQ_ITEMS = [
   { q: "Zakaj ne vidim napredka?", a: "Napredek se izračuna po vsaj 2 tednih rednega beleženja. Poskrbi, da redno vnaša treninge in spanje." },
 ];
 
-// Fixed palette copied from the reference mock — the profile page keeps these
-// exact three stacked shades (peach page → lighter peach sheet → white card)
-// in both app themes, with pastel-green icon chips and a soft red logout.
-const P = {
-  page: "#F7DDC8",   // top band / page background
-  sheet: "#FAE9DC",  // sheet behind the avatar's lower half + name
-  card: "#FDFDFC",   // menu card
-  ink: "#182B41",    // labels / name
-  sub: "#4A5568",    // secondary text
-  faint: "rgba(24,43,65,0.10)",
-  muted: "#8A93A3",
-  chipGreen: "#E4F2E2",
-  green: "#63B168",
-  chipRed: "#FCE6E4",
-  red: "#E25C55",
-  avatarBg: "#AFD8A4",
-};
-
 export default function ScreenSettings({ profile, setProfile, user, theme, setTheme, onPrivacy, onAccount, onLogout }) {
   const C = useTheme();
   const t = useT();
   const fileRef = React.useRef(null);
+  const dark = C.name === "dark";
 
   // FAQ
   const [openFaq, setOpenFaq] = useState(null);
@@ -96,19 +79,19 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
     setTimeout(() => { setContactOpen(false); setContactMsg(""); setContactSent(false); }, 2000);
   };
 
-  const inp = { width: "100%", padding: "14px 16px", borderRadius: 14, border: `1px solid ${P.faint}`, background: "#FFFFFF", color: P.ink, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box", colorScheme: "light", marginTop: 8 };
-  const primaryBtn = { borderRadius: 999, border: "none", background: P.green, color: "#ffffff", fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
-  const outlineBtn = { borderRadius: 999, border: `1px solid ${P.faint}`, background: "transparent", color: P.ink, fontFamily: C.display, fontWeight: 700, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
+  const inp = { width: "100%", padding: "14px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box", colorScheme: dark ? "dark" : "light", marginTop: 8 };
+  const primaryBtn = { borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
+  const outlineBtn = { borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
 
   // ── Menu row — tinted icon chip · label · arrow (the reference list) ──
   const Row = ({ d, label, onClick, danger, right }) => (
     <Pressable onClick={onClick} scale={0.99} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 2px", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}>
-      <span style={{ width: 40, height: 40, borderRadius: 13, background: danger ? P.chipRed : P.chipGreen, color: danger ? P.red : P.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      <span style={{ width: 40, height: 40, borderRadius: 13, background: danger ? `${C.red}16` : `${C.accent}14`, color: danger ? C.red : C.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{d}</svg>
       </span>
-      <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: danger ? P.red : P.ink }}>{label}</span>
+      <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: danger ? C.red : C.text }}>{label}</span>
       {right || (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={P.ink} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
       )}
@@ -116,7 +99,7 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
   );
 
   return (
-    <div style={{ padding: "10px 18px 120px", background: P.page, margin: "-10px 0 -80px" }}>
+    <div style={{ padding: "10px 18px 28px" }}>
       <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />
 
       {/* ── Hero — big ringed avatar with a pencil badge, name centered.
@@ -126,7 +109,7 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
         <div aria-hidden="true" style={{
           position: "absolute", top: 72, left: 0, right: 0, bottom: 0,
           borderRadius: 28,
-          background: P.sheet,
+          background: dark ? "rgba(0,255,135,0.05)" : "rgba(31,122,82,0.07)",
         }} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <Pressable
@@ -134,11 +117,11 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
             scale={0.96}
             style={{
               width: 112, height: 112, borderRadius: "50%", padding: 0, overflow: "hidden",
-              border: "5px solid #FFFFFF",
-              boxShadow: "0 12px 30px rgba(120,72,40,0.18)",
-              background: P.avatarBg,
+              border: `4px solid ${C.surface}`,
+              boxShadow: `0 12px 30px rgba(0,0,0,${dark ? 0.4 : 0.14}), 0 0 0 1px ${C.border}`,
+              background: `${C.accent}1a`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#FFFFFF", fontWeight: 800, fontSize: 42, fontFamily: C.display, flexShrink: 0,
+              color: C.accent, fontWeight: 800, fontSize: 42, fontFamily: C.display, flexShrink: 0,
             }}
           >
             {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
@@ -147,19 +130,19 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
           <button onClick={() => fileRef.current?.click()} aria-label={t("Zamenjaj sliko")} style={{
             position: "absolute", left: "50%", bottom: -13, transform: "translateX(-50%)",
             width: 36, height: 36, borderRadius: "50%", cursor: "pointer",
-            background: "#FFFFFF", border: "none",
-            boxShadow: "0 4px 14px rgba(120,72,40,0.22)",
-            color: P.green, display: "flex", alignItems: "center", justifyContent: "center",
+            background: C.surface, border: `1px solid ${C.border}`,
+            boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+            color: C.accent, display: "flex", alignItems: "center", justifyContent: "center",
             WebkitTapHighlightColor: "transparent",
           }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg>
           </button>
         </div>
-        <div style={{ position: "relative", zIndex: 1, fontFamily: C.display, fontWeight: 800, fontSize: 21.5, color: P.ink, marginTop: 26 }}>{profile.name}</div>
+        <div style={{ position: "relative", zIndex: 1, fontFamily: C.display, fontWeight: 800, fontSize: 21.5, color: C.text, marginTop: 26 }}>{profile.name}</div>
       </div>
 
       {/* ── Menu card ── */}
-      <div style={{ background: P.card, borderRadius: 24, padding: "8px 16px", boxShadow: "0 10px 30px rgba(120,72,40,0.10)" }}>
+      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: "8px 16px", boxShadow: dark ? "none" : "0 10px 30px rgba(28,24,20,0.06)" }}>
         <Row
           d={<><circle cx="12" cy="8" r="3.6" /><path d="M5 20v-1a7 7 0 0114 0v1" /></>}
           label={t("Uredi profil")}
@@ -186,15 +169,15 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
                   scale={0.99}
                   style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: "11px 0", gap: 12 }}
                 >
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: P.ink, flex: 1 }}>{t(item.q)}</span>
-                  <span style={{ color: P.muted, fontSize: 17, transition: "transform 0.2s", transform: openFaq === i ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>›</span>
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.text, flex: 1 }}>{t(item.q)}</span>
+                  <span style={{ color: C.muted, fontSize: 17, transition: "transform 0.2s", transform: openFaq === i ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>›</span>
                 </Pressable>
                 {openFaq === i && (
                   <div style={{ padding: "0 0 12px", animation: "athlosFade 0.2s ease" }}>
-                    <p style={{ fontFamily: C.display, fontSize: 14, color: P.sub, lineHeight: 1.6, margin: 0 }}>{t(item.a)}</p>
+                    <p style={{ fontFamily: C.display, fontSize: 14, color: C.text2, lineHeight: 1.6, margin: 0 }}>{t(item.a)}</p>
                   </div>
                 )}
-                {i < FAQ_ITEMS.length - 1 && <div style={{ height: 1, background: P.faint }} />}
+                {i < FAQ_ITEMS.length - 1 && <div style={{ height: 1, background: C.border }} />}
               </div>
             ))}
           </div>
@@ -205,10 +188,10 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
           onClick={() => { setContactOpen((v) => !v); setContactSent(false); }}
         />
         {contactOpen && (contactSent ? (
-          <div style={{ padding: 18, margin: "0 2px 12px", borderRadius: 14, background: P.chipGreen, border: `1px solid ${P.green}55`, textAlign: "center", animation: "athlosFade 0.2s ease" }}>
-            <div style={{ fontSize: 27, marginBottom: 8, color: P.green }}>✓</div>
-            <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: P.green }}>{t("Sporočilo poslano!")}</div>
-            <div style={{ fontFamily: C.display, fontSize: 14.5, color: P.sub, marginTop: 4 }}>{t("Odgovorili vam bomo v 24 urah.")}</div>
+          <div style={{ padding: 18, margin: "0 2px 12px", borderRadius: 14, background: `${C.accent}14`, border: `1px solid ${C.accent}40`, textAlign: "center", animation: "athlosFade 0.2s ease" }}>
+            <div style={{ fontSize: 27, marginBottom: 8 }}>✓</div>
+            <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.accent }}>{t("Sporočilo poslano!")}</div>
+            <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, marginTop: 4 }}>{t("Odgovorili vam bomo v 24 urah.")}</div>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 2px 12px", animation: "athlosFade 0.2s ease" }}>
@@ -243,7 +226,7 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
         />
       </div>
 
-      <p style={{ textAlign: "center", color: "rgba(24,43,65,0.45)", fontFamily: C.display, fontSize: 13.5, marginTop: 22 }}>ATHLOS v0.6 · © 2026</p>
+      <p style={{ textAlign: "center", color: C.muted2, fontFamily: C.display, fontSize: 13.5, marginTop: 22 }}>ATHLOS v0.6 · © 2026</p>
 
       {/* Full-screen photo preview — TikTok-style: tap the avatar, see it big,
           tap the ✕ or backdrop to dismiss, or jump straight to changing it. */}
