@@ -180,7 +180,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
   const STEP_TITLES = {
     name:      { title: "Uporabniško\nime",        sub: "KAKO TE BOMO KLICALI" },
-    acq:       { title: "Kako si\nslišal za nas?", sub: "DA VEMO, OD KOD PRIHAJAŠ" },
+    acq:       { title: "Kako si\nslišal za nas?", sub: "" },
     birth:     { title: "Datum\nrojstva",          sub: "ZA PRILAGODITEV PROGRAMA" },
     gender:    { title: "Spol",                    sub: "ZA IZRAČUN NORM IN KALORIJ" },
     vision:    { title: "",                        sub: "" }, // custom render — hero figure with callouts
@@ -305,7 +305,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
       <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 38px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
         {key !== "quote" && key !== "vision" && (
           <div style={{ marginBottom: 28 }}>
-            <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.18em" }}>{t(STEP_TITLES[key].sub)}</Mono>
+            {STEP_TITLES[key].sub && <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.18em" }}>{t(STEP_TITLES[key].sub)}</Mono>}
             <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, textTransform: "uppercase", margin: "8px 0 0", color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
               {t(STEP_TITLES[key].title)}
             </h2>
