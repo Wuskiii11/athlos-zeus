@@ -260,34 +260,29 @@ export const Icon = ({ name, color, size = 22 }) => {
   }
 };
 
-// Flat, fixed-size tab — no animations, same icon size for every tab.
+// Icon-only tab: the active one is a solid accent circle with a knocked-out
+// icon, inactive ones are bare muted glyphs — the compact floating-pill look.
 // `dot` marks the tab with a small badge (e.g. unread chat messages).
 export function TabButton({ n, active, onClick, dot }) {
   const C = useTheme();
-  const color = active ? C.accent : C.muted;
+  const dark = C.name === "dark";
   return (
     <button
       onClick={onClick}
       aria-label={n.label}
       className="athlos-tab-btn"
       style={{
-        flex: 1, minWidth: 0, border: "none", cursor: "pointer",
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-        padding: "6px 2px", WebkitTapHighlightColor: "transparent",
-        borderRadius: 20,
-        // liquid highlight — flat accent wash + glow under the active tab
-        background: active ? `${C.accent}1f` : "none",
-        boxShadow: active ? `0 0 16px ${C.accent}38, inset 0 1px 0 rgba(255,255,255,0.22)` : "none",
+        flex: "0 0 auto", width: 46, height: 46, borderRadius: "50%",
+        border: "none", cursor: "pointer", position: "relative",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: active ? C.accent : "transparent",
+        boxShadow: active ? `0 6px 16px ${C.accent}55` : "none",
+        WebkitTapHighlightColor: "transparent",
         transition: "background 0.25s ease, box-shadow 0.25s ease",
       }}
     >
-      <div style={{ display: "flex", position: "relative", filter: active ? `drop-shadow(0 0 6px ${C.accent}80)` : "none" }}>
-        <Icon name={n.icon} color={color} size={22} />
-        {dot && <span aria-hidden="true" style={{ position: "absolute", top: -2, right: -5, width: 7, height: 7, borderRadius: "50%", background: C.red }} />}
-      </div>
-      <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, letterSpacing: "0.01em", color, whiteSpace: "nowrap", transition: "color 0.2s" }}>
-        {n.label}
-      </span>
+      <Icon name={n.icon} color={active ? (dark ? "#04130A" : "#FFFFFF") : C.muted} size={22} />
+      {dot && <span aria-hidden="true" style={{ position: "absolute", top: 4, right: 4, width: 7, height: 7, borderRadius: "50%", background: C.red }} />}
       <style>{`
         .athlos-tab-btn { transition: transform 0.15s ease; }
         .athlos-tab-btn:active { transform: scale(0.86); }

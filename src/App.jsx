@@ -620,15 +620,15 @@ export default function AthlosApp() {
             {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
             {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
 
-            {/* iOS liquid-glass nav — frosted translucent pill the content blurs through */}
+            {/* compact icon-only glass pill — hugs its content, centered */}
             <nav style={{
-              display: "flex", justifyContent: "space-around", alignItems: "center",
-              width: "100%", maxWidth: 560, marginInline: "auto",
-              padding: "7px 8px",
+              display: "flex", justifyContent: "center", alignItems: "center", gap: 8,
+              width: "fit-content", marginInline: "auto",
+              padding: "6px 10px",
               background: theme === "dark" ? "rgba(10,12,11,0.28)" : "rgba(255,255,255,0.10)",
               backdropFilter: "blur(24px) saturate(180%)",
               WebkitBackdropFilter: "blur(24px) saturate(180%)",
-              borderRadius: 28,
+              borderRadius: 999,
               border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.45)"}`,
               boxShadow: theme === "dark"
                 // outer lift + top rim highlight = the "lit glass edge"
