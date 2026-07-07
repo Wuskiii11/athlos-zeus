@@ -574,8 +574,8 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
       </div>
 
       {/* brand headline — the ATHLOS logotype takes the reference's big-greeting spot */}
-      <div style={{ margin: "16px 0 20px", position: "relative", zIndex: 1, order: 1, ...rise(0.05) }}>
-        <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: 34, letterSpacing: "0.16em", color: C.text, lineHeight: 1 }}>
+      <div style={{ margin: "16px 0 20px", position: "relative", zIndex: 1, order: 1, textAlign: "center", ...rise(0.05) }}>
+        <div style={{ fontFamily: "'Cinzel',Georgia,serif", fontWeight: 700, fontSize: 34, letterSpacing: "0.16em", color: C.text, lineHeight: 1, paddingLeft: "0.16em" }}>
           ATHL<span style={{ color: C.gold }}>·</span>OS
         </div>
         <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 7 }}>
