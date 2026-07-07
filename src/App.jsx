@@ -122,6 +122,7 @@ export default function AthlosApp() {
   const [user, setUser]               = useState(null);
   const [chatUnread, setChatUnread]   = useState(0); // conversations with unread messages → nav dot + home bell
   const [chatConvOpen, setChatConvOpen] = useState(false); // full-screen chat subview open → hide the bottom nav
+  const [kbOpen, setKbOpen]           = useState(false); // a text field is focused (keyboard up) → slide the nav away
   const [authReady, setAuthReady]     = useState(false);
   const [reminder, setReminder]       = useState(null);
   const [dp, setDp]                   = useState(null);
@@ -248,6 +249,27 @@ export default function AthlosApp() {
     const onChange = (e) => { if (!themeExplicit.current) setThemeState(e.matches ? "dark" : "light"); };
     mq.addEventListener ? mq.addEventListener("change", onChange) : mq.addListener(onChange);
     return () => { mq.removeEventListener ? mq.removeEventListener("change", onChange) : mq.removeListener(onChange); };
+  }, []);
+
+  // Slide the floating nav away while a text field is focused (keyboard up)
+  // and bring it back on blur. The focusout check is deferred a tick because
+  // focus hopping between two fields fires out→in back-to-back.
+  useEffect(() => {
+    const editable = (el) => !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+    let timer;
+    const onFocusIn = (e) => { if (editable(e.target)) { clearTimeout(timer); setKbOpen(true); } };
+    const onFocusOut = (e) => {
+      if (!editable(e.target)) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => { if (!editable(document.activeElement)) setKbOpen(false); }, 80);
+    };
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+    };
   }, []);
 
   const navActive = ["train","session","report","fuel"].includes(screen) ? "today"
@@ -616,6 +638,10 @@ export default function AthlosApp() {
             // no solid backdrop here — real glass needs the app content to show
             // THROUGH the bar (blurred), so nothing opaque may sit behind it
             pointerEvents: "none",
+            // typing → the pill slides off below the screen; blur → it glides back
+            transform: kbOpen ? "translateY(130%)" : "translateY(0)",
+            opacity: kbOpen ? 0 : 1,
+            transition: "transform 0.32s cubic-bezier(.22,1,.36,1), opacity 0.25s ease",
           }}>
             {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
             {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
