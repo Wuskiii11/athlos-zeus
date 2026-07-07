@@ -4,9 +4,9 @@ import React, { useRef, useEffect, useCallback } from "react";
 // gives the real "sliding" feel; the centered item is highlighted, others fade
 // toward the edges. Used by the date-of-birth picker and the height/weight step.
 const ITEM_H = 40;
-const PAD = 2; // rows above/below center → 5-row visible window
+const PAD = 2; // default rows above/below center → 5-row visible window
 
-export default function WheelColumn({ items, value, onChange, render, width = 64, C, align = "center", showBand = true, activeColor }) {
+export default function WheelColumn({ items, value, onChange, render, width = 64, C, align = "center", showBand = true, activeColor, pad = PAD }) {
   const justify = align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
   const ref = useRef(null);
   const settleTimer = useRef(null);
@@ -36,14 +36,14 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
     }, 90);
   };
 
-  const visibleH = ITEM_H * (PAD * 2 + 1);
+  const visibleH = ITEM_H * (pad * 2 + 1);
 
   return (
     <div style={{ position: "relative", height: visibleH, width, flexShrink: 0 }}>
       {/* center selection band — engraved bronze rules (hidden when a parent
           draws its own full-width highlight bar instead) */}
       {showBand && <div style={{
-        position: "absolute", top: ITEM_H * PAD, left: 0, right: 0, height: ITEM_H,
+        position: "absolute", top: ITEM_H * pad, left: 0, right: 0, height: ITEM_H,
         borderTop: `1px solid ${C.gold}77`, borderBottom: `1px solid ${C.gold}77`,
         pointerEvents: "none", zIndex: 2,
       }} />}
@@ -71,7 +71,7 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
         }}
       >
         <style>{`.athlos-wheel-scroll::-webkit-scrollbar{display:none}`}</style>
-        <div style={{ height: ITEM_H * PAD }} />
+        <div style={{ height: ITEM_H * pad }} />
         {items.map((it, i) => {
           const active = it === value;
           return (
@@ -93,11 +93,11 @@ export default function WheelColumn({ items, value, onChange, render, width = 64
             </div>
           );
         })}
-        <div style={{ height: ITEM_H * PAD }} />
+        <div style={{ height: ITEM_H * pad }} />
       </div>
       {/* top/bottom fade — matches the sheet/screen background it sits on */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: ITEM_H * PAD, background: `linear-gradient(to bottom, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 3 }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: ITEM_H * PAD, background: `linear-gradient(to top, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 3 }} />
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: ITEM_H * pad, background: `linear-gradient(to bottom, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 3 }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: ITEM_H * pad, background: `linear-gradient(to top, ${C.bg}, transparent)`, pointerEvents: "none", zIndex: 3 }} />
     </div>
   );
 }

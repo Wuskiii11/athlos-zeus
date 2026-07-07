@@ -81,12 +81,12 @@ function BirthWheelInline({ value, onChange, C, lang }) {
 
   return (
     <div style={{ position: "relative", margin: "6px -28px 0" }}>
-      {/* full-width selection bar behind the middle row */}
-      <div aria-hidden="true" style={{ position: "absolute", top: 80, left: 0, right: 0, height: 40, background: C.accent, zIndex: 0 }} />
+      {/* full-width selection bar behind the middle row (7-row window → row 4) */}
+      <div aria-hidden="true" style={{ position: "absolute", top: 120, left: 0, right: 0, height: 40, background: C.accent, zIndex: 0 }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", padding: "0 26px" }}>
-        <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width="46%" C={C} render={(m) => months[m]} align="left" showBand={false} activeColor={onBar} />
-        <WheelColumn items={days} value={day} onChange={setDay} width="18%" C={C} align="center" showBand={false} activeColor={onBar} />
-        <WheelColumn items={years} value={year} onChange={setYear} width="36%" C={C} align="right" showBand={false} activeColor={onBar} />
+        <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width="46%" C={C} render={(m) => months[m]} align="left" showBand={false} activeColor={onBar} pad={3} />
+        <WheelColumn items={days} value={day} onChange={setDay} width="18%" C={C} align="center" showBand={false} activeColor={onBar} pad={3} />
+        <WheelColumn items={years} value={year} onChange={setYear} width="36%" C={C} align="right" showBand={false} activeColor={onBar} pad={3} />
       </div>
     </div>
   );
@@ -222,7 +222,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const STEP_TITLES = {
     name:      { title: "Uporabniško\nime",        sub: "KAKO TE BOMO KLICALI" },
     acq:       { title: "Kako si\nslišal za nas?", sub: "" },
-    birth:     { title: "Datum\nrojstva",          sub: "ZA PRILAGODITEV PROGRAMA" },
+    birth:     { title: "Datum\nrojstva",          sub: "" },
     gender:    { title: "Spol",                    sub: "ZA IZRAČUN NORM IN KALORIJ" },
     vision:    { title: "",                        sub: "" }, // custom render — hero figure with callouts
     body:      { title: "Višina\n& teža",          sub: "ZA IZRAČUN BREMEN IN KALORIJ" },
@@ -494,16 +494,6 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         {key === "birth" && (
           <>
             <BirthWheelInline value={birth} onChange={setBirth} C={C} lang={lang} />
-            {validBirth(birth) && (
-              <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.14em", textAlign: "center", display: "block", marginTop: 16 }}>
-                {(() => {
-                  const b = new Date(birth); const n = new Date();
-                  let a = n.getFullYear() - b.getFullYear();
-                  if (n.getMonth() < b.getMonth() || (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) a -= 1;
-                  return `${a} ${t("LET")}`;
-                })()}
-              </Mono>
-            )}
             <div style={{ flex: 1 }} />
             <PrimaryBtn onClick={() => validBirth(birth) && next()} style={{ opacity: validBirth(birth) ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
           </>
