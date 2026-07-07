@@ -37,9 +37,9 @@
   --at-line-soft:   rgba(28,24,20,0.07);
 
   /* Type families */
-  --at-serif:  'Cinzel', Georgia, serif;            /* headings, numerals — UPPERCASE, tracked */
-  --at-body:   'Cormorant Garamond', Georgia, serif;/* body copy, quotes — generous, can italicize */
-  --at-cond:   'Barlow Condensed', sans-serif;      /* big display labels (workout titles) */
+  --at-serif:  'Poppins', system-ui, sans-serif;    /* headings, numerals — UPPERCASE, tracked */
+  --at-body:   'Poppins', system-ui, sans-serif;    /* body copy, quotes */
+  --at-cond:   'Poppins', system-ui, sans-serif;    /* big display labels (workout titles) */
   --at-mono:   'JetBrains Mono', monospace;         /* kickers, metrics, data, eyebrows */
 
   /* Radii */

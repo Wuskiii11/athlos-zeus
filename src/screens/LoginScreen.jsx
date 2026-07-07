@@ -5,7 +5,7 @@ import { signIn, signUp, signInWithProvider } from "../lib/api";
 import { useT } from "../lib/i18n";
 
 // ── Entry experience: full-bleed gym photo, always-dark chrome on top ──
-const FONTS = { heading: "'Cinzel',Georgia,serif", display: "'Cormorant Garamond',Georgia,serif" };
+const FONTS = { heading: "'Poppins',system-ui,sans-serif", display: "'Poppins',system-ui,sans-serif" };
 const DARK = {
   bg: "#0A0A09", text: "#F2F5F2", text2: "rgba(242,245,242,0.80)", muted: "rgba(242,245,242,0.55)", muted2: "rgba(242,245,242,0.38)",
   surface: "rgba(255,255,255,0.05)", surface2: "rgba(255,255,255,0.08)", border: "rgba(255,255,255,0.14)",

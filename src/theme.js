@@ -12,13 +12,13 @@ import React from "react";
 
 export const FONTS = {
   // body / UI
-  display: "'Cormorant Garamond',Georgia,'Times New Roman',serif",
-  // headings — engraved caps
-  heading: "'Cinzel',Georgia,'Times New Roman',serif",
+  display: "'Poppins',system-ui,sans-serif",
+  // headings — same face, heavier weights differentiate
+  heading: "'Poppins',system-ui,sans-serif",
   // accent / numerals / quotes
-  serif: "'Cormorant Garamond',Georgia,'Times New Roman',serif",
-  // condensed display labels
-  cond: "'Barlow Condensed','Arial Narrow',sans-serif",
+  serif: "'Poppins',system-ui,sans-serif",
+  // display labels
+  cond: "'Poppins',system-ui,sans-serif",
   // data / numerals — monospace kept for data fidelity
   mono: "'JetBrains Mono','IBM Plex Mono',ui-monospace,Menlo,monospace",
 };
