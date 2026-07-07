@@ -272,7 +272,8 @@ export function TabButton({ n, active, onClick, dot }) {
       aria-label={n.label}
       className="athlos-tab-btn"
       style={{
-        flex: "0 0 auto", width: 46, height: 46, borderRadius: "50%",
+        flex: "0 0 auto", width: active ? "auto" : 46, height: 46, borderRadius: 999,
+        padding: active ? "0 18px" : 0,
         border: "none", cursor: "pointer", position: "relative",
         display: "flex", alignItems: "center", justifyContent: "center",
         background: active ? C.accent : "transparent",
@@ -281,8 +282,11 @@ export function TabButton({ n, active, onClick, dot }) {
         transition: "background 0.25s ease, box-shadow 0.25s ease",
       }}
     >
-      <Icon name={n.icon} color={active ? (dark ? "#04130A" : "#FFFFFF") : C.muted} size={22} />
-      {dot && <span aria-hidden="true" style={{ position: "absolute", top: 4, right: 4, width: 7, height: 7, borderRadius: "50%", background: C.red }} />}
+      {/* active tab spells its name; the icon only stands in while inactive */}
+      {active
+        ? <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: dark ? "#04130A" : "#FFFFFF", whiteSpace: "nowrap", lineHeight: 1 }}>{n.label}</span>
+        : <Icon name={n.icon} color={C.muted} size={22} />}
+      {dot && <span aria-hidden="true" style={{ position: "absolute", top: 4, right: 4, width: 7, height: 7, borderRadius: "50%", background: C.red, border: active ? `1.5px solid ${C.accent}` : "none" }} />}
       <style>{`
         .athlos-tab-btn { transition: transform 0.15s ease; }
         .athlos-tab-btn:active { transform: scale(0.86); }
