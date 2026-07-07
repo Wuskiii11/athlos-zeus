@@ -125,7 +125,7 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
     <div style={{
       alignSelf: "stretch", borderRadius: 18, padding: "16px 16px 14px", margin: "2px 0",
       animation: "athlosMsgBot 0.32s cubic-bezier(0.22,1,0.36,1) both",
-      background: dark ? C.surface : "#FCF9F2",
+      background: dark ? C.surface : "#FFFFFF",
       border: `1px solid ${C.gold}44`,
     }}>
       <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 17, color: C.text, letterSpacing: "0.02em" }}>{t("Kako je šlo zadnjič?")}</div>
@@ -361,7 +361,7 @@ export default function ScreenAI({ user, profile }) {
                 borderRadius: isMine ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
                 background: isMine
                   ? "#1C1814"
-                  : (dark ? "rgba(255,255,255,0.07)" : "#FCF9F2"),
+                  : (dark ? "rgba(255,255,255,0.07)" : "#FFFFFF"),
                 border: isMine
                   ? "1px solid rgba(244,239,230,0.10)"
                   : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
@@ -398,7 +398,7 @@ export default function ScreenAI({ user, profile }) {
           <div style={{ display: "flex", animation: "athlosFade 0.2s ease" }}>
             <div style={{
               padding: "16px 18px", borderRadius: "18px 18px 18px 4px", display: "flex", gap: 6, alignItems: "center",
-              background: dark ? "rgba(255,255,255,0.07)" : "#FCF9F2",
+              background: dark ? "rgba(255,255,255,0.07)" : "#FFFFFF",
               border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
             }}>
               {[0, 0.2, 0.4].map((d, i) => (
@@ -415,7 +415,7 @@ export default function ScreenAI({ user, profile }) {
             {SUGGESTIONS.map((s) => (
               <button key={s} onClick={() => send(s)} style={{
                 width: "100%",
-                background: dark ? C.surface : "#FCF9F2",
+                background: dark ? C.surface : "#FFFFFF",
                 border: `1px solid ${dark ? C.border : "#D8CFBD"}`,
                 borderRadius: 16,
                 padding: "14px 16px", textAlign: "left", cursor: "pointer", marginBottom: 10,

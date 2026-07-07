@@ -213,7 +213,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
   // making white-on-marble unreadable on dark chat backgrounds.
   const bgBubble = isMine
     ? "#1C1814"
-    : (darkBg ? "rgba(255,255,255,0.09)" : "#FCF9F2");
+    : (darkBg ? "rgba(255,255,255,0.09)" : "#FFFFFF");
   const bubbleBorder = isMine
     ? `1px solid ${darkBg ? "rgba(244,239,230,0.22)" : "rgba(244,239,230,0.10)"}`
     : `1px solid ${darkBg ? "rgba(255,255,255,0.16)" : "#D8CFBD"}`;

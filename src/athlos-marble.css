@@ -12,10 +12,10 @@
 /* 2 ─ TOKENS ──────────────────────────────────────────────────
    Reference these everywhere — never hard-code hex values.       */
 :root {
-  /* Surfaces — warm marble */
-  --at-bg:          #f4efe6;  /* page / screen base    */
-  --at-surface:     #fcf9f2;  /* raised card (light)   */
-  --at-surface-2:   #f0e9da;  /* card gradient bottom  */
+  /* Surfaces — pure white (cards separate via veins/borders, not tint) */
+  --at-bg:          #ffffff;  /* page / screen base    */
+  --at-surface:     #ffffff;  /* raised card (light)   */
+  --at-surface-2:   #ffffff;  /* card gradient bottom  */
   --at-ink-bg:      #14120e;  /* dark "oracle" panel   */
 
   /* Ink (text) */
@@ -169,7 +169,7 @@
    For a hero metric. Pair with an SVG ring (see README).         */
 .at-medallion {
   width: 210px; height: 210px; border-radius: 50%; position: relative;
-  background: #f2eee4;
+  background: #ffffff;
   box-shadow: var(--at-shadow-lift);
   display: flex; align-items: center; justify-content: center;
 }

@@ -64,7 +64,7 @@ export const THEMES = {
     bgImage: "none",
     btn: "#1C1814",
     btnText: "#F4EFE6",
-    surface: "#FCF9F2",
+    surface: "#FFFFFF",
     surface2: "#FFFFFF",
     surface3: "#FFFFFF",
     border: "rgba(28,24,20,0.12)",

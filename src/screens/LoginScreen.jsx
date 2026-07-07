@@ -8,7 +8,7 @@ import { useT } from "../lib/i18n";
 const FONTS = { heading: "'Cinzel',Georgia,serif", display: "'Cormorant Garamond',Georgia,serif" };
 const LIGHT = {
   bg: "#FFFFFF", text: "#1C1814", text2: "rgba(28,24,20,0.78)", muted: "rgba(28,24,20,0.52)", muted2: "rgba(28,24,20,0.34)",
-  surface: "#FCF9F2", surface2: "#FFFFFF", border: "rgba(28,24,20,0.16)",
+  surface: "#FFFFFF", surface2: "#FFFFFF", border: "rgba(28,24,20,0.16)",
   accent: "#1F7A52", accent2: "#00FF87", gold: "#1F7A52", red: "#B1452F", ...FONTS,
 };
 const DARK = {

@@ -159,7 +159,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
             padding: "15px 16px", borderRadius: 16, cursor: "pointer",
             background: active
               ? `${C.gold}12`
-              : (C.name === "dark" ? C.surface : "#FCF9F2"),
+              : (C.name === "dark" ? C.surface : "#FFFFFF"),
             border: `1.5px solid ${active ? `${C.gold}99` : (C.name === "dark" ? C.border : "#D8CFBD")}`,
             boxShadow: C.name === "dark" ? "none" : "0 3px 10px rgba(28,24,20,0.05)",
             transition: "background 0.15s, border-color 0.15s",
