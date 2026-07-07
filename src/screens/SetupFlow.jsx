@@ -143,6 +143,11 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const next = () => setStep((s) => Math.min(s + 1, total - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
+  // Progress dashes count QUESTIONS only — the interstitial story screens
+  // (vision, quote) show no indicator at all.
+  const QUESTION_FLOW = FLOW.filter((k) => k !== "vision" && k !== "quote");
+  const qIndex = QUESTION_FLOW.indexOf(key);
+
   // Display names are unique across accounts — check with the server before
   // moving on (offline/demo mode skips silently, isNameTaken returns false).
   const tryName = async () => {
@@ -279,18 +284,14 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         style={{ position: "absolute", top: "max(env(safe-area-inset-top, 12px), 12px)", right: 20, zIndex: 3 }}
       />
 
-      {/* Progress bar — bronze, clear of the compact language pill */}
-      <div style={{ padding: "12px 112px 0 24px", display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Top row — just the back arrow; progress lives as dashes at the bottom */}
+      <div style={{ padding: "12px 112px 0 24px", display: "flex", alignItems: "center" }}>
         {/* Back — earlier step, or out to the login screen on step 0 */}
         <button onClick={() => (step > 0 ? back() : onBack?.())} style={{ background: "none", border: "none", color: C.muted, fontSize: 24.5, cursor: "pointer", lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>‹</button>
-        <div style={{ flex: 1, height: 3, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
-          <div style={{ width: `${((step + 1) / total) * 100}%`, height: "100%", background: C.gold, borderRadius: 999, transition: "width 0.35s cubic-bezier(.2,.8,.2,1)" }} />
-        </div>
-        <Mono style={{ color: C.muted, fontSize: 10 }}>{step + 1}/{total}</Mono>
       </div>
 
       {/* Step content */}
-      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 24px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
+      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 38px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
         {key !== "quote" && key !== "vision" && (
           <div style={{ marginBottom: 28 }}>
             <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.18em" }}>{t(STEP_TITLES[key].sub)}</Mono>
@@ -590,12 +591,31 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
       </div>
 
-      {/* Fixed bottom button for the sport step */}
+      {/* Progress dashes — one per QUESTION, bottom center; interstitial
+          story screens (vision, quote) render none */}
+      {qIndex !== -1 && (
+        <div aria-hidden="true" style={{
+          position: "absolute", left: 0, right: 0,
+          bottom: "max(env(safe-area-inset-bottom, 10px), 10px)",
+          display: "flex", justifyContent: "center", gap: 6,
+          zIndex: 4, pointerEvents: "none",
+        }}>
+          {QUESTION_FLOW.map((k, i) => (
+            <span key={k} style={{
+              width: i === qIndex ? 22 : 8, height: 4, borderRadius: 999,
+              background: i <= qIndex ? C.gold : (C.name === "dark" ? "rgba(255,255,255,0.16)" : "rgba(28,24,20,0.16)"),
+              transition: "width 0.3s ease, background 0.3s ease",
+            }} />
+          ))}
+        </div>
+      )}
+
+      {/* Fixed bottom button for the sport step — lifted above the dashes */}
       {key === "sport" && (
         <div style={{
           position: "absolute", bottom: 0, left: 0, right: 0,
           padding: "12px 28px",
-          paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)",
+          paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 28px), 30px)",
           background: `linear-gradient(to top, ${C.bg} 70%, transparent)`,
         }}>
           <PrimaryBtn
