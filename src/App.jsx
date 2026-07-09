@@ -587,14 +587,17 @@ export default function AthlosApp() {
           {/* ── Brand atmosphere — Greek identity hidden in the background.
               Faint carved relief + engraved-stone grain + soft depth, all
               sub-6% so they read subconsciously and never compete. ── */}
-          {/* carved Zeus relief, bleeding off the top-right, dissolving downward */}
-          <img src="/img/hero-zeus-ink.png" alt="" aria-hidden="true" style={{
-            position: "absolute", top: 6, right: -48, height: 500, width: "auto", maxWidth: "80%",
+          {/* carved Zeus statue, bleeding off the top-right and dissolving down.
+              screen blend on dark drops the artwork's black field so only the
+              faint figure remains (no seam); multiply does the same on light. */}
+          <img src={C.name === "dark" ? "/img/hero-zeus-alt-cut.png" : "/img/bust-ink.png"} alt="" aria-hidden="true" style={{
+            position: "absolute", top: 8, right: -50, height: 580, width: "auto", maxWidth: "88%",
             objectFit: "contain", zIndex: 0, pointerEvents: "none", userSelect: "none",
-            opacity: C.name === "dark" ? 0.05 : 0.045,
-            filter: C.name === "dark" ? "invert(1) grayscale(1)" : "grayscale(1)",
-            WebkitMaskImage: "linear-gradient(180deg, #000 0%, #000 52%, transparent 90%)",
-            maskImage: "linear-gradient(180deg, #000 0%, #000 52%, transparent 90%)",
+            opacity: C.name === "dark" ? 0.10 : 0.05,
+            filter: C.name === "dark" ? "grayscale(1) brightness(1.2)" : "grayscale(1)",
+            mixBlendMode: C.name === "dark" ? "screen" : "multiply",
+            WebkitMaskImage: "linear-gradient(180deg, #000 0%, #000 58%, transparent 92%)",
+            maskImage: "linear-gradient(180deg, #000 0%, #000 58%, transparent 92%)",
           }} />
           {/* engraved-stone grain */}
           <div aria-hidden="true" style={{
