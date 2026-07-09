@@ -99,11 +99,30 @@ export default function CheckinCard({ C, t, lang, onSubmit }) {
   const today = isoLocal(new Date());
   const doneToday = !!store.days[today];
 
-  // Done for today → questionnaire is gone, only the streak strip stays.
+  // Done for today → streak strip on top, today's answers as four bare stat
+  // columns (value large, label whisper-quiet) — same grammar as the battery.
   if (doneToday) {
+    const a = store.days[today] || {};
+    const stats = [
+      [`${a.sleepQuality ?? "–"}/5`, t("SPANEC")],
+      [`${a.mood ?? "–"}/5`, t("ENERGIJA")],
+      [`${a.soreness ?? "–"}/5`, t("SORNOST")],
+      [`${a.stress ?? "–"}/5`, t("STRES")],
+    ];
     return (
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: "14px 18px", marginBottom: 12 }}>
-        <StreakStrip days={store.days} C={C} t={t} lang={lang} />
+      <div style={{ background: C.surface2, borderRadius: 24, padding: "15px 18px", marginBottom: 12, boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)" }}>
+        <StreakStrip days={store.days} C={C} t={t} lang={lang} style={{ paddingBottom: 13, borderBottom: `1px solid ${C.border}`, marginBottom: 14 }} />
+        <div style={{ display: "flex", alignItems: "stretch" }}>
+          {stats.map(([val, label], i) => (
+            <React.Fragment key={label}>
+              {i > 0 && <span style={{ width: 1, background: C.border }} />}
+              <span style={{ flex: 1, textAlign: "center" }}>
+                <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 16.5, color: C.text, lineHeight: 1 }}>{val}</span>
+                <Mono style={{ color: C.muted2, fontSize: 7.5, letterSpacing: "0.12em", display: "block", marginTop: 5 }}>{label}</Mono>
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
       </div>
     );
   }
@@ -119,10 +138,10 @@ export default function CheckinCard({ C, t, lang, onSubmit }) {
   };
 
   return (
-    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: 18, marginBottom: 12 }}>
+    <div style={{ background: C.surface2, borderRadius: 24, padding: 18, marginBottom: 12, boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)" }}>
       {/* icon-chip header row, matching the rest of the home cards */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ width: 36, height: 36, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <span style={{ width: 36, height: 36, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8M9 10h.01M15 10h.01" /></svg>
         </span>
         <span style={{ flex: 1, fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{t("Kako se počutiš?")}</span>

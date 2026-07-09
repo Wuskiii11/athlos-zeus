@@ -211,8 +211,22 @@ export async function searchUsers(q) {
   return (data || []).map((r) => ({
     user_id: r.user_id,
     name: r.name,
+    photo: r.photo || null,
     initials: (r.name || "?").trim().charAt(0).toUpperCase() || "?",
   }));
+}
+
+// Public slice of other users' profiles (name + avatar URL) — the profiles RLS
+// is "own row only", so this goes through the public_profiles RPC.
+export async function getPublicProfiles(ids = []) {
+  if (!hasSupabase || !ids.length) return {};
+  try {
+    const { data, error } = await supabase.rpc("public_profiles", { ids });
+    if (error) return {};
+    const map = {};
+    (data || []).forEach((r) => { map[r.user_id] = { name: r.name, photo: r.photo || null }; });
+    return map;
+  } catch { return {}; }
 }
 
 // True when someone ELSE already uses this display name (case-insensitive).
@@ -370,8 +384,8 @@ async function saveAiMessage(userId, role, content) {
 // Ask the AI coach via the "ai-coach" Edge Function. Returns the reply text,
 // or null when the function isn't deployed / no backend — caller falls back
 // to the local demo answers, so the screen never breaks.
-export async function askAI(userId, question, history = [], profile = {}, memory = null) {
-  try { await saveAiMessage(userId, "user", question); } catch {}
+export async function askAI(userId, question, history = [], profile = {}, memory = null, attachment = null) {
+  try { await saveAiMessage(userId, "user", attachment ? `[priponka: ${attachment.name}] ${question}` : question); } catch {}
   if (!hasSupabase) return null;
   try {
     const { data, error } = await supabase.functions.invoke("ai-coach", {
@@ -380,6 +394,7 @@ export async function askAI(userId, question, history = [], profile = {}, memory
         history: history.slice(-12).map((m) => ({ role: m.role, content: m.content })),
         profile: { name: profile.name, sport: profile.sport, height: profile.height, weight: profile.weight },
         memory: memory || undefined,   // učeča se baza (cilj/nivo/faza/oprema/poškodbe + opombe + feedback)
+        attachment: attachment || undefined, // { name, mime, data(base64) } — slika/PDF za vision
       },
     });
     if (error || !data?.reply) return null;
@@ -487,10 +502,14 @@ export async function listClubmates(userId) {
       const { data } = await supabase
         .from("athletes").select("user_id, name, initials, clubs(name)")
         .eq("club_id", myRow.club_id).neq("user_id", userId);
-      return (data || []).filter(a => a.user_id).map(a => ({
+      const rows = (data || []).filter(a => a.user_id);
+      // avatars live on profiles (own-row RLS) — pull them via the public RPC
+      const pubs = await getPublicProfiles(rows.map(a => a.user_id));
+      return rows.map(a => ({
         user_id: a.user_id,
         name: a.name,
         initials: a.initials,
+        photo: pubs[a.user_id]?.photo || null,
         club: a.clubs?.name || "",
         sport: "",
       }));
@@ -581,6 +600,12 @@ export async function listConversations(userId) {
         }
         return withBgOverride({ ...conv, lastMsg, otherUser });
       }));
+      // one RPC for all the avatars (photo lives on profiles, own-row RLS)
+      const pubs = await getPublicProfiles(result.filter(c => c.otherUser?.user_id).map(c => c.otherUser.user_id));
+      result.forEach((c) => {
+        const p = c.otherUser && pubs[c.otherUser.user_id];
+        if (p) c.otherUser = { ...c.otherUser, photo: p.photo, name: c.otherUser.name === "Neznano" ? (p.name || c.otherUser.name) : c.otherUser.name };
+      });
       return result.sort((a, b) => new Date(b.lastMsg?.created_at || b.created_at) - new Date(a.lastMsg?.created_at || a.created_at));
     } catch { return []; }
   }

@@ -24,67 +24,88 @@ export const FONTS = {
 };
 
 export const THEMES = {
-  // ── DARK — "Obsidian": true black marble, electric-green signal carries
-  // everything the bronze does in daylight ──
+  // ── DARK — premium 2025: near-black canvas, solid grayscale surfaces for
+  // depth (no glows, no colour washes), electric green reserved for primary
+  // actions and key signals only ──
   dark: {
     name: "dark",
-    bg: "#0A0A09",
-    // flat canvas — depth comes from surfaces and hairlines, not colour washes
+    bg: "#080808",
     bgImage: "none",
-    btn: "#E8FFF2",
-    btnText: "#091A0D",
-    surface: "rgba(255,255,255,0.045)",
-    surface2: "rgba(255,255,255,0.075)",
-    surface3: "rgba(255,255,255,0.11)",
-    border: "rgba(255,255,255,0.09)",
-    border2: "rgba(255,255,255,0.18)",
-    text: "#F2F5F2",
-    text2: "rgba(242,245,242,0.80)",
-    muted: "rgba(242,245,242,0.52)",
-    muted2: "rgba(242,245,242,0.34)",
+    // primary action IS the brand green — the one element allowed to shine
+    btn: "#00FF87",
+    btnText: "#04130A",
+    surface: "#111111",
+    surface2: "#181818",
+    surface3: "#1F1F1F",
+    border: "rgba(255,255,255,0.06)",
+    border2: "rgba(255,255,255,0.10)",
+    text: "#FFFFFF",
+    text2: "#B3B3B3",
+    muted: "#8C8C8C",
+    muted2: "#5C5C5C",
     accent: "#00FF87",
     accent2: "#33FFA3",
     gold: "#33FFA3",
     gold2: "#00FF87",
-    red: "#C95A3F",
-    yellow: "#33FFA3",
-    // oracle-panel ambiance
-    glow: "0 0 32px rgba(0,255,135,0.36)",
-    glowSoft: "0 0 18px rgba(0,255,135,0.20)",
-    ambient: "rgba(0,255,135,0.10)",
+    red: "#F87066",
+    yellow: "#F5A623",
+    // metric accents — used sparingly, always with an icon + label
+    amber: "#F5A623",
+    aqua: "#4CC9F0",
+    lav: "#C9A7FF",
+    lime: "#D9FF5B",
+    // restrained: only the green CTA may glow, and only softly
+    glow: "0 8px 24px rgba(0,255,135,0.22)",
+    glowSoft: "0 6px 16px rgba(0,255,135,0.14)",
+    ambient: "rgba(0,255,135,0.07)",
     grid: "rgba(0,255,135,0.03)",
     ...FONTS,
   },
 
-  // ── LIGHT (default / hero) — "Parian marble": warm cream + bronze + classical laurel ──
+  // ── LIGHT (default) — "Clean studio": a cool, calm neutral system built
+  // AROUND the Athlos green rather than a warm cream that reads dated. The
+  // canvas is a soft cool gray so crisp white cards lift off it (depth from
+  // tone, not heavy shadow — Linear / Stripe / Notion). Text is a cool ink,
+  // not pure black. Green stays the one brand signal: a deepened emerald that
+  // clears AA on white for text/icons, plus an electric pop for tiny accents.
   light: {
     name: "light",
-    bg: "#FFFFFF",
-    // flat parchment — the halftone dot texture alone carries the print feel
+    // app canvas — cool light gray; white surfaces sit visibly above it
+    bg: "#F5F6F8",
     bgImage: "none",
-    btn: "#1C1814",
-    btnText: "#F4EFE6",
-    surface: "#FFFFFF",
-    surface2: "#FFFFFF",
-    surface3: "#FFFFFF",
-    border: "rgba(28,24,20,0.12)",
-    border2: "rgba(28,24,20,0.20)",
-    text: "#1C1814",
-    text2: "rgba(28,24,20,0.78)",
-    muted: "rgba(28,24,20,0.52)",
-    muted2: "rgba(28,24,20,0.34)",
-    // in daylight everything signals in bronze/gold — the battery's color
-    accent: "#1F7A52",
-    accent2: "#00FF87",
-    gold: "#1F7A52",
-    gold2: "#00FF87",
-    red: "#B1452F",
-    yellow: "#1F7A52",
-    // restrained marble glow
-    glow: "0 10px 30px rgba(31,122,82,0.24)",
-    glowSoft: "0 6px 18px rgba(31,122,82,0.15)",
-    ambient: "rgba(31,122,82,0.10)",
-    grid: "rgba(28,24,20,0.04)",
+    // primary CTA — Athlos green, deepened just enough for white text (AA ~5:1)
+    btn: "#12805A",
+    btnText: "#FFFFFF",
+    surface: "#FFFFFF",   // elevated cards — the one true white
+    surface2: "#EFF1F4",  // inset controls: inputs, tiles, segmented tracks
+    surface3: "#E3E7EC",  // deepest inset: progress tracks, skeletons
+    // cool slate-based hairlines — quiet structure without hard lines
+    border: "rgba(16,24,40,0.08)",
+    border2: "rgba(16,24,40,0.12)",
+    // cool near-black ink → strong slate → gray labels → faint gray
+    text: "#0F1729",
+    text2: "#3A4453",
+    muted: "#68727F",
+    muted2: "#98A2B0",
+    // brand green for text/icons/active states — AA-legible on white
+    accent: "#12805A",
+    // electric pop reserved for tiny non-text accents (dots, sparkles)
+    accent2: "#00E27E",
+    gold: "#12805A",
+    gold2: "#00E27E",
+    // semantic set — clean, confident, all AA on white
+    red: "#D0352B",
+    yellow: "#B5610A",
+    // metric accents — burnt amber / deep teal / violet / olive
+    amber: "#B5610A",
+    aqua: "#0E7490",
+    lav: "#6941C6",
+    lime: "#5B8C00",
+    // the ONLY glow — a soft green lift under the primary CTA
+    glow: "0 10px 30px rgba(18,128,90,0.20)",
+    glowSoft: "0 6px 18px rgba(18,128,90,0.13)",
+    ambient: "rgba(18,128,90,0.08)",
+    grid: "rgba(16,24,40,0.04)",
     ...FONTS,
   },
 };

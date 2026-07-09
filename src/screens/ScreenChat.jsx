@@ -139,31 +139,32 @@ const GREEK = {
 };
 export const toGreek = (s) => String(s).split("").map((ch) => GREEK[ch.toUpperCase()] || ch).join("");
 
-// Marble disc with a ring — engraved Greek monogram, like a small medallion.
-function Avatar({ initials = "?", size = 44, isGroup }) {
+// Apple-style avatar: photo when there is one, otherwise a quiet grey disc
+// with the first letter of the name — no colour, no ornament.
+function Avatar({ initials = "?", size = 44, isGroup, photo }) {
   const C = useTheme();
   const dark = C.name === "dark";
+  if (photo && !isGroup) {
+    return (
+      <img src={photo} alt="" style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0, objectFit: "cover",
+      }} />
+    );
+  }
   return (
     <div style={{
       width: size, height: size, borderRadius: "50%", flexShrink: 0,
-      // filled "greige" disc (like Apple's grey avatars, warmed to the marble
-      // palette) so the icon reads as a solid chip against the cream page —
-      // not just a ring blending into the background
-      background: dark ? "#26241F" : "#DDD6C7",
-      border: `1.5px solid ${C.gold}55`,
-      boxShadow: dark ? "inset 0 1px 1px rgba(255,255,255,0.06)" : "inset 0 1px 2px rgba(255,255,255,0.7), 0 2px 7px rgba(28,24,20,0.10)",
+      background: dark ? "#2C2C2E" : "#D8D8DC",
       display: "flex", alignItems: "center", justifyContent: "center",
-      // Georgia fallback carries the Greek glyphs (Cinzel is Latin-only);
-      // regular weight so the glyph reads as a thin engraved stroke
-      fontFamily: C.heading, fontWeight: 400, fontSize: size * 0.48, lineHeight: 1,
-      color: isGroup ? C.gold : (dark ? C.text : "#1C1814"),
+      fontFamily: C.display, fontWeight: 600, fontSize: size * 0.42, lineHeight: 1,
+      color: dark ? "#9A9AA0" : "#6E6E73",
     }}>
       {isGroup ? (
         <svg width={size * 0.44} height={size * 0.44} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
           <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
         </svg>
-      ) : toGreek(initials)}
+      ) : (String(initials || "?").trim().charAt(0) || "?").toUpperCase()}
     </div>
   );
 }
@@ -216,7 +217,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
     : (darkBg ? "rgba(255,255,255,0.09)" : "#FFFFFF");
   const bubbleBorder = isMine
     ? `1px solid ${darkBg ? "rgba(244,239,230,0.22)" : "rgba(244,239,230,0.10)"}`
-    : `1px solid ${darkBg ? "rgba(255,255,255,0.16)" : "#D8CFBD"}`;
+    : `1px solid ${darkBg ? "rgba(255,255,255,0.16)" : "#D6DAE0"}`;
   const textColor = isMine ? "#F4EFE6" : (darkBg ? "rgba(255,255,255,0.92)" : "#1C1814");
 
   return (
@@ -230,8 +231,8 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
         onContextMenu={e => { e.preventDefault(); onLongPress?.(msg); }}
         style={{
           maxWidth: "74%",
-          padding: (isImage || isVideo) ? 0 : "10px 15px",
-          borderRadius: isMine ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+          padding: (isImage || isVideo) ? 0 : "11px 16px",
+          borderRadius: isMine ? "22px 22px 6px 22px" : "22px 22px 22px 6px",
           background: bgBubble,
           border: bubbleBorder,
           color: textColor,
@@ -268,15 +269,15 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
         )}
         {msg.type === "text" && (
           <span style={{
-            fontFamily: C.display, fontSize: 17.5, fontWeight: 500, lineHeight: 1.45,
-            fontStyle: isMine ? "normal" : "italic", position: "relative",
+            fontFamily: C.display, fontSize: 16.5, fontWeight: 500, lineHeight: 1.45,
+            position: "relative",
           }}>
             {msg.content}
           </span>
         )}
       </div>
       {showTime && (
-        <Mono style={{ fontSize: 9, color: C.muted2, margin: "3px 4px", letterSpacing: "0.12em" }}>
+        <Mono style={{ fontSize: 9, color: C.accent, margin: "4px 4px 2px", letterSpacing: "0.12em", opacity: 0.85 }}>
           {msg.created_at
             ? new Date(msg.created_at).toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })
             : ""}
@@ -295,7 +296,7 @@ function ProfileSheet({ user, C, t, onClose, onMessage, onBlock }) {
     >
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
-        background: C.bg, borderRadius: "24px 24px 0 0", padding: "24px 22px 40px",
+        background: C.bg, borderRadius: "28px 28px 0 0", padding: "24px 22px 40px",
         animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
       }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 22px" }} />
@@ -359,7 +360,7 @@ function BgSheet({ current, C, t, onSelect, onClose }) {
     >
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
-        background: C.bg, borderRadius: "24px 24px 0 0", padding: "24px 20px 44px",
+        background: C.bg, borderRadius: "28px 28px 0 0", padding: "24px 20px 44px",
         animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
       }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 18px" }} />
@@ -505,6 +506,8 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [convBg, setConvBg]         = useState(restored?.conv?.background || "default");
   const [search, setSearch]         = useState("");
+  const [searchOpen, setSearchOpen] = useState(false); // search collapses behind the header icon (reference)
+  const [filter, setFilter]         = useState("all"); // all | unread | groups
   const [reads, setReads]           = useState(() => loadChatReads());
   const [userQ, setUserQ]           = useState("");   // "new chat" name search
   const [userHits, setUserHits]     = useState([]);
@@ -749,6 +752,12 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
   // name, not a two-letter initial pair.
   const convInitials = (conv) =>
     conv.type === "group" ? "" : (conv.otherUser?.name?.trim()?.[0]?.toUpperCase() || "?");
+  // Unread = their latest message is newer than the last time we opened the
+  // conversation; prototype-seeded demo messages never count.
+  const isUnread = (conv) =>
+    !!conv.lastMsg && conv.lastMsg.sender_id && conv.lastMsg.sender_id !== userId
+    && !String(conv.lastMsg.id || "").startsWith("proto-")
+    && (!reads[conv.id] || new Date(conv.lastMsg.created_at) > new Date(reads[conv.id]));
   const lastMsgLabel = (conv) => {
     const msg = conv.lastMsg;
     if (!msg) return t("Začni pogovor");
@@ -784,44 +793,85 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
         const dark = C.name === "dark";
         const sep = dark ? "rgba(255,255,255,0.07)" : "rgba(28,24,20,0.08)";
         const q = search.trim().toLowerCase();
-        const shown = convs.filter(c => convName(c).toLowerCase().includes(q));
+        let shown = convs.filter(c => convName(c).toLowerCase().includes(q));
+        if (filter === "unread") shown = shown.filter(isUnread);
+        if (filter === "groups") shown = shown.filter(c => c.type === "group");
+        const roundBtn = {
+          background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 50, flexShrink: 0,
+          width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: C.text,
+          boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.06)",
+        };
         return (
         <div style={{ paddingBottom: 20 }}>
-          {/* Header — engraved kicker + title with the compose seal on the same
-              baseline; calmer scale and a steady 14px rhythm down to the list */}
+          {/* Header — big title left, round search / new-chat actions right
+              (the reference's Chats header) */}
           <div style={{ padding: "18px 16px 0" }}>
-            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
-              <div style={{ minWidth: 0 }}>
-                <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.22em", display: "block", marginBottom: 6 }}>{t("KLUB · EKIPA")}</Mono>
-                <h1 style={{ fontFamily: C.heading, fontSize: 27, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0, color: C.text, lineHeight: 1 }}>
-                  {t("Pogovori")}
-                </h1>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 14 }}>
+              <h1 style={{ fontFamily: C.display, fontSize: 30, fontWeight: 800, margin: 0, color: C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>
+                {t("Pogovori")}
+              </h1>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Pressable onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearch(""); }} scale={0.9}
+                  style={{ ...roundBtn, color: searchOpen ? C.accent : C.text, borderColor: searchOpen ? `${C.accent}55` : C.border }}>
+                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                </Pressable>
+                <Pressable onClick={() => setView("new-chat")} scale={0.9} style={{ ...roundBtn, color: C.accent }}>
+                  <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                </Pressable>
               </div>
-              <Pressable
-                onClick={() => setView("new-chat")}
-                scale={0.9}
-                style={{
-                  background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 50, flexShrink: 0,
-                  width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: C.accent,
-                  boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.06)",
-                }}
-              >
-                <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
-                </svg>
-              </Pressable>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 9, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 999, padding: "11px 16px", marginBottom: 10, boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.04)" }}>
-              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth={2.2} strokeLinecap="round" style={{ flexShrink: 0 }}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder={t("Iskanje")}
-                className="athlos-conv-search"
-                style={{ flex: 1, border: "none", background: "none", outline: "none", fontFamily: C.display, fontWeight: 500, color: C.text, minWidth: 0 }}
-              />
-              <style>{`.athlos-conv-search::placeholder { color: ${C.muted2}; font-style: italic; }`}</style>
-              {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 20, lineHeight: 1 }}>×</button>}
+
+            {searchOpen && (
+              <div style={{ display: "flex", alignItems: "center", gap: 9, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 999, padding: "11px 16px", marginBottom: 12, boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.04)", animation: "athlosFade 0.2s ease" }}>
+                <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth={2.2} strokeLinecap="round" style={{ flexShrink: 0 }}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder={t("Iskanje")}
+                  autoFocus
+                  className="athlos-conv-search"
+                  style={{ flex: 1, border: "none", background: "none", outline: "none", fontFamily: C.display, fontWeight: 500, color: C.text, minWidth: 0 }}
+                />
+                <style>{`.athlos-conv-search::placeholder { color: ${C.muted2}; font-style: italic; }`}</style>
+                {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 20, lineHeight: 1 }}>×</button>}
+              </div>
+            )}
+
+            {/* people rail — me (+ new chat) and clubmates, reference stories row */}
+            <div className="athlos-scroll" style={{ display: "flex", gap: 14, overflowX: "auto", scrollbarWidth: "none", padding: "2px 2px 14px" }}>
+              <button onClick={() => setView("new-chat")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0, width: 60 }}>
+                <span style={{ position: "relative" }}>
+                  <Avatar initials={(profile?.name || "?").trim()[0]?.toUpperCase()} photo={profile?.photo} size={56} />
+                  <span style={{ position: "absolute", bottom: -1, right: -1, width: 19, height: 19, borderRadius: "50%", background: C.accent, border: `2px solid ${C.bg}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke={dark ? "#04130A" : "#FFFFFF"} strokeWidth={3} strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  </span>
+                </span>
+                <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>{t("Jaz")}</span>
+              </button>
+              {clubmates.filter(m => !blocks.includes(m.user_id)).slice(0, 12).map(m => (
+                <button key={m.user_id} onClick={() => startChat(m.user_id, m)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0, width: 60 }}>
+                  <span style={{ padding: 2, borderRadius: "50%", border: `1.5px solid ${C.accent}55` }}>
+                    <Avatar initials={m.initials} photo={m.photo} size={52} />
+                  </span>
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>
+                    {(m.name || "?").trim().split(/\s+/)[0]}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* filter chips — Vsi / Neprebrani / Skupine */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              {[["all", t("Vsi")], ["unread", t("Neprebrani")], ["groups", t("Skupine")]].map(([key, lbl]) => (
+                <button key={key} onClick={() => setFilter(key)} style={{
+                  padding: "8px 16px", borderRadius: 999, cursor: "pointer",
+                  border: `1px solid ${filter === key ? `${C.accent}55` : C.border}`,
+                  background: filter === key ? `${C.accent}16` : C.surface,
+                  color: filter === key ? C.accent : C.muted,
+                  fontFamily: C.display, fontWeight: 600, fontSize: 13.5,
+                  WebkitTapHighlightColor: "transparent",
+                }}>{lbl}</button>
+              ))}
             </div>
           </div>
 
@@ -847,15 +897,11 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             </div>
           )}
 
-          {/* Rows — Apple Messages structure, marble medallion avatars */}
+          {/* Rows — reference structure: avatar · name + preview · time + badge */}
           {!loadingConvs && shown.map((conv, i) => {
             const isBlocked = conv.type === "direct" && blocks.includes(conv.otherUser?.user_id);
-            // Unread = their latest message is newer than the last time we opened
-            // this conversation (opening it marks it read → clears the dot).
-            // Prototype-seeded demo messages are days old — never mark them unread.
-            const unread = !!conv.lastMsg && conv.lastMsg.sender_id && conv.lastMsg.sender_id !== userId
-              && !String(conv.lastMsg.id || "").startsWith("proto-")
-              && (!reads[conv.id] || new Date(conv.lastMsg.created_at) > new Date(reads[conv.id]));
+            const unread = isUnread(conv);
+            const mineLast = conv.lastMsg?.sender_id === userId;
             const last = i === shown.length - 1;
             return (
               <button
@@ -863,36 +909,38 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                 onClick={() => openConv(conv)}
                 style={{
                   width: "100%", textAlign: "left", display: "flex", alignItems: "center",
-                  padding: 0, background: "none", border: "none",
+                  padding: "0 16px", background: "none", border: "none",
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                   opacity: isBlocked ? 0.45 : 1,
                 }}
               >
-                {/* fixed left rail keeps the unread dot centred, never clipped */}
-                <span style={{ width: 22, display: "flex", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: unread ? C.accent : "transparent", boxShadow: unread ? `0 0 8px ${C.accent}66` : "none" }} />
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: 13, flex: 1, minWidth: 0, paddingRight: 16 }}>
-                  <Avatar initials={convInitials(conv)} isGroup={conv.type === "group"} size={52} />
-                  <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "14px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
-                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
-                      <span style={{ fontFamily: C.display, fontWeight: unread ? 800 : 700, fontSize: 17.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {convName(conv)}
-                      </span>
-                      <span style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
-                        <span style={{ fontFamily: C.mono, fontSize: 10, color: C.muted2, letterSpacing: "0.08em" }}>
-                          {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
-                        </span>
-                        <svg width={6} height={11} viewBox="0 0 8 13" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}><path d="M1.5 1.5L6.5 6.5L1.5 11.5"/></svg>
+                <Avatar initials={convInitials(conv)} photo={conv.type === "direct" ? conv.otherUser?.photo : null} isGroup={conv.type === "group"} size={52} />
+                <span style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, marginLeft: 13, padding: "14px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: "block", fontFamily: C.display, fontWeight: unread ? 800 : 700, fontSize: 16.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {convName(conv)}
+                    </span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 4, minWidth: 0 }}>
+                      {mineLast && !isBlocked && (
+                        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                          <path d="M2 12l4 4L14 8" /><path d="M9 14.5L11.5 17 21 7" />
+                        </svg>
+                      )}
+                      <span style={{
+                        fontFamily: C.display, fontSize: 14.5, fontWeight: 500,
+                        color: unread ? C.text2 : C.muted, lineHeight: 1.35,
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>
+                        {isBlocked ? t("Blokirano") : lastMsgLabel(conv)}
                       </span>
                     </span>
-                    <span style={{
-                      fontFamily: C.display, fontSize: 15, fontWeight: 500, fontStyle: "italic",
-                      color: unread ? C.text2 : C.muted, marginTop: 4, lineHeight: 1.35,
-                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
-                    }}>
-                      {isBlocked ? t("Blokirano") : lastMsgLabel(conv)}
+                  </span>
+                  {/* right column — time on top, unread badge under it */}
+                  <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
+                    <span style={{ fontFamily: C.mono, fontSize: 10, color: unread ? C.accent : C.muted2, letterSpacing: "0.06em" }}>
+                      {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
                     </span>
+                    <span style={{ width: 10, height: 10, borderRadius: "50%", background: unread ? C.red : "transparent", boxShadow: unread ? `0 0 8px ${C.red}66` : "none" }} />
                   </span>
                 </span>
               </button>
@@ -958,16 +1006,18 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                 display: "flex", alignItems: "center", gap: 10, flex: 1, textAlign: "left", padding: 0,
               }}
             >
-              <Avatar initials={convInitials(activeConv)} isGroup={activeConv.type === "group"} size={38} />
-              <div>
-                <div style={{ fontFamily: C.heading, fontSize: 15.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: textOnBg }}>
+              <Avatar initials={convInitials(activeConv)} photo={activeConv.type === "direct" ? activeConv.otherUser?.photo : null} isGroup={activeConv.type === "group"} size={40} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: C.display, fontSize: 16.5, fontWeight: 700, color: textOnBg, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {convName(activeConv)}
                 </div>
-                {activeConv.type === "direct" && activeConv.otherUser?.club && (
-                  <Mono style={{ fontSize: 9, color: C.gold, letterSpacing: "0.22em" }}>
-                    {activeConv.otherUser.club}
-                  </Mono>
-                )}
+                {/* green status line under the name, like the reference */}
+                <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.accent2, boxShadow: `0 0 6px ${C.accent2}88`, flexShrink: 0 }} />
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11.5, color: C.accent2 }}>
+                    {activeConv.type === "group" ? t("Skupina") : (activeConv.otherUser?.club || t("Športnik"))}
+                  </span>
+                </div>
               </div>
             </button>
 
@@ -1060,89 +1110,73 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             </div>
           )}
 
-          {/* Composer */}
+          {/* Composer — "+" (stickers) on the left, text pill in the middle,
+              round accent send button on the right */}
           <div style={{
-            display: "flex", alignItems: "flex-end", gap: 7, padding: "8px 10px",
+            display: "flex", alignItems: "center", gap: 8, padding: "8px 12px",
             paddingBottom: "max(8px, env(safe-area-inset-bottom, 8px))",
             background: surfaceOnBg, borderTop: `1px solid ${borderOnBg}`,
           }}>
-            {/* Sticker toggle */}
+            {/* "+" stickers — on the left, centered with the text */}
             <Pressable
               onClick={() => setStickerOpen(o => !o)}
               style={{
-                background: "transparent", border: `1px solid ${borderOnBg}`, borderRadius: 50,
-                width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-                color: stickerOpen ? C.accent : mutedOnBg, flexShrink: 0,
-              }}
-            >
-              <svg width={18} height={18} viewBox="0 0 24 24" fill={stickerOpen ? C.accent : "none"} stroke={stickerOpen ? C.accent : "currentColor"} strokeWidth={1.8} strokeLinecap="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth={3}/>
-                <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth={3}/>
-              </svg>
-            </Pressable>
-
-            {/* File attach */}
-            <Pressable
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                background: "transparent", border: `1px solid ${borderOnBg}`, borderRadius: 50,
-                width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-                color: mutedOnBg, flexShrink: 0,
-              }}
-            >
-              <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-              </svg>
-            </Pressable>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*,*/*"
-              style={{ display: "none" }}
-              onChange={handleFile}
-            />
-
-            {/* Text input — serif, on raised marble. Tied to darkBackdrop (the
-                conversation's own theme/background), not the app theme, so a
-                dark custom chat background never leaves it as a washed-out
-                gray pill fighting the backdrop. */}
-            <textarea
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doSend(); } }}
-              placeholder={t("Sporočilo…")}
-              rows={1}
-              className="athlos-chat-input"
-              style={{
-                flex: 1, padding: "9px 14px", borderRadius: 20,
-                border: `1px solid ${darkBackdrop ? "rgba(255,255,255,0.16)" : "#D8CFBD"}`,
                 background: darkBackdrop ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.55)",
-                color: textOnBg, fontFamily: C.display, fontSize: 17, fontWeight: 500,
-                resize: "none", outline: "none", lineHeight: 1.4,
-                minHeight: 36, maxHeight: 100, overflowY: "auto",
-              }}
-            />
-            <style>{`.athlos-chat-input::placeholder { color: ${mutedOnBg}; }`}</style>
-
-            {/* Send — ink medallion with the electric-green arrow (signal, not fill) */}
-            <Pressable
-              onClick={() => doSend()}
-              disabled={!input.trim()}
-              style={{
-                background: "#1C1814", borderRadius: 50,
-                width: 38, height: 38, border: "1px solid rgba(244,239,230,0.12)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                opacity: input.trim() ? 1 : 0.35, flexShrink: 0,
-                color: input.trim() ? C.accent2 : "rgba(244,239,230,0.6)",
-                boxShadow: input.trim() ? "0 6px 16px rgba(28,24,20,0.28)" : "none",
-                transition: "opacity 0.2s, color 0.2s, box-shadow 0.2s",
+                borderRadius: 50, width: 42, height: 42,
+                border: `1px solid ${darkBackdrop ? "rgba(255,255,255,0.14)" : "#D6DAE0"}`,
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                color: stickerOpen ? C.accent : textOnBg,
+                transition: "color 0.2s",
               }}
             >
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M13 5l7 7-7 7"/>
-              </svg>
+              <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ transition: "transform 0.2s", transform: stickerOpen ? "rotate(45deg)" : "none" }}><path d="M12 5v14M5 12h14"/></svg>
+            </Pressable>
+
+            <div style={{
+              flex: 1, minWidth: 0, display: "flex", alignItems: "flex-end",
+              background: darkBackdrop ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.55)",
+              border: `1px solid ${darkBackdrop ? "rgba(255,255,255,0.14)" : "#D6DAE0"}`,
+              borderRadius: 24, padding: "5px 16px",
+            }}>
+              <textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); doSend(); } }}
+                placeholder={t("Sporočilo…")}
+                rows={1}
+                className="athlos-chat-input"
+                style={{
+                  flex: 1, minWidth: 0, padding: "8px 0",
+                  border: "none", background: "none",
+                  color: textOnBg, fontFamily: C.display, fontSize: 16.5, fontWeight: 500,
+                  resize: "none", outline: "none", lineHeight: 1.4,
+                  minHeight: 20, maxHeight: 100, overflowY: "auto",
+                }}
+              />
+              <style>{`.athlos-chat-input::placeholder { color: ${mutedOnBg}; }`}</style>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*,*/*"
+                style={{ display: "none" }}
+                onChange={handleFile}
+              />
+            </div>
+
+            {/* Send button — on the right, green once there's text */}
+            <Pressable
+              onClick={() => input.trim() && doSend()}
+              style={{
+                background: input.trim() ? C.accent : (darkBackdrop ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.55)"),
+                borderRadius: 50, width: 42, height: 42,
+                border: input.trim() ? "none" : `1px solid ${darkBackdrop ? "rgba(255,255,255,0.14)" : "#D6DAE0"}`,
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                color: input.trim() ? (C.name === "dark" ? "#04130A" : "#FFFFFF") : mutedOnBg,
+                boxShadow: input.trim() ? `0 6px 16px ${C.accent}44` : "none",
+                transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+              }}
+            >
+              <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </Pressable>
           </div>
         </div>
@@ -1218,7 +1252,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                 }}
               >
-                <Avatar initials={u.initials} size={42} />
+                <Avatar initials={u.initials} photo={u.photo} size={42} />
                 <div style={{ flex: 1, textAlign: "left", fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
                   {u.name}
                 </div>
@@ -1248,7 +1282,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                 }}
               >
-                <Avatar initials={mate.initials} size={42} />
+                <Avatar initials={mate.initials} photo={mate.photo} size={42} />
                 <div style={{ flex: 1, textAlign: "left" }}>
                   <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
                     {mate.name}
@@ -1331,7 +1365,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                     cursor: "pointer", WebkitTapHighlightColor: "transparent",
                   }}
                 >
-                  <Avatar initials={mate.initials} size={42} />
+                  <Avatar initials={mate.initials} photo={mate.photo} size={42} />
                   <div style={{ flex: 1, textAlign: "left" }}>
                     <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
                       {mate.name}

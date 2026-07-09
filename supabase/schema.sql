@@ -44,16 +44,29 @@ create unique index if not exists profiles_name_unique
 
 -- Iskanje uporabnikov po imenu (za "Nov pogovor" v chatu). SECURITY DEFINER,
 -- ker RLS dovoli branje samo lastnega profila — funkcija vrne zgolj id + ime.
-create or replace function public.search_users(q text)
-returns table (user_id uuid, name text)
+-- drop najprej: če stara verzija vrača drugačne stolpce, je "create or
+-- replace" ne sme spremeniti (42P13)
+drop function if exists public.search_users(text);
+create function public.search_users(q text)
+returns table (user_id uuid, name text, photo text)
 language sql security definer as $$
-  select id, name from public.profiles
+  select id, name, photo from public.profiles
   where name is not null
     and length(trim(q)) >= 2
     and name ilike '%' || trim(q) || '%'
     and id <> auth.uid()
   order by name
   limit 20;
+$$;
+
+-- Javni delček profila (ime + slika) za poljuben seznam uporabnikov — za
+-- avatarje v chatu/klubu. SECURITY DEFINER iz istega razloga kot search_users;
+-- vrne SAMO id, ime in javni URL slike, nič drugega.
+drop function if exists public.public_profiles(uuid[]);
+create function public.public_profiles(ids uuid[])
+returns table (user_id uuid, name text, photo text)
+language sql security definer as $$
+  select id, name, photo from public.profiles where id = any(ids);
 $$;
 
 -- Ali prikazno ime že uporablja kdo drug?

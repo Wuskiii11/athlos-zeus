@@ -390,6 +390,14 @@ export default function AthlosApp() {
     html, body, #root { height: 100%; margin: 0; padding: 0; overscroll-behavior: none; overflow-x: hidden; background: ${C.bg}; }
     body { -webkit-font-smoothing: antialiased; background: ${C.bg}; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 
+    /* micro-interaction: every button gives quiet tactile feedback on press.
+       Inline transforms (Pressable, GSAP) override this, so they never fight. */
+    button { transition: transform 0.12s ease; }
+    button:active { transform: scale(0.97); }
+    @media (prefers-reduced-motion: reduce) {
+      button, button:active { transition: none; transform: none; }
+    }
+
     /* True full-screen: size against the phone shell (fixed top:0/bottom:0 — the
        only reliably full-height box). NO viewport units here: an explicit
        100vh/100dvh height OVERRIDES the bottom:0 anchor (CSS ignores bottom when
@@ -579,8 +587,8 @@ export default function AthlosApp() {
           {/* Antique printed-paper halftone — very faint, app-wide */}
           <div aria-hidden="true" style={{
             position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-            backgroundImage: "radial-gradient(rgba(28,24,20,0.05) 0.8px, transparent 1.2px)",
-            backgroundSize: "5px 5px", mixBlendMode: "multiply", opacity: C.name === "dark" ? 0.18 : 0.08,
+            backgroundImage: "radial-gradient(rgba(16,24,40,0.05) 0.8px, transparent 1.2px)",
+            backgroundSize: "5px 5px", mixBlendMode: "multiply", opacity: C.name === "dark" ? 0.18 : 0.06,
           }} />
 
           {/* Safe area top spacer */}
@@ -657,24 +665,16 @@ export default function AthlosApp() {
               width: "fit-content", marginInline: "auto",
               padding: "6px 10px",
               position: "relative", overflow: "hidden",
-              background: theme === "dark" ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.32)",
-              backdropFilter: "blur(28px) saturate(200%)",
-              WebkitBackdropFilter: "blur(28px) saturate(200%)",
+              background: theme === "dark" ? "rgba(17,17,17,0.62)" : "rgba(255,255,255,0.55)",
+              backdropFilter: "blur(24px) saturate(160%)",
+              WebkitBackdropFilter: "blur(24px) saturate(160%)",
               borderRadius: 999,
-              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.20)" : "rgba(255,255,255,0.65)"}`,
+              border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.09)" : "rgba(16,24,40,0.08)"}`,
               boxShadow: theme === "dark"
-                // outer lift + lit top rim + faint bottom edge = glass slab
-                ? "0 12px 36px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -1px 0 rgba(255,255,255,0.07)"
-                : "0 12px 36px rgba(28,24,20,0.16), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(255,255,255,0.3), 0 0 0 1px rgba(28,24,20,0.04)",
+                ? "0 10px 30px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.10)"
+                : "0 10px 30px rgba(16,24,40,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
               pointerEvents: "auto",
             }}>
-              {/* diagonal light sheen across the glass */}
-              <span aria-hidden="true" style={{
-                position: "absolute", inset: 0, borderRadius: 999, pointerEvents: "none",
-                background: theme === "dark"
-                  ? "linear-gradient(115deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 38%, transparent 55%, rgba(255,255,255,0.05) 100%)"
-                  : "linear-gradient(115deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 40%, transparent 58%, rgba(255,255,255,0.2) 100%)",
-              }} />
               {NAV.map(n => {
                 const active = navActive === n.id;
                 return <TabButton key={n.id} n={{ ...n, label: t(n.label) }} active={active} onClick={() => go(n.id)} dot={n.id === "chat" && chatUnread > 0} />;

@@ -15,11 +15,12 @@ export default function ScreenPrivacy({ onClose }) {
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: "fixed", inset: 0, zIndex: 80, background: "rgba(20,18,14,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+      style={{ position: "fixed", inset: 0, zIndex: 80, background: "rgba(12,14,20,0.5)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
     >
       <div style={{
         width: "100%", maxWidth: 430, maxHeight: "88vh", display: "flex", flexDirection: "column",
-        background: C.bg, borderRadius: "20px 20px 0 0", border: `1px solid ${C.border}`, borderBottom: "none",
+        background: C.bg, borderRadius: "24px 24px 0 0",
+        boxShadow: C.name === "dark" ? "0 -18px 50px rgba(0,0,0,0.55)" : "0 -18px 50px rgba(16,24,40,0.18)",
         animation: "athlosRise 0.28s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden",
       }}>
         {/* header — plain, official, with an explicit close control */}

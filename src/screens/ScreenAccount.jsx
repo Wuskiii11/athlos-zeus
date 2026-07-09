@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "../theme";
-import { Pressable, SettingsBlock, BackBtn, Mono, LanguageSwitcher } from "../components/UI";
+import { Pressable, Card, SectionLabel, BackBtn, Mono, LanguageSwitcher } from "../components/UI";
 import { changePassword, requestPasswordReset, changeEmail, isNameTaken } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -100,10 +100,14 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
   const [resetMsg, setResetMsg] = useState("");
   const [resetting, setResetting] = useState(false);
 
+  // Plan tiers keep a distinct identity, but via C.* metric tokens (no raw hex)
+  const planColors = { basic: C.aqua, pro: C.lav, elite: C.amber };
+
   const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
-  const inp = { width: "100%", padding: "14px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box" };
+  const cardStyle = { marginBottom: 12 };
+  const inp = { width: "100%", padding: "14px 16px", borderRadius: 16, border: `1px solid ${C.border}`, background: C.surface3, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box" };
   const editBtn = { padding: "9px 16px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.accent, fontFamily: C.display, fontSize: 14.5, fontWeight: 700 };
-  const primaryBtn = { borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
+  const primaryBtn = { borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
   const outlineBtn = { borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
   const msgBox = (ok) => ({ padding: "11px 14px", borderRadius: 14, background: ok ? `${C.accent}14` : `${C.red}14`, border: `1px solid ${ok ? C.accent : C.red}40`, color: ok ? C.accent : C.red, fontFamily: C.display, fontSize: 14.5, marginTop: 10 });
 
@@ -164,7 +168,8 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
       </header>
 
       {/* Username */}
-      <SettingsBlock title={t("UPORABNIŠKO IME")}>
+      <Card style={cardStyle}>
+        <SectionLabel>{t("UPORABNIŠKO IME")}</SectionLabel>
         {!editingName ? (
           <div style={row}>
             <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 17, color: C.text }}>{profile.name}</span>
@@ -173,16 +178,17 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
         ) : (
           <>
             <div style={{ display: "flex", gap: 8 }}>
-              <input value={name} onChange={(e) => { setName(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && saveName()} style={{ flex: 1, padding: "13px 16px", borderRadius: 14, border: `1px solid ${nameMsg ? C.red : C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box" }} />
+              <input value={name} onChange={(e) => { setName(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && saveName()} style={{ ...inp, flex: 1, borderColor: nameMsg ? C.red : C.border }} />
               <Pressable onClick={saveName} scale={0.93} style={{ ...primaryBtn, padding: "0 20px" }}>{t("Shrani")}</Pressable>
             </div>
             {nameMsg && <div style={msgBox(false)}>{t(nameMsg)}</div>}
           </>
         )}
-      </SettingsBlock>
+      </Card>
 
       {/* Email */}
-      <SettingsBlock title={t("E-POŠTA")}>
+      <Card style={cardStyle}>
+        <SectionLabel>{t("E-POŠTA")}</SectionLabel>
         {!editingEmail ? (
           <div style={row}>
             <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 17, color: C.text }}>{email || t("Ni nastavljeno")}</span>
@@ -198,10 +204,11 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
             </div>
           </div>
         )}
-      </SettingsBlock>
+      </Card>
 
       {/* Password */}
-      <SettingsBlock title={t("GESLO")}>
+      <Card style={cardStyle}>
+        <SectionLabel>{t("GESLO")}</SectionLabel>
         {!changingPw ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={row}>
@@ -231,16 +238,18 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
             </div>
           </div>
         )}
-      </SettingsBlock>
+      </Card>
 
       {/* Language */}
-      <SettingsBlock title={t("JEZIK")}>
+      <Card style={cardStyle}>
+        <SectionLabel>{t("JEZIK")}</SectionLabel>
         <LanguageSwitcher value={curLang} onChange={setLang} />
-      </SettingsBlock>
+      </Card>
 
       {/* Notifications — moved here from Settings so the account screen owns
           everything personal (identity, security, language, notifications, plan) */}
-      <SettingsBlock title={t("OBVESTILA")}>
+      <Card style={cardStyle}>
+        <SectionLabel>{t("OBVESTILA")}</SectionLabel>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Potisna obvestila")}</span>
@@ -260,7 +269,7 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
               disabled={notifPerm === "denied"}
               style={{
                 width: 50, height: 28, borderRadius: 999, flexShrink: 0,
-                background: notifPerm === "granted" ? C.accent : C.surface2,
+                background: notifPerm === "granted" ? C.accent : C.surface3,
                 border: `1px solid ${notifPerm === "granted" ? C.accent : C.border2}`,
                 cursor: notifPerm === "denied" ? "not-allowed" : "pointer",
                 position: "relative", transition: "background 0.22s", padding: 0,
@@ -279,16 +288,18 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
           )}
         </div>
         {notifPerm === "denied" && (
-          <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 10, padding: "10px 12px", borderRadius: 10, background: C.surface2, lineHeight: 1.5 }}>
+          <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 10, padding: "10px 12px", borderRadius: 12, background: C.surface3, lineHeight: 1.5 }}>
             {t("Odpri nastavitve naprave → Aplikacije → Brskalnik → Obvestila in jih dovoli.")}
           </div>
         )}
-      </SettingsBlock>
+      </Card>
 
       {/* Plan — current plan only, tap to reveal its info */}
-      <SettingsBlock title={t("MOJ PLAN")}>
+      <Card style={cardStyle}>
+        <SectionLabel>{t("MOJ PLAN")}</SectionLabel>
         {(() => {
           const plan = PLANS.find((p) => p.id === currentPlan) || PLANS[0];
+          const pc = planColors[plan.id] || C.accent;
           return (
             <>
               <Pressable
@@ -299,8 +310,8 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
                 <div>
                   <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Trenutni plan")}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                    <span style={{ padding: "4px 12px", borderRadius: 999, background: `${plan.color}1a`, border: `1px solid ${plan.color}40` }}>
-                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12.5, letterSpacing: "0.04em", color: plan.color }}>{plan.name}</span>
+                    <span style={{ padding: "4px 12px", borderRadius: 999, background: `${pc}1a`, border: `1px solid ${pc}40` }}>
+                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12.5, letterSpacing: "0.04em", color: pc }}>{plan.name}</span>
                     </span>
                     <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted }}>{plan.earlyBird}{t("/mes")}</span>
                   </div>
@@ -319,8 +330,8 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
                     {plan.features.map((f) => (
                       <div key={f} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-                          <circle cx="6" cy="6" r="6" fill={`${plan.color}20`} />
-                          <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke={plan.color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="6" cy="6" r="6" fill={`${pc}20`} />
+                          <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke={pc} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         <span style={{ fontFamily: C.display, fontSize: 15.5, color: C.text2 }}>{t(f)}</span>
                       </div>
@@ -332,7 +343,7 @@ export default function ScreenAccount({ profile, setProfile, user, onBack }) {
             </>
           );
         })()}
-      </SettingsBlock>
+      </Card>
     </div>
   );
 }

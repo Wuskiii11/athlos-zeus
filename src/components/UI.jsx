@@ -211,12 +211,13 @@ export const PrimaryBtn = ({ children, onClick, style, disabled }) => {
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
       style={{
-        width: "100%", padding: "17px 16px", borderRadius: 999, border: "none",
+        width: "100%", height: 56, padding: "0 16px", borderRadius: 18, border: "none",
         background: C.btn, color: C.btnText,
         fontFamily: C.display, fontWeight: 700, textTransform: "none",
-        letterSpacing: "0.01em", fontSize: 17,
+        letterSpacing: "0.01em", fontSize: 16.5,
         cursor: disabled ? "default" : "pointer",
-        boxShadow: pressed ? "none" : (C.name === "dark" ? "0 4px 14px rgba(0,0,0,0.35)" : "0 3px 12px rgba(28,24,20,0.14)"),
+        // the ONE element allowed a soft glow — the brand-green CTA
+        boxShadow: pressed ? "none" : C.glowSoft,
         WebkitTapHighlightColor: "transparent",
         transition: "transform 0.12s ease, box-shadow 0.12s ease",
         transform: pressed ? "scale(0.98)" : "scale(1)",
@@ -249,7 +250,22 @@ export const Icon = ({ name, color, size = 22 }) => {
     case "today":    return (<svg {...common}><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>);
     case "train":    return (<svg {...common}><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg>);
     case "fuel":     return (<svg {...common}><path d="M6 3v7a2 2 0 004 0V3M8 11v10M18 3c-1.5 0-3 1.5-3 5s1.5 4 3 4v9"/></svg>);
-    case "ai":       return (<svg {...common}><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill={color} stroke="none"/></svg>);
+    // AI wears its own colours: a four-point sparkle with a pink→violet→aqua
+    // gradient (ignores the passed colour on purpose — AI is never muted)
+    case "ai":       return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <defs>
+          <linearGradient id="at-ai-sparkle" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FF7AD9" />
+            <stop offset="50%" stopColor="#9D7BFF" />
+            <stop offset="100%" stopColor="#3ECFEF" />
+          </linearGradient>
+        </defs>
+        <path d="M13.5 5c.9 4.2 2.3 5.6 6.5 6.5-4.2.9-5.6 2.3-6.5 6.5-.9-4.2-2.3-5.6-6.5-6.5 4.2-.9 5.6-2.3 6.5-6.5z" fill="url(#at-ai-sparkle)" />
+        <path d="M6.5 3c.45 2.1 1.15 2.8 3.25 3.25C7.65 6.7 6.95 7.4 6.5 9.5 6.05 7.4 5.35 6.7 3.25 6.25 5.35 5.8 6.05 5.1 6.5 3z" fill="url(#at-ai-sparkle)" opacity="0.85" />
+        <circle cx="5.6" cy="19" r="1.1" fill="url(#at-ai-sparkle)" opacity="0.7" />
+      </svg>
+    );
     case "season":   return (<svg {...common}><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>);
     case "settings": return (<svg {...common}><circle cx="12" cy="8" r="3.2"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>);
     case "calendar": return (<svg {...common}><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>);
@@ -277,7 +293,7 @@ export function TabButton({ n, active, onClick, dot }) {
         border: "none", cursor: "pointer", position: "relative",
         display: "flex", alignItems: "center", justifyContent: "center",
         background: active ? C.accent : "transparent",
-        boxShadow: active ? `0 6px 16px ${C.accent}55` : "none",
+        boxShadow: "none",
         WebkitTapHighlightColor: "transparent",
         transition: "background 0.25s ease, box-shadow 0.25s ease",
       }}
@@ -303,4 +319,59 @@ export function SettingsBlock({ title, children }) {
       {children}
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Design-system primitives — the premium dark language used across
+// every screen. Soft dark card, no border, 24px radius, one green
+// accent, quiet shadow. Keep new screens built from THESE, so the
+// whole app stays visually consistent.
+// ─────────────────────────────────────────────────────────────
+
+// Soft dark surface card. Pass onClick to make it a pressable row.
+export function Card({ children, onClick, style, pad = 20, radius = 24 }) {
+  const C = useTheme();
+  const base = {
+    background: C.surface2, borderRadius: radius, padding: pad,
+    boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)",
+    ...style,
+  };
+  return onClick
+    ? <Pressable onClick={onClick} scale={0.99} style={{ ...base, border: "none", width: "100%", textAlign: "left", display: "block" }}>{children}</Pressable>
+    : <div style={base}>{children}</div>;
+}
+
+// Small uppercase section header with an optional right-aligned action.
+export function SectionLabel({ children, action, onAction, style }) {
+  const C = useTheme();
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14, ...style }}>
+      <span style={{ fontFamily: C.mono, fontSize: 10.5, letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 600 }}>{children}</span>
+      {action && (
+        <button onClick={onAction} style={{ background: "none", border: "none", color: C.accent, fontFamily: C.display, fontWeight: 600, fontSize: 13, cursor: "pointer", padding: 0, WebkitTapHighlightColor: "transparent" }}>{action}</button>
+      )}
+    </div>
+  );
+}
+
+// Compact metric tile — label · value · optional sub · optional level bar.
+// The single building block for stat grids and metric rows everywhere.
+export function StatTile({ label, value, sub, onClick, barPct, color, valueColor, style }) {
+  const C = useTheme();
+  const inner = (
+    <>
+      <span style={{ display: "block", fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted2, marginBottom: 9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+      <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 19, color: valueColor || C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>{value}</span>
+      {sub && <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 5 }}>{sub}</span>}
+      {typeof barPct === "number" && (
+        <span style={{ display: "block", height: 4, borderRadius: 999, background: C.surface3, overflow: "hidden", marginTop: 11 }}>
+          <span style={{ display: "block", width: `${Math.round(Math.max(0, Math.min(1, barPct)) * 100)}%`, height: "100%", borderRadius: 999, background: color || C.accent, transition: "width 0.7s cubic-bezier(.22,1,.36,1)" }} />
+        </span>
+      )}
+    </>
+  );
+  const base = { background: C.surface2, borderRadius: 20, padding: "14px 14px", textAlign: "left", ...style };
+  return onClick
+    ? <Pressable onClick={onClick} scale={0.98} style={{ ...base, border: "none", width: "100%", display: "block" }}>{inner}</Pressable>
+    : <div style={base}>{inner}</div>;
 }

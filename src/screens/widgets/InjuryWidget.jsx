@@ -16,48 +16,44 @@ export default function InjuryWidget({ injury, C, t, isCoach = false }) {
   const showCoachNote = isCoach && coachView && injury.coachNote;
 
   return (
-    <div style={{ background: C.surface, border: `1px solid ${C.red}40`, borderRadius: 20, padding: 18, marginBottom: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-        <Mono style={{ color: C.red, fontSize: 10, letterSpacing: "0.12em" }}>{t("AKTIVNA POŠKODBA")}</Mono>
-        {isCoach && (
-          <button
-            onClick={() => setCoachView((v) => !v)}
-            style={{ fontFamily: C.display, fontSize: 12.5, color: C.muted, background: "none", border: `1px solid ${C.border2}`, borderRadius: 999, padding: "4px 10px", cursor: "pointer" }}
-          >
-            {coachView ? t("Pogled trenerja") : t("Pogled igralca")}
-          </button>
-        )}
-      </div>
-
-      <h3 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 20, color: C.text, margin: "0 0 12px" }}>{t(injury.name)}</h3>
-
-      {/* 4-phase stepper */}
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
-        {PHASES.map((label, i) => (
-          <React.Fragment key={label}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: i === 0 || i === PHASES.length - 1 ? "0 0 auto" : 1 }}>
-              <div style={{
-                width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                background: i <= injury.phase ? C.red : C.surface3,
-                border: `1px solid ${i <= injury.phase ? C.red : C.border2}`,
-                color: i <= injury.phase ? "#fff" : C.muted,
-                fontFamily: C.mono, fontSize: 11, fontWeight: 700, flexShrink: 0,
-              }}>
-                {i + 1}
-              </div>
-              <Mono style={{ color: i === injury.phase ? C.red : C.muted2, fontSize: 9, marginTop: 4, whiteSpace: "nowrap" }}>{t(label)}</Mono>
-            </div>
-            {i < PHASES.length - 1 && (
-              <div style={{ flex: 1, height: 2, background: i < injury.phase ? C.red : C.border, margin: "0 4px 14px" }} />
-            )}
+    <div style={{ display: "flex", gap: 16, padding: "6px 4px", marginBottom: 20 }}>
+      {/* vertical phase rail — the injury reads as a timeline, not a card */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, paddingTop: 5 }}>
+        {PHASES.map((p, i) => (
+          <React.Fragment key={p}>
+            {i > 0 && <span style={{ width: 2, flex: 1, minHeight: 16, background: i <= injury.phase ? C.red : C.border2 }} />}
+            <span style={{
+              width: i === injury.phase ? 12 : 8, height: i === injury.phase ? 12 : 8,
+              borderRadius: "50%", flexShrink: 0,
+              background: i <= injury.phase ? C.red : "transparent",
+              border: `2px solid ${i <= injury.phase ? C.red : C.border2}`,
+              transition: "background 0.3s, border-color 0.3s",
+            }} />
           </React.Fragment>
         ))}
       </div>
 
-      <p style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, margin: "0 0 8px" }}>{t(injury.progressNote)}</p>
-      <Mono style={{ color: C.muted, fontSize: 11 }}>
-        {t("Pričakovana vrnitev")}: {injury.returnWeeks} {t("tedne")} · {t(injury.returnDate)}
-      </Mono>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
+          <Mono style={{ color: C.red, fontSize: 9.5, letterSpacing: "0.16em" }}>{t("AKTIVNA POŠKODBA")}</Mono>
+          {isCoach ? (
+            <button
+              onClick={() => setCoachView((v) => !v)}
+              style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted, background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
+            >
+              {coachView ? t("Pogled trenerja") : t("Pogled igralca")}
+            </button>
+          ) : (
+            <Mono style={{ color: C.muted, fontSize: 9.5 }}>~{injury.returnWeeks} {t("tedne")}</Mono>
+          )}
+        </div>
+
+        <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, margin: "0 0 6px", lineHeight: 1.2 }}>{t(injury.name)}</h3>
+        <Mono style={{ color: C.muted, fontSize: 9, display: "block", marginBottom: 10 }}>
+          {t("FAZA")} {injury.phase + 1}/{PHASES.length} · {t(PHASES[injury.phase])} · {t(injury.returnDate)}
+        </Mono>
+
+        <p style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, margin: 0, lineHeight: 1.5 }}>{t(injury.progressNote)}</p>
 
       {showCoachNote && (
         <div style={{ marginTop: 12, padding: 12, borderRadius: 12, background: C.surface3, border: `1px solid ${C.border}` }}>
@@ -65,6 +61,7 @@ export default function InjuryWidget({ injury, C, t, isCoach = false }) {
           <p style={{ fontFamily: C.display, fontSize: 13.5, color: C.text2, margin: 0 }}>{injury.coachNote}</p>
         </div>
       )}
+      </div>
     </div>
   );
 }

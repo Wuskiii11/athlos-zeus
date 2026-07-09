@@ -70,6 +70,8 @@ function buildSystem(profile: Record<string, any> = {}, memory: Record<string, a
 }
 
 type Msg = { role: "user" | "assistant"; content: string };
+// Priponka iz aplikacije: slika ali PDF kot base64 — jo vidita OBA ponudnika.
+type Attachment = { name?: string; mime: string; data: string };
 
 function sanitizeHistory(history: unknown): Msg[] {
   const msgs = (Array.isArray(history) ? history : [])
@@ -79,19 +81,46 @@ function sanitizeHistory(history: unknown): Msg[] {
   return msgs;
 }
 
-async function askClaude(system: string, msgs: Msg[]): Promise<string> {
+function sanitizeAttachment(a: unknown): Attachment | null {
+  if (!a || typeof a !== "object") return null;
+  const { mime, data, name } = a as Record<string, unknown>;
+  if (typeof mime !== "string" || typeof data !== "string" || !data) return null;
+  if (!mime.startsWith("image/") && mime !== "application/pdf") return null;
+  if (data.length > 8_000_000) return null; // ~6 MB datoteke; ščiti kvoto
+  return { mime, data, name: typeof name === "string" ? name : undefined };
+}
+
+async function askClaude(system: string, msgs: Msg[], attachment: Attachment | null): Promise<string> {
   const client = new Anthropic({ apiKey: Deno.env.get("ANTHROPIC_API_KEY") });
+  // zadnje uporabnikovo sporočilo postane multimodalno, ko je priložena datoteka
+  const messages: any[] = msgs.map((m) => ({ role: m.role, content: m.content }));
+  if (attachment && messages.length) {
+    const last = messages[messages.length - 1];
+    const media = attachment.mime === "application/pdf"
+      ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: attachment.data } }
+      : { type: "image", source: { type: "base64", media_type: attachment.mime, data: attachment.data } };
+    last.content = [media, { type: "text", text: last.content }];
+  }
   const response = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 1024,
     system,
-    messages: msgs,
+    messages,
   });
   return response.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
 }
 
-async function askGemini(system: string, msgs: Msg[]): Promise<string> {
+async function askGemini(system: string, msgs: Msg[], attachment: Attachment | null): Promise<string> {
   const key = Deno.env.get("GEMINI_API_KEY");
+  const contents = msgs.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }] as any[],
+  }));
+  if (attachment && contents.length) {
+    contents[contents.length - 1].parts.unshift({
+      inline_data: { mime_type: attachment.mime, data: attachment.data },
+    });
+  }
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
     {
@@ -99,10 +128,7 @@ async function askGemini(system: string, msgs: Msg[]): Promise<string> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
-        contents: msgs.map((m) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        })),
+        contents,
         generationConfig: { maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } },
       }),
     },
@@ -121,7 +147,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
-    const { question, history = [], profile = {}, memory = {} } = await req.json();
+    const { question, history = [], profile = {}, memory = {}, attachment = null } = await req.json();
     if (!question || typeof question !== "string") {
       return Response.json({ error: "Manjka vprašanje." }, { status: 400, headers: cors });
     }
@@ -129,12 +155,13 @@ Deno.serve(async (req) => {
     const system = buildSystem(profile, memory);
     const msgs = sanitizeHistory(history);
     msgs.push({ role: "user", content: question });
+    const att = sanitizeAttachment(attachment);
 
     const errors: string[] = [];
 
     if (Deno.env.get("ANTHROPIC_API_KEY")) {
       try {
-        return Response.json({ reply: await askClaude(system, msgs), provider: "claude" }, { headers: cors });
+        return Response.json({ reply: await askClaude(system, msgs, att), provider: "claude" }, { headers: cors });
       } catch (e) {
         errors.push(`claude: ${e?.message || e}`);
       }
@@ -142,7 +169,7 @@ Deno.serve(async (req) => {
 
     if (Deno.env.get("GEMINI_API_KEY")) {
       try {
-        return Response.json({ reply: await askGemini(system, msgs), provider: "gemini" }, { headers: cors });
+        return Response.json({ reply: await askGemini(system, msgs, att), provider: "gemini" }, { headers: cors });
       } catch (e) {
         errors.push(`gemini: ${e?.message || e}`);
       }

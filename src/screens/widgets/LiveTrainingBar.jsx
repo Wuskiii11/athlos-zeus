@@ -30,25 +30,23 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
     <button onClick={onOpen} style={{
       width: "100%", maxWidth: 560, marginInline: "auto", marginBottom: 8,
       display: "flex", alignItems: "center", gap: 12, padding: "11px 16px",
-      background: "#1A1E19",
-      border: `1px solid ${C.accent2}40`, borderRadius: 18,
-      boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+      background: C.surface2,
+      border: `1px solid ${C.accent}33`, borderRadius: 18,
+      boxShadow: C.name === "dark" ? "0 8px 24px rgba(0,0,0,0.4)" : "0 8px 24px rgba(16,24,40,0.12)",
       cursor: "pointer", textAlign: "left", pointerEvents: "auto",
       animation: "athlosSlideDown 0.3s ease", WebkitTapHighlightColor: "transparent",
       position: "relative", overflow: "hidden",
     }}>
-      {/* signal-tinted "oracle" halo, same language as the AI panels */}
-
       {/* pulsing live dot */}
       <span style={{ position: "relative", width: 9, height: 9, flexShrink: 0 }}>
-        <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: C.accent2, boxShadow: `0 0 10px ${C.accent2}80`, animation: "athlosPulse 1.6s ease infinite" }} />
+        <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: C.accent, animation: "athlosPulse 1.6s ease infinite" }} />
       </span>
 
       <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: "#F4EFE6", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {live.block} · {t(live.exName)}
         </span>
-        <Mono style={{ color: restLeft ? "#00FF87" : "rgba(244,239,230,0.55)", fontSize: 10, letterSpacing: "0.08em" }}>
+        <Mono style={{ color: restLeft ? C.accent : C.muted, fontSize: 10, letterSpacing: "0.08em" }}>
           {restLeft
             ? <>{t("ODMOR")} {restLeft}s{live.nextName ? ` · ${t("nato")}: ${t(live.nextName)}` : ""}</>
             : <>SET {Math.min(live.setDone + 1, live.setsTotal)}/{live.setsTotal}{live.load ? ` · ${live.load} ${live.unit}` : ""} · {live.reps} {t("pon.")}</>}
@@ -56,8 +54,8 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
       </span>
 
       <span style={{ textAlign: "right", flexShrink: 0 }}>
-        <span style={{ display: "block", fontFamily: C.mono, fontWeight: 700, fontSize: 17, color: C.accent2 }}>{fmtElapsed(live.startedAt)}</span>
-        <Mono style={{ color: "rgba(244,239,230,0.45)", fontSize: 9, letterSpacing: "0.1em" }}>{t("TRENING")}</Mono>
+        <span style={{ display: "block", fontFamily: C.mono, fontWeight: 700, fontSize: 17, color: C.accent }}>{fmtElapsed(live.startedAt)}</span>
+        <Mono style={{ color: C.muted2, fontSize: 9, letterSpacing: "0.1em" }}>{t("TRENING")}</Mono>
       </span>
     </button>
   );

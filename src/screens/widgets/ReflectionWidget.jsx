@@ -86,20 +86,22 @@ export default function ReflectionWidget({ insights, C, t }) {
         onTouchMove={(e) => onMove(e.touches[0].clientX)}
         onTouchEnd={onEnd}
         style={{
-          position: "relative", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18,
+          position: "relative", background: C.surface2, borderRadius: 24, padding: 18,
+          boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)",
           transform: `translateX(${drag}px) rotate(${drag * 0.04}deg)`,
           opacity: 1 - Math.min(Math.abs(drag) / 220, 0.6),
           transition: dragging.current ? "none" : "transform 0.25s ease, opacity 0.25s ease",
           cursor: "grab", touchAction: "pan-y",
         }}
       >
+        {/* tinted icon tile + coloured kicker — the reference's insights row */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <span style={{
-            width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
+            width: 36, height: 36, borderRadius: 12, flexShrink: 0,
             display: "flex", alignItems: "center", justifyContent: "center",
-            background: `${iconColor}1c`, color: iconColor,
+            background: `${iconColor}16`, border: `1px solid ${iconColor}2e`, color: iconColor,
           }}>{top.icon}</span>
-          <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em" }}>{t(top.kicker)}</Mono>
+          <Mono style={{ color: iconColor, fontSize: 9.5, letterSpacing: "0.12em" }}>{t(top.kicker)}</Mono>
         </div>
         <p style={{ fontFamily: C.display, fontSize: 15.5, color: C.text, lineHeight: 1.5, margin: 0 }}>{t(top.text)}</p>
         <Mono style={{ color: C.muted2, fontSize: 10, marginTop: 12, display: "block" }}>

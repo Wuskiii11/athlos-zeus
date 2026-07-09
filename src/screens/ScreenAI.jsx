@@ -181,6 +181,53 @@ export default function ScreenAI({ user, profile }) {
   const inputRef = useRef(null);
   const chatInit = useRef(false);
 
+  // ── Dictation (green mic while the field is empty) — Web Speech API where
+  // the browser has it; elsewhere the button stays a plain send arrow ──
+  const [listening, setListening] = useState(false);
+  const recRef = useRef(null);
+  const SR = typeof window !== "undefined" ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
+  const canDictate = !!SR;
+  const toggleMic = () => {
+    if (!SR) return;
+    if (listening) { try { recRef.current?.stop(); } catch { /* already stopped */ } return; }
+    const rec = new SR();
+    rec.lang = profile?.lang === "en" ? "en-US" : "sl-SI";
+    rec.interimResults = false;
+    rec.onresult = (e) => {
+      const txt = Array.from(e.results).map((r) => r[0].transcript).join(" ").trim();
+      if (txt) setInput((p) => (p ? `${p} ${txt}` : txt));
+      inputRef.current?.focus();
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    recRef.current = rec;
+    setListening(true);
+    try { rec.start(); } catch { setListening(false); }
+  };
+  useEffect(() => () => { try { recRef.current?.stop(); } catch { /* already stopped */ } }, []);
+
+  // ── Attachment ("+" in the composer): image or PDF, sent to the AI as
+  // base64 so ZEUS actually sees it (Claude/Gemini vision) ──
+  const [attach, setAttach] = useState(null); // { name, mime, dataUrl, isImage }
+  const fileRef = useRef(null);
+  const onPickFile = (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!f) return;
+    const isImage = f.type.startsWith("image/");
+    if (!isImage && f.type !== "application/pdf") {
+      setMsgs((m) => [...m, { from: "bot", t: "Zaenkrat znam pogledati slike in PDF datoteke.", time: nowTime() }]);
+      return;
+    }
+    if (f.size > 5 * 1024 * 1024) {
+      setMsgs((m) => [...m, { from: "bot", t: "Priponka je prevelika — največ 5 MB.", time: nowTime() }]);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setAttach({ name: f.name, mime: f.type, dataUrl: String(reader.result), isImage });
+    reader.readAsDataURL(f);
+  };
+
   // ── Gate: load the learning memory; no setup yet → funnel, else → chat ──
   useEffect(() => {
     let alive = true;
@@ -270,17 +317,30 @@ export default function ScreenAI({ user, profile }) {
 
   const send = async (text) => {
     const q = (text || input).trim();
-    if (!q || typing) return;
+    const att = text ? null : attach; // suggestion chips send bare text
+    if ((!q && !att) || typing) return;
     setShowSugg(false);
     setShowFeedback(false);
-    const history = msgs.map((m) => ({ role: m.from === "user" ? "user" : "assistant", content: m.t }));
-    setMsgs((m) => [...m, { from: "user", t: q, time: nowTime() }]);
+    const history = msgs.map((m) => ({
+      role: m.from === "user" ? "user" : "assistant",
+      content: m.t || (m.img ? "[slika]" : m.file ? `[datoteka: ${m.file}]` : ""),
+    }));
+    setMsgs((m) => [...m, { from: "user", t: q, img: att?.isImage ? att.dataUrl : null, file: att && !att.isImage ? att.name : null, time: nowTime() }]);
     setInput("");
+    setAttach(null);
     setTyping(true);
+    // the AI always gets a textual question; base64 payload rides along
+    const question = q || (att?.isImage ? "Poglej priloženo sliko in komentiraj kot trener." : "Poglej priloženo datoteko in komentiraj kot trener.");
+    const attachment = att ? { name: att.name, mime: att.mime, data: att.dataUrl.split(",")[1] } : null;
     try {
       // Real AI via the ai-coach Edge Function (memory injected); null → local demo answers
-      let finalText = await askAI(user?.id, q, history, profile || {}, memory);
-      if (!finalText) { finalText = demoReply(q); saveAiReply(user?.id, finalText); }
+      let finalText = await askAI(user?.id, question, history, profile || {}, memory, attachment);
+      if (!finalText) {
+        finalText = att
+          ? "Priponke si lahko ogledam šele, ko je povezan AI strežnik — do takrat mi jo opiši z besedami."
+          : demoReply(q);
+        saveAiReply(user?.id, finalText);
+      }
       setMsgs((m) => [...m, { from: "bot", t: finalText, time: nowTime() }]);
       if (looksLikePlan(finalText) && memory?.setup) {
         saveToCalendar();
@@ -364,16 +424,27 @@ export default function ScreenAI({ user, profile }) {
                   : (dark ? "rgba(255,255,255,0.07)" : "#FFFFFF"),
                 border: isMine
                   ? "1px solid rgba(244,239,230,0.10)"
-                  : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
+                  : `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D6DAE0"}`,
                 boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
               }}>
-                <span style={{
-                  position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17.5, lineHeight: 1.5, whiteSpace: "pre-wrap",
-                  fontStyle: isMine ? "normal" : "italic",
-                  color: isMine ? "#F4EFE6" : C.text,
-                }}>
-                  {renderRich(t(m.t))}
-                </span>
+                {m.img && (
+                  <img src={m.img} alt="" style={{ display: "block", maxWidth: "100%", maxHeight: 260, borderRadius: 12, marginBottom: m.t ? 10 : 0, objectFit: "cover" }} />
+                )}
+                {m.file && (
+                  <span style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: m.t ? 10 : 0, padding: "8px 12px", borderRadius: 10, background: "rgba(255,255,255,0.08)" }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isMine ? "#F4EFE6" : C.text} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" /><path d="M13 2v7h7" /></svg>
+                    <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: isMine ? "#F4EFE6" : C.text, wordBreak: "break-all" }}>{m.file}</span>
+                  </span>
+                )}
+                {m.t && (
+                  <span style={{
+                    position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17.5, lineHeight: 1.5, whiteSpace: "pre-wrap",
+                    fontStyle: isMine ? "normal" : "italic",
+                    color: isMine ? "#F4EFE6" : C.text,
+                  }}>
+                    {renderRich(t(m.t))}
+                  </span>
+                )}
               </div>
               <Mono style={{ fontSize: 9, color: C.muted2, marginTop: 5, letterSpacing: "0.1em" }}>{m.time}</Mono>
             </div>
@@ -399,7 +470,7 @@ export default function ScreenAI({ user, profile }) {
             <div style={{
               padding: "16px 18px", borderRadius: "18px 18px 18px 4px", display: "flex", gap: 6, alignItems: "center",
               background: dark ? "rgba(255,255,255,0.07)" : "#FFFFFF",
-              border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D8CFBD"}`,
+              border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D6DAE0"}`,
             }}>
               {[0, 0.2, 0.4].map((d, i) => (
                 <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold, animation: "athlosDot 1.2s infinite", animationDelay: `${d}s`, display: "block" }} />
@@ -408,58 +479,86 @@ export default function ScreenAI({ user, profile }) {
           </div>
         )}
 
-        {/* Suggestions (fresh start) — marble tablets, matching the chat list */}
-        {showSugg && !typing && (
-          <div style={{ marginTop: 8, animation: "athlosFade 0.35s ease" }}>
-            <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.14em", display: "block", marginBottom: 12 }}>{t("predlagana vprašanja")}</Mono>
-            {SUGGESTIONS.map((s) => (
-              <button key={s} onClick={() => send(s)} style={{
-                width: "100%",
-                background: dark ? C.surface : "#FFFFFF",
-                border: `1px solid ${dark ? C.border : "#D8CFBD"}`,
-                borderRadius: 16,
-                padding: "14px 16px", textAlign: "left", cursor: "pointer", marginBottom: 10,
-                color: C.text2, fontFamily: C.display, fontSize: 17, fontStyle: "italic", lineHeight: 1.4,
-                WebkitTapHighlightColor: "transparent", transition: "border-color 0.15s, color 0.15s",
-                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-              }}
-                onPointerEnter={(e) => { e.currentTarget.style.borderColor = C.gold + "88"; e.currentTarget.style.color = C.text; }}
-                onPointerLeave={(e) => { e.currentTarget.style.borderColor = dark ? C.border : "#D8CFBD"; e.currentTarget.style.color = C.text2; }}
-              >
-                <span>{t(s)}</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Input — same serif-on-marble composer as human chat, ink send button
-          with the signature electric-green arrow */}
-      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "10px 18px 18px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 6px 6px 16px", background: dark ? C.surface2 : "rgba(255,255,255,0.55)", border: `1px solid ${dark ? C.border : "#D8CFBD"}`, borderRadius: 16 }}>
+      {/* Quick prompts — chip rail directly above the composer (reference
+          look): first chip is the featured one with the green outline */}
+      {showSugg && !typing && (
+        <div className="athlos-scroll" style={{ position: "relative", zIndex: 1, flexShrink: 0, display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "4px 18px 10px", animation: "athlosFade 0.3s ease" }}>
+          {SUGGESTIONS.map((s, i) => (
+            <button key={s} onClick={() => send(s)} style={{
+              flexShrink: 0, padding: "10px 15px", borderRadius: 999, cursor: "pointer",
+              border: `1.5px solid ${i === 0 ? C.accent : (dark ? C.border : "#D6DAE0")}`,
+              background: i === 0 ? `${C.accent}10` : (dark ? C.surface2 : "rgba(255,255,255,0.6)"),
+              color: i === 0 ? (dark ? C.accent : C.text) : C.text2,
+              fontFamily: C.display, fontWeight: 600, fontSize: 13.5, whiteSpace: "nowrap",
+              WebkitTapHighlightColor: "transparent",
+            }}>
+              {t(s)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Input — reference composer: "+" attaches an image/PDF for ZEUS to
+          see, green circle sends (or dictates while everything is empty) */}
+      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "0 18px 18px" }}>
+        {/* pending attachment preview */}
+        {attach && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, padding: "8px 10px", borderRadius: 14, background: dark ? C.surface2 : "rgba(255,255,255,0.6)", border: `1px solid ${dark ? C.border : "#D6DAE0"}`, animation: "athlosFade 0.2s ease" }}>
+            {attach.isImage
+              ? <img src={attach.dataUrl} alt="" style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
+              : <span style={{ width: 40, height: 40, borderRadius: 10, background: `${C.accent}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" /><path d="M13 2v7h7" /></svg>
+                </span>}
+            <span style={{ flex: 1, minWidth: 0, fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{attach.name}</span>
+            <button onClick={() => setAttach(null)} aria-label={t("Odstrani priponko")} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: 6, lineHeight: 0, WebkitTapHighlightColor: "transparent" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: 6, background: dark ? C.surface2 : "rgba(255,255,255,0.55)", border: `1px solid ${dark ? C.border : "#D6DAE0"}`, borderRadius: 999 }}>
+          <input ref={fileRef} type="file" accept="image/*,application/pdf" onChange={onPickFile} style={{ display: "none" }} />
+          <Pressable
+            onClick={() => fileRef.current?.click()}
+            scale={0.86}
+            aria-label={t("Priloži sliko ali datoteko")}
+            style={{
+              width: 38, height: 38, borderRadius: "50%", flexShrink: 0, border: "none",
+              background: dark ? C.surface3 : "rgba(28,24,20,0.07)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+          </Pressable>
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder={t("Vprašaj ZEUS-a...")}
-            style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 18, lineHeight: 1 }}
+            style={{ flex: 1, minWidth: 0, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 17, lineHeight: 1 }}
           />
           <Pressable
-            onClick={() => send()}
+            onClick={() => (input.trim() || attach ? send() : toggleMic())}
             scale={0.86}
-            disabled={!input.trim() || typing}
+            disabled={typing || (!input.trim() && !attach && !canDictate)}
+            aria-label={input.trim() || attach ? t("Pošlji") : t("Narekovanje")}
             style={{
-              width: 38, height: 38, borderRadius: 999, border: "1px solid rgba(244,239,230,0.12)",
-              background: "#1C1814",
+              width: 40, height: 40, borderRadius: "50%", flexShrink: 0, border: "none",
+              background: listening ? C.red : C.accent,
               display: "flex", alignItems: "center", justifyContent: "center",
-              opacity: input.trim() && !typing ? 1 : 0.4,
-              boxShadow: input.trim() && !typing ? "0 6px 16px rgba(28,24,20,0.28)" : "none",
-              transition: "opacity 0.2s, box-shadow 0.2s",
+              opacity: typing || (!input.trim() && !attach && !canDictate) ? 0.4 : 1,
+              boxShadow: `0 6px 16px ${listening ? C.red : C.accent}44`,
+              transition: "background 0.2s, opacity 0.2s, box-shadow 0.2s",
             }}
           >
-            <SendIcon color={input.trim() && !typing ? C.accent2 : "rgba(244,239,230,0.6)"} />
+            {input.trim() || attach || !canDictate
+              ? <SendIcon color={dark ? "#04130A" : "#FFFFFF"} />
+              : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={dark ? "#04130A" : "#FFFFFF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="2.5" width="6" height="11.5" rx="3" />
+                  <path d="M5 11a7 7 0 0014 0M12 18v3.5" />
+                </svg>}
           </Pressable>
         </div>
       </div>

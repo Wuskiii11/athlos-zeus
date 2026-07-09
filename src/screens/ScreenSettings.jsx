@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme, LANDING_URL } from "../theme";
-import { Pressable, SettingsBlock } from "../components/UI";
+import { Pressable } from "../components/UI";
 import { uploadAvatar } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -29,7 +29,32 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
   // Full-screen profile-photo preview (tap the avatar, TikTok-style)
   const [photoPreview, setPhotoPreview] = useState(false);
 
+  // Logout confirmation dialog — logout only fires after the user confirms
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
+  // Dismiss the dialog on Escape (desktop) and on Android/browser back — the
+  // back gesture closes the modal instead of leaving the screen. Purely modal
+  // UX: it adds one transient history entry while open and removes it on close.
+  useEffect(() => {
+    if (!confirmLogout) return;
+    const close = () => setConfirmLogout(false);
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+    window.addEventListener("keydown", onKey);
+    window.history.pushState({ athlosDialog: "logout" }, "");
+    window.addEventListener("popstate", close);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("popstate", close);
+      // Closed via button/backdrop (not back)? Pop our entry to keep history clean.
+      if (window.history.state && window.history.state.athlosDialog === "logout") {
+        window.history.back();
+      }
+    };
+  }, [confirmLogout]);
+
   const initial = (profile.name || "?").trim().charAt(0).toUpperCase();
+  // Real account e-mail — hidden for the offline/local session (no address)
+  const email = user?.email && user.id !== "local" ? user.email : null;
 
   // Downscale to ≤512px JPEG — uploads stay small and the offline fallback
   // (data URL) fits in the profile cache without breaking the cloud upsert.
@@ -78,81 +103,123 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
     setTimeout(() => { setContactOpen(false); setContactMsg(""); setContactSent(false); }, 2000);
   };
 
-  const inp = { width: "100%", padding: "14px 16px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light", marginTop: 8 };
-  const editBtn = { padding: "9px 16px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.accent, fontFamily: C.display, fontSize: 14.5, fontWeight: 700 };
-  const primaryBtn = { borderRadius: 999, border: "none", background: C.accent, color: "#ffffff", fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
+  // ── Shared styles (de-duplicated) ───────────────────────────────
+  const inp = { width: "100%", padding: "14px 16px", borderRadius: 18, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box", colorScheme: C.name === "dark" ? "dark" : "light", marginTop: 8 };
+  const primaryBtn = { borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
   const outlineBtn = { borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
+  const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, overflow: "hidden", marginBottom: 12 };
+
+  // ── One consistent icon family (feather-style strokes) ──────────
+  const sv = (c) => ({ width: 19, height: 19, viewBox: "0 0 24 24", fill: "none", stroke: c, strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" });
+  const IC = {
+    user:    (c) => (<svg {...sv(c)}><circle cx="12" cy="8" r="3.4" /><path d="M5 20v-1a7 7 0 0114 0v1" /></svg>),
+    help:    (c) => (<svg {...sv(c)}><circle cx="12" cy="12" r="9" /><path d="M9.2 9.2a2.8 2.8 0 015.4 1c0 1.9-2.8 2.5-2.8 2.5" /><path d="M12 17h.01" /></svg>),
+    mail:    (c) => (<svg {...sv(c)}><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="M3.5 7.5l8.5 5.5 8.5-5.5" /></svg>),
+    shield:  (c) => (<svg {...sv(c)}><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /></svg>),
+    globe:   (c) => (<svg {...sv(c)}><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><path d="M15 3h6v6" /><path d="M10 14L21 3" /></svg>),
+    logout:  (c) => (<svg {...sv(c)}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></svg>),
+    moon:    (c) => (<svg {...sv(c)}><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>),
+    sun:     (c) => (<svg {...sv(c)}><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" /></svg>),
+  };
+  const chevron = (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+  );
+
+  // Clean list row — icon tile · title (+ subtitle) · right accessory.
+  // Called as a function (not <Row/>) so element types stay stable and
+  // inputs nested nearby never remount.
+  const Row = ({ icon, title, subtitle, onClick, danger, first, accessory }) => {
+    // Neutral tiles by default; green stays reserved for accents — the only
+    // coloured icon here is the destructive logout (red).
+    const iconCol = danger ? C.red : C.text2;
+    return (
+      <Pressable onClick={onClick} scale={0.985} style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 13,
+        padding: "13px 15px", background: "none",
+        border: "none", borderTop: first ? "none" : `1px solid ${C.border}`,
+        textAlign: "left",
+      }}>
+        <span style={{ width: 36, height: 36, borderRadius: 11, background: C.surface2, border: `1px solid ${C.border}`, color: iconCol, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          {icon(iconCol)}
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 16, color: danger ? C.red : C.text }}>{title}</span>
+          {subtitle && <span style={{ display: "block", fontFamily: C.display, fontSize: 13, color: C.muted, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{subtitle}</span>}
+        </span>
+        {accessory !== undefined ? accessory : chevron}
+      </Pressable>
+    );
+  };
 
   return (
-    <div style={{ padding: "10px 18px 28px" }}>
-      <header style={{ marginBottom: 22 }}>
-        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Nastavitve")}</h2>
-      </header>
-
+    <div style={{ padding: "10px 18px 36px" }}>
       <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />
 
-      {/* Profile row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16, padding: 16, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, marginBottom: 16 }}>
-        {/* Tap the avatar to preview it full-screen (TikTok-style); with no
-            photo yet there's nothing to preview, so it opens the picker instead. */}
-        <Pressable onClick={() => (profile.photo ? setPhotoPreview(true) : fileRef.current?.click())} scale={0.94} style={{ position: "relative", width: 60, height: 60, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.accent, fontWeight: 800, fontSize: 27, fontFamily: C.display, flexShrink: 0 }}>
-          {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
-        </Pressable>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text }}>{profile.name}</div>
-          <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted, marginTop: 2 }}>{profile.sport || "—"}</div>
+      {/* ── Profile header — spacious, centered ── */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "14px 0 26px" }}>
+        <div style={{ position: "relative", width: 112, height: 112, marginBottom: 16 }}>
+          {/* Tap the avatar to preview it full-screen (TikTok-style); with no
+              photo yet there's nothing to preview, so it opens the picker. */}
+          <Pressable onClick={() => (profile.photo ? setPhotoPreview(true) : fileRef.current?.click())} scale={0.94} style={{ width: 112, height: 112, borderRadius: "50%", border: `1px solid ${C.border2}`, background: C.surface2, padding: 0, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", color: C.text2, fontWeight: 800, fontSize: 44, fontFamily: C.display }}>
+            {profile.photo ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
+          </Pressable>
+          {/* Subtle edit badge — neutral dark chip, opens the picker */}
+          <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.9} style={{ position: "absolute", right: 4, bottom: 4, width: 28, height: 28, borderRadius: "50%", background: C.surface2, border: `2px solid ${C.bg}`, color: C.text2, padding: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: C.name === "dark" ? "none" : "0 1px 3px rgba(28,24,20,0.12)" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg>
+            <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>{t("Slika")}</span>
+          </Pressable>
         </div>
-        <Pressable onClick={() => fileRef.current && fileRef.current.click()} scale={0.95} style={editBtn}>{t("Slika")}</Pressable>
+        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, color: C.text, letterSpacing: "-0.01em" }}>{profile.name}</div>
+        {email && <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14.5, color: C.muted, marginTop: 4 }}>{email}</div>}
+        {profile.sport && (
+          <span style={{ marginTop: 12, padding: "5px 13px", borderRadius: 999, background: C.surface2, border: `1px solid ${C.border2}`, color: C.accent, fontFamily: C.display, fontWeight: 600, fontSize: 12.5, letterSpacing: "0.01em" }}>{profile.sport}</span>
+        )}
       </div>
 
-      {/* Account — name, e-mail, password, language and plan now live on
-          their own screen */}
-      <SettingsBlock title={t("RAČUN")}>
-        <Pressable onClick={onAccount} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
-          <div>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 17, color: C.text }}>{profile.name}</span>
-            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 3 }}>{t("Ime, e-pošta, geslo, jezik, obvestila in plan")}</div>
+      {/* ── Account ── */}
+      <div style={card}>
+        {Row({ icon: IC.user, title: profile.name, subtitle: t("Ime, e-pošta, geslo, jezik, obvestila in plan"), onClick: onAccount, first: true })}
+      </div>
+
+      {/* ── Appearance / theme — iOS-style segmented control ── */}
+      <div style={card}>
+        <div style={{ padding: 15 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 13 }}>
+            <span style={{ width: 36, height: 36, borderRadius: 11, background: C.surface2, border: `1px solid ${C.border}`, color: C.text2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              {(theme === "light" ? IC.sun : IC.moon)(C.text2)}
+            </span>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 16, color: C.text }}>{t("Tema")}</span>
           </div>
-          <span style={{ color: C.muted, fontSize: 20 }}>›</span>
-        </Pressable>
-      </SettingsBlock>
-
-      {/* Theme */}
-      <SettingsBlock title={t("TEMA")}>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setTheme("dark")} style={{ flex: 1, padding: "13px", borderRadius: 14, cursor: "pointer", border: `1px solid ${theme === "dark" ? C.accent : C.border}`, background: theme === "dark" ? `${C.accent}14` : "transparent", color: theme === "dark" ? C.accent : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 14.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, WebkitTapHighlightColor: "transparent" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
-            {t("Temna")}
-          </button>
-          <button onClick={() => setTheme("light")} style={{ flex: 1, padding: "13px", borderRadius: 14, cursor: "pointer", border: `1px solid ${theme === "light" ? C.accent : C.border}`, background: theme === "light" ? `${C.accent}14` : "transparent", color: theme === "light" ? C.accent : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 14.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, WebkitTapHighlightColor: "transparent" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" /></svg>
-            {t("Svetla")}
-          </button>
+          <div role="group" aria-label={t("Tema")} style={{ display: "flex", gap: 4, padding: 4, borderRadius: 13, background: C.surface2, border: `1px solid ${C.border}` }}>
+            {[["dark", IC.moon, t("Temna")], ["light", IC.sun, t("Svetla")]].map(([mode, ico, lbl]) => {
+              const active = theme === mode;
+              return (
+                <button key={mode} onClick={() => setTheme(mode)} aria-pressed={active} style={{
+                  flex: 1, padding: "10px", borderRadius: 10, cursor: "pointer", border: "none",
+                  background: active ? C.accent : "transparent",
+                  color: active ? C.btnText : C.muted,
+                  fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 14.5,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  WebkitTapHighlightColor: "transparent", transition: "background 0.18s ease, color 0.18s ease",
+                }}>
+                  {ico(active ? C.btnText : C.muted)}
+                  {lbl}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </SettingsBlock>
+      </div>
 
-      {/* FAQ */}
-      <SettingsBlock title={t("POMOČ")}>
+      {/* ── Support: FAQ + contact ── */}
+      <div style={card}>
+        {/* FAQ — collapsed row, or the expanded question list */}
         {!openFaq ? (
-          <Pressable
-            onClick={() => setOpenFaq(true)}
-            scale={0.99}
-            style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}
-          >
-            <div>
-              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Pogosta vprašanja")}</span>
-              <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, textTransform: "lowercase", marginTop: 3 }}>{FAQ_ITEMS.length} {t("vprašanj in odgovorov")}</div>
-            </div>
-            <span style={{ color: C.muted, fontSize: 20 }}>›</span>
-          </Pressable>
+          Row({ icon: IC.help, title: t("Pogosta vprašanja"), subtitle: `${FAQ_ITEMS.length} ${t("vprašanj in odgovorov")}`, onClick: () => setOpenFaq(true), first: true })
         ) : (
-          <div style={{ animation: "athlosFade 0.2s ease" }}>
-            <Pressable
-              onClick={() => { setOpenFaq(null); }}
-              scale={0.99}
-              style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", padding: "0 0 14px", cursor: "pointer" }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          <div style={{ padding: "14px 16px", animation: "athlosFade 0.2s ease" }}>
+            <Pressable onClick={() => setOpenFaq(null)} scale={0.99} style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", padding: "0 0 12px", cursor: "pointer" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
               <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted }}>{t("ZAPRI")}</span>
             </Pressable>
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -161,7 +228,7 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
                   <Pressable
                     onClick={() => setOpenFaq(openFaq === i ? true : i)}
                     scale={0.99}
-                    style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: "11px 0", gap: 12 }}
+                    style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: "12px 0", gap: 12 }}
                   >
                     <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text, flex: 1 }}>{t(item.q)}</span>
                     <span style={{ color: C.muted, fontSize: 18, transition: "transform 0.2s", transform: openFaq === i ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>›</span>
@@ -177,30 +244,20 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
             </div>
           </div>
         )}
-      </SettingsBlock>
 
-      {/* Contact */}
-      <SettingsBlock title={t("KONTAKTIRAJ OSEBJE")}>
+        {/* Contact — collapsed row, success state, or the message form */}
         {!contactOpen ? (
-          <Pressable
-            onClick={() => setContactOpen(true)}
-            scale={0.99}
-            style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}
-          >
-            <div>
-              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Pošlji sporočilo")}</span>
-              <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, textTransform: "lowercase", marginTop: 3 }}>{t("odgovorimo v 24 urah")}</div>
-            </div>
-            <span style={{ color: C.muted, fontSize: 20 }}>›</span>
-          </Pressable>
+          Row({ icon: IC.mail, title: t("Pošlji sporočilo"), subtitle: t("odgovorimo v 24 urah"), onClick: () => setContactOpen(true), first: false })
         ) : contactSent ? (
-          <div style={{ padding: 18, borderRadius: 14, background: `${C.accent}14`, border: `1px solid ${C.accent}40`, textAlign: "center", animation: "athlosFade 0.2s ease" }}>
-            <div style={{ fontSize: 27, marginBottom: 8 }}>✓</div>
-            <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.accent }}>{t("Sporočilo poslano!")}</div>
-            <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, marginTop: 4 }}>{t("Odgovorili vam bomo v 24 urah.")}</div>
+          <div style={{ borderTop: `1px solid ${C.border}`, padding: 16, animation: "athlosFade 0.2s ease" }}>
+            <div style={{ padding: 16, borderRadius: 18, background: `${C.accent}14`, border: `1px solid ${C.accent}40`, textAlign: "center" }}>
+              <div style={{ fontSize: 27, marginBottom: 8 }}>✓</div>
+              <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.accent }}>{t("Sporočilo poslano!")}</div>
+              <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, marginTop: 4 }}>{t("Odgovorili vam bomo v 24 urah.")}</div>
+            </div>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, animation: "athlosFade 0.2s ease" }}>
+          <div style={{ borderTop: `1px solid ${C.border}`, padding: 16, display: "flex", flexDirection: "column", gap: 8, animation: "athlosFade 0.2s ease" }}>
             <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.muted }}>{t("VAŠE SPOROČILO")}</span>
             <textarea
               value={contactMsg}
@@ -209,59 +266,78 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
               rows={4}
               style={{ ...inp, resize: "none", lineHeight: 1.5 }}
             />
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-              <button onClick={() => { setContactOpen(false); setContactMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "13px", fontSize: 14.5 }}>{t("Prekliči")}</button>
-              <button onClick={sendContact} style={{ ...primaryBtn, flex: 2, padding: "13px", fontSize: 14.5, opacity: contactMsg.trim() ? 1 : 0.4 }}>{t("Pošlji")}</button>
+            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+              <button onClick={() => { setContactOpen(false); setContactMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "12px", fontSize: 14.5 }}>{t("Prekliči")}</button>
+              <button onClick={sendContact} style={{ ...primaryBtn, flex: 2, padding: "12px", fontSize: 14.5, opacity: contactMsg.trim() ? 1 : 0.4 }}>{t("Pošlji")}</button>
             </div>
           </div>
         )}
-      </SettingsBlock>
+      </div>
 
-      {/* Legal */}
-      <SettingsBlock title={t("PRAVNO")}>
-        <Pressable onClick={onPrivacy} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
-          <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Politika zasebnosti")}</span>
-          <span style={{ color: C.muted, fontSize: 20 }}>›</span>
-        </Pressable>
-      </SettingsBlock>
+      {/* ── About: legal + website ── */}
+      <div style={card}>
+        {Row({ icon: IC.shield, title: t("Politika zasebnosti"), onClick: onPrivacy, first: true })}
+        {Row({ icon: IC.globe, title: "ATHLOS", subtitle: t("odpre v brskalniku"), onClick: () => window.open(LANDING_URL, "_blank", "noopener,noreferrer"), accessory: (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+        ) })}
+      </div>
 
-      {/* Website */}
-      <SettingsBlock title={t("SPLETNA STRAN")}>
-        <Pressable onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} scale={0.99} style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}>
-          <div>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>ATHLOS</span>
-            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, textTransform: "lowercase", marginTop: 3 }}>{t("odpre v brskalniku")}</div>
-          </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-          </svg>
-        </Pressable>
-      </SettingsBlock>
+      {/* ── Logout (opens a confirmation dialog) ── */}
+      <div style={{ ...card, marginBottom: 20 }}>
+        {Row({ icon: IC.logout, title: t("Odjava"), danger: true, first: true, onClick: () => setConfirmLogout(true), accessory: null })}
+      </div>
 
-      <Pressable onClick={onLogout} scale={0.98} style={{ width: "100%", marginTop: 24, padding: 15, borderRadius: 999, border: `1px solid ${C.red}40`, background: `${C.red}14`, color: C.red, fontFamily: C.display, fontWeight: 700, fontSize: 15.5 }}>{t("Odjava")}</Pressable>
-      <p style={{ textAlign: "center", color: C.muted2, fontFamily: C.display, fontSize: 13.5, marginTop: 22 }}>ATHLOS v0.6 · © 2026</p>
+      <p style={{ textAlign: "center", color: C.muted2, fontFamily: C.display, fontSize: 13.5, marginTop: 8 }}>ATHLOS v0.6 · © 2026</p>
 
       {/* Full-screen photo preview — TikTok-style: tap the avatar, see it big,
           tap the ✕ or backdrop to dismiss, or jump straight to changing it. */}
       {photoPreview && profile.photo && (
         <div
           onClick={(e) => { if (e.target === e.currentTarget) setPhotoPreview(false); }}
-          style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(10,9,8,0.94)", display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease" }}
+          style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(8,8,8,0.94)", display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease" }}
         >
           <div style={{ display: "flex", justifyContent: "flex-end", padding: "max(16px, env(safe-area-inset-top, 16px)) 18px 12px" }}>
-            <button onClick={() => setPhotoPreview(false)} aria-label={t("Zapri")} style={{ width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(244,239,230,0.28)", background: "rgba(244,239,230,0.08)", color: "#F4EFE6", fontSize: 22.5, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
+            <button onClick={() => setPhotoPreview(false)} aria-label={t("Zapri")} style={{ width: 38, height: 38, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.28)", background: "rgba(255,255,255,0.08)", color: "#FFFFFF", fontSize: 22.5, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
           </div>
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
-            <img src={profile.photo} alt="" style={{ width: "100%", maxWidth: 320, aspectRatio: "1 / 1", borderRadius: "50%", objectFit: "cover", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }} />
+            <img src={profile.photo} alt="" style={{ width: "100%", maxWidth: 320, aspectRatio: "1 / 1", borderRadius: "50%", objectFit: "cover" }} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "12px 24px max(24px, env(safe-area-inset-bottom, 24px))" }}>
-            <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 18, color: "#F4EFE6" }}>{profile.name}</div>
+            <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 18, color: "#FFFFFF" }}>{profile.name}</div>
             <button
               onClick={() => { setPhotoPreview(false); fileRef.current?.click(); }}
-              style={{ padding: "10px 22px", borderRadius: 999, border: "1px solid rgba(244,239,230,0.3)", background: "rgba(244,239,230,0.08)", color: "#F4EFE6", fontFamily: C.display, fontWeight: 700, fontSize: 14.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
+              style={{ padding: "10px 22px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.08)", color: "#FFFFFF", fontFamily: C.display, fontWeight: 700, fontSize: 14.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
             >
               {t("Zamenjaj sliko")}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Logout confirmation — bottom sheet, faithful to the reference design.
+          Theme-aware so it reads correctly in the app's dark mode too. The user
+          is only signed out after confirming. */}
+      {confirmLogout && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setConfirmLogout(false); }}
+          style={{ position: "fixed", inset: 0, zIndex: 95, background: "rgba(12,14,20,0.5)", animation: "athlosFade 0.2s ease", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+        >
+          <div role="dialog" aria-modal="true" aria-label={t("Ali si prepričan, da se želiš odjaviti?")} style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.surface, borderRadius: "32px 32px 0 0", padding: "40px 24px max(28px, env(safe-area-inset-bottom, 28px))", boxShadow: C.name === "dark" ? "0 -18px 50px rgba(0,0,0,0.55)" : "0 -18px 50px rgba(16,24,40,0.18)", animation: "athlosRise 0.36s cubic-bezier(0.22,1,0.36,1)" }}>
+            {/* neutral ID/session badge */}
+            <div style={{ width: 88, height: 88, borderRadius: "50%", margin: "0 auto 22px", background: C.surface2, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="3" />
+                <circle cx="8.5" cy="11" r="2" />
+                <path d="M5.4 16.2a3.2 3.2 0 016.2 0" />
+                <path d="M14.5 10h3.5M14.5 13.6h3.5" />
+              </svg>
+            </div>
+            <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 23, lineHeight: 1.25, textAlign: "center", color: C.text, margin: "0 auto 12px", maxWidth: 260, letterSpacing: "-0.01em" }}>{t("Ali si prepričan, da se želiš odjaviti?")}</h3>
+            <p style={{ fontFamily: C.display, fontSize: 14, fontWeight: 500, lineHeight: 1.6, textAlign: "center", color: C.muted, margin: "0 auto 28px", maxWidth: 300 }}>{t("Z odjavo boš zaključil trenutno sejo in ne boš več imel dostopa do svojega računa.")}</p>
+            {/* coral destructive pill */}
+            <Pressable onClick={onLogout} scale={0.97} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: "#E5544A", color: "#FFFFFF", fontFamily: C.display, fontWeight: 700, fontSize: 16.5, marginBottom: 12, boxShadow: "0 12px 26px rgba(229,84,74,0.4)" }}>{t("Odjava")}</Pressable>
+            {/* neutral cancel pill */}
+            <Pressable onClick={() => setConfirmLogout(false)} scale={0.97} style={{ width: "100%", padding: "17px", borderRadius: 999, border: `1px solid ${C.border2}`, background: C.name === "dark" ? C.surface2 : "#FFFFFF", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 16.5, boxShadow: C.name === "dark" ? "none" : "0 6px 18px rgba(16,24,40,0.08)" }}>{t("Prekliči")}</Pressable>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "../theme";
-import { Mono, BackBtn } from "../components/UI";
+import { Mono, BackBtn, Card, SectionLabel } from "../components/UI";
 import { useT } from "../lib/i18n";
 import { IcBolt, IcPulse, IcDumbbell, IcJump, IcHeart } from "../components/Icons";
 
@@ -37,8 +37,8 @@ function statusLabel(s, t) {
 function statusColor(s, C) {
   if (s >= 88) return C.accent;
   if (s >= 72) return C.accent;
-  if (s >= 50) return C.yellow || "#f59e0b";
-  return C.red || "#ef4444";
+  if (s >= 50) return C.yellow;
+  return C.red;
 }
 
 function BenchmarkCard({ m, C, t }) {
@@ -62,7 +62,7 @@ function BenchmarkCard({ m, C, t }) {
   ];
 
   return (
-    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: 16, marginBottom: 12 }}>
+    <Card pad={16} style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
         <span style={{ display: "flex", flexShrink: 0, color: C.gold }}>{m.icon}</span>
         <div style={{ flex: 1 }}>
@@ -114,7 +114,7 @@ function BenchmarkCard({ m, C, t }) {
           </Mono>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -136,7 +136,7 @@ export default function ScreenAssessment({ go, profile }) {
       </header>
 
       {/* overall score card */}
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 18, display: "flex", alignItems: "center", gap: 18 }}>
+      <Card pad={18} style={{ marginBottom: 18, display: "flex", alignItems: "center", gap: 18 }}>
         <div style={{ width: 78, height: 78, borderRadius: "50%", border: `3px solid ${C.accent}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: `${C.accent}0f`, flexShrink: 0 }}>
           <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 31.5, color: C.accent, lineHeight: 1 }}>{COACH_COMMENT.grade}</span>
         </div>
@@ -158,15 +158,15 @@ export default function ScreenAssessment({ go, profile }) {
           <Mono style={{ color: C.muted, fontSize: 8, textAlign: "right", display: "block" }}>{t("POZICIJA")}</Mono>
           <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: C.text, textAlign: "right" }}>{t(profile.sport || "Nogomet")}</div>
         </div>
-      </div>
+      </Card>
 
       {/* benchmark cards */}
-      <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em", marginBottom: 12, display: "block" }}>{t("BENCHMARK PRIMERJAVA")}</Mono>
+      <SectionLabel>{t("BENCHMARK PRIMERJAVA")}</SectionLabel>
       {BENCHMARKS.map(m => <BenchmarkCard key={m.id} m={m} C={C} t={t} />)}
 
       {/* coach comment */}
-      <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.1em", marginBottom: 12, display: "block", marginTop: 6 }}>{t("TRENERJEV KOMENTAR")}</Mono>
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 18, marginBottom: 14 }}>
+      <SectionLabel style={{ marginTop: 20 }}>{t("TRENERJEV KOMENTAR")}</SectionLabel>
+      <Card pad={18} style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <span style={{ width: 36, height: 36, borderRadius: "50%", background: `${C.accent}1f`, border: `1px solid ${C.accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, color: C.accent, fontSize: 15.5, flexShrink: 0 }}>M</span>
           <div>
@@ -178,7 +178,7 @@ export default function ScreenAssessment({ go, profile }) {
           </span>
         </div>
         <p style={{ margin: 0, color: C.text2, fontSize: 14.5, lineHeight: 1.6, fontFamily: C.display }}>{t(COACH_COMMENT.text)}</p>
-      </div>
+      </Card>
     </div>
   );
 }
