@@ -34,33 +34,73 @@ const NAV = [
   { id: "settings", label: "Profil",  icon: "profile" },
 ];
 
+// Premium loading experience — motion only, no bars/spinner/percent/skeleton.
+// The Athlos "A" materializes from darkness (fade + 0.96→1 scale), a thin ring
+// carries a single green energy segment in a slow orbit, a soft green sweep
+// passes through the mark, and a low radial light breathes behind it. The
+// reveal plays once; the ring/sweep/glow loop seamlessly for longer loads.
+// GPU-friendly: transform + opacity only (the web equivalent of Reanimated).
 function SplashScreen() {
-  // One artwork for both themes: green-on-black Zeus statue, frameless, on a
-  // pure black field — cover fills the screen edge to edge.
+  const GREEN = "#00FF87";
+  // the "A" as thin strokes — used as a mask so a white fill + a moving green
+  // sweep both render exactly inside the glyph
+  const aSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><g fill='none' stroke='#fff' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'><path d='M33 93 L60 27 L87 93'/><path d='M43 71 L77 71'/></g></svg>`;
+  const aMask = `url("data:image/svg+xml,${encodeURIComponent(aSvg)}")`;
+  const maskProps = {
+    WebkitMaskImage: aMask, maskImage: aMask,
+    WebkitMaskSize: "contain", maskSize: "contain",
+    WebkitMaskRepeat: "no-repeat", maskRepeat: "no-repeat",
+    WebkitMaskPosition: "center", maskPosition: "center",
+  };
+  const type = "'Poppins',system-ui,sans-serif";
   return (
     <div style={{
-      position: "fixed", inset: 0,
-      background: "#000609",
-      zIndex: 999, overflow: "hidden",
+      position: "fixed", inset: 0, zIndex: 999, overflow: "hidden",
+      background: "radial-gradient(125% 120% at 50% 44%, #0B0B0B, #060606 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)",
     }}>
       <style>{`
-        @keyframes splashGod { from { opacity: 0; } to { opacity: 1; } }
-        /* The app-wide reduced-motion reset forces animation-duration to ~0
-           via !important; this one-time fade wins it back, scoped here only. */
-        .athlos-splash-god { animation: splashGod 0.55s ease-out forwards !important; }
+        @keyframes athSplashIn   { 0% { opacity: 0; transform: scale(0.96); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes athSplashRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes athSplashSweep{ 0% { transform: translateX(-64px); } 22% { transform: translateX(184px); } 100% { transform: translateX(184px); } }
+        @keyframes athSplashGlow { 0%,100% { opacity: 0.45; } 50% { opacity: 0.82; } }
+        @keyframes athSplashText { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+        .ath-splash-center { animation: athSplashIn 1.3s cubic-bezier(0.22,1,0.36,1) both; }
+        .ath-splash-ring   { animation: athSplashRing 18s linear infinite; transform-origin: 50% 50%; }
+        .ath-splash-glow   { animation: athSplashGlow 4.6s ease-in-out infinite; }
+        .ath-splash-sweep  { animation: athSplashSweep 3.6s cubic-bezier(0.4,0,0.2,1) 1.1s infinite; }
+        .ath-splash-word   { animation: athSplashText 0.9s cubic-bezier(0.22,1,0.36,1) 0.85s both; }
+        .ath-splash-sub    { animation: athSplashText 0.9s cubic-bezier(0.22,1,0.36,1) 1.5s both; }
       `}</style>
-      <img
-        className="athlos-splash-god"
-        src="/img/splash-zeus.png"
-        alt=""
-        style={{
-          position: "absolute", inset: 0,
-          width: "100%", height: "100%",
-          objectFit: "cover", objectPosition: "center",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      />
+
+      <div className="ath-splash-center" style={{ position: "relative", width: 200, height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {/* subtle radial light behind the mark — low, no neon */}
+        <div className="ath-splash-glow" aria-hidden="true" style={{
+          position: "absolute", width: 240, height: 240, borderRadius: "50%", pointerEvents: "none",
+          background: `radial-gradient(circle, ${GREEN}1c, transparent 62%)`,
+        }} />
+        {/* thin ring carrying one green energy segment, slow orbit */}
+        <svg className="ath-splash-ring" width="200" height="200" viewBox="0 0 200 200" aria-hidden="true" style={{ position: "absolute" }}>
+          <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1.2" />
+          <circle cx="100" cy="100" r="82" fill="none" stroke={GREEN} strokeWidth="1.6" strokeLinecap="round" strokeDasharray="20 495" opacity="0.9" />
+        </svg>
+        {/* the Athlos "A" — white via mask; a green energy sweep passes through */}
+        <div style={{ position: "relative", width: 120, height: 120, ...maskProps }}>
+          <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.92)" }} />
+          <div className="ath-splash-sweep" aria-hidden="true" style={{
+            position: "absolute", top: 0, left: 0, width: 60, height: 120,
+            background: `linear-gradient(105deg, transparent 30%, ${GREEN} 50%, transparent 70%)`,
+          }} />
+        </div>
+      </div>
+
+      <div className="ath-splash-word" style={{ marginTop: 40, fontFamily: type, fontWeight: 600, fontSize: 12, letterSpacing: "0.5em", paddingLeft: "0.5em", color: "rgba(255,255,255,0.9)" }}>
+        ATHLOS
+      </div>
+      <div className="ath-splash-sub" style={{ marginTop: 12, fontFamily: type, fontWeight: 500, fontSize: 12.5, letterSpacing: "0.02em", color: "rgba(255,255,255,0.34)" }}>
+        Preparing your training…
+      </div>
     </div>
   );
 }
@@ -172,7 +212,7 @@ export default function AthlosApp() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => setSplash(false), 1800);
+    const t = setTimeout(() => setSplash(false), 2400);
     return () => clearTimeout(t);
   }, []);
 
