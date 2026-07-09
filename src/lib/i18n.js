@@ -446,6 +446,7 @@ const EN = {
   "Pripravljenost": "Readiness",
   "STANJE": "STATUS",
   "Regeneracija": "Recovery",
+  "Okrevanje": "Recovery",
   "Utrujenost": "Fatigue",
   "Nizka": "Low",
   "Zmerna": "Moderate",

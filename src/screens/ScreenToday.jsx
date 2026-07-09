@@ -519,7 +519,6 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
   const recComp = components.find((c) => c.key === "recovery");
   const recScore = recComp ? recComp.score : battery;
   const fatigue = Math.max(1, Math.min(5, checkin.soreness || 2));
-  const fatigueWord = fatigue <= 2 ? t("Nizka") : fatigue <= 3 ? t("Zmerna") : t("Visoka");
   const WEEKLY_GOAL = 5;
   const doneWorkouts = Math.min(doneThisWeek, WEEKLY_GOAL);
   const trend = battery >= 70 ? "+6%" : battery >= 40 ? "−2%" : "−9%";
@@ -639,8 +638,8 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         <SectionLabel>{t("STANJE")}</SectionLabel>
         <div style={{ display: "flex", gap: 8 }}>
           <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Spanje").toUpperCase()} value={`${checkin.sleepH}h`} barPct={Math.min(1, (checkin.sleepH || 0) / 8)} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Regeneracija").toUpperCase()} value={`${recScore}%`} barPct={recScore / 100} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Utrujenost").toUpperCase()} value={fatigueWord} barPct={fatigue / 5} />
+          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Okrevanje").toUpperCase()} value={`${recScore}%`} barPct={recScore / 100} />
+          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Utrujenost").toUpperCase()} value={`${fatigue}/5`} barPct={fatigue / 5} />
           <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Počutje").toUpperCase()} value={`${checkin.mood}/5`} barPct={checkin.mood / 5} />
         </div>
       </div>
@@ -670,7 +669,7 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         <SectionLabel>{t("HITRE STATISTIKE")}</SectionLabel>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           <StatTile label={t("OBREMENITEV")} value={t("Optimalna")} sub={t("7-dnevno povprečje")} />
-          <StatTile label={t("Regeneracija").toUpperCase()} value={`${recScore}%`} sub={`${components.length} ${t("vira")}`} />
+          <StatTile label={t("Okrevanje").toUpperCase()} value={`${recScore}%`} sub={`${components.length} ${t("vira")}`} />
           <StatTile label={t("TREND")} value={trend} valueColor={battery >= 70 ? C.accent : C.text} sub={t("vs. včeraj")} />
           <StatTile label={t("KALORIJE DANES")} value="480" sub="kcal" />
         </div>
