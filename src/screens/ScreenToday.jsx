@@ -587,7 +587,25 @@ export default function ScreenToday({ go, profile, chatUnread = 0 }) {
         cursor: "pointer", WebkitTapHighlightColor: "transparent",
         display: "flex", flexDirection: "column", alignItems: "center", ...rise(0.1),
       }}>
-        <BatteryRing pct={shown} level={battery} C={C} size={196} />
+        <div style={{ position: "relative", width: 196, height: 196, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {/* radial rays — divine sunburst, sub-6% opacity, masked to a band */}
+          <div aria-hidden="true" style={{
+            position: "absolute", width: 300, height: 300, borderRadius: "50%", pointerEvents: "none", opacity: 0.6,
+            background: C.name === "dark"
+              ? "repeating-conic-gradient(from 0deg, rgba(255,255,255,0.05) 0deg 0.5deg, transparent 0.5deg 7.5deg)"
+              : "repeating-conic-gradient(from 0deg, rgba(16,24,40,0.06) 0deg 0.5deg, transparent 0.5deg 7.5deg)",
+            WebkitMaskImage: "radial-gradient(closest-side, transparent 44%, #000 60%, transparent 90%)",
+            maskImage: "radial-gradient(closest-side, transparent 44%, #000 60%, transparent 90%)",
+          }} />
+          {/* soft depth disc behind the score */}
+          <div aria-hidden="true" style={{
+            position: "absolute", width: 214, height: 214, borderRadius: "50%", pointerEvents: "none",
+            background: C.name === "dark"
+              ? "radial-gradient(closest-side, rgba(255,255,255,0.03), transparent 72%)"
+              : "radial-gradient(closest-side, rgba(16,24,40,0.03), transparent 72%)",
+          }} />
+          <BatteryRing pct={shown} level={battery} C={C} size={196} />
+        </div>
         <span style={{ fontFamily: C.mono, fontSize: 10, letterSpacing: "0.26em", color: C.muted2, marginTop: 16, textTransform: "uppercase" }}>
           {t("Pripravljenost")} · {season === "off" ? t("OFF-SEASON") : t("MID-SEASON")}
         </span>

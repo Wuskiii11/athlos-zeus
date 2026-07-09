@@ -329,15 +329,24 @@ export function SettingsBlock({ title, children }) {
 // ─────────────────────────────────────────────────────────────
 
 // Soft dark surface card. Pass onClick to make it a pressable row.
+// Glass-like: an extremely soft top sheen + hairline over the flat fill gives
+// premium depth without any obvious gradient.
 export function Card({ children, onClick, style, pad = 20, radius = 24 }) {
   const C = useTheme();
+  const dark = C.name === "dark";
   const base = {
-    background: C.surface2, borderRadius: radius, padding: pad,
-    boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)",
+    background: dark
+      ? `linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0) 44%), ${C.surface2}`
+      : `linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 42%), ${C.surface2}`,
+    borderRadius: radius, padding: pad,
+    border: `1px solid ${dark ? "rgba(255,255,255,0.045)" : "rgba(16,24,40,0.05)"}`,
+    boxShadow: dark
+      ? "0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)"
+      : "0 2px 12px rgba(16,24,40,0.05)",
     ...style,
   };
   return onClick
-    ? <Pressable onClick={onClick} scale={0.99} style={{ ...base, border: "none", width: "100%", textAlign: "left", display: "block" }}>{children}</Pressable>
+    ? <Pressable onClick={onClick} scale={0.99} style={{ ...base, width: "100%", textAlign: "left", display: "block" }}>{children}</Pressable>
     : <div style={base}>{children}</div>;
 }
 
@@ -370,8 +379,17 @@ export function StatTile({ label, value, sub, onClick, barPct, color, valueColor
       )}
     </>
   );
-  const base = { background: C.surface2, borderRadius: 20, padding: "14px 14px", textAlign: "left", ...style };
+  const dark = C.name === "dark";
+  const base = {
+    background: dark
+      ? `linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 46%), ${C.surface2}`
+      : `linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0) 44%), ${C.surface2}`,
+    borderRadius: 20, padding: "14px 14px", textAlign: "left",
+    border: `1px solid ${dark ? "rgba(255,255,255,0.04)" : "rgba(16,24,40,0.045)"}`,
+    boxShadow: dark ? "inset 0 1px 0 rgba(255,255,255,0.025)" : "0 1px 6px rgba(16,24,40,0.04)",
+    ...style,
+  };
   return onClick
-    ? <Pressable onClick={onClick} scale={0.98} style={{ ...base, border: "none", width: "100%", display: "block" }}>{inner}</Pressable>
+    ? <Pressable onClick={onClick} scale={0.98} style={{ ...base, width: "100%", display: "block" }}>{inner}</Pressable>
     : <div style={base}>{inner}</div>;
 }

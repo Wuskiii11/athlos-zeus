@@ -584,11 +584,33 @@ export default function AthlosApp() {
             backgroundColor: C.bg,
             backgroundImage: C.bgImage,
           }} />
-          {/* Antique printed-paper halftone — very faint, app-wide */}
+          {/* ── Brand atmosphere — Greek identity hidden in the background.
+              Faint carved relief + engraved-stone grain + soft depth, all
+              sub-6% so they read subconsciously and never compete. ── */}
+          {/* carved Zeus relief, bleeding off the top-right, dissolving downward */}
+          <img src="/img/hero-zeus-ink.png" alt="" aria-hidden="true" style={{
+            position: "absolute", top: 6, right: -48, height: 500, width: "auto", maxWidth: "80%",
+            objectFit: "contain", zIndex: 0, pointerEvents: "none", userSelect: "none",
+            opacity: C.name === "dark" ? 0.05 : 0.045,
+            filter: C.name === "dark" ? "invert(1) grayscale(1)" : "grayscale(1)",
+            WebkitMaskImage: "linear-gradient(180deg, #000 0%, #000 52%, transparent 90%)",
+            maskImage: "linear-gradient(180deg, #000 0%, #000 52%, transparent 90%)",
+          }} />
+          {/* engraved-stone grain */}
           <div aria-hidden="true" style={{
             position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-            backgroundImage: "radial-gradient(rgba(16,24,40,0.05) 0.8px, transparent 1.2px)",
-            backgroundSize: "5px 5px", mixBlendMode: "multiply", opacity: C.name === "dark" ? 0.18 : 0.06,
+            backgroundImage: C.name === "dark"
+              ? "radial-gradient(rgba(255,255,255,0.5) 0.7px, transparent 1.1px)"
+              : "radial-gradient(rgba(16,24,40,0.06) 0.8px, transparent 1.2px)",
+            backgroundSize: "5px 5px",
+            opacity: C.name === "dark" ? 0.03 : 0.06,
+          }} />
+          {/* soft depth — a whisper of top light + grounded base, no glow */}
+          <div aria-hidden="true" style={{
+            position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+            background: C.name === "dark"
+              ? "radial-gradient(125% 74% at 50% -8%, rgba(255,255,255,0.028), transparent 60%), linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.34))"
+              : "radial-gradient(125% 74% at 50% -8%, rgba(255,255,255,0.6), transparent 60%)",
           }} />
 
           {/* Safe area top spacer */}
