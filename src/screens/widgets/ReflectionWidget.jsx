@@ -69,11 +69,11 @@ export default function ReflectionWidget({ insights, C, t }) {
   };
 
   return (
-    <div style={{ position: "relative", marginBottom: 14, minHeight: 132 }}>
+    <div style={{ position: "relative", marginBottom: 10, minHeight: 132 }}>
       {/* preview of the card(s) behind, peeking out */}
       {behindCount > 0 && (
         <div style={{
-          position: "absolute", inset: "6px 6px -6px 6px", borderRadius: 20,
+          position: "absolute", inset: "6px 6px -6px 6px", borderRadius: 16,
           background: C.surface3, border: `1px solid ${C.border}`, opacity: 0.6,
         }} />
       )}
@@ -86,7 +86,7 @@ export default function ReflectionWidget({ insights, C, t }) {
         onTouchMove={(e) => onMove(e.touches[0].clientX)}
         onTouchEnd={onEnd}
         style={{
-          position: "relative", background: C.surface2, borderRadius: 24, padding: 18,
+          position: "relative", background: C.surface2, borderRadius: 18, padding: 18,
           boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)",
           transform: `translateX(${drag}px) rotate(${drag * 0.04}deg)`,
           opacity: 1 - Math.min(Math.abs(drag) / 220, 0.6),
@@ -95,16 +95,16 @@ export default function ReflectionWidget({ insights, C, t }) {
         }}
       >
         {/* tinted icon tile + coloured kicker — the reference's insights row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
           <span style={{
-            width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+            width: 36, height: 36, borderRadius: 10, flexShrink: 0,
             display: "flex", alignItems: "center", justifyContent: "center",
             background: `${iconColor}16`, border: `1px solid ${iconColor}2e`, color: iconColor,
           }}>{top.icon}</span>
-          <Mono style={{ color: iconColor, fontSize: 9.5, letterSpacing: "0.12em" }}>{t(top.kicker)}</Mono>
+          <Mono style={{ color: iconColor, fontSize: 9, letterSpacing: "0.12em" }}>{t(top.kicker)}</Mono>
         </div>
-        <p style={{ fontFamily: C.display, fontSize: 15.5, color: C.text, lineHeight: 1.5, margin: 0 }}>{t(top.text)}</p>
-        <Mono style={{ color: C.muted2, fontSize: 10, marginTop: 12, display: "block" }}>
+        <p style={{ fontFamily: C.display, fontSize: 14, color: C.text, lineHeight: 1.5, margin: 0 }}>{t(top.text)}</p>
+        <Mono style={{ color: C.muted2, fontSize: 9, marginTop: 9, display: "block" }}>
           ← {t("povleci za naslednje")} · {queue.length} {t("sporočil")}
         </Mono>
       </div>

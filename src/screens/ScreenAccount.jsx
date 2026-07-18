@@ -107,12 +107,12 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
   const planColors = { basic: C.aqua, pro: C.lav, elite: C.amber };
 
   const row = { display: "flex", justifyContent: "space-between", alignItems: "center" };
-  const cardStyle = { marginBottom: 12 };
-  const inp = { width: "100%", padding: "14px 16px", borderRadius: 16, border: `1px solid ${C.border}`, background: C.surface3, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17, outline: "none", boxSizing: "border-box" };
-  const editBtn = { padding: "9px 16px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.accent, fontFamily: C.display, fontSize: 14.5, fontWeight: 700 };
+  const cardStyle = { marginBottom: 9 };
+  const inp = { width: "100%", padding: "10px 11px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface3, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15, outline: "none", boxSizing: "border-box" };
+  const editBtn = { padding: "7px 11px", borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.accent, fontFamily: C.display, fontSize: 13, fontWeight: 700 };
   const primaryBtn = { borderRadius: 999, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
   const outlineBtn = { borderRadius: 999, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, cursor: "pointer", WebkitTapHighlightColor: "transparent" };
-  const msgBox = (ok) => ({ padding: "11px 14px", borderRadius: 14, background: ok ? `${C.accent}14` : `${C.red}14`, border: `1px solid ${ok ? C.accent : C.red}40`, color: ok ? C.accent : C.red, fontFamily: C.display, fontSize: 14.5, marginTop: 10 });
+  const msgBox = (ok) => ({ padding: "8px 10px", borderRadius: 12, background: ok ? `${C.accent}14` : `${C.red}14`, border: `1px solid ${ok ? C.accent : C.red}40`, color: ok ? C.accent : C.red, fontFamily: C.display, fontSize: 13, marginTop: 8 });
 
   const saveName = async () => {
     const n = name.trim();
@@ -177,10 +177,10 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
   };
 
   return (
-    <div style={{ padding: "10px 18px 28px" }}>
-      <header style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 22 }}>
+    <div style={{ padding: "8px 13px 18px" }}>
+      <header style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 15 }}>
         <BackBtn onClick={onBack} />
-        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Račun")}</h2>
+        <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, margin: 0, color: C.text, letterSpacing: "-0.02em" }}>{t("Račun")}</h2>
       </header>
 
       {/* Username */}
@@ -188,14 +188,14 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
         <SectionLabel>{t("UPORABNIŠKO IME")}</SectionLabel>
         {!editingName ? (
           <div style={row}>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 17, color: C.text }}>{profile.name}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15, color: C.text }}>{profile.name}</span>
             <Pressable onClick={() => { setName(profile.name); setEditingName(true); }} scale={0.95} style={editBtn}>{t("Uredi")}</Pressable>
           </div>
         ) : (
           <>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 6 }}>
               <input value={name} onChange={(e) => { setName(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && saveName()} style={{ ...inp, flex: 1, borderColor: nameMsg ? C.red : C.border }} />
-              <Pressable onClick={saveName} scale={0.93} style={{ ...primaryBtn, padding: "0 20px" }}>{t("Shrani")}</Pressable>
+              <Pressable onClick={saveName} scale={0.93} style={{ ...primaryBtn, padding: "0 14px" }}>{t("Shrani")}</Pressable>
             </div>
             {nameMsg && <div style={msgBox(false)}>{t(nameMsg)}</div>}
           </>
@@ -207,16 +207,16 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
         <SectionLabel>{t("E-POŠTA")}</SectionLabel>
         {!editingEmail ? (
           <div style={row}>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 17, color: C.text }}>{email || t("Ni nastavljeno")}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15, color: C.text }}>{email || t("Ni nastavljeno")}</span>
             <Pressable onClick={() => { setEmailMsg(""); setEditingEmail(true); }} scale={0.95} style={editBtn}>{t("Uredi")}</Pressable>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ime@email.com" style={inp} />
             {emailMsg && <div style={msgBox(emailMsg.startsWith("✓"))}>{t(emailMsg)}</div>}
-            <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-              <button onClick={() => { setEditingEmail(false); setEmail(user?.email || ""); setEmailMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "13px", fontSize: 14.5 }}>{t("Prekliči")}</button>
-              <button onClick={saveEmail} style={{ ...primaryBtn, flex: 2, padding: "13px", fontSize: 14.5 }}>{t("Shrani")}</button>
+            <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+              <button onClick={() => { setEditingEmail(false); setEmail(user?.email || ""); setEmailMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "9px", fontSize: 13 }}>{t("Prekliči")}</button>
+              <button onClick={saveEmail} style={{ ...primaryBtn, flex: 2, padding: "9px", fontSize: 13 }}>{t("Shrani")}</button>
             </div>
           </div>
         )}
@@ -226,31 +226,31 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
       <Card style={cardStyle}>
         <SectionLabel>{t("GESLO")}</SectionLabel>
         {!changingPw ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={row}>
-              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Spremeni geslo")}</span>
+              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Spremeni geslo")}</span>
               <Pressable onClick={() => setChangingPw(true)} scale={0.95} style={editBtn}>{t("Uredi")}</Pressable>
             </div>
             <div style={{ width: "100%", height: 1, background: C.border }} />
             <div style={row}>
               <div>
-                <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text2 }}>{t("Pozabljeno geslo?")}</span>
-                {email && <Mono style={{ display: "block", color: C.muted, fontSize: 10, marginTop: 3 }}>{email}</Mono>}
+                <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text2 }}>{t("Pozabljeno geslo?")}</span>
+                {email && <Mono style={{ display: "block", color: C.muted, fontSize: 9, marginTop: 3 }}>{email}</Mono>}
               </div>
               <Pressable onClick={sendReset} disabled={resetting} scale={0.95} style={{ ...editBtn, opacity: resetting ? 0.6 : 1 }}>{resetting ? t("Pošiljam…") : t("Ponastavi")}</Pressable>
             </div>
             {resetMsg && <div style={msgBox(resetMsg.startsWith("✓"))}>{t(resetMsg)}</div>}
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.muted }}>{t("TRENUTNO GESLO")}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted }}>{t("TRENUTNO GESLO")}</span>
             <input type="password" value={oldPw} onChange={(e) => setOldPw(e.target.value)} placeholder="••••••••" style={inp} />
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.muted, marginTop: 8 }}>{t("NOVO GESLO")}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.muted, marginTop: 6 }}>{t("NOVO GESLO")}</span>
             <input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="••••••••" style={inp} />
             {pwMsg && <div style={msgBox(pwMsg.startsWith("✓"))}>{t(pwMsg)}</div>}
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-              <button onClick={() => { setChangingPw(false); setOldPw(""); setNewPw(""); setPwMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "13px", fontSize: 14.5 }}>{t("Prekliči")}</button>
-              <button onClick={savePassword} style={{ ...primaryBtn, flex: 2, padding: "13px", fontSize: 14.5 }}>{t("Shrani geslo")}</button>
+            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+              <button onClick={() => { setChangingPw(false); setOldPw(""); setNewPw(""); setPwMsg(""); }} style={{ ...outlineBtn, flex: 1, padding: "9px", fontSize: 13 }}>{t("Prekliči")}</button>
+              <button onClick={savePassword} style={{ ...primaryBtn, flex: 2, padding: "9px", fontSize: 13 }}>{t("Shrani geslo")}</button>
             </div>
           </div>
         )}
@@ -262,8 +262,8 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
         <SectionLabel>{t("OBVESTILA")}</SectionLabel>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Potisna obvestila")}</span>
-            <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 3 }}>
+            <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Potisna obvestila")}</span>
+            <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 3 }}>
               {notifPerm === "granted"
                 ? t("Vklopljeno")
                 : notifPerm === "denied"
@@ -298,7 +298,7 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
           )}
         </div>
         {notifPerm === "denied" && (
-          <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 10, padding: "10px 12px", borderRadius: 12, background: C.surface3, lineHeight: 1.5 }}>
+          <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 8, padding: "8px 9px", borderRadius: 10, background: C.surface3, lineHeight: 1.5 }}>
             {t("Odpri nastavitve naprave → Aplikacije → Brskalnik → Obvestila in jih dovoli.")}
           </div>
         )}
@@ -318,36 +318,36 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
                 style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", padding: 0 }}
               >
                 <div>
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Trenutni plan")}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                    <span style={{ padding: "4px 12px", borderRadius: 999, background: `${pc}1a`, border: `1px solid ${pc}40` }}>
-                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12.5, letterSpacing: "0.04em", color: pc }}>{plan.name}</span>
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Trenutni plan")}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                    <span style={{ padding: "4px 9px", borderRadius: 999, background: `${pc}1a`, border: `1px solid ${pc}40` }}>
+                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 11, letterSpacing: "0.04em", color: pc }}>{plan.name}</span>
                     </span>
-                    <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.muted }}>{plan.earlyBird}{t("/mes")}</span>
+                    <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.muted }}>{plan.earlyBird}{t("/mes")}</span>
                   </div>
                 </div>
-                <span style={{ color: C.muted, fontSize: 20, transition: "transform 0.2s", transform: planOpen ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
+                <span style={{ color: C.muted, fontSize: 17, transition: "transform 0.2s", transform: planOpen ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
               </Pressable>
 
               {planOpen && (
-                <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.border}`, animation: "athlosFade 0.2s ease" }}>
-                  <div style={{ marginBottom: 14 }}>
-                    <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, color: C.text, letterSpacing: "-0.02em" }}>{plan.earlyBird}</span>
-                    <span style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted }}>{t("/mes · early bird")}</span>
-                    <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 4 }}>{t("Redna cena:")} {plan.regular}{t("/mes")}</div>
+                <div style={{ marginTop: 11, paddingTop: 16, borderTop: `1px solid ${C.border}`, animation: "athlosFade 0.2s ease" }}>
+                  <div style={{ marginBottom: 10 }}>
+                    <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text, letterSpacing: "-0.02em" }}>{plan.earlyBird}</span>
+                    <span style={{ fontFamily: C.display, fontSize: 12, color: C.muted }}>{t("/mes · early bird")}</span>
+                    <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 4 }}>{t("Redna cena:")} {plan.regular}{t("/mes")}</div>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {plan.features.map((f) => (
-                      <div key={f} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
                           <circle cx="6" cy="6" r="6" fill={`${pc}20`} />
                           <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke={pc} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <span style={{ fontFamily: C.display, fontSize: 15.5, color: C.text2 }}>{t(f)}</span>
+                        <span style={{ fontFamily: C.display, fontSize: 14, color: C.text2 }}>{t(f)}</span>
                       </div>
                     ))}
                   </div>
-                  {plan.note && <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 12 }}>{t(plan.note)}</div>}
+                  {plan.note && <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 9 }}>{t(plan.note)}</div>}
                 </div>
               )}
             </>
@@ -361,27 +361,27 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
         {!deleteOpen ? (
           <div style={row}>
             <div>
-              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Izbriši račun")}</span>
-              <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, marginTop: 3 }}>{t("Trajno izbriše vse tvoje podatke.")}</div>
+              <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Izbriši račun")}</span>
+              <div style={{ fontFamily: C.display, fontSize: 11.5, color: C.muted, marginTop: 3 }}>{t("Trajno izbriše vse tvoje podatke.")}</div>
             </div>
             <Pressable onClick={() => setDeleteOpen(true)} scale={0.95} style={{ ...editBtn, color: C.red, borderColor: `${C.red}40` }}>{t("Izbriši")}</Pressable>
           </div>
         ) : (
           <div>
-            <p style={{ fontFamily: C.display, fontSize: 14, color: C.text2, lineHeight: 1.55, margin: "0 0 14px" }}>
+            <p style={{ fontFamily: C.display, fontSize: 12.5, color: C.text2, lineHeight: 1.55, margin: "0 0 10px" }}>
               {t("To dejanje je nepovratno. Izbrisani bodo tvoj profil, treningi, koledar, klepeti in vsi drugi podatki. Za potrditev vtipkaj")} <strong style={{ color: C.text }}>{confirmWord}</strong>.
             </p>
             <input
               value={deleteConfirm}
               onChange={(e) => { setDeleteConfirm(e.target.value); setDeleteMsg(""); }}
               placeholder={confirmWord}
-              style={{ ...inp, borderColor: deleteMsg ? C.red : C.border, marginBottom: 10 }}
+              style={{ ...inp, borderColor: deleteMsg ? C.red : C.border, marginBottom: 8 }}
             />
             {deleteMsg && <div style={msgBox(false)}>{t(deleteMsg)}</div>}
-            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
               <button
                 onClick={() => { setDeleteOpen(false); setDeleteConfirm(""); setDeleteMsg(""); }}
-                style={{ ...outlineBtn, flex: 1, padding: "13px", fontSize: 14.5 }}
+                style={{ ...outlineBtn, flex: 1, padding: "9px", fontSize: 13 }}
               >
                 {t("Prekliči")}
               </button>
@@ -389,7 +389,7 @@ export default function ScreenAccount({ profile, setProfile, user, onBack, onAcc
                 onClick={runDeleteAccount}
                 disabled={deleteConfirm !== confirmWord || deleting}
                 style={{
-                  flex: 2, padding: "13px", fontSize: 14.5, borderRadius: 999, border: "none",
+                  flex: 2, padding: "9px", fontSize: 13, borderRadius: 999, border: "none",
                   background: C.red, color: "#fff", fontFamily: C.display, fontWeight: 800,
                   cursor: deleteConfirm === confirmWord && !deleting ? "pointer" : "not-allowed",
                   opacity: deleteConfirm === confirmWord && !deleting ? 1 : 0.45,

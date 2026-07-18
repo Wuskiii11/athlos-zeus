@@ -127,7 +127,7 @@ export default function Settings({
     }
   }
 
-  const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 20, overflow: 'hidden', marginBottom: 12 }
+  const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', marginBottom: 9 }
   const iconTile: React.CSSProperties = { width: 36, height: 36, borderRadius: 11, background: 'var(--surface2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }
   const sv = (c: string) => ({ width: 19, height: 19, viewBox: '0 0 24 24', fill: 'none', stroke: c, strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const })
 
@@ -161,7 +161,7 @@ export default function Settings({
       <button
         onClick={onClick}
         style={{
-          width: '100%', display: 'flex', alignItems: 'center', gap: 13,
+          width: '100%', display: 'flex', alignItems: 'center', gap: 9,
           padding: '13px 15px', background: 'none', cursor: onClick ? 'pointer' : 'default',
           border: 'none', borderTop: first ? 'none' : '1px solid var(--line)',
           textAlign: 'left', fontFamily: 'inherit', WebkitTapHighlightColor: 'transparent',
@@ -169,8 +169,8 @@ export default function Settings({
       >
         <span style={iconTile}>{icon(iconCol)}</span>
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: 'block', fontWeight: 600, fontSize: 16, color: danger ? 'var(--red)' : 'var(--text)' }}>{title}</span>
-          {subtitle && <span style={{ display: 'block', fontSize: 13, color: 'var(--muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</span>}
+          <span style={{ display: 'block', fontWeight: 600, fontSize: 14, color: danger ? 'var(--red)' : 'var(--text)' }}>{title}</span>
+          {subtitle && <span style={{ display: 'block', fontSize: 11.5, color: 'var(--muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</span>}
         </span>
         {accessory !== undefined ? accessory : chevron}
       </button>
@@ -186,11 +186,11 @@ export default function Settings({
     first?: boolean
   }) {
     return (
-      <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 13, padding: '13px 15px', borderTop: first ? 'none' : '1px solid var(--line)' }}>
+      <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '13px 15px', borderTop: first ? 'none' : '1px solid var(--line)' }}>
         <span style={iconTile}>{icon('var(--text)')}</span>
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: 'block', fontWeight: 600, fontSize: 16, color: 'var(--text)' }}>{title}</span>
-          {subtitle && <span style={{ display: 'block', fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{subtitle}</span>}
+          <span style={{ display: 'block', fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{title}</span>
+          {subtitle && <span style={{ display: 'block', fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>{subtitle}</span>}
         </span>
         <button className={`toggle ${on ? 'on' : ''}`} onClick={onClick} aria-pressed={on}>
           <span className="toggle-knob" />
@@ -205,7 +205,7 @@ export default function Settings({
 
       {/* Profile header — matches the athlete screen's centered avatar block */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '14px 0 26px' }}>
-        <div style={{ position: 'relative', width: 112, height: 112, marginBottom: 16 }}>
+        <div style={{ position: 'relative', width: 112, height: 112, marginBottom: 11 }}>
           <button
             onClick={() => photoInputRef.current?.click()}
             style={{
@@ -230,10 +230,10 @@ export default function Settings({
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg>
           </button>
         </div>
-        <button onClick={editName} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 24, color: 'var(--text)', letterSpacing: '-0.01em', fontFamily: 'inherit', WebkitTapHighlightColor: 'transparent' }}>
-          {name} <span style={{ color: 'var(--muted)', fontSize: 16 }}>✎</span>
+        <button onClick={editName} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: 20, color: 'var(--text)', letterSpacing: '-0.01em', fontFamily: 'inherit', WebkitTapHighlightColor: 'transparent' }}>
+          {name} <span style={{ color: 'var(--muted)', fontSize: 14 }}>✎</span>
         </button>
-        <div style={{ fontWeight: 500, fontSize: 14.5, color: 'var(--muted)', marginTop: 4 }}>{t('Head coach')} · {club.name}</div>
+        <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>{t('Head coach')} · {club.name}</div>
       </div>
 
       {/* Club — the one section that differs from the athlete: club identity, not personal */}
@@ -245,9 +245,9 @@ export default function Settings({
       {/* Theme — identical segmented control to the athlete screen */}
       <div style={card}>
         <div style={{ padding: 15 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 13 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 9 }}>
             <span style={iconTile}>{(darkMode ? IC.moon : IC.sun)('var(--text)')}</span>
-            <span style={{ fontWeight: 600, fontSize: 16, color: 'var(--text)' }}>{t('Theme')}</span>
+            <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{t('Theme')}</span>
           </div>
           <div role="group" aria-label={t('Theme')} style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 13, background: 'var(--surface2)', border: '1px solid var(--line)' }}>
             {([['dark', IC.moon, t('Dark')], ['light', IC.sun, t('Light')]] as const).map(([mode, ico, lbl]) => {
@@ -258,11 +258,11 @@ export default function Settings({
                   onClick={() => { if (active) return; onToggleDarkMode() }}
                   aria-pressed={active}
                   style={{
-                    flex: 1, padding: 10, borderRadius: 10, cursor: 'pointer', border: 'none',
+                    flex: 1, padding: 10, borderRadius: 9, cursor: 'pointer', border: 'none',
                     background: active ? 'var(--green)' : 'transparent',
                     color: active ? '#04130A' : 'var(--muted)',
-                    fontWeight: active ? 700 : 600, fontSize: 14.5, fontFamily: 'inherit',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    fontWeight: active ? 700 : 600, fontSize: 13, fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     WebkitTapHighlightColor: 'transparent', transition: 'background 0.18s ease, color 0.18s ease',
                   }}
                 >
@@ -297,11 +297,11 @@ export default function Settings({
       </div>
 
       {/* Delete account — standalone red card */}
-      <div style={{ ...card, marginBottom: 20 }}>
+      <div style={{ ...card, marginBottom: 14 }}>
         {Row({ icon: IC.trash, title: t('Delete account'), danger: true, first: true, onClick: deleteMyAccount })}
       </div>
 
-      <p style={{ textAlign: 'center', color: 'var(--muted2, var(--muted))', fontSize: 13.5, marginTop: 8 }}>ATHLOS v0.6 · © 2026</p>
+      <p style={{ textAlign: 'center', color: 'var(--muted2, var(--muted))', fontSize: 12, marginTop: 6 }}>ATHLOS v0.6 · © 2026</p>
     </div>
   )
 }

@@ -30,11 +30,11 @@ function BmiGauge({ height, weight, C, t }) {
       </svg>
       {/* center readout + end labels */}
       <div style={{ position: "absolute", left: 0, right: 0, top: "38%", textAlign: "center", pointerEvents: "none" }}>
-        <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12, color: C.muted }}>{t("Tvoj ITM")}</div>
-        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, color: C.text, lineHeight: 1.15 }}>{(Math.round(bmi * 10) / 10).toFixed(1)}</div>
+        <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 11, color: C.muted }}>{t("Tvoj ITM")}</div>
+        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, color: C.text, lineHeight: 1.15 }}>{(Math.round(bmi * 10) / 10).toFixed(1)}</div>
       </div>
-      <span style={{ position: "absolute", left: -4, bottom: -14, fontFamily: C.mono, fontSize: 8.5, color: C.muted2, letterSpacing: "0.04em" }}>{t("PODHRANJENOST")}</span>
-      <span style={{ position: "absolute", right: -4, bottom: -14, fontFamily: C.mono, fontSize: 8.5, color: C.muted2, letterSpacing: "0.04em" }}>{t("DEBELOST")}</span>
+      <span style={{ position: "absolute", left: -4, bottom: -14, fontFamily: C.mono, fontSize: 8, color: C.muted2, letterSpacing: "0.04em" }}>{t("PODHRANJENOST")}</span>
+      <span style={{ position: "absolute", right: -4, bottom: -14, fontFamily: C.mono, fontSize: 8, color: C.muted2, letterSpacing: "0.04em" }}>{t("DEBELOST")}</span>
     </div>
   );
 }
@@ -109,7 +109,7 @@ function BirthWheelInline({ value, onChange, C, lang }) {
     <div style={{ position: "relative", margin: "6px -28px 0" }}>
       {/* full-width selection bar behind the middle row (7-row window → row 4) */}
       <div aria-hidden="true" style={{ position: "absolute", top: 120, left: 0, right: 0, height: 40, background: C.accent, zIndex: 0 }} />
-      <div style={{ position: "relative", zIndex: 1, display: "flex", padding: "0 26px" }}>
+      <div style={{ position: "relative", zIndex: 1, display: "flex", padding: "0 17px" }}>
         <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width="46%" C={C} render={(m) => months[m]} align="left" showBand={false} activeColor={onBar} pad={3} />
         <WheelColumn items={days} value={day} onChange={setDay} width="18%" C={C} align="center" showBand={false} activeColor={onBar} pad={3} />
         <WheelColumn items={years} value={year} onChange={setYear} width="36%" C={C} align="right" showBand={false} activeColor={onBar} pad={3} />
@@ -125,10 +125,10 @@ function NumberWheelInline({ label, unit, min, max, value, onChange, C }) {
   const items = Array.from({ length: max - min + 1 }, (_, i) => min + i);
   const onBar = C.btnText;
   return (
-    <div style={{ marginBottom: 26 }}>
-      {label && <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14.5, color: C.text2, marginBottom: 10 }}>{label}</div>}
+    <div style={{ marginBottom: 17 }}>
+      {label && <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.text2, marginBottom: 8 }}>{label}</div>}
       <div style={{ position: "relative" }}>
-        <div aria-hidden="true" style={{ position: "absolute", top: 80, left: 0, right: 0, height: 40, background: C.accent, borderRadius: 12, zIndex: 0 }} />
+        <div aria-hidden="true" style={{ position: "absolute", top: 80, left: 0, right: 0, height: 40, background: C.accent, borderRadius: 10, zIndex: 0 }} />
         <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center" }}>
           <WheelColumn
             items={items} value={value} onChange={onChange} width={150} C={C}
@@ -292,10 +292,10 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   };
 
   const inp = {
-    width: "100%", padding: "15px 16px", borderRadius: 16,
+    width: "100%", padding: "11px 11px", borderRadius: 14,
     border: `1px solid ${C.border}`, background: C.surface2,
-    color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 17,
-    outline: "none", boxSizing: "border-box", marginTop: 8, colorScheme: "dark",
+    color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15,
+    outline: "none", boxSizing: "border-box", marginTop: 6, colorScheme: "dark",
   };
 
   const STEP_TITLES = {
@@ -320,13 +320,13 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   // socket (design-system list language instead of stacked boxes)
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
   const Choice = ({ options, value, onPick, subs, labels, icons }) => (
-    <div data-gsap-list="true" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div data-gsap-list="true" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {options.map((o, i) => {
         const active = value === o;
         return (
           <button key={o} onClick={(e) => { popPick(e.currentTarget); onPick(o); }} style={{
-            width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 14,
-            padding: "16px 16px", borderRadius: 18, cursor: "pointer",
+            width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 10,
+            padding: "11px 11px", borderRadius: 15, cursor: "pointer",
             background: active ? `${C.accent}14` : C.surface2,
             border: `1.5px solid ${active ? C.accent : "transparent"}`,
             boxShadow: "none",
@@ -335,7 +335,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
           }}>
             {icons?.[i] && (
               <span style={{
-                width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+                width: 38, height: 38, borderRadius: 10, flexShrink: 0,
                 background: C.surface3,
                 border: `1px solid ${active ? C.accent : C.border}`,
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -345,8 +345,8 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
               </span>
             )}
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 17.5, color: C.text }}>{labels ? labels[i] : o}</span>
-              {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 10, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
+              <span style={{ display: "block", fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15, color: C.text }}>{labels ? labels[i] : o}</span>
+              {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
             </span>
             {/* roman numeral, right — grey until the box is picked */}
             <span style={{ flexShrink: 0, minWidth: 28, textAlign: "right", fontFamily: C.mono, fontSize: active ? 13.5 : 11, fontWeight: active ? 700 : 600, letterSpacing: "0.06em", color: active ? C.accent : C.muted2, transition: "color 0.15s, font-size 0.15s" }}>
@@ -360,17 +360,17 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
   // multi-select chips
   const MultiChips = ({ options, values, onToggle }) => (
-    <div data-gsap-list="true" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+    <div data-gsap-list="true" style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
       {options.map((o) => {
         const active = values.includes(o);
         return (
           <button key={o} onClick={(e) => { popPick(e.currentTarget); onToggle(o); }} style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center",
-            padding: "12px 20px", borderRadius: 999, cursor: "pointer",
+            padding: "9px 14px", borderRadius: 999, cursor: "pointer",
             border: `1.5px solid ${active ? `${C.accent}99` : C.border2}`,
             background: active ? `${C.accent}14` : "transparent",
             color: active ? C.text : C.text2,
-            fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 17.5,
+            fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 15,
             transition: "border-color 0.15s, background 0.15s, color 0.15s",
             WebkitTapHighlightColor: "transparent",
           }}>
@@ -386,7 +386,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const toggle = (setter) => (o) => setter((arr) => arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o]);
 
   const SkipBtn = ({ onClick }) => (
-    <button onClick={onClick} style={{ width: "100%", marginTop: 10, padding: "12px", background: "none", border: "none", color: C.muted, fontFamily: C.display, fontWeight: 600, fontSize: 14.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+    <button onClick={onClick} style={{ width: "100%", marginTop: 8, padding: "9px", background: "none", border: "none", color: C.muted, fontFamily: C.display, fontWeight: 600, fontSize: 13, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
       {t("Preskoči")} ›
     </button>
   );
@@ -408,16 +408,16 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
       <div style={{ height: 8, flexShrink: 0 }} />
 
       {/* Top row — just the back arrow; progress lives as dashes at the bottom */}
-      <div style={{ padding: "12px 112px 0 24px", display: "flex", alignItems: "center" }}>
+      <div style={{ padding: "9px 112px 0 16px", display: "flex", alignItems: "center" }}>
         {/* Back — earlier step, or out to the login screen on step 0 */}
         <button onClick={() => (step > 0 ? back() : onBack?.())} style={{ background: "none", border: "none", color: C.muted, fontSize: 24.5, cursor: "pointer", lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>‹</button>
       </div>
 
       {/* Step content */}
-      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "28px 28px 38px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
+      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "18px 18px 25px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
         {key !== "quote" && key !== "vision" && (
-          <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, textTransform: "uppercase", margin: 0, color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
+          <div style={{ marginBottom: 18 }}>
+            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, textTransform: "uppercase", margin: 0, color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
               {t(STEP_TITLES[key].title)}
             </h2>
           </div>
@@ -425,25 +425,25 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
         {key === "name" && (
           <>
-            <Mono style={{ color: C.muted, fontSize: 10 }}>{t("UPORABNIŠKO IME")}</Mono>
+            <Mono style={{ color: C.muted, fontSize: 9 }}>{t("UPORABNIŠKO IME")}</Mono>
             <input value={username} onChange={(e) => { setUsername(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && tryName()} placeholder={t("npr. Nik")} style={{ ...inp, ...(nameMsg ? { borderColor: C.red } : {}) }} />
-            {nameMsg && <span style={{ color: C.red, fontFamily: C.display, fontSize: 13.5, marginTop: 6, display: "block" }}>{t(nameMsg)}</span>}
+            {nameMsg && <span style={{ color: C.red, fontFamily: C.display, fontSize: 12, marginTop: 5, display: "block" }}>{t(nameMsg)}</span>}
 
             {/* live preview — the profile row teammates will actually see */}
-            <div style={{ marginTop: 22, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: "14px 16px", display: "flex", alignItems: "center", gap: 13 }}>
-              <span style={{ width: 46, height: 46, borderRadius: "50%", background: `${C.accent}1a`, border: `1.5px solid ${C.accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, fontSize: 19, color: C.accent, flexShrink: 0, transition: "border-color 0.2s" }}>
+            <div style={{ marginTop: 15, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 15, padding: "10px 11px", display: "flex", alignItems: "center", gap: 9 }}>
+              <span style={{ width: 46, height: 46, borderRadius: "50%", background: `${C.accent}1a`, border: `1.5px solid ${C.accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.accent, flexShrink: 0, transition: "border-color 0.2s" }}>
                 {(username.trim()[0] || "?").toUpperCase()}
               </span>
               <span style={{ minWidth: 0 }}>
-                <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 17, color: username.trim() ? C.text : C.muted2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15, color: username.trim() ? C.text : C.muted2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {username.trim() || t("Tvoje ime")}
                 </span>
-                <span style={{ display: "block", fontFamily: C.display, fontSize: 12.5, color: C.muted, marginTop: 2 }}>{t("Tako te bodo videli soigralci in trener")}</span>
+                <span style={{ display: "block", fontFamily: C.display, fontSize: 11, color: C.muted, marginTop: 2 }}>{t("Tako te bodo videli soigralci in trener")}</span>
               </span>
             </div>
 
             {/* what the name is for — quiet rows so the step doesn't feel empty */}
-            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 13 }}>
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 9 }}>
               {[
                 ["M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z|dot", "Vidno v klepetu, na lestvicah in pri trenerju."],
                 ["M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z", "Ime lahko kadarkoli spremeniš v Profilu."],
@@ -451,12 +451,12 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
               ].map(([p, txt]) => {
                 const [d, extra] = p.split("|");
                 return (
-                  <span key={txt} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <span key={txt} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
                       <path d={d} />
                       {extra === "dot" && <circle cx="12" cy="12" r="3" />}
                     </svg>
-                    <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 13.5, color: C.text2, lineHeight: 1.45 }}>{t(txt)}</span>
+                    <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12, color: C.text2, lineHeight: 1.45 }}>{t(txt)}</span>
                   </span>
                 );
               })}
@@ -511,21 +511,21 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
             ATHLOS tracks as clean metric rows, and the CTA. No artwork. ── */}
         {key === "vision" && (
           <div data-gsap-list="true" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, color: C.text, margin: "4px 0 0", lineHeight: 1.15, letterSpacing: "-0.01em", textAlign: "center" }}>
+            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 23, color: C.text, margin: "4px 0 0", lineHeight: 1.15, letterSpacing: "-0.01em", textAlign: "center" }}>
               {t("Dobrodošel v svojo")}<br />
               <span style={{ color: C.accent }}>{t("najboljšo sezono")}</span>
             </h2>
 
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 12, margin: "24px 0 8px" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 9, margin: "16px 0 6px" }}>
               {[t("READINESS 8.4"), t("MOČ +12 %"), t("REGENERACIJA 92 %")].map((lbl, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, background: C.surface2, borderRadius: 18, padding: "18px 20px" }}>
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, background: C.surface2, borderRadius: 15, padding: "13px 14px" }}>
                   <span style={{ width: 9, height: 9, borderRadius: "50%", background: C.accent, flexShrink: 0 }} />
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, letterSpacing: "0.01em" }}>{lbl}</span>
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text, letterSpacing: "0.01em" }}>{lbl}</span>
                 </div>
               ))}
             </div>
 
-            <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted, textAlign: "center", margin: "0 8px 16px", lineHeight: 1.55 }}>
+            <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, textAlign: "center", margin: "0 6px 11px", lineHeight: 1.55 }}>
               {t("ATHLOS spremlja tvojo moč, hitrost in regeneracijo — in program prilagaja vsak dan.")}
             </p>
             <PrimaryBtn onClick={next}>{t("Naprej")} →</PrimaryBtn>
@@ -542,8 +542,8 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
 
         {key === "gender" && (() => {
           const card = (active) => ({
-            borderRadius: 24, cursor: "pointer",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14,
+            borderRadius: 18, cursor: "pointer",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10,
             background: active ? `${C.accent}14` : C.surface2,
             border: `1.5px solid ${active ? C.accent : "transparent"}`,
             boxShadow: "none",
@@ -557,22 +557,22 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
           );
           return (
             <>
-              <div data-gsap-list="true" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div data-gsap-list="true" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 9 }}>
                 {/* two tall cards — Mars / Venus, like the reference */}
                 <button onClick={(e) => { popPick(e.currentTarget); setGender("Moški"); }} style={{ ...card(gender === "Moški"), flex: 1, minHeight: 150 }}>
                   {sign(<><circle cx="10" cy="14" r="5.5" /><path d="M14 10l6.5-6.5M20.5 3.5H15M20.5 3.5V9" /></>, gender === "Moški")}
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>{t("Moški")}</span>
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{t("Moški")}</span>
                 </button>
                 <button onClick={(e) => { popPick(e.currentTarget); setGender("Ženski"); }} style={{ ...card(gender === "Ženski"), flex: 1, minHeight: 150 }}>
                   {sign(<><circle cx="12" cy="8.5" r="5.5" /><path d="M12 14v7M8.5 17.5h7" /></>, gender === "Ženski")}
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>{t("Ženski")}</span>
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{t("Ženski")}</span>
                 </button>
                 {/* Drugo — slim row under the two cards */}
-                <button onClick={(e) => { popPick(e.currentTarget); setGender("Drugo"); }} style={{ ...card(gender === "Drugo"), flexDirection: "row", gap: 8, padding: "15px 16px" }}>
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>{t("Drugo")}</span>
+                <button onClick={(e) => { popPick(e.currentTarget); setGender("Drugo"); }} style={{ ...card(gender === "Drugo"), flexDirection: "row", gap: 6, padding: "11px 11px" }}>
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Drugo")}</span>
                 </button>
               </div>
-              <PrimaryBtn onClick={() => gender && next()} style={{ marginTop: 14, opacity: gender ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+              <PrimaryBtn onClick={() => gender && next()} style={{ marginTop: 10, opacity: gender ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
             </>
           );
         })()}
@@ -598,14 +598,14 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
           const waistOk = waist === "" || (+waist >= 40 && +waist <= 200);
           const bfOk = bodyFat === "" || (+bodyFat >= 3 && +bodyFat <= 60);
           const canNext = (waist !== "" || bodyFat !== "") && waistOk && bfOk;
-          const hint = { color: C.red, fontFamily: C.display, fontSize: 13.5, marginTop: 6, display: "block" };
+          const hint = { color: C.red, fontFamily: C.display, fontSize: 12, marginTop: 5, display: "block" };
           return (
           <>
-            <Mono style={{ color: C.muted, fontSize: 10 }}>{t("OBSEG PASU (CM)")}</Mono>
+            <Mono style={{ color: C.muted, fontSize: 9 }}>{t("OBSEG PASU (CM)")}</Mono>
             <input value={waist} onChange={(e) => setWaist(clean(e.target.value))} inputMode="decimal" placeholder={t("npr. 82")}
               style={{ ...inp, borderColor: waistOk ? C.border2 : C.red }} />
             {!waistOk && <span style={hint}>{t("Vnesi realen obseg pasu (40–200 cm).")}</span>}
-            <Mono style={{ color: C.muted, fontSize: 10, marginTop: 18, display: "block" }}>{t("BODY FAT % (OKVIRNO)")}</Mono>
+            <Mono style={{ color: C.muted, fontSize: 9, marginTop: 13, display: "block" }}>{t("BODY FAT % (OKVIRNO)")}</Mono>
             <input value={bodyFat} onChange={(e) => setBodyFat(clean(e.target.value))} inputMode="decimal" placeholder={t("npr. 15")}
               style={{ ...inp, borderColor: bfOk ? C.border2 : C.red }} />
             {!bfOk && <span style={hint}>{t("Vnesi realen odstotek (3–60 %).")}</span>}
@@ -620,7 +620,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         {key === "quote" && (
           <div data-gsap-list="true" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
             {/* Animated progress line */}
-            <div style={{ marginBottom: 32 }}>
+            <div style={{ marginBottom: 20 }}>
               <svg viewBox="0 0 300 80" width="100%" height="80" style={{ overflow: "visible" }}>
                 {[20, 40, 60].map(y => <line key={y} x1="0" y1={y} x2="300" y2={y} stroke={C.border} strokeWidth="1" strokeDasharray="4 6"/>)}
                 <path ref={quotePathRef} d="M0 15 C30 15, 50 55, 80 45 S130 20, 160 35 S210 55, 240 40 S280 25, 300 30" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round"/>
@@ -632,19 +632,19 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
             </div>
 
             <div style={{ flex: 1 }}>
-              <Mono style={{ color: C.accent, fontSize: 10, letterSpacing: "0.18em" }}>{t("RESNICA JE:")}</Mono>
-              <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 31.5, color: C.text, margin: "10px 0 0", lineHeight: 1.15, letterSpacing: "-0.02em" }}>
+              <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.18em" }}>{t("RESNICA JE:")}</Mono>
+              <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 31.5, color: C.text, margin: "8px 0 0", lineHeight: 1.15, letterSpacing: "-0.02em" }}>
                 {t("Vsak vrhunski športnik je začel točno tam, kjer si ti zdaj.")}
               </h2>
-              <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 15.5, color: C.text2, marginTop: 16, lineHeight: 1.6 }}>
+              <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.text2, marginTop: 11, lineHeight: 1.6 }}>
                 {t("ATHLOS te bo vodil skozi vzpone in padce — tako da boš dosegel cilj, ki si si ga zadal.")}
               </p>
-              <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 14.5, color: C.muted, marginTop: 20, lineHeight: 1.55 }}>
+              <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 13, color: C.muted, marginTop: 14, lineHeight: 1.55 }}>
                 {t("P.S. Najtežji del je že za teboj — odločitev, da začneš.")}
               </p>
             </div>
 
-            <PrimaryBtn onClick={next} style={{ marginTop: 16 }}>{t("Naprej")} →</PrimaryBtn>
+            <PrimaryBtn onClick={next} style={{ marginTop: 11 }}>{t("Naprej")} →</PrimaryBtn>
           </div>
         )}
 
@@ -654,9 +654,9 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
             <Choice options={SPORTS} labels={SPORTS.map(t)} value={sport} onPick={setSport} />
 
             {sport === "Drugo" && (
-              <div style={{ animation: "athlosFade 0.2s ease", marginTop: 14 }}>
-                <Mono style={{ color: C.muted, fontSize: 10 }}>{t("VPIŠI ŠPORT")}</Mono>
-                <input value={customSport} onChange={(e) => setCustomSport(e.target.value)} placeholder={t("npr. Odbojka, Judo, Veslanje...")} style={{ ...inp, marginTop: 6 }} />
+              <div style={{ animation: "athlosFade 0.2s ease", marginTop: 10 }}>
+                <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPIŠI ŠPORT")}</Mono>
+                <input value={customSport} onChange={(e) => setCustomSport(e.target.value)} placeholder={t("npr. Odbojka, Judo, Veslanje...")} style={{ ...inp, marginTop: 5 }} />
               </div>
             )}
           </div>
@@ -712,10 +712,10 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         {key === "test" && (
           <>
             {/* Placeholder — spec §01: assessment content is TBD */}
-            <div style={{ background: C.surface, border: `1.5px dashed ${C.border2}`, borderRadius: 18, padding: "26px 20px", textAlign: "center" }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12, color: C.accent }}><IcChart size={32} /></div>
-              <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, margin: "0 0 8px" }}>{t("Začetni assessment")}</h3>
-              <p style={{ fontFamily: C.display, fontSize: 14.5, color: C.text2, margin: 0, lineHeight: 1.55 }}>
+            <div style={{ background: C.surface, border: `1.5px dashed ${C.border2}`, borderRadius: 15, padding: "17px 14px", textAlign: "center" }}>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 9, color: C.accent }}><IcChart size={32} /></div>
+              <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, margin: "0 0 6px" }}>{t("Začetni assessment")}</h3>
+              <p style={{ fontFamily: C.display, fontSize: 13, color: C.text2, margin: 0, lineHeight: 1.55 }}>
                 {t("Kratek test moči, hitrosti in mobilnosti — vsebina prihaja kmalu. Zaenkrat ta korak preskočimo.")}
               </p>
             </div>
@@ -732,7 +732,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         <div style={{
           position: "absolute", left: 0, right: 0,
           bottom: "max(env(safe-area-inset-bottom, 4px), 4px)",
-          display: "flex", gap: 6, padding: "0 16px",
+          display: "flex", gap: 5, padding: "0 11px",
           zIndex: 4,
         }}>
           {QUESTION_FLOW.map((k, i) => {
@@ -763,7 +763,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
       {key === "sport" && (
         <div style={{
           position: "absolute", bottom: 0, left: 0, right: 0,
-          padding: "12px 28px",
+          padding: "9px 18px",
           paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 28px), 30px)",
           background: `linear-gradient(to top, ${C.bg} 70%, transparent)`,
         }}>

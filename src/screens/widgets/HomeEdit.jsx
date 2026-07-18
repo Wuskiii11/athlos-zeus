@@ -92,28 +92,28 @@ export function EditHomeSheet({ layout, onSave, onClose, C, t }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 30, background: C.bg, display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease" }}>
       {/* header */}
-      <div style={{ padding: "16px 18px 14px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
+      <div style={{ padding: "11px 13px 10px", display: "flex", alignItems: "center", gap: 9, borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+        <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 9, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontSize: 17, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }}>×</button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 19, color: C.text, margin: 0 }}>{t("Uredi home screen")}</h2>
-          <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>EDIT · ON</Mono>
+          <h2 style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 16, color: C.text, margin: 0 }}>{t("Uredi home screen")}</h2>
+          <Mono style={{ color: C.muted, fontSize: 8.5, letterSpacing: "0.1em" }}>EDIT · ON</Mono>
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px 18px 24px" }} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
-        <p style={{ fontFamily: C.display, fontSize: 15.5, color: C.text2, margin: "0 0 16px", lineHeight: 1.5 }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "11px 13px 16px" }} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+        <p style={{ fontFamily: C.display, fontSize: 14, color: C.text2, margin: "0 0 11px", lineHeight: 1.5 }}>
           {t("Izberi widgete, ki jih želiš imeti na home screenu. Vlečenje za vrstni red.")}
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {items.map((w, idx) => {
             const meta = HOME_WIDGETS[w.id];
             if (!meta) return null;
             const dragging = idx === dragIdx;
             return (
               <div key={w.id} style={{
-                display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", height: 50, boxSizing: "border-box",
-                background: C.surface, border: `1px solid ${dragging ? C.accent : C.border}`, borderRadius: 14,
+                display: "flex", alignItems: "center", gap: 9, padding: "9px 10px", height: 50, boxSizing: "border-box",
+                background: C.surface, border: `1px solid ${dragging ? C.accent : C.border}`, borderRadius: 12,
                 transform: dragging ? `translateY(${dragY}px) scale(1.02)` : "none",
                 boxShadow: dragging ? "0 10px 26px rgba(0,0,0,0.18)" : "none",
                 transition: dragging ? "none" : "transform 0.15s ease",
@@ -123,12 +123,12 @@ export function EditHomeSheet({ layout, onSave, onClose, C, t }) {
                 {/* drag handle */}
                 <span
                   onPointerDown={onDown(idx)}
-                  style={{ cursor: "grab", touchAction: "none", color: C.muted, fontSize: 17, letterSpacing: "-2px", padding: "4px 2px", userSelect: "none" }}
+                  style={{ cursor: "grab", touchAction: "none", color: C.muted, fontSize: 15, letterSpacing: "-2px", padding: "4px 2px", userSelect: "none" }}
                 >⋮⋮</span>
                 <span style={{ display: "flex", color: C.gold }}>{meta.icon}</span>
-                <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, color: C.text }}>
+                <span style={{ flex: 1, fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>
                   {t(meta.label)}
-                  {meta.locked && <Mono style={{ color: C.muted2, fontSize: 9, marginLeft: 8 }}>{t("VEDNO PRIKAZAN")}</Mono>}
+                  {meta.locked && <Mono style={{ color: C.muted2, fontSize: 8.5, marginLeft: 8 }}>{t("VEDNO PRIKAZAN")}</Mono>}
                 </span>
                 {/* toggle */}
                 <button onClick={() => toggle(w.id)} disabled={meta.locked} aria-label={meta.label} style={{
@@ -147,7 +147,7 @@ export function EditHomeSheet({ layout, onSave, onClose, C, t }) {
         </div>
       </div>
 
-      <div style={{ padding: "12px 18px", paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)", borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
+      <div style={{ padding: "9px 13px", paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)", borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
         <PrimaryBtn onClick={() => onSave(items)}>{t("Shrani postavitev")}</PrimaryBtn>
       </div>
     </div>

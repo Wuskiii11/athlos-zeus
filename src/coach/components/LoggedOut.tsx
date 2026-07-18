@@ -8,13 +8,13 @@ export default function LoggedOut({ onLogin }: { onLogin: () => void }) {
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
-        gap: 14,
+        gap: 10,
       }}
     >
-      <div className="logo" style={{ fontSize: 22 }}>
+      <div className="logo" style={{ fontSize: 18 }}>
         ATH<b>LOS</b>
       </div>
-      <div style={{ color: 'var(--muted)', fontSize: 13 }}>You've been logged out.</div>
+      <div style={{ color: 'var(--muted)', fontSize: 11.5 }}>You've been logged out.</div>
       <button className="chat-cta" style={{ width: 'auto', padding: '12px 28px' }} onClick={onLogin}>
         Log back in
       </button>

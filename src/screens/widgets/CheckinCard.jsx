@@ -65,15 +65,15 @@ const QUESTIONS = [
 function ScaleRow({ q, value, onPick, C, t }) {
   return (
     <div>
-      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text, display: "block", marginBottom: 7 }}>{t(q.label)}</span>
-      <div style={{ display: "flex", gap: 7 }}>
+      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, display: "block", marginBottom: 6 }}>{t(q.label)}</span>
+      <div style={{ display: "flex", gap: 6 }}>
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} onClick={() => onPick(n)} style={{
-            flex: 1, padding: "10px 0", borderRadius: 10, cursor: "pointer",
+            flex: 1, padding: "8px 0", borderRadius: 9, cursor: "pointer",
             border: `1px solid ${value === n ? C.accent : C.border2}`,
             background: value === n ? `${C.accent}1f` : "transparent",
             color: value === n ? C.accent : C.muted,
-            fontFamily: C.mono, fontWeight: 700, fontSize: 14.5, WebkitTapHighlightColor: "transparent",
+            fontFamily: C.mono, fontWeight: 700, fontSize: 13, WebkitTapHighlightColor: "transparent",
           }}>{n}</button>
         ))}
       </div>
@@ -84,16 +84,16 @@ function ScaleRow({ q, value, onPick, C, t }) {
 function StreakStrip({ days, C, t, lang, style }) {
   const streak = computeStreak(days);
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, ...style }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9, ...style }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <span style={{ display: "flex", color: streak > 0 ? C.gold : C.muted2 }}><IcFlame size={19} /></span>
         <span style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 24.5, color: C.text, lineHeight: 1 }}>{streak}</span>
-        <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.1em" }}>{t("DNI ZAPORED · STREAK")}</Mono>
+        <Mono style={{ color: C.muted, fontSize: 8.5, letterSpacing: "0.1em" }}>{t("DNI ZAPORED · STREAK")}</Mono>
       </div>
-      <div style={{ display: "flex", gap: 6 }}>
+      <div style={{ display: "flex", gap: 5 }}>
         {weekDots(days, new Date(), lang).map((d, i) => (
           <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-            <Mono style={{ color: d.isToday ? C.text : C.muted2, fontSize: 9 }}>{d.label}</Mono>
+            <Mono style={{ color: d.isToday ? C.text : C.muted2, fontSize: 8.5 }}>{d.label}</Mono>
             <div style={{
               width: 8, height: 8, borderRadius: "50%",
               background: d.done ? C.accent : "transparent",
@@ -123,15 +123,15 @@ export default function CheckinCard({ C, t, lang, onSubmit, userId }) {
       [`${a.stress ?? "–"}/5`, t("STRES")],
     ];
     return (
-      <div style={{ background: C.surface2, borderRadius: 24, padding: "15px 18px", marginBottom: 12, boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)" }}>
-        <StreakStrip days={store.days} C={C} t={t} lang={lang} style={{ paddingBottom: 13, borderBottom: `1px solid ${C.border}`, marginBottom: 14 }} />
+      <div style={{ background: C.surface2, borderRadius: 18, padding: "11px 13px", marginBottom: 9, boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)" }}>
+        <StreakStrip days={store.days} C={C} t={t} lang={lang} style={{ paddingBottom: 13, borderBottom: `1px solid ${C.border}`, marginBottom: 10 }} />
         <div style={{ display: "flex", alignItems: "stretch" }}>
           {stats.map(([val, label], i) => (
             <React.Fragment key={label}>
               {i > 0 && <span style={{ width: 1, background: C.border }} />}
               <span style={{ flex: 1, textAlign: "center" }}>
-                <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 16.5, color: C.text, lineHeight: 1 }}>{val}</span>
-                <Mono style={{ color: C.muted2, fontSize: 7.5, letterSpacing: "0.12em", display: "block", marginTop: 5 }}>{label}</Mono>
+                <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 14.5, color: C.text, lineHeight: 1 }}>{val}</span>
+                <Mono style={{ color: C.muted2, fontSize: 7.5, letterSpacing: "0.12em", display: "block", marginTop: 4 }}>{label}</Mono>
               </span>
             </React.Fragment>
           ))}
@@ -151,29 +151,29 @@ export default function CheckinCard({ C, t, lang, onSubmit, userId }) {
   };
 
   return (
-    <div style={{ background: C.surface2, borderRadius: 24, padding: 18, marginBottom: 12, boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)" }}>
+    <div style={{ background: C.surface2, borderRadius: 18, padding: 18, marginBottom: 9, boxShadow: C.name === "dark" ? "0 1px 2px rgba(0,0,0,0.35)" : "0 2px 10px rgba(16,24,40,0.05)" }}>
       {/* icon-chip header row, matching the rest of the home cards */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <span style={{ width: 36, height: 36, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <span style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${C.border}`, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8M9 10h.01M15 10h.01" /></svg>
         </span>
-        <span style={{ flex: 1, fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{t("Kako se počutiš?")}</span>
-        <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.1em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
+        <span style={{ flex: 1, fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Kako se počutiš?")}</span>
+        <Mono style={{ color: C.accent, fontSize: 8.5, letterSpacing: "0.1em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
       </div>
 
-      <StreakStrip days={store.days} C={C} t={t} lang={lang} style={{ paddingBottom: 14, borderBottom: `1px solid ${C.border}`, marginBottom: 14 }} />
+      <StreakStrip days={store.days} C={C} t={t} lang={lang} style={{ paddingBottom: 14, borderBottom: `1px solid ${C.border}`, marginBottom: 10 }} />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {QUESTIONS.map((q) => (
           <ScaleRow key={q.key} q={q} value={answers[q.key]} onPick={(n) => setAnswers((a) => ({ ...a, [q.key]: n }))} C={C} t={t} />
         ))}
       </div>
 
       <button onClick={submit} disabled={!complete} style={{
-        width: "100%", marginTop: 16, padding: "15px 0", borderRadius: 999, border: "none",
+        width: "100%", marginTop: 11, padding: "11px 0", borderRadius: 999, border: "none",
         cursor: complete ? "pointer" : "default",
         background: complete ? C.btn : C.surface3, color: complete ? C.btnText : C.muted,
-        fontFamily: C.display, fontWeight: 700, fontSize: 15,
+        fontFamily: C.display, fontWeight: 700, fontSize: 13.5,
         transition: "background 0.2s, color 0.2s", WebkitTapHighlightColor: "transparent",
       }}>
         {t("Pošlji & posodobi readiness")} <span style={{ color: complete ? C.accent2 : C.muted2 }}>→</span>

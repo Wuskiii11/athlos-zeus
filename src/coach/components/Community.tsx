@@ -97,26 +97,26 @@ export default function Community({
       <button
         onClick={() => setShowRoster(true)}
         style={{
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 18,
-          padding: '16px 18px', marginBottom: 14, flexShrink: 0, textAlign: 'left',
+          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 15,
+          padding: '16px 18px', marginBottom: 10, flexShrink: 0, textAlign: 'left',
           cursor: 'pointer', width: '100%', fontFamily: 'inherit', WebkitTapHighlightColor: 'transparent',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>{club.name}</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+            <div style={{ fontSize: 15.5, fontWeight: 800, color: 'var(--text)' }}>{club.name}</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
               {club.location ? `${club.location} · ` : ''}{memberCount} {memberCount === 1 ? t('athlete') : t('athletes')} · {coachName}
             </div>
           </div>
-          <span style={{ color: 'var(--muted)', fontSize: 18 }}>›</span>
+          <span style={{ color: 'var(--muted)', fontSize: 15.5 }}>›</span>
         </div>
       </button>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 10 }}>
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 10 }}>
         {msgs.length === 0 && (
-          <div style={{ color: 'var(--muted)', fontSize: 13, textAlign: 'center', marginTop: 30 }}>
+          <div style={{ color: 'var(--muted)', fontSize: 11.5, textAlign: 'center', marginTop: 19 }}>
             {t('No messages yet — say hello to your club.')}
           </div>
         )}
@@ -125,18 +125,18 @@ export default function Community({
           return (
             <div key={m.id} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '78%' }}>
               {!mine && (
-                <div style={{ fontSize: 10, color: 'var(--muted)', margin: '0 0 3px 10px' }}>
+                <div style={{ fontSize: 9, color: 'var(--muted)', margin: '0 0 3px 10px' }}>
                   {names[m.sender_id]?.name || '…'}
                 </div>
               )}
               <div style={{
-                padding: '10px 13px', borderRadius: 16, fontSize: 14, lineHeight: 1.45,
+                padding: '10px 13px', borderRadius: 14, fontSize: 12.5, lineHeight: 1.45,
                 background: mine ? 'var(--green)' : 'var(--surface2)',
                 color: mine ? '#04130A' : 'var(--text)',
                 border: mine ? 'none' : '1px solid var(--line)',
               }}>
                 {m.content}
-                <span style={{ display: 'block', fontSize: 9, opacity: 0.6, marginTop: 3, textAlign: 'right' }}>{timeOf(m.created_at)}</span>
+                <span style={{ display: 'block', fontSize: 8.5, opacity: 0.6, marginTop: 3, textAlign: 'right' }}>{timeOf(m.created_at)}</span>
               </div>
             </div>
           )
@@ -145,7 +145,7 @@ export default function Community({
       </div>
 
       {/* Composer */}
-      <div style={{ display: 'flex', gap: 8, paddingTop: 10, flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 6, paddingTop: 10, flexShrink: 0 }}>
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -154,7 +154,7 @@ export default function Community({
           style={{
             flex: 1, padding: '12px 15px', borderRadius: 999,
             background: 'var(--surface2)', border: '1px solid var(--line2)',
-            color: 'var(--text)', fontFamily: 'inherit', fontSize: 14, outline: 'none',
+            color: 'var(--text)', fontFamily: 'inherit', fontSize: 12.5, outline: 'none',
           }}
         />
         <button

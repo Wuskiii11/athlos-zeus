@@ -51,24 +51,24 @@ export default function CoachWelcome({ onDone }: { onDone: () => void }) {
     }}>
       <button
         onClick={onDone}
-        style={{ alignSelf: 'flex-end', background: 'none', border: 'none', color: 'var(--muted)', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', padding: 6 }}
+        style={{ alignSelf: 'flex-end', background: 'none', border: 'none', color: 'var(--muted)', fontFamily: 'inherit', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 6 }}
       >
         {t('Skip')}
       </button>
 
       <div key={i} className="screen-anim" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
         <div style={{
-          width: 86, height: 86, borderRadius: 26,
+          width: 86, height: 86, borderRadius: 19,
           background: 'rgba(0,255,135,0.08)', border: '1px solid rgba(0,255,135,0.22)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18,
         }}>
           {s.icon}
         </div>
-        <h1 style={{ fontWeight: 800, fontSize: 25, margin: '0 0 12px', letterSpacing: '-0.02em' }}>{t(s.title)}</h1>
-        <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'var(--muted)', margin: 0, maxWidth: 320 }}>{t(s.desc)}</p>
+        <h1 style={{ fontWeight: 800, fontSize: 21, margin: '0 0 12px', letterSpacing: '-0.02em' }}>{t(s.title)}</h1>
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--muted)', margin: 0, maxWidth: 320 }}>{t(s.desc)}</p>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 7, marginBottom: 22 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 15 }}>
         {SLIDES.map((_, d) => (
           <span key={d} style={{
             width: d === i ? 22 : 7, height: 7, borderRadius: 999,
@@ -83,7 +83,7 @@ export default function CoachWelcome({ onDone }: { onDone: () => void }) {
         style={{
           width: '100%', padding: 16, borderRadius: 999, border: 'none',
           background: 'var(--green)', color: '#04130A', fontFamily: 'inherit',
-          fontWeight: 800, fontSize: 16, cursor: 'pointer',
+          fontWeight: 800, fontSize: 14, cursor: 'pointer',
           WebkitTapHighlightColor: 'transparent',
         }}
       >

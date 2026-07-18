@@ -65,14 +65,14 @@ export default function AddAthleteSheet({
           placeholder={t('Athlete username…')}
           style={{
             width: '100%', boxSizing: 'border-box', padding: '13px 16px',
-            borderRadius: 14, background: 'var(--surface2)', border: '1px solid var(--line2)',
-            color: 'var(--text)', fontFamily: 'inherit', fontSize: 15, outline: 'none',
-            marginBottom: 14,
+            borderRadius: 12, background: 'var(--surface2)', border: '1px solid var(--line2)',
+            color: 'var(--text)', fontFamily: 'inherit', fontSize: 13.5, outline: 'none',
+            marginBottom: 10,
           }}
         />
 
         {error && (
-          <div style={{ marginBottom: 12, padding: '10px 13px', borderRadius: 12, background: 'rgba(248,112,102,0.10)', border: '1px solid rgba(248,112,102,0.35)', color: 'var(--red)', fontSize: 13 }}>
+          <div style={{ marginBottom: 9, padding: '10px 13px', borderRadius: 10, background: 'rgba(248,112,102,0.10)', border: '1px solid rgba(248,112,102,0.35)', color: 'var(--red)', fontSize: 11.5 }}>
             {error}
           </div>
         )}
@@ -91,7 +91,7 @@ export default function AddAthleteSheet({
                   <div className="meta">{already ? t('Already in your club') : t('Tap to add to the club')}</div>
                 </div>
                 {!already && (
-                  <span style={{ color: 'var(--green)', fontWeight: 800, fontSize: 20 }}>
+                  <span style={{ color: 'var(--green)', fontWeight: 800, fontSize: 17 }}>
                     {busyId === u.user_id ? '…' : '+'}
                   </span>
                 )}

@@ -74,7 +74,7 @@ export default function Dashboard({
           style={{
             background: 'var(--green)', color: '#04130A', border: 'none',
             borderRadius: 999, padding: '6px 13px', fontFamily: 'inherit',
-            fontWeight: 800, fontSize: 12, cursor: 'pointer',
+            fontWeight: 800, fontSize: 11, cursor: 'pointer',
             WebkitTapHighlightColor: 'transparent',
           }}
         >

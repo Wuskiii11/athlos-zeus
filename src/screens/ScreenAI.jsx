@@ -113,49 +113,49 @@ function FeedbackCard({ C, t, onSave, onSkip }) {
   const [done, setDone] = useState(null);
   const [pain, setPain] = useState([]);
   const ok = rpe != null && done != null;
-  const base = { fontFamily: C.display, fontSize: 14.5, cursor: "pointer", borderRadius: 999, transition: "all 0.15s", WebkitTapHighlightColor: "transparent" };
-  const chip = (active, extra = {}) => ({ ...base, padding: "7px 12px", border: `1.5px solid ${active ? C.accent : C.border}`, background: active ? `${C.accent}16` : C.surface, color: active ? C.accent : C.text2, fontWeight: active ? 700 : 500, ...extra });
+  const base = { fontFamily: C.display, fontSize: 13, cursor: "pointer", borderRadius: 999, transition: "all 0.15s", WebkitTapHighlightColor: "transparent" };
+  const chip = (active, extra = {}) => ({ ...base, padding: "6px 9px", border: `1.5px solid ${active ? C.accent : C.border}`, background: active ? `${C.accent}16` : C.surface, color: active ? C.accent : C.text2, fontWeight: active ? 700 : 500, ...extra });
   const togglePain = (p) =>
     setPain((arr) => p === "Brez"
       ? (arr.includes("Brez") ? [] : ["Brez"])
       : (arr.includes(p) ? arr.filter((x) => x !== p) : [...arr.filter((x) => x !== "Brez"), p]));
-  const row = { fontFamily: C.display, fontSize: 13.5, color: C.text2, fontWeight: 600, marginBottom: 7 };
+  const row = { fontFamily: C.display, fontSize: 12, color: C.text2, fontWeight: 600, marginBottom: 6 };
   const dark = C.name === "dark";
   return (
     <div style={{
-      alignSelf: "stretch", borderRadius: 18, padding: "16px 16px 14px", margin: "2px 0",
+      alignSelf: "stretch", borderRadius: 15, padding: "11px 11px 10px", margin: "2px 0",
       animation: "athlosMsgBot 0.32s cubic-bezier(0.22,1,0.36,1) both",
       background: dark ? C.surface : "#FFFFFF",
       border: `1px solid ${C.gold}44`,
     }}>
-      <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 17, color: C.text, letterSpacing: "0.02em" }}>{t("Kako je šlo zadnjič?")}</div>
-      <div style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, marginTop: 2, marginBottom: 13 }}>{t("Da te ZEUS bolje pozna in nadgradi naslednji trening.")}</div>
+      <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 15, color: C.text, letterSpacing: "0.02em" }}>{t("Kako je šlo zadnjič?")}</div>
+      <div style={{ fontFamily: C.display, fontSize: 12, color: C.muted, marginTop: 2, marginBottom: 9 }}>{t("Da te ZEUS bolje pozna in nadgradi naslednji trening.")}</div>
 
       <div style={row}>{t("Napor (RPE 1–10)")}</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 13 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 9 }}>
         {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-          <button key={n} onClick={() => setRpe(n)} style={chip(rpe === n, { minWidth: 34, textAlign: "center", padding: "7px 0" })}><span className="at-chip-lbl" data-text={String(n)}>{n}</span></button>
+          <button key={n} onClick={() => setRpe(n)} style={chip(rpe === n, { minWidth: 34, textAlign: "center", padding: "6px 0" })}><span className="at-chip-lbl" data-text={String(n)}>{n}</span></button>
         ))}
       </div>
 
       <div style={row}>{t("Opravljeno")}</div>
-      <div style={{ display: "flex", gap: 6, marginBottom: 13 }}>
+      <div style={{ display: "flex", gap: 5, marginBottom: 9 }}>
         {[["Da", true], ["Delno", "delno"], ["Ne", false]].map(([l, v]) => (
           <button key={l} onClick={() => setDone(v)} style={chip(done === v)}><span className="at-chip-lbl" data-text={t(l)}>{t(l)}</span></button>
         ))}
       </div>
 
       <div style={row}>{t("Bolečina")}</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
         {PAIN_TAGS.map((p) => <button key={p} onClick={() => togglePain(p)} style={chip(pain.includes(p))}><span className="at-chip-lbl" data-text={t(p)}>{t(p)}</span></button>)}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-        <button onClick={onSkip} style={{ background: "none", border: "none", color: C.muted, fontFamily: C.display, fontSize: 13.5, cursor: "pointer", letterSpacing: "0.04em" }}>{t("Preskoči")}</button>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 11 }}>
+        <button onClick={onSkip} style={{ background: "none", border: "none", color: C.muted, fontFamily: C.display, fontSize: 12, cursor: "pointer", letterSpacing: "0.04em" }}>{t("Preskoči")}</button>
         <Pressable
           onClick={() => ok && onSave({ rpe, completed: done !== false, pain: pain.filter((x) => x !== "Brez"), note: done === "delno" ? "delno opravljeno" : "" })}
           disabled={!ok} scale={0.96}
-          style={{ background: ok ? C.btn : C.surface3, color: ok ? C.btnText : C.muted, border: "none", borderRadius: 999, padding: "11px 20px", fontFamily: C.display, fontWeight: 700, fontSize: 14.5 }}
+          style={{ background: ok ? C.btn : C.surface3, color: ok ? C.btnText : C.muted, border: "none", borderRadius: 999, padding: "8px 14px", fontFamily: C.display, fontWeight: 700, fontSize: 13 }}
         >
           {t("Shrani")}
         </Pressable>
@@ -372,12 +372,12 @@ export default function ScreenAI({ user, profile }) {
   if (gate === "loading") return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg }}>
       {/* header skeleton */}
-      <div style={{ flexShrink: 0, padding: "18px 18px 14px", borderBottom: `1px solid ${C.border}` }}>
+      <div style={{ flexShrink: 0, padding: "13px 13px 10px", borderBottom: `1px solid ${C.border}` }}>
         <SkeletonBlock width={104} height={30} radius={8} />
-        <div style={{ marginTop: 10 }}><SkeletonBlock width={190} height={12} radius={5} /></div>
+        <div style={{ marginTop: 8 }}><SkeletonBlock width={190} height={12} radius={5} /></div>
       </div>
       {/* chat bubbles skeleton */}
-      <div style={{ flex: 1, overflow: "hidden", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ flex: 1, overflow: "hidden", padding: "11px 13px", display: "flex", flexDirection: "column", gap: 11 }}>
         {[["l", "78%", 66], ["r", "58%", 44], ["l", "86%", 90], ["r", "48%", 40], ["l", "72%", 58]].map(([side, w, h], i) => (
           <div key={i} style={{ alignSelf: side === "r" ? "flex-end" : "flex-start", width: w }}>
             <SkeletonBlock width="100%" height={h} radius={16} />
@@ -385,7 +385,7 @@ export default function ScreenAI({ user, profile }) {
         ))}
       </div>
       {/* composer skeleton */}
-      <div style={{ flexShrink: 0, padding: "10px 14px", borderTop: `1px solid ${C.border}`, display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ flexShrink: 0, padding: "8px 10px", borderTop: `1px solid ${C.border}`, display: "flex", gap: 6, alignItems: "center" }}>
         <SkeletonBlock width="100%" height={44} radius={22} />
         <SkeletonBlock width={44} height={44} radius={999} />
       </div>
@@ -407,11 +407,11 @@ export default function ScreenAI({ user, profile }) {
       {/* Header — flat, calm bar. No image, no hard color edge, no kicker
           line above ZEUS. The status line doubles as the disclaimer, so
           there's no separate floating strip either. */}
-      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "18px 18px 14px", borderBottom: `1px solid ${C.border}` }}>
+      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "13px 13px 10px", borderBottom: `1px solid ${C.border}` }}>
         <div style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 31.5, letterSpacing: "0.12em", color: C.text, lineHeight: 1 }}>ZEUS</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: typing ? C.gold : C.accent2, boxShadow: typing ? "none" : `0 0 8px ${C.accent2}99`, flexShrink: 0 }} />
-          <span style={{ fontFamily: C.display, fontSize: 13.5, fontWeight: 600, color: typing ? C.gold : C.muted }}>
+          <span style={{ fontFamily: C.display, fontSize: 12, fontWeight: 600, color: typing ? C.gold : C.muted }}>
             {typing ? t("razmišlja…") : t("ATHLOS AI · ni nadomestilo za zdravnika")}
           </span>
         </div>
@@ -420,13 +420,13 @@ export default function ScreenAI({ user, profile }) {
       {/* Messages — the same marble dialogue as human chat: ZEUS speaks in
           italic Cormorant on a marble tablet, your replies are engraved ink
           panels with a faint green "oracle" breath, like an answered oracle. */}
-      <div ref={scrollRef} style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "12px 18px 8px", display: "flex", flexDirection: "column", gap: 14 }}>
+      <div ref={scrollRef} style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "9px 13px 6px", display: "flex", flexDirection: "column", gap: 10 }}>
         {msgs.map((m, i) => {
           const isMine = m.from === "user";
           return (
             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: isMine ? "flex-end" : "flex-start", animation: `${isMine ? "athlosMsgUser" : "athlosMsgBot"} 0.32s cubic-bezier(0.22,1,0.36,1) both` }}>
               <div style={{
-                position: "relative", maxWidth: isMine ? "80%" : "88%", padding: "14px 16px", overflow: "hidden",
+                position: "relative", maxWidth: isMine ? "80%" : "88%", padding: "10px 11px", overflow: "hidden",
                 borderRadius: isMine ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
                 background: isMine
                   ? "#1C1814"
@@ -437,17 +437,17 @@ export default function ScreenAI({ user, profile }) {
                 boxShadow: isMine ? "0 6px 16px rgba(28,24,20,0.18)" : (dark ? "none" : "0 3px 10px rgba(28,24,20,0.05)"),
               }}>
                 {m.img && (
-                  <img src={m.img} alt="" style={{ display: "block", maxWidth: "100%", maxHeight: 260, borderRadius: 12, marginBottom: m.t ? 10 : 0, objectFit: "cover" }} />
+                  <img src={m.img} alt="" style={{ display: "block", maxWidth: "100%", maxHeight: 260, borderRadius: 10, marginBottom: m.t ? 10 : 0, objectFit: "cover" }} />
                 )}
                 {m.file && (
-                  <span style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: m.t ? 10 : 0, padding: "8px 12px", borderRadius: 10, background: "rgba(255,255,255,0.08)" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: m.t ? 10 : 0, padding: "6px 9px", borderRadius: 9, background: "rgba(255,255,255,0.08)" }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isMine ? "#F4EFE6" : C.text} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" /><path d="M13 2v7h7" /></svg>
-                    <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: isMine ? "#F4EFE6" : C.text, wordBreak: "break-all" }}>{m.file}</span>
+                    <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 12, color: isMine ? "#F4EFE6" : C.text, wordBreak: "break-all" }}>{m.file}</span>
                   </span>
                 )}
                 {m.t && (
                   <span style={{
-                    position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 17.5, lineHeight: 1.5, whiteSpace: "pre-wrap",
+                    position: "relative", fontFamily: C.display, fontWeight: 500, fontSize: 15, lineHeight: 1.5, whiteSpace: "pre-wrap",
                     fontStyle: isMine ? "normal" : "italic",
                     color: isMine ? "#F4EFE6" : C.text,
                   }}>
@@ -455,14 +455,14 @@ export default function ScreenAI({ user, profile }) {
                   </span>
                 )}
               </div>
-              <Mono style={{ fontSize: 9, color: C.muted2, marginTop: 5, letterSpacing: "0.1em" }}>{m.time}</Mono>
+              <Mono style={{ fontSize: 8.5, color: C.muted2, marginTop: 4, letterSpacing: "0.1em" }}>{m.time}</Mono>
             </div>
           );
         })}
 
         {/* Saving to calendar — brief inline status while the auto-save runs */}
         {calSaving && (
-          <div style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 999, border: `1px solid ${C.border2}`, color: C.muted, fontFamily: C.display, fontSize: 13.5, animation: "athlosFade 0.2s ease" }}>
+          <div style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 999, border: `1px solid ${C.border2}`, color: C.muted, fontFamily: C.display, fontSize: 12, animation: "athlosFade 0.2s ease" }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.accent }} />
             <span style={{ display: "flex", color: C.gold }}><IcCalendar size={13} /></span> {t("Shranjujem v Koledar…")}
           </div>
@@ -477,7 +477,7 @@ export default function ScreenAI({ user, profile }) {
         {typing && (
           <div style={{ display: "flex", animation: "athlosFade 0.2s ease" }}>
             <div style={{
-              padding: "16px 18px", borderRadius: "18px 18px 18px 4px", display: "flex", gap: 6, alignItems: "center",
+              padding: "11px 13px", borderRadius: "18px 18px 18px 4px", display: "flex", gap: 5, alignItems: "center",
               background: dark ? "rgba(255,255,255,0.07)" : "#FFFFFF",
               border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "#D6DAE0"}`,
             }}>
@@ -493,14 +493,14 @@ export default function ScreenAI({ user, profile }) {
       {/* Quick prompts — chip rail directly above the composer (reference
           look): first chip is the featured one with the green outline */}
       {showSugg && !typing && (
-        <div className="athlos-scroll" style={{ position: "relative", zIndex: 1, flexShrink: 0, display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", padding: "4px 18px 10px", animation: "athlosFade 0.3s ease" }}>
+        <div className="athlos-scroll" style={{ position: "relative", zIndex: 1, flexShrink: 0, display: "flex", gap: 6, overflowX: "auto", scrollbarWidth: "none", padding: "4px 13px 8px", animation: "athlosFade 0.3s ease" }}>
           {SUGGESTIONS.map((s, i) => (
             <button key={s} onClick={() => send(s)} style={{
-              flexShrink: 0, padding: "10px 15px", borderRadius: 999, cursor: "pointer",
+              flexShrink: 0, padding: "8px 11px", borderRadius: 999, cursor: "pointer",
               border: `1.5px solid ${i === 0 ? C.accent : (dark ? C.border : "#D6DAE0")}`,
               background: i === 0 ? `${C.accent}10` : (dark ? C.surface2 : "rgba(255,255,255,0.6)"),
               color: i === 0 ? (dark ? C.accent : C.text) : C.text2,
-              fontFamily: C.display, fontWeight: 600, fontSize: 13.5, whiteSpace: "nowrap",
+              fontFamily: C.display, fontWeight: 600, fontSize: 12, whiteSpace: "nowrap",
               WebkitTapHighlightColor: "transparent",
             }}>
               {t(s)}
@@ -511,22 +511,22 @@ export default function ScreenAI({ user, profile }) {
 
       {/* Input — reference composer: "+" attaches an image/PDF for ZEUS to
           see, green circle sends (or dictates while everything is empty) */}
-      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "0 18px 18px" }}>
+      <div style={{ position: "relative", zIndex: 1, flexShrink: 0, padding: "0 13px 13px" }}>
         {/* pending attachment preview */}
         {attach && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, padding: "8px 10px", borderRadius: 14, background: dark ? C.surface2 : "rgba(255,255,255,0.6)", border: `1px solid ${dark ? C.border : "#D6DAE0"}`, animation: "athlosFade 0.2s ease" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "6px 8px", borderRadius: 12, background: dark ? C.surface2 : "rgba(255,255,255,0.6)", border: `1px solid ${dark ? C.border : "#D6DAE0"}`, animation: "athlosFade 0.2s ease" }}>
             {attach.isImage
-              ? <img src={attach.dataUrl} alt="" style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
-              : <span style={{ width: 40, height: 40, borderRadius: 10, background: `${C.accent}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              ? <img src={attach.dataUrl} alt="" style={{ width: 40, height: 40, borderRadius: 9, objectFit: "cover", flexShrink: 0 }} />
+              : <span style={{ width: 40, height: 40, borderRadius: 9, background: `${C.accent}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" /><path d="M13 2v7h7" /></svg>
                 </span>}
-            <span style={{ flex: 1, minWidth: 0, fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{attach.name}</span>
+            <span style={{ flex: 1, minWidth: 0, fontFamily: C.display, fontWeight: 600, fontSize: 12, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{attach.name}</span>
             <button onClick={() => setAttach(null)} aria-label={t("Odstrani priponko")} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", padding: 6, lineHeight: 0, WebkitTapHighlightColor: "transparent" }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
         )}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: 6, background: dark ? C.surface2 : "rgba(255,255,255,0.55)", border: `1px solid ${dark ? C.border : "#D6DAE0"}`, borderRadius: 999 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: 6, background: dark ? C.surface2 : "rgba(255,255,255,0.55)", border: `1px solid ${dark ? C.border : "#D6DAE0"}`, borderRadius: 999 }}>
           <input ref={fileRef} type="file" accept="image/*,application/pdf" onChange={onPickFile} style={{ display: "none" }} />
           <Pressable
             onClick={() => fileRef.current?.click()}
@@ -546,7 +546,7 @@ export default function ScreenAI({ user, profile }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder={t("Vprašaj ZEUS-a...")}
-            style={{ flex: 1, minWidth: 0, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 17, lineHeight: 1 }}
+            style={{ flex: 1, minWidth: 0, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 15, lineHeight: 1 }}
           />
           <Pressable
             onClick={() => (input.trim() || attach ? send() : toggleMic())}

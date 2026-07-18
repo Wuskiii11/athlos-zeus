@@ -47,8 +47,8 @@ function SegmentedControl({ tabs, value, onChange, C }) {
         return (
           <button key={t.key} onClick={() => { haptic(); onChange(t.key); }} style={{
             position: "relative", zIndex: 1, flex: 1, border: "none", background: "none",
-            padding: "10px 0", borderRadius: 999, cursor: "pointer", WebkitTapHighlightColor: "transparent",
-            fontFamily: C.display, fontWeight: 700, fontSize: 14.5,
+            padding: "8px 0", borderRadius: 999, cursor: "pointer", WebkitTapHighlightColor: "transparent",
+            fontFamily: C.display, fontWeight: 700, fontSize: 13,
             color: on ? C.btnText : C.muted, transition: "color 0.25s",
           }}>
             {t.label}
@@ -64,8 +64,8 @@ function SearchBar({ value, onChange, placeholder, C }) {
   const [focus, setFocus] = useState(false);
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 10, padding: "0 16px", height: 50,
-      borderRadius: 16, background: C.surface2,
+      display: "flex", alignItems: "center", gap: 8, padding: "0 11px", height: 50,
+      borderRadius: 14, background: C.surface2,
       border: `1px solid ${focus ? C.accent : C.border}`,
       boxShadow: focus ? `0 0 0 3px ${C.accent}1f` : "none",
       transform: focus ? "scale(1.01)" : "scale(1)",
@@ -78,7 +78,7 @@ function SearchBar({ value, onChange, placeholder, C }) {
         value={value} onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
         placeholder={placeholder}
-        style={{ flex: 1, minWidth: 0, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 15 }}
+        style={{ flex: 1, minWidth: 0, background: "none", border: "none", outline: "none", color: C.text, fontFamily: C.display, fontWeight: 500, fontSize: 13.5 }}
       />
     </div>
   );
@@ -92,8 +92,8 @@ function CommunityCard({ community, variant, C, onJoin }) {
       className="ath-press"
       onClick={(e) => { e.stopPropagation(); haptic(); setJoined((v) => !v); onJoin?.(community); }}
       style={{
-        border: "none", borderRadius: 999, padding: "9px 18px", cursor: "pointer", flexShrink: 0,
-        fontFamily: C.display, fontWeight: 800, fontSize: 13, WebkitTapHighlightColor: "transparent",
+        border: "none", borderRadius: 999, padding: "7px 13px", cursor: "pointer", flexShrink: 0,
+        fontFamily: C.display, fontWeight: 800, fontSize: 11.5, WebkitTapHighlightColor: "transparent",
         background: joined ? "transparent" : C.accent,
         color: joined ? C.muted : C.btnText,
         boxShadow: joined ? "none" : `0 6px 18px ${C.accent}33`,
@@ -107,25 +107,25 @@ function CommunityCard({ community, variant, C, onJoin }) {
   if (variant === "featured") {
     return (
       <div style={{
-        position: "relative", overflow: "hidden", borderRadius: 24, padding: 20,
+        position: "relative", overflow: "hidden", borderRadius: 18, padding: 20,
         background: `radial-gradient(120% 90% at 85% -10%, ${C.accent}1f, transparent 55%), ${C.surface}`,
         border: `1px solid ${C.accent}22`,
         boxShadow: `0 10px 34px rgba(0,0,0,0.4), 0 0 0 1px ${C.accent}0a`,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <span style={{ width: 58, height: 58, borderRadius: "50%", flexShrink: 0, fontSize: 30, background: C.surface3, border: `1px solid ${C.border2}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{community.flag}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ width: 58, height: 58, borderRadius: "50%", flexShrink: 0, fontSize: 24, background: C.surface3, border: `1px solid ${C.border2}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{community.flag}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: C.mono, fontSize: 9, letterSpacing: "0.18em", color: C.accent, marginBottom: 4 }}>FEATURED</div>
-            <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text, letterSpacing: "-0.01em" }}>{community.name}</div>
+            <div style={{ fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.18em", color: C.accent, marginBottom: 4 }}>FEATURED</div>
+            <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, letterSpacing: "-0.01em" }}>{community.name}</div>
           </div>
           {JoinBtn}
         </div>
-        <p style={{ fontFamily: C.display, fontSize: 13.5, lineHeight: 1.55, color: C.text2, margin: "14px 0 16px" }}>{community.description}</p>
-        <div style={{ display: "flex", gap: 10 }}>
+        <p style={{ fontFamily: C.display, fontSize: 12, lineHeight: 1.55, color: C.text2, margin: "10px 0 11px" }}>{community.description}</p>
+        <div style={{ display: "flex", gap: 8 }}>
           {[["Members", fmt(community.members)], ["Active today", fmt(community.activeToday)]].map(([k, v]) => (
-            <div key={k} style={{ flex: 1, borderRadius: 16, padding: "12px 14px", background: C.surface2, border: `1px solid ${C.border}` }}>
-              <div style={{ fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.12em", color: C.muted2 }}>{k.toUpperCase()}</div>
-              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, marginTop: 4 }}>{v}</div>
+            <div key={k} style={{ flex: 1, borderRadius: 14, padding: "9px 10px", background: C.surface2, border: `1px solid ${C.border}` }}>
+              <div style={{ fontFamily: C.mono, fontSize: 8, letterSpacing: "0.12em", color: C.muted2 }}>{k.toUpperCase()}</div>
+              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, marginTop: 4 }}>{v}</div>
             </div>
           ))}
         </div>
@@ -135,13 +135,13 @@ function CommunityCard({ community, variant, C, onJoin }) {
 
   return (
     <div className="ath-press" style={{
-      display: "flex", alignItems: "center", gap: 14, padding: "13px 16px",
-      background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20,
+      display: "flex", alignItems: "center", gap: 10, padding: "9px 11px",
+      background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
     }}>
-      <span style={{ width: 44, height: 44, borderRadius: "50%", flexShrink: 0, fontSize: 20, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center" }}>{community.icon}</span>
+      <span style={{ width: 44, height: 44, borderRadius: "50%", flexShrink: 0, fontSize: 17, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center" }}>{community.icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text }}>{community.name}</div>
-        <div style={{ fontFamily: C.display, fontSize: 12.5, color: C.muted, marginTop: 2 }}>{fmt(community.members)} members</div>
+        <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{community.name}</div>
+        <div style={{ fontFamily: C.display, fontSize: 11, color: C.muted, marginTop: 2 }}>{fmt(community.members)} members</div>
       </div>
       {JoinBtn}
     </div>
@@ -149,7 +149,7 @@ function CommunityCard({ community, variant, C, onJoin }) {
 }
 
 const SectionHeader = ({ children, C }) => (
-  <h3 style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, margin: "0 0 12px", letterSpacing: "-0.01em" }}>{children}</h3>
+  <h3 style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: C.text, margin: "0 0 9px", letterSpacing: "-0.01em" }}>{children}</h3>
 );
 
 // ── Private — the real chat engine (groups + direct messages, Supabase-
@@ -171,21 +171,21 @@ function PublicTab({ C }) {
   const trending = TRENDING.filter((c) => c.name.toLowerCase().includes(q.trim().toLowerCase()));
   return (
     <div style={{ animation: "athlosCommFade 0.3s ease" }}>
-      <div style={{ marginBottom: 22 }}>
+      <div style={{ marginBottom: 15 }}>
         <SearchBar value={q} onChange={setQ} placeholder="Search communities…" C={C} />
       </div>
 
       {!q && (
-        <div style={{ marginBottom: 26 }}>
+        <div style={{ marginBottom: 17 }}>
           <CommunityCard community={FEATURED} variant="featured" C={C} />
         </div>
       )}
 
       <SectionHeader C={C}>Trending Communities</SectionHeader>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {trending.map((c) => <CommunityCard key={c.id} community={c} variant="trending" C={C} />)}
         {trending.length === 0 && (
-          <div style={{ textAlign: "center", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 14.5, padding: "22px 0" }}>
+          <div style={{ textAlign: "center", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 13, padding: "15px 0" }}>
             No communities match “{q}”.
           </div>
         )}
@@ -203,7 +203,7 @@ export default function ScreenCommunity({ user, profile, onConvOpenChange }) {
   const [tab, setTab] = useState("private");
 
   return (
-    <div style={{ padding: "10px 18px 40px", color: C.text, position: "relative", minHeight: "100%" }}>
+    <div style={{ padding: "8px 13px 26px", color: C.text, position: "relative", minHeight: "100%" }}>
       <style>{`
         .ath-press { transition: transform 0.14s cubic-bezier(0.22,1,0.36,1); }
         .ath-press:active { transform: scale(0.975); }
@@ -211,11 +211,11 @@ export default function ScreenCommunity({ user, profile, onConvOpenChange }) {
       `}</style>
 
       {/* Header */}
-      <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, margin: "6px 0 4px", letterSpacing: "-0.02em" }}>Community</h2>
-      <p style={{ fontFamily: C.display, fontSize: 13.5, color: C.muted, margin: "0 0 18px" }}>Train together. Compete together.</p>
+      <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, margin: "5px 0 4px", letterSpacing: "-0.02em" }}>Community</h2>
+      <p style={{ fontFamily: C.display, fontSize: 12, color: C.muted, margin: "0 0 13px" }}>Train together. Compete together.</p>
 
       {/* Segmented control */}
-      <div style={{ marginBottom: 22 }}>
+      <div style={{ marginBottom: 15 }}>
         <SegmentedControl
           tabs={[{ key: "private", label: "Private" }, { key: "public", label: "Public" }]}
           value={tab} onChange={setTab} C={C}

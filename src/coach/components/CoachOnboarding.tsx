@@ -33,12 +33,12 @@ async function searchPlaces(q: string): Promise<Place[]> {
 const field: React.CSSProperties = {
   width: '100%', padding: '14px 16px', boxSizing: 'border-box',
   background: 'var(--surface2)', border: '1px solid var(--line2)',
-  borderRadius: 14, color: 'var(--text)', fontFamily: 'inherit',
-  fontWeight: 600, fontSize: 16, outline: 'none',
+  borderRadius: 12, color: 'var(--text)', fontFamily: 'inherit',
+  fontWeight: 600, fontSize: 14, outline: 'none',
 }
 
 const label: React.CSSProperties = {
-  fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 600,
+  fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 600,
   letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--muted)',
   display: 'block', margin: '18px 0 8px',
 }
@@ -100,14 +100,14 @@ export default function CoachOnboarding({
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '48px 26px 40px', display: 'flex', flexDirection: 'column' }}>
-      <div className="logo" style={{ fontSize: 20 }}>ATHLOS</div>
+      <div className="logo" style={{ fontSize: 17 }}>ATHLOS</div>
       <div className="logo-underline" style={{ maxWidth: 90 }} />
-      <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 8 }}>{t('Coach setup')}</div>
+      <div style={{ color: 'var(--muted)', fontSize: 11, marginTop: 6 }}>{t('Coach setup')}</div>
 
       <h1 style={{ fontSize: 26, fontWeight: 800, margin: '28px 0 6px', color: 'var(--text)' }}>
         {t('Set up your club')}
       </h1>
-      <p style={{ color: 'var(--muted)', fontSize: 13.5, lineHeight: 1.55, margin: 0 }}>
+      <p style={{ color: 'var(--muted)', fontSize: 12, lineHeight: 1.55, margin: 0 }}>
         {t('Athletes will find your club by its name — or by yours.')}
       </p>
 
@@ -124,7 +124,7 @@ export default function CoachOnboarding({
           <div style={{
             position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 5,
             background: 'var(--surface2)', border: '1px solid var(--line2)',
-            borderRadius: 14, overflow: 'hidden', boxShadow: '0 12px 32px rgba(0,0,0,0.45)',
+            borderRadius: 12, overflow: 'hidden', boxShadow: '0 12px 32px rgba(0,0,0,0.45)',
           }}>
             {suggestions.map((pl, i) => (
               <button
@@ -137,8 +137,8 @@ export default function CoachOnboarding({
                   fontFamily: 'inherit', WebkitTapHighlightColor: 'transparent',
                 }}
               >
-                <span style={{ display: 'block', color: 'var(--text)', fontSize: 14, fontWeight: 600 }}>{pl.label}</span>
-                {pl.detail && <span style={{ display: 'block', color: 'var(--muted)', fontSize: 11.5, marginTop: 2 }}>{pl.detail}</span>}
+                <span style={{ display: 'block', color: 'var(--text)', fontSize: 12.5, fontWeight: 600 }}>{pl.label}</span>
+                {pl.detail && <span style={{ display: 'block', color: 'var(--muted)', fontSize: 10.5, marginTop: 2 }}>{pl.detail}</span>}
               </button>
             ))}
           </div>
@@ -146,7 +146,7 @@ export default function CoachOnboarding({
       </div>
 
       {error && (
-        <div style={{ marginTop: 14, padding: '11px 14px', borderRadius: 12, background: 'rgba(248,112,102,0.10)', border: '1px solid rgba(248,112,102,0.35)', color: 'var(--red)', fontSize: 13 }}>
+        <div style={{ marginTop: 10, padding: '11px 14px', borderRadius: 10, background: 'rgba(248,112,102,0.10)', border: '1px solid rgba(248,112,102,0.35)', color: 'var(--red)', fontSize: 11.5 }}>
           {error}
         </div>
       )}
@@ -155,9 +155,9 @@ export default function CoachOnboarding({
         onClick={submit}
         disabled={busy}
         style={{
-          marginTop: 26, width: '100%', padding: '15px 16px', borderRadius: 999,
+          marginTop: 17, width: '100%', padding: '15px 16px', borderRadius: 999,
           border: 'none', background: 'var(--green)', color: '#04130A',
-          fontFamily: 'inherit', fontWeight: 800, fontSize: 15.5, cursor: 'pointer',
+          fontFamily: 'inherit', fontWeight: 800, fontSize: 14, cursor: 'pointer',
           opacity: busy ? 0.6 : 1, WebkitTapHighlightColor: 'transparent',
         }}
       >
@@ -166,7 +166,7 @@ export default function CoachOnboarding({
 
       <button
         onClick={onLogout}
-        style={{ marginTop: 14, background: 'none', border: 'none', color: 'var(--muted)', fontFamily: 'inherit', fontSize: 13, cursor: 'pointer' }}
+        style={{ marginTop: 10, background: 'none', border: 'none', color: 'var(--muted)', fontFamily: 'inherit', fontSize: 11.5, cursor: 'pointer' }}
       >
         {t('Log out')}
       </button>

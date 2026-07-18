@@ -178,9 +178,9 @@ function Meander({ color, width = 96, opacity = 0.5 }) {
 // ─── Day divider — engraved rule with a mono date ────────────
 function DayDivider({ label, C, muted, line }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 6px 10px" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "11px 5px 8px" }}>
       <span style={{ flex: 1, height: 1, background: line }} />
-      <Mono style={{ color: muted, fontSize: 9, letterSpacing: "0.28em" }}>{label}</Mono>
+      <Mono style={{ color: muted, fontSize: 8.5, letterSpacing: "0.28em" }}>{label}</Mono>
       <span style={{ flex: 1, height: 1, background: line }} />
     </div>
   );
@@ -257,19 +257,19 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
           />
         )}
         {isFile && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 10px" }}>
             <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
-            <span style={{ fontFamily: C.display, fontSize: 14.5, fontWeight: 600 }}>
+            <span style={{ fontFamily: C.display, fontSize: 13, fontWeight: 600 }}>
               {msg.content || "Datoteka"}
             </span>
           </div>
         )}
         {msg.type === "text" && (
           <span style={{
-            fontFamily: C.display, fontSize: 16.5, fontWeight: 500, lineHeight: 1.45,
+            fontFamily: C.display, fontSize: 14.5, fontWeight: 500, lineHeight: 1.45,
             position: "relative",
           }}>
             {msg.content}
@@ -277,7 +277,7 @@ function Bubble({ msg, isMine, C, onLongPress, showTime = true, darkBg = false }
         )}
       </div>
       {showTime && (
-        <Mono style={{ fontSize: 9, color: C.accent, margin: "4px 4px 2px", letterSpacing: "0.12em", opacity: 0.85 }}>
+        <Mono style={{ fontSize: 8.5, color: C.accent, margin: "4px 4px 2px", letterSpacing: "0.12em", opacity: 0.85 }}>
           {msg.created_at
             ? new Date(msg.created_at).toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })
             : ""}
@@ -296,52 +296,52 @@ function ProfileSheet({ user, C, t, onClose, onMessage, onBlock }) {
     >
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
-        background: C.bg, borderRadius: "28px 28px 0 0", padding: "24px 22px 40px",
+        background: C.bg, borderRadius: "28px 28px 0 0", padding: "16px 15px 26px",
         animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
       }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 22px" }} />
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginBottom: 26 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 17 }}>
           <div style={{
             width: 76, height: 76, borderRadius: "50%",
             background: `${C.accent}18`, border: `2px solid ${C.accent}45`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: C.heading, fontSize: 29, fontWeight: 700, color: C.accent,
+            fontFamily: C.heading, fontSize: 23, fontWeight: 700, color: C.accent,
           }}>{toGreek(user?.initials || "?")}</div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontFamily: C.heading, fontSize: 21.5, fontWeight: 700, color: C.text, letterSpacing: "0.04em" }}>
               {user?.name}
             </div>
             {user?.sport && (
-              <Mono style={{ color: C.accent, fontSize: 11, display: "block", marginTop: 3 }}>
+              <Mono style={{ color: C.accent, fontSize: 10, display: "block", marginTop: 3 }}>
                 {user.sport}
               </Mono>
             )}
             {user?.club && (
-              <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginTop: 2 }}>
+              <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginTop: 2 }}>
                 {user.club}
               </Mono>
             )}
           </div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <button onClick={onMessage} style={{
-            padding: "15px", borderRadius: 14, border: "none",
+            padding: "11px", borderRadius: 12, border: "none",
             background: C.accent, color: C.name === "dark" ? "#04130a" : "#fff",
-            fontFamily: C.display, fontSize: 17, fontWeight: 700, cursor: "pointer",
+            fontFamily: C.display, fontSize: 15, fontWeight: 700, cursor: "pointer",
           }}>
             {t("Pošlji sporočilo")}
           </button>
           <button onClick={() => onBlock(user?.user_id)} style={{
-            padding: "15px", borderRadius: 14, border: "1px solid rgba(229,83,75,0.35)",
+            padding: "11px", borderRadius: 12, border: "1px solid rgba(229,83,75,0.35)",
             background: "transparent", color: "#e5534b",
-            fontFamily: C.display, fontSize: 17, fontWeight: 600, cursor: "pointer",
+            fontFamily: C.display, fontSize: 15, fontWeight: 600, cursor: "pointer",
           }}>
             {t("Blokiraj")}
           </button>
           <button onClick={onClose} style={{
-            padding: "13px", borderRadius: 14, border: `1px solid ${C.border}`,
+            padding: "9px", borderRadius: 12, border: `1px solid ${C.border}`,
             background: "transparent", color: C.muted,
-            fontFamily: C.display, fontSize: 15.5, fontWeight: 600, cursor: "pointer",
+            fontFamily: C.display, fontSize: 14, fontWeight: 600, cursor: "pointer",
           }}>
             {t("Zapri")}
           </button>
@@ -360,27 +360,27 @@ function BgSheet({ current, C, t, onSelect, onClose }) {
     >
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
-        background: C.bg, borderRadius: "28px 28px 0 0", padding: "24px 20px 44px",
+        background: C.bg, borderRadius: "28px 28px 0 0", padding: "16px 14px 30px",
         animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
       }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 18px" }} />
-        <div style={{ fontFamily: C.heading, fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>
+        <div style={{ fontFamily: C.heading, fontSize: 15.5, fontWeight: 700, color: C.text, marginBottom: 11 }}>
           {t("Ozadje pogovora")}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
           {BG_OPTIONS.map(bg => (
             <button key={bg.id} onClick={() => { onSelect(bg.id); onClose(); }} style={{
-              aspectRatio: "1", borderRadius: 14,
+              aspectRatio: "1", borderRadius: 12,
               background: bg.color || C.bg,
               border: current === bg.id
                 ? `2.5px solid ${C.accent}`
                 : `1.5px solid ${C.border}`,
               cursor: "pointer", position: "relative",
               display: "flex", alignItems: "flex-end", justifyContent: "center",
-              padding: "0 0 6px",
+              padding: "0 0 5px",
             }}>
               <span style={{
-                fontFamily: C.display, fontSize: 10, fontWeight: 700,
+                fontFamily: C.display, fontSize: 9, fontWeight: 700,
                 color: bg.id === "dark" || bg.id === "olive" || bg.id === "navy" || bg.id === "bronze"
                   ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.55)",
                 letterSpacing: "0.02em",
@@ -414,22 +414,22 @@ function BlockConfirm({ name, C, t, onConfirm, onCancel }) {
       display: "flex", alignItems: "center", justifyContent: "center",
     }}>
       <div style={{
-        background: C.bg, borderRadius: 20, padding: "26px 22px 20px", width: "88%", maxWidth: 320,
+        background: C.bg, borderRadius: 16, padding: "17px 15px 14px", width: "88%", maxWidth: 320,
         animation: "athlosFade 0.2s ease",
       }}>
-        <div style={{ fontFamily: C.heading, fontSize: 19, fontWeight: 700, color: C.text, textAlign: "center", marginBottom: 8 }}>
+        <div style={{ fontFamily: C.heading, fontSize: 16, fontWeight: 700, color: C.text, textAlign: "center", marginBottom: 6 }}>
           {t("Blokiraj")} {name}
         </div>
-        <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.muted, textAlign: "center", marginBottom: 22, lineHeight: 1.4 }}>
+        <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, textAlign: "center", marginBottom: 15, lineHeight: 1.4 }}>
           {t("Uporabnik vam ne bo mogel pošiljati sporočil.")}
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 8 }}>
           <button onClick={onCancel} style={{
-            flex: 1, padding: 14, borderRadius: 12, border: `1px solid ${C.border}`,
+            flex: 1, padding: 14, borderRadius: 10, border: `1px solid ${C.border}`,
             background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 600, cursor: "pointer",
           }}>{t("Prekliči")}</button>
           <button onClick={onConfirm} style={{
-            flex: 1, padding: 14, borderRadius: 12, border: "none",
+            flex: 1, padding: 14, borderRadius: 10, border: "none",
             background: "#e5534b", color: "#fff",
             fontFamily: C.display, fontWeight: 700, cursor: "pointer",
           }}>{t("Blokiraj")}</button>
@@ -448,22 +448,22 @@ function MsgMenu({ msg, C, t, onDelete, onClose }) {
     >
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
-        background: C.bg, borderRadius: "20px 20px 0 0", padding: "18px 18px 36px",
+        background: C.bg, borderRadius: "20px 20px 0 0", padding: "13px 13px 23px",
         animation: "athlosRise 0.28s cubic-bezier(0.22,1,0.36,1)",
       }}>
         <div style={{ width: 32, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 16px" }} />
         <button onClick={onDelete} style={{
-          width: "100%", padding: "14px 18px", borderRadius: 12, border: "none",
+          width: "100%", padding: "10px 13px", borderRadius: 10, border: "none",
           background: "rgba(229,83,75,0.1)", color: "#e5534b",
-          fontFamily: C.display, fontSize: 17, fontWeight: 600, cursor: "pointer", textAlign: "left",
-          display: "flex", alignItems: "center", gap: 10,
+          fontFamily: C.display, fontSize: 15, fontWeight: 600, cursor: "pointer", textAlign: "left",
+          display: "flex", alignItems: "center", gap: 8,
         }}>
           <IcTrash size={15} /> {t("Izbriši sporočilo")}
         </button>
         <button onClick={onClose} style={{
-          width: "100%", marginTop: 8, padding: "14px 18px", borderRadius: 12,
+          width: "100%", marginTop: 6, padding: "10px 13px", borderRadius: 10,
           border: `1px solid ${C.border}`, background: "transparent", color: C.muted,
-          fontFamily: C.display, fontSize: 15.5, fontWeight: 600, cursor: "pointer",
+          fontFamily: C.display, fontSize: 14, fontWeight: 600, cursor: "pointer",
         }}>
           {t("Prekliči")}
         </button>
@@ -805,12 +805,12 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
         <div style={{ paddingBottom: 20 }}>
           {/* Header — big title left, round search / new-chat actions right
               (the reference's Chats header) */}
-          <div style={{ padding: "18px 16px 0" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 14 }}>
-              <h1 style={{ fontFamily: C.display, fontSize: 30, fontWeight: 800, margin: 0, color: C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>
+          <div style={{ padding: "13px 11px 0" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 10 }}>
+              <h1 style={{ fontFamily: C.display, fontSize: 24, fontWeight: 800, margin: 0, color: C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>
                 {t("Pogovori")}
               </h1>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 6 }}>
                 <Pressable onClick={() => { setSearchOpen(v => !v); if (searchOpen) setSearch(""); }} scale={0.9}
                   style={{ ...roundBtn, color: searchOpen ? C.accent : C.text, borderColor: searchOpen ? `${C.accent}55` : C.border }}>
                   <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -822,7 +822,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             </div>
 
             {searchOpen && (
-              <div style={{ display: "flex", alignItems: "center", gap: 9, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 999, padding: "11px 16px", marginBottom: 12, boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.04)", animation: "athlosFade 0.2s ease" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 999, padding: "8px 11px", marginBottom: 9, boxShadow: dark ? "none" : "0 2px 8px rgba(28,24,20,0.04)", animation: "athlosFade 0.2s ease" }}>
                 <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth={2.2} strokeLinecap="round" style={{ flexShrink: 0 }}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
                 <input
                   value={search}
@@ -833,27 +833,27 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                   style={{ flex: 1, border: "none", background: "none", outline: "none", fontFamily: C.display, fontWeight: 500, color: C.text, minWidth: 0 }}
                 />
                 <style>{`.athlos-conv-search::placeholder { color: ${C.muted2}; font-style: italic; }`}</style>
-                {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 20, lineHeight: 1 }}>×</button>}
+                {search && <button onClick={() => setSearch("")} style={{ border: "none", background: "none", color: C.muted, cursor: "pointer", padding: 0, fontSize: 17, lineHeight: 1 }}>×</button>}
               </div>
             )}
 
             {/* people rail — me (+ new chat) and clubmates, reference stories row */}
-            <div className="athlos-scroll" style={{ display: "flex", gap: 14, overflowX: "auto", scrollbarWidth: "none", padding: "2px 2px 14px" }}>
-              <button onClick={() => setView("new-chat")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0, width: 60 }}>
+            <div className="athlos-scroll" style={{ display: "flex", gap: 10, overflowX: "auto", scrollbarWidth: "none", padding: "2px 2px 10px" }}>
+              <button onClick={() => setView("new-chat")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0, width: 60 }}>
                 <span style={{ position: "relative" }}>
                   <Avatar initials={(profile?.name || "?").trim()[0]?.toUpperCase()} photo={profile?.photo} size={56} />
                   <span style={{ position: "absolute", bottom: -1, right: -1, width: 19, height: 19, borderRadius: "50%", background: C.accent, border: `2px solid ${C.bg}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke={dark ? "#04130A" : "#FFFFFF"} strokeWidth={3} strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
                   </span>
                 </span>
-                <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>{t("Jaz")}</span>
+                <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 10, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>{t("Jaz")}</span>
               </button>
               {clubmates.filter(m => !blocks.includes(m.user_id)).slice(0, 12).map(m => (
-                <button key={m.user_id} onClick={() => startChat(m.user_id, m)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0, width: 60 }}>
+                <button key={m.user_id} onClick={() => startChat(m.user_id, m)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0, width: 60 }}>
                   <span style={{ padding: 2, borderRadius: "50%", border: `1.5px solid ${C.accent}55` }}>
                     <Avatar initials={m.initials} photo={m.photo} size={52} />
                   </span>
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 10, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>
                     {(m.name || "?").trim().split(/\s+/)[0]}
                   </span>
                 </button>
@@ -861,14 +861,14 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             </div>
 
             {/* filter chips — Vsi / Neprebrani / Skupine */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
               {[["all", t("Vsi")], ["unread", t("Neprebrani")], ["groups", t("Skupine")]].map(([key, lbl]) => (
                 <button key={key} onClick={() => setFilter(key)} style={{
-                  padding: "8px 16px", borderRadius: 999, cursor: "pointer",
+                  padding: "6px 11px", borderRadius: 999, cursor: "pointer",
                   border: `1px solid ${filter === key ? `${C.accent}55` : C.border}`,
                   background: filter === key ? `${C.accent}16` : C.surface,
                   color: filter === key ? C.accent : C.muted,
-                  fontFamily: C.display, fontWeight: 600, fontSize: 13.5,
+                  fontFamily: C.display, fontWeight: 600, fontSize: 12,
                   WebkitTapHighlightColor: "transparent",
                 }}>{lbl}</button>
               ))}
@@ -877,11 +877,11 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
 
           {/* Loading skeletons */}
           {loadingConvs && (
-            <div style={{ padding: "4px 16px" }}>
+            <div style={{ padding: "4px 11px" }}>
               {[0, 1, 2, 3, 4].map((i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0" }}>
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 0" }}>
                   <SkeletonBlock width={52} height={52} radius={999} />
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
                     <SkeletonBlock width={`${55 - i * 4}%`} height={14} radius={5} />
                     <SkeletonBlock width={`${78 - i * 5}%`} height={12} radius={5} />
                   </div>
@@ -892,7 +892,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
 
           {/* Empty state */}
           {!loadingConvs && shown.length === 0 && (
-            <div style={{ textAlign: "center", padding: "60px 24px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 17 }}>
+            <div style={{ textAlign: "center", padding: "60px 16px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 15 }}>
               {q ? t("Ni zadetkov") : t("Ni pogovorov")}
             </div>
           )}
@@ -909,25 +909,25 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                 onClick={() => openConv(conv)}
                 style={{
                   width: "100%", textAlign: "left", display: "flex", alignItems: "center",
-                  padding: "0 16px", background: "none", border: "none",
+                  padding: "0 11px", background: "none", border: "none",
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                   opacity: isBlocked ? 0.45 : 1,
                 }}
               >
                 <Avatar initials={convInitials(conv)} photo={conv.type === "direct" ? conv.otherUser?.photo : null} isGroup={conv.type === "group"} size={52} />
-                <span style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, marginLeft: 13, padding: "14px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
+                <span style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8, marginLeft: 13, padding: "10px 0", borderBottom: last ? "none" : `1px solid ${sep}` }}>
                   <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: "block", fontFamily: C.display, fontWeight: unread ? 800 : 700, fontSize: 16.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span style={{ display: "block", fontFamily: C.display, fontWeight: unread ? 800 : 700, fontSize: 14.5, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {convName(conv)}
                     </span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 4, minWidth: 0 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4, minWidth: 0 }}>
                       {mineLast && !isBlocked && (
                         <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                           <path d="M2 12l4 4L14 8" /><path d="M9 14.5L11.5 17 21 7" />
                         </svg>
                       )}
                       <span style={{
-                        fontFamily: C.display, fontSize: 14.5, fontWeight: 500,
+                        fontFamily: C.display, fontSize: 13, fontWeight: 500,
                         color: unread ? C.text2 : C.muted, lineHeight: 1.35,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>
@@ -936,8 +936,8 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                     </span>
                   </span>
                   {/* right column — time on top, unread badge under it */}
-                  <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
-                    <span style={{ fontFamily: C.mono, fontSize: 10, color: unread ? C.accent : C.muted2, letterSpacing: "0.06em" }}>
+                  <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
+                    <span style={{ fontFamily: C.mono, fontSize: 9, color: unread ? C.accent : C.muted2, letterSpacing: "0.06em" }}>
                       {fmtTime(conv.lastMsg?.created_at || conv.created_at)}
                     </span>
                     <span style={{ width: 10, height: 10, borderRadius: "50%", background: unread ? C.red : "transparent", boxShadow: unread ? `0 0 8px ${C.red}66` : "none" }} />
@@ -977,8 +977,8 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
         }}>
           {/* Header */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "12px 14px 10px",
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "9px 10px 8px",
             paddingTop: "max(12px, env(safe-area-inset-top, 12px))",
             background: bgColor,
             borderBottom: `1px solid ${borderOnBg}`,
@@ -1003,18 +1003,18 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
               }}
               style={{
                 background: "none", border: "none", cursor: activeConv.type === "direct" ? "pointer" : "default",
-                display: "flex", alignItems: "center", gap: 10, flex: 1, textAlign: "left", padding: 0,
+                display: "flex", alignItems: "center", gap: 8, flex: 1, textAlign: "left", padding: 0,
               }}
             >
               <Avatar initials={convInitials(activeConv)} photo={activeConv.type === "direct" ? activeConv.otherUser?.photo : null} isGroup={activeConv.type === "group"} size={40} />
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: C.display, fontSize: 16.5, fontWeight: 700, color: textOnBg, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <div style={{ fontFamily: C.display, fontSize: 14.5, fontWeight: 700, color: textOnBg, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {convName(activeConv)}
                 </div>
                 {/* green status line under the name, like the reference */}
-                <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.accent2, boxShadow: `0 0 6px ${C.accent2}88`, flexShrink: 0 }} />
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 11.5, color: C.accent2 }}>
+                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 10.5, color: C.accent2 }}>
                     {activeConv.type === "group" ? t("Skupina") : (activeConv.otherUser?.club || t("Športnik"))}
                   </span>
                 </div>
@@ -1042,7 +1042,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
           <div
             className="athlos-scroll"
             style={{
-              flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 2,
+              flex: 1, overflowY: "auto", padding: "9px 10px", display: "flex", flexDirection: "column", gap: 2,
               ...(convBg === "default" && C.name !== "dark" ? {
                 backgroundImage: "radial-gradient(rgba(28,24,20,0.045) 0.8px, transparent 1.2px)",
                 backgroundSize: "5px 5px, 100% 100%, 100% 100%",
@@ -1050,9 +1050,9 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             }}
           >
             {messages.length === 0 && (
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, opacity: 0.7 }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, opacity: 0.7 }}>
                 <Meander color={C.gold} width={120} />
-                <div style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 17, color: mutedOnBg }}>
+                <div style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 15, color: mutedOnBg }}>
                   {t("Začni pogovor")}
                 </div>
               </div>
@@ -1060,9 +1060,9 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
 
             {/* engraved inscription that opens every correspondence */}
             {messages.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7, padding: "14px 0 18px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "10px 0 13px" }}>
                 <Meander color={C.gold} width={96} />
-                <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.34em", paddingLeft: "0.34em" }}>
+                <Mono style={{ color: C.gold, fontSize: 8.5, letterSpacing: "0.34em", paddingLeft: "0.34em" }}>
                   {convName(activeConv)}
                 </Mono>
               </div>
@@ -1093,7 +1093,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
 
           {/* Sticker picker */}
           {stickerOpen && (
-            <div style={{ background: surfaceOnBg, borderTop: `1px solid ${borderOnBg}`, padding: "10px 6px 6px" }}>
+            <div style={{ background: surfaceOnBg, borderTop: `1px solid ${borderOnBg}`, padding: "8px 5px 5px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 2 }}>
                 {STICKERS.map((s, i) => (
                   <button
@@ -1101,7 +1101,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                     onClick={() => setInput((prev) => prev + s)}
                     style={{
                       background: "none", border: "none", cursor: "pointer",
-                      fontSize: 31.5, padding: "6px 2px", lineHeight: 1,
+                      fontSize: 31.5, padding: "5px 2px", lineHeight: 1,
                       borderRadius: 8, WebkitTapHighlightColor: "transparent",
                     }}
                   >{s}</button>
@@ -1113,7 +1113,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
           {/* Composer — "+" (stickers) on the left, text pill in the middle,
               round accent send button on the right */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 8, padding: "8px 12px",
+            display: "flex", alignItems: "center", gap: 6, padding: "6px 9px",
             paddingBottom: "max(8px, env(safe-area-inset-bottom, 8px))",
             background: surfaceOnBg, borderTop: `1px solid ${borderOnBg}`,
           }}>
@@ -1136,7 +1136,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
               flex: 1, minWidth: 0, display: "flex", alignItems: "flex-end",
               background: darkBackdrop ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.55)",
               border: `1px solid ${darkBackdrop ? "rgba(255,255,255,0.14)" : "#D6DAE0"}`,
-              borderRadius: 24, padding: "5px 16px",
+              borderRadius: 18, padding: "4px 11px",
             }}>
               <textarea
                 value={input}
@@ -1146,9 +1146,9 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                 rows={1}
                 className="athlos-chat-input"
                 style={{
-                  flex: 1, minWidth: 0, padding: "8px 0",
+                  flex: 1, minWidth: 0, padding: "6px 0",
                   border: "none", background: "none",
-                  color: textOnBg, fontFamily: C.display, fontSize: 16.5, fontWeight: 500,
+                  color: textOnBg, fontFamily: C.display, fontSize: 14.5, fontWeight: 500,
                   resize: "none", outline: "none", lineHeight: 1.4,
                   minHeight: 20, maxHeight: 100, overflowY: "auto",
                 }}
@@ -1186,25 +1186,25 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
       {view === "new-chat" && (
         <div style={{ position: "fixed", inset: 0, zIndex: 15, background: C.bg, display: "flex", flexDirection: "column" }}>
           <div style={{
-            display: "flex", alignItems: "center", gap: 10,
-            padding: "12px 16px 10px",
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "9px 11px 8px",
             paddingTop: "max(12px, env(safe-area-inset-top, 12px))",
             borderBottom: `1px solid ${C.border}`,
           }}>
             <BackBtn onClick={() => setView("list")} />
-            <div style={{ fontFamily: C.heading, fontSize: 19, fontWeight: 700, color: C.text }}>
+            <div style={{ fontFamily: C.heading, fontSize: 16, fontWeight: 700, color: C.text }}>
               Nov pogovor
             </div>
           </div>
 
-          <div className="athlos-scroll" style={{ flex: 1, overflowY: "auto", padding: "14px 18px" }}>
+          <div className="athlos-scroll" style={{ flex: 1, overflowY: "auto", padding: "10px 13px" }}>
             {/* Create group */}
             <button
               onClick={() => { setGroupSelected([]); setGroupName(""); setView("new-group"); }}
               style={{
-                width: "100%", display: "flex", alignItems: "center", gap: 14,
-                padding: "13px 16px", marginBottom: 22,
-                background: `${C.accent}10`, border: `1px solid ${C.accent}30`, borderRadius: 14,
+                width: "100%", display: "flex", alignItems: "center", gap: 10,
+                padding: "9px 11px", marginBottom: 15,
+                background: `${C.accent}10`, border: `1px solid ${C.accent}30`, borderRadius: 12,
                 cursor: "pointer", WebkitTapHighlightColor: "transparent",
               }}
             >
@@ -1218,7 +1218,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                   <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
                 </svg>
               </div>
-              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
+              <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>
                 Ustvari skupino
               </span>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth={2} strokeLinecap="round" style={{ marginLeft: "auto" }}>
@@ -1227,7 +1227,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             </button>
 
             {/* Search anyone by display name (RPC — works across clubs) */}
-            <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginBottom: 10, letterSpacing: "0.12em" }}>
+            <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 8, letterSpacing: "0.12em" }}>
               {t("IŠČI PO IMENU")}
             </Mono>
             <input
@@ -1235,10 +1235,10 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
               onChange={(e) => setUserQ(e.target.value)}
               placeholder={t("Vpiši ime …")}
               style={{
-                width: "100%", padding: "13px 16px", borderRadius: 14, boxSizing: "border-box",
+                width: "100%", padding: "9px 11px", borderRadius: 12, boxSizing: "border-box",
                 border: `1px solid ${C.border2}`, background: C.surface2, color: C.text,
-                fontFamily: C.display, fontWeight: 600, fontSize: 16.5, outline: "none",
-                marginBottom: 6,
+                fontFamily: C.display, fontWeight: 600, fontSize: 14.5, outline: "none",
+                marginBottom: 5,
               }}
             />
             {userHits.filter(u => u.user_id !== userId && !blocks.includes(u.user_id)).map(u => (
@@ -1246,14 +1246,14 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                 key={u.user_id}
                 onClick={() => { setUserQ(""); setUserHits([]); startChat(u.user_id, u); }}
                 style={{
-                  width: "100%", display: "flex", alignItems: "center", gap: 14,
-                  padding: "12px 0", background: "none", border: "none",
+                  width: "100%", display: "flex", alignItems: "center", gap: 10,
+                  padding: "9px 0", background: "none", border: "none",
                   borderBottom: `1px solid ${C.border}`,
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                 }}
               >
                 <Avatar initials={u.initials} photo={u.photo} size={42} />
-                <div style={{ flex: 1, textAlign: "left", fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
+                <div style={{ flex: 1, textAlign: "left", fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>
                   {u.name}
                 </div>
                 <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth={2} strokeLinecap="round">
@@ -1262,12 +1262,12 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
               </button>
             ))}
             {userQ.trim().length >= 2 && userHits.length === 0 && (
-              <div style={{ textAlign: "center", padding: "14px 0 4px", fontFamily: C.display, fontStyle: "italic", color: C.muted, fontSize: 14.5 }}>
+              <div style={{ textAlign: "center", padding: "10px 0 4px", fontFamily: C.display, fontStyle: "italic", color: C.muted, fontSize: 13 }}>
                 {t("Ni zadetkov")}
               </div>
             )}
 
-            <Mono style={{ color: C.muted, fontSize: 11, display: "block", margin: "22px 0 10px", letterSpacing: "0.12em" }}>
+            <Mono style={{ color: C.muted, fontSize: 10, display: "block", margin: "15px 0 8px", letterSpacing: "0.12em" }}>
               SOTEKMOVALCI
             </Mono>
 
@@ -1276,19 +1276,19 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                 key={mate.user_id}
                 onClick={() => startChat(mate.user_id, mate)}
                 style={{
-                  width: "100%", display: "flex", alignItems: "center", gap: 14,
-                  padding: "12px 0", background: "none", border: "none",
+                  width: "100%", display: "flex", alignItems: "center", gap: 10,
+                  padding: "9px 0", background: "none", border: "none",
                   borderBottom: `1px solid ${C.border}`,
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                 }}
               >
                 <Avatar initials={mate.initials} photo={mate.photo} size={42} />
                 <div style={{ flex: 1, textAlign: "left" }}>
-                  <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
+                  <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>
                     {mate.name}
                   </div>
                   {mate.club && (
-                    <Mono style={{ fontSize: 10, color: C.muted, display: "block", marginTop: 1 }}>
+                    <Mono style={{ fontSize: 9, color: C.muted, display: "block", marginTop: 1 }}>
                       {mate.club}
                     </Mono>
                   )}
@@ -1300,7 +1300,7 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             ))}
 
             {clubmates.length === 0 && (
-              <div style={{ textAlign: "center", padding: "24px 20px", fontFamily: C.display, color: C.muted, fontSize: 15.5 }}>
+              <div style={{ textAlign: "center", padding: "16px 14px", fontFamily: C.display, color: C.muted, fontSize: 14 }}>
                 {t("Nisi še v klubu — poišči prijatelja po imenu zgoraj.")}
               </div>
             )}
@@ -1312,13 +1312,13 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
       {view === "new-group" && (
         <div style={{ position: "fixed", inset: 0, zIndex: 15, background: C.bg, display: "flex", flexDirection: "column" }}>
           <div style={{
-            display: "flex", alignItems: "center", gap: 10,
-            padding: "12px 16px 10px",
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "9px 11px 8px",
             paddingTop: "max(12px, env(safe-area-inset-top, 12px))",
             borderBottom: `1px solid ${C.border}`,
           }}>
             <BackBtn onClick={() => setView("new-chat")} />
-            <div style={{ fontFamily: C.heading, fontSize: 19, fontWeight: 700, color: C.text, flex: 1 }}>
+            <div style={{ fontFamily: C.heading, fontSize: 16, fontWeight: 700, color: C.text, flex: 1 }}>
               Nova skupina
             </div>
             <button
@@ -1326,8 +1326,8 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
               disabled={!groupName.trim() || groupSelected.length === 0}
               style={{
                 background: C.accent, color: C.name === "dark" ? "#04130a" : "#fff",
-                border: "none", borderRadius: 20, padding: "7px 18px",
-                fontFamily: C.display, fontWeight: 700, fontSize: 14.5, cursor: "pointer",
+                border: "none", borderRadius: 16, padding: "6px 13px",
+                fontFamily: C.display, fontWeight: 700, fontSize: 13, cursor: "pointer",
                 opacity: (!groupName.trim() || groupSelected.length === 0) ? 0.38 : 1,
               }}
             >
@@ -1335,20 +1335,20 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
             </button>
           </div>
 
-          <div className="athlos-scroll" style={{ flex: 1, overflowY: "auto", padding: "16px 18px" }}>
+          <div className="athlos-scroll" style={{ flex: 1, overflowY: "auto", padding: "11px 13px" }}>
             <input
               value={groupName}
               onChange={e => setGroupName(e.target.value)}
               placeholder="Ime skupine…"
               style={{
-                width: "100%", padding: "13px 16px", borderRadius: 14,
+                width: "100%", padding: "9px 11px", borderRadius: 12,
                 border: `1.5px solid ${C.border}`,
-                background: C.surface2, color: C.text, fontFamily: C.display, fontSize: 17,
-                outline: "none", marginBottom: 22, boxSizing: "border-box",
+                background: C.surface2, color: C.text, fontFamily: C.display, fontSize: 15,
+                outline: "none", marginBottom: 15, boxSizing: "border-box",
               }}
             />
 
-            <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginBottom: 10, letterSpacing: "0.12em" }}>
+            <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 8, letterSpacing: "0.12em" }}>
               IZBERI ČLANE ({groupSelected.length} izbranih)
             </Mono>
 
@@ -1359,19 +1359,19 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                   key={mate.user_id}
                   onClick={() => setGroupSelected(s => sel ? s.filter(id => id !== mate.user_id) : [...s, mate.user_id])}
                   style={{
-                    width: "100%", display: "flex", alignItems: "center", gap: 14,
-                    padding: "12px 0", background: "none", border: "none",
+                    width: "100%", display: "flex", alignItems: "center", gap: 10,
+                    padding: "9px 0", background: "none", border: "none",
                     borderBottom: `1px solid ${C.border}`,
                     cursor: "pointer", WebkitTapHighlightColor: "transparent",
                   }}
                 >
                   <Avatar initials={mate.initials} photo={mate.photo} size={42} />
                   <div style={{ flex: 1, textAlign: "left" }}>
-                    <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>
+                    <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>
                       {mate.name}
                     </div>
                     {mate.club && (
-                      <Mono style={{ fontSize: 10, color: C.muted, display: "block", marginTop: 1 }}>
+                      <Mono style={{ fontSize: 9, color: C.muted, display: "block", marginTop: 1 }}>
                         {mate.club}
                       </Mono>
                     )}

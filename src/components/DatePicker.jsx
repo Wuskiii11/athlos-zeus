@@ -52,16 +52,16 @@ function FutureDatePicker({ value, onChange, onClose, futureDays }) {
       <style>{`@keyframes dpUp { from { transform:translateY(100%); opacity:0; } to { transform:translateY(0); opacity:1; } }`}</style>
       <div onClick={(e) => e.stopPropagation()} style={{ background: C.bg, borderRadius: "26px 26px 0 0", border: `1px solid ${C.border2}`, borderBottom: "none", overflow: "hidden", animation: "dpUp 0.3s cubic-bezier(.2,.8,.2,1)" }}>
         {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "9px 0 4px" }}>
           <div style={{ width: 36, height: 4, borderRadius: 999, background: C.border2 }} />
         </div>
         {/* Selected label */}
-        <div style={{ padding: "4px 20px 14px", borderBottom: `1px solid ${C.border}` }}>
-          <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.22em" }}>{t("IZBRANI DATUM")}</Mono>
+        <div style={{ padding: "4px 14px 10px", borderBottom: `1px solid ${C.border}` }}>
+          <Mono style={{ color: C.gold, fontSize: 8.5, letterSpacing: "0.22em" }}>{t("IZBRANI DATUM")}</Mono>
           <div style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 21.5, color: sel ? C.text : C.muted, marginTop: 4 }}>{fmtSel()}</div>
         </div>
         {/* Day grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, padding: "14px 10px 10px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, padding: "10px 8px 8px" }}>
           {days.map((d, i) => {
             const iso = toISO(d);
             const active = sel === iso;
@@ -72,17 +72,17 @@ function FutureDatePicker({ value, onChange, onClose, futureDays }) {
                 onClick={() => setSel(iso)}
                 style={{
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  gap: 4, padding: "8px 2px", borderRadius: 12,
+                  gap: 4, padding: "6px 2px", borderRadius: 10,
                   border: active ? "none" : isToday ? `1.5px solid ${C.gold}66` : `1.5px solid transparent`,
                   background: active ? C.btn : "transparent",
                   cursor: "pointer", WebkitTapHighlightColor: "transparent",
                   transition: "background 0.12s, transform 0.1s",
                 }}
               >
-                <span style={{ fontFamily: C.mono, fontSize: 9, color: active ? C.btnText : C.muted, letterSpacing: "0.06em" }}>
+                <span style={{ fontFamily: C.mono, fontSize: 8.5, color: active ? C.btnText : C.muted, letterSpacing: "0.06em" }}>
                   {daysShort[d.getDay()].toUpperCase()}
                 </span>
-                <span style={{ fontFamily: C.display, fontWeight: active ? 800 : isToday ? 700 : 400, fontSize: 17, color: active ? C.btnText : C.text, lineHeight: 1 }}>
+                <span style={{ fontFamily: C.display, fontWeight: active ? 800 : isToday ? 700 : 400, fontSize: 15, color: active ? C.btnText : C.text, lineHeight: 1 }}>
                   {d.getDate()}
                 </span>
                 {isToday && !active && (
@@ -93,9 +93,9 @@ function FutureDatePicker({ value, onChange, onClose, futureDays }) {
           })}
         </div>
         {/* Actions */}
-        <div style={{ display: "flex", gap: 10, padding: "8px 16px 28px" }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 15.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Prekliči")}</button>
-          <button onClick={confirm} style={{ flex: 2, padding: "14px", borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Potrdi")}</button>
+        <div style={{ display: "flex", gap: 8, padding: "6px 11px 18px" }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px", borderRadius: 10, border: `1px solid ${C.border2}`, background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 14, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Prekliči")}</button>
+          <button onClick={confirm} style={{ flex: 2, padding: "10px", borderRadius: 10, border: "none", background: C.btn, color: C.btnText, fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t("Potrdi")}</button>
         </div>
       </div>
     </div>
@@ -169,40 +169,40 @@ function BirthDatePicker({ value, onChange, onClose }) {
         position: "absolute", top: "max(env(safe-area-inset-top, 14px), 14px)", left: 18, zIndex: 2,
         width: 38, height: 38, borderRadius: "50%", cursor: "pointer",
         background: C.surface, border: `1px solid ${C.border}`,
-        color: C.text, fontSize: 21, lineHeight: 1,
+        color: C.text, fontSize: 18, lineHeight: 1,
         display: "flex", alignItems: "center", justifyContent: "center",
         WebkitTapHighlightColor: "transparent",
       }}>×</button>
 
       {/* hero — the age counts live while the wheels spin */}
-      <div style={{ textAlign: "center", padding: "40px 24px 8px", position: "relative" }}>
-        <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.26em" }}>{t("DATUM ROJSTVA")}</Mono>
+      <div style={{ textAlign: "center", padding: "26px 16px 6px", position: "relative" }}>
+        <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.26em" }}>{t("DATUM ROJSTVA")}</Mono>
         <div key={age} style={{
           fontFamily: C.display, fontWeight: 800, fontSize: 88, lineHeight: 1,
-          color: C.text, marginTop: 10, letterSpacing: "-0.03em",
+          color: C.text, marginTop: 8, letterSpacing: "-0.03em",
           animation: "dpAgePop 0.24s cubic-bezier(.34,1.56,.64,1)",
         }}>
           {age}
         </div>
         <style>{`@keyframes dpAgePop { from { transform:scale(0.94); opacity:0.4; } to { transform:scale(1); opacity:1; } }`}</style>
-        <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 15, color: C.muted, marginTop: 8 }}>
+        <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13.5, color: C.muted, marginTop: 6 }}>
           {t("LET")} · {fmtSel()}
         </div>
       </div>
 
       {/* wheels — day / month / year, centered in the remaining space */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 14px" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "0 10px" }}>
         <WheelColumn items={days} value={day} onChange={setDay} width={62} C={C} />
         <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width={140} C={C} render={(m) => months[m]} />
         <WheelColumn items={years} value={year} onChange={setYear} width={78} C={C} />
       </div>
 
       {/* confirm — one full-width pill; × is the way out */}
-      <div style={{ padding: "10px 24px 6px" }}>
+      <div style={{ padding: "8px 16px 5px" }}>
         <button onClick={confirm} style={{
-          width: "100%", padding: "16px", borderRadius: 999, border: "none",
+          width: "100%", padding: "11px", borderRadius: 999, border: "none",
           background: C.btn, color: C.btnText,
-          fontFamily: C.display, fontWeight: 700, fontSize: 15.5,
+          fontFamily: C.display, fontWeight: 700, fontSize: 14,
           cursor: "pointer", WebkitTapHighlightColor: "transparent",
         }}>
           {t("Potrdi datum")}

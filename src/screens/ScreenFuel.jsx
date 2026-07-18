@@ -63,10 +63,10 @@ function MacroPie({ macros, eaten, target }) {
   // slim horizontal split-strip: segment widths = pLen/cLen/fLen fractions.
   void sw; void cx; void cy;
   return (
-    <div style={{ marginTop: 18 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 8 }}>
-        <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted }}>{t("ZAUŽITO")}</span>
-        <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15, color: C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>{pct}%</span>
+    <div style={{ marginTop: 13 }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
+        <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 8.5, letterSpacing: "0.14em", textTransform: "uppercase", color: C.muted }}>{t("ZAUŽITO")}</span>
+        <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 13.5, color: C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>{pct}%</span>
       </div>
       <div style={{ display: "flex", gap, height: 5 }}>
         <div style={{ width: `${(Math.max(0, pLen - gap) / circ) * 100}%`, borderRadius: 999, background: MC.p, transition: "width 0.8s cubic-bezier(.2,.8,.2,1)" }} />
@@ -81,10 +81,10 @@ function MacroMini({ label, v, color }) {
   const C = useTheme();
   // Floating tile: surface2, radius 16, borderless.
   return (
-    <div style={{ flex: 1, minWidth: 0, background: C.surface2, borderRadius: 20, padding: "13px 14px", boxSizing: "border-box" }}>
-      <div style={{ width: 18, height: 3, borderRadius: 999, background: color, marginBottom: 10 }} />
-      <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 20, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{v}<span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>g</span></div>
-      <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: C.muted, display: "block", marginTop: 7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+    <div style={{ flex: 1, minWidth: 0, background: C.surface2, borderRadius: 16, padding: "9px 10px", boxSizing: "border-box" }}>
+      <div style={{ width: 18, height: 3, borderRadius: 999, background: color, marginBottom: 8 }} />
+      <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{v}<span style={{ fontSize: 10, color: C.muted, fontWeight: 600 }}>g</span></div>
+      <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: C.muted, display: "block", marginTop: 6, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
     </div>
   );
 }
@@ -100,12 +100,12 @@ function EatenForm({ onAdd }) {
     onAdd({ name: name.trim(), kcal: k });
     setName(""); setKcal("");
   };
-  const inp = { padding: "13px 14px", borderRadius: 14, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15.5, outline: "none", boxSizing: "border-box" };
+  const inp = { padding: "9px 10px", borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface2, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 14, outline: "none", boxSizing: "border-box" };
   return (
-    <div style={{ display: "flex", gap: 8, margin: "10px 0 12px" }}>
+    <div style={{ display: "flex", gap: 6, margin: "8px 0 9px" }}>
       <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder={t("npr. Sendvič")} style={{ ...inp, flex: 1 }} />
       <input value={kcal} onChange={(e) => setKcal(e.target.value.replace(/[^0-9]/g, ""))} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="kcal" inputMode="numeric" style={{ ...inp, width: 70, textAlign: "center" }} />
-      <Pressable onClick={submit} scale={0.9} style={{ width: 48, borderRadius: 14, border: "none", background: C.btn, color: C.btnText, fontWeight: 800, fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>+</Pressable>
+      <Pressable onClick={submit} scale={0.9} style={{ width: 48, borderRadius: 12, border: "none", background: C.btn, color: C.btnText, fontWeight: 800, fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>+</Pressable>
     </div>
   );
 }
@@ -129,33 +129,33 @@ export default function ScreenFuel({ go }) {
       setLoading(false);
     }, 900);
   };
-  const label = { fontFamily: C.mono, fontWeight: 600, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, display: "block" };
+  const label = { fontFamily: C.mono, fontWeight: 600, fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, display: "block" };
   const MC = macroColors(C);
 
   // Presentation only: which plan meal is "up next" given what's been eaten.
   let mealAcc = 0;
   const nextMealIdx = plan.meals.findIndex((m) => { mealAcc += m.kcal; return eatenTotal < mealAcc; });
 
-  const segBtn = (active) => ({ flex: 1, padding: "8px 4px", borderRadius: 999, border: "none", background: active ? `${C.accent}16` : "transparent", color: active ? C.accent : C.muted, fontFamily: C.display, fontSize: 12.5, textTransform: "lowercase", cursor: "pointer", fontWeight: active ? 700 : 500 });
+  const segBtn = (active) => ({ flex: 1, padding: "6px 4px", borderRadius: 999, border: "none", background: active ? `${C.accent}16` : "transparent", color: active ? C.accent : C.muted, fontFamily: C.display, fontSize: 11, textTransform: "lowercase", cursor: "pointer", fontWeight: active ? 700 : 500 });
 
   return (
-    <div style={{ padding: "12px 20px 32px", color: C.text }}>
-      <header style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 4 }}>
+    <div style={{ padding: "9px 14px 20px", color: C.text }}>
+      <header style={{ marginBottom: 18, display: "flex", alignItems: "center", gap: 4 }}>
         <BackBtn onClick={() => go?.("today")} />
         <div>
           <span style={label}>{t("HRANA")}</span>
-          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 30, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj jedilnik")}</h2>
+          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, margin: "4px 0 0", color: C.text, letterSpacing: "-0.02em" }}>{t("Tvoj jedilnik")}</h2>
         </div>
       </header>
 
       {/* HERO — pure typography, no card */}
-      <section style={{ marginBottom: 28 }}>
+      <section style={{ marginBottom: 18 }}>
         <span style={label}>{t("ŠE NA VOLJO DANES")}</span>
-        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 52, color: C.text, lineHeight: 1, letterSpacing: "-0.04em", marginTop: 8 }}>
-          {remaining}<span style={{ fontSize: 15, color: C.muted, fontWeight: 600, letterSpacing: 0, marginLeft: 7 }}>kcal</span>
+        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 52, color: C.text, lineHeight: 1, letterSpacing: "-0.04em", marginTop: 6 }}>
+          {remaining}<span style={{ fontSize: 13.5, color: C.muted, fontWeight: 600, letterSpacing: 0, marginLeft: 7 }}>kcal</span>
         </div>
         <MacroPie macros={plan.macros} eaten={eatenTotal} target={plan.target} />
-        <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+        <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
           <MacroMini label={t("Proteini")} v={plan.macros.p} color={MC.p} />
           <MacroMini label={t("Ogljikohidrati")} v={plan.macros.c} color={MC.c} />
           <MacroMini label={t("Maščobe")} v={plan.macros.f} color={MC.f} />
@@ -163,24 +163,24 @@ export default function ScreenFuel({ go }) {
       </section>
 
       {/* Current plan readout + AI toggle in one quiet row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: showSetup ? 16 : 28 }}>
-        <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: C.muted, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 9, marginBottom: showSetup ? 16 : 28 }}>
+        <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: C.muted, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {t(GOAL_LABEL[goal])} · {t(MASS_LABEL[mass])} · {plan.target} KCAL
         </span>
-        <Pressable onClick={() => setShowSetup((v) => !v)} scale={0.97} style={{ padding: "10px 16px", borderRadius: 999, border: "none", background: showSetup ? C.surface3 : C.surface2, color: C.text, fontFamily: C.display, fontSize: 12.5, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>
+        <Pressable onClick={() => setShowSetup((v) => !v)} scale={0.97} style={{ padding: "8px 11px", borderRadius: 999, border: "none", background: showSetup ? C.surface3 : C.surface2, color: C.text, fontFamily: C.display, fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>
           {t("AI Sestavi jedilnik")}
         </Pressable>
       </div>
 
       {showSetup && (
-        <div style={{ marginBottom: 28, animation: "athlosFade 0.2s ease" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+        <div style={{ marginBottom: 18, animation: "athlosFade 0.2s ease" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
             <span style={{ ...label, width: 46, flexShrink: 0 }}>{t("CILJ")}</span>
             {["izguba", "vzdrzevanje", "pridobitev"].map((g) => (
               <button key={g} onClick={() => setGoal(g)} style={segBtn(goal === g)}>{t(GOAL_LABEL[g]).split(" ")[0]}</button>
             ))}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 11 }}>
             <span style={{ ...label, width: 46, flexShrink: 0 }}>{t("FOKUS")}</span>
             {["mascoba", "misice"].map((mm) => (
               <button key={mm} onClick={() => setMass(mm)} style={segBtn(mass === mm)}>{t(MASS_LABEL[mm])}</button>
@@ -197,38 +197,38 @@ export default function ScreenFuel({ go }) {
         {plan.meals.map((meal, i) => {
           const isNext = i === nextMealIdx;
           return (
-            <div key={i} style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, padding: isNext ? "13px 14px" : "11px 0", background: isNext ? C.surface2 : "transparent", borderRadius: isNext ? 20 : 0, margin: isNext ? "4px 0 4px -14px" : 0 }}>
+            <div key={i} style={{ position: "relative", display: "flex", alignItems: "center", gap: 9, padding: isNext ? "13px 14px" : "11px 0", background: isNext ? C.surface2 : "transparent", borderRadius: isNext ? 20 : 0, margin: isNext ? "4px 0 4px -14px" : 0 }}>
               <div style={{ position: "absolute", left: isNext ? -8 : -22, top: "50%", transform: "translateY(-50%)", width: 8, height: 8, borderRadius: "50%", background: isNext ? C.text : C.surface3, boxShadow: `0 0 0 3px ${C.bg}` }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{t(meal.name)}</span>
-                  <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9, letterSpacing: "0.08em", color: C.muted2 }}>{Math.round(meal.pct * 100)}%</span>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: C.text }}>{t(meal.name)}</span>
+                  <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 8.5, letterSpacing: "0.08em", color: C.muted2 }}>{Math.round(meal.pct * 100)}%</span>
                 </div>
-                <div style={{ fontFamily: C.display, fontWeight: 400, fontSize: 13, color: C.muted, marginTop: 3 }}>{t(meal.desc)}</div>
+                <div style={{ fontFamily: C.display, fontWeight: 400, fontSize: 11.5, color: C.muted, marginTop: 3 }}>{t(meal.desc)}</div>
               </div>
-              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.text, letterSpacing: "-0.01em", flexShrink: 0 }}>{meal.kcal}<span style={{ fontSize: 10, color: C.muted, fontWeight: 600 }}> kcal</span></div>
+              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: C.text, letterSpacing: "-0.01em", flexShrink: 0 }}>{meal.kcal}<span style={{ fontSize: 9, color: C.muted, fontWeight: 600 }}> kcal</span></div>
             </div>
           );
         })}
       </div>
 
       {/* EATEN LOG — hairline rows */}
-      <div style={{ marginTop: 32 }}>
+      <div style={{ marginTop: 20 }}>
         <SectionLabel>{t("KAJ SEM DANES POJEDEL")}</SectionLabel>
         <EatenForm onAdd={(item) => setEaten((e) => [...e, { ...item, id: Date.now() }])} />
-        {eaten.length === 0 && <span style={{ fontFamily: C.display, fontWeight: 400, fontSize: 13.5, color: C.muted2 }}>{t("Vpiši obrok zgoraj — kalorije se odštejejo avtomatsko.")}</span>}
+        {eaten.length === 0 && <span style={{ fontFamily: C.display, fontWeight: 400, fontSize: 12, color: C.muted2 }}>{t("Vpiši obrok zgoraj — kalorije se odštejejo avtomatsko.")}</span>}
         {eaten.length > 0 && (
           <div>
             {eaten.map((e) => (
-              <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 0", borderBottom: `1px solid ${C.border}` }}>
-                <div style={{ flex: 1, minWidth: 0, fontFamily: C.display, fontWeight: 500, fontSize: 14.5, color: C.text2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
-                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15.5, color: C.text, letterSpacing: "-0.01em", textAlign: "right" }}>{e.kcal}<span style={{ fontSize: 10.5, color: C.muted, fontWeight: 600 }}> kcal</span></div>
-                <button onClick={() => setEaten((list) => list.filter((x) => x.id !== e.id))} style={{ background: "none", border: "none", color: C.muted2, fontSize: 18, cursor: "pointer", padding: 4 }}>×</button>
+              <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 0", borderBottom: `1px solid ${C.border}` }}>
+                <div style={{ flex: 1, minWidth: 0, fontFamily: C.display, fontWeight: 500, fontSize: 13, color: C.text2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
+                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14, color: C.text, letterSpacing: "-0.01em", textAlign: "right" }}>{e.kcal}<span style={{ fontSize: 9.5, color: C.muted, fontWeight: 600 }}> kcal</span></div>
+                <button onClick={() => setEaten((list) => list.filter((x) => x.id !== e.id))} style={{ background: "none", border: "none", color: C.muted2, fontSize: 15.5, cursor: "pointer", padding: 4 }}>×</button>
               </div>
             ))}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "16px 0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0" }}>
               <span style={{ ...label, display: "inline" }}>{t("skupaj danes")}</span>
-              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text, letterSpacing: "-0.02em" }}>{eatenTotal} <span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>kcal</span></span>
+              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, letterSpacing: "-0.02em" }}>{eatenTotal} <span style={{ fontSize: 10, color: C.muted, fontWeight: 600 }}>kcal</span></span>
             </div>
           </div>
         )}

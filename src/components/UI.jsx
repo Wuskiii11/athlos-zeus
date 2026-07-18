@@ -47,7 +47,7 @@ export function SkeletonBlock({ width = "100%", height = 16, radius = 8, style }
 export const Mono = ({ children, style }) => {
   const C = useTheme();
   return (
-    <span style={{ fontFamily: C.mono, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 11, fontWeight: 600, ...style }}>
+    <span style={{ fontFamily: C.mono, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 10, fontWeight: 600, ...style }}>
       {children}
     </span>
   );
@@ -105,9 +105,9 @@ export const Kicker = ({ children, color }) => {
   const C = useTheme();
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 7,
-      fontFamily: C.display, fontSize: 13.5, letterSpacing: "0.02em", textTransform: "lowercase",
-      color: color || C.muted, fontWeight: 500, marginBottom: 6,
+      display: "flex", alignItems: "center", gap: 6,
+      fontFamily: C.display, fontSize: 12, letterSpacing: "0.02em", textTransform: "lowercase",
+      color: color || C.muted, fontWeight: 500, marginBottom: 5,
     }}>
       <span aria-hidden="true" style={{
         width: 5, height: 5, borderRadius: "50%", background: C.accent, flexShrink: 0,
@@ -122,8 +122,8 @@ export const Pill = ({ children, fill, color }) => {
   const c = color || C.accent;
   return (
     <span style={{
-      fontFamily: C.display, fontSize: 12.5, letterSpacing: "0.01em", textTransform: "lowercase",
-      padding: "4px 11px", borderRadius: 999, fontWeight: 600,
+      fontFamily: C.display, fontSize: 11.5, letterSpacing: "0.01em", textTransform: "lowercase",
+      padding: "3px 9px", borderRadius: 999, fontWeight: 600,
       color: fill ? "#000" : c, background: fill ? c : `${c}16`,
       border: "none",
       whiteSpace: "nowrap",
@@ -211,10 +211,10 @@ export const PrimaryBtn = ({ children, onClick, style, disabled }) => {
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
       style={{
-        width: "100%", height: 56, padding: "0 16px", borderRadius: 18, border: "none",
+        width: "100%", height: 47, padding: "0 14px", borderRadius: 15, border: "none",
         background: C.btn, color: C.btnText,
         fontFamily: C.display, fontWeight: 700, textTransform: "none",
-        letterSpacing: "0.01em", fontSize: 16.5,
+        letterSpacing: "0.01em", fontSize: 15,
         cursor: disabled ? "default" : "pointer",
         // the ONE element allowed a soft glow — the brand-green CTA
         boxShadow: pressed ? "none" : C.glowSoft,
@@ -234,17 +234,17 @@ export const BackBtn = ({ onClick }) => {
   return (
     <Pressable onClick={onClick} scale={0.88} style={{
       background: "transparent", border: `1px solid ${C.border}`, borderRadius: 50,
-      width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-      color: C.text, marginRight: 12, lineHeight: 1, flexShrink: 0,
+      width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+      color: C.text, marginRight: 10, lineHeight: 1, flexShrink: 0,
     }}>
-      <svg width="9" height="16" viewBox="0 0 10 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="8" height="14" viewBox="0 0 10 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 1L1 9l8 8"/>
       </svg>
     </Pressable>
   );
 };
 
-export const Icon = ({ name, color, size = 22 }) => {
+export const Icon = ({ name, color, size = 19 }) => {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round" };
   switch (name) {
     case "today":    return (<svg {...common}><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>);
@@ -289,8 +289,8 @@ export function TabButton({ n, active, onClick, dot }) {
       aria-label={n.label}
       className="athlos-tab-btn"
       style={{
-        flex: "0 0 auto", width: active ? "auto" : 46, height: 46, borderRadius: 999,
-        padding: active ? "0 18px" : 0,
+        flex: "0 0 auto", width: active ? "auto" : 44, height: 44, borderRadius: 999,
+        padding: active ? "0 14px" : 0,
         border: "none", cursor: "pointer", position: "relative",
         display: "flex", alignItems: "center", justifyContent: "center",
         background: active ? C.accent : "transparent",
@@ -301,8 +301,8 @@ export function TabButton({ n, active, onClick, dot }) {
     >
       {/* active tab spells its name; the icon only stands in while inactive */}
       {active
-        ? <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: dark ? "#04130A" : "#FFFFFF", whiteSpace: "nowrap", lineHeight: 1 }}>{n.label}</span>
-        : <Icon name={n.icon} color={C.muted} size={22} />}
+        ? <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12.5, color: dark ? "#04130A" : "#FFFFFF", whiteSpace: "nowrap", lineHeight: 1 }}>{n.label}</span>
+        : <Icon name={n.icon} color={C.muted} size={19} />}
       {dot && <span aria-hidden="true" style={{ position: "absolute", top: 4, right: 4, width: 7, height: 7, borderRadius: "50%", background: C.red, border: active ? `1.5px solid ${C.accent}` : "none" }} />}
       <style>{`
         .athlos-tab-btn { transition: transform 0.15s ease; }
@@ -315,8 +315,8 @@ export function TabButton({ n, active, onClick, dot }) {
 export function SettingsBlock({ title, children }) {
   const C = useTheme();
   return (
-    <div style={{ padding: "16px 0", borderBottom: `1px solid ${C.border}` }}>
-      <Mono style={{ color: C.muted, fontSize: 11, display: "block", marginBottom: 12 }}>{title}</Mono>
+    <div style={{ padding: "12px 0", borderBottom: `1px solid ${C.border}` }}>
+      <Mono style={{ color: C.muted, fontSize: 10, display: "block", marginBottom: 9 }}>{title}</Mono>
       {children}
     </div>
   );
@@ -332,7 +332,7 @@ export function SettingsBlock({ title, children }) {
 // Soft dark surface card. Pass onClick to make it a pressable row.
 // Glass-like: an extremely soft top sheen + hairline over the flat fill gives
 // premium depth without any obvious gradient.
-export function Card({ children, onClick, style, pad = 20, radius = 24 }) {
+export function Card({ children, onClick, style, pad = 16, radius = 18 }) {
   const C = useTheme();
   const dark = C.name === "dark";
   const base = {
@@ -355,10 +355,10 @@ export function Card({ children, onClick, style, pad = 20, radius = 24 }) {
 export function SectionLabel({ children, action, onAction, style }) {
   const C = useTheme();
   return (
-    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14, ...style }}>
-      <span style={{ fontFamily: C.mono, fontSize: 10.5, letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 600 }}>{children}</span>
+    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10, ...style }}>
+      <span style={{ fontFamily: C.mono, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, fontWeight: 600 }}>{children}</span>
       {action && (
-        <button onClick={onAction} style={{ background: "none", border: "none", color: C.accent, fontFamily: C.display, fontWeight: 600, fontSize: 13, cursor: "pointer", padding: 0, WebkitTapHighlightColor: "transparent" }}>{action}</button>
+        <button onClick={onAction} style={{ background: "none", border: "none", color: C.accent, fontFamily: C.display, fontWeight: 600, fontSize: 12, cursor: "pointer", padding: 0, WebkitTapHighlightColor: "transparent" }}>{action}</button>
       )}
     </div>
   );
@@ -370,11 +370,11 @@ export function StatTile({ label, value, sub, onClick, barPct, color, valueColor
   const C = useTheme();
   const inner = (
     <>
-      <span style={{ display: "block", fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted2, marginBottom: 9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
-      <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 19, color: valueColor || C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>{value}</span>
-      {sub && <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 5 }}>{sub}</span>}
+      <span style={{ display: "block", fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted2, marginBottom: 7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+      <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 17, color: valueColor || C.text, lineHeight: 1, letterSpacing: "-0.01em" }}>{value}</span>
+      {sub && <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 10.5, color: C.muted, marginTop: 4 }}>{sub}</span>}
       {typeof barPct === "number" && (
-        <span style={{ display: "block", height: 4, borderRadius: 999, background: C.surface3, overflow: "hidden", marginTop: 11 }}>
+        <span style={{ display: "block", height: 4, borderRadius: 999, background: C.surface3, overflow: "hidden", marginTop: 8 }}>
           <span style={{ display: "block", width: `${Math.round(Math.max(0, Math.min(1, barPct)) * 100)}%`, height: "100%", borderRadius: 999, background: color || C.accent, transition: "width 0.7s cubic-bezier(.22,1,.36,1)" }} />
         </span>
       )}
@@ -385,7 +385,7 @@ export function StatTile({ label, value, sub, onClick, barPct, color, valueColor
     background: dark
       ? `linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 46%), ${C.surface2}`
       : `linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0) 44%), ${C.surface2}`,
-    borderRadius: 20, padding: "14px 14px", textAlign: "left",
+    borderRadius: 16, padding: "11px 12px", textAlign: "left",
     border: `1px solid ${dark ? "rgba(255,255,255,0.04)" : "rgba(16,24,40,0.045)"}`,
     boxShadow: dark ? "inset 0 1px 0 rgba(255,255,255,0.025)" : "0 1px 6px rgba(16,24,40,0.04)",
     ...style,

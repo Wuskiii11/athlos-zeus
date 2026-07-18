@@ -28,10 +28,10 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
 
   return (
     <button onClick={onOpen} style={{
-      width: "100%", maxWidth: 560, marginInline: "auto", marginBottom: 8,
-      display: "flex", alignItems: "center", gap: 12, padding: "11px 16px",
+      width: "100%", maxWidth: 560, marginInline: "auto", marginBottom: 6,
+      display: "flex", alignItems: "center", gap: 9, padding: "8px 11px",
       background: C.surface2,
-      border: `1px solid ${C.accent}33`, borderRadius: 18,
+      border: `1px solid ${C.accent}33`, borderRadius: 15,
       boxShadow: C.name === "dark" ? "0 8px 24px rgba(0,0,0,0.4)" : "0 8px 24px rgba(16,24,40,0.12)",
       cursor: "pointer", textAlign: "left", pointerEvents: "auto",
       animation: "athlosSlideDown 0.3s ease", WebkitTapHighlightColor: "transparent",
@@ -43,10 +43,10 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
       </span>
 
       <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {live.block} · {t(live.exName)}
         </span>
-        <Mono style={{ color: restLeft ? C.accent : C.muted, fontSize: 10, letterSpacing: "0.08em" }}>
+        <Mono style={{ color: restLeft ? C.accent : C.muted, fontSize: 9, letterSpacing: "0.08em" }}>
           {restLeft
             ? <>{t("ODMOR")} {restLeft}s{live.nextName ? ` · ${t("nato")}: ${t(live.nextName)}` : ""}</>
             : <>SET {Math.min(live.setDone + 1, live.setsTotal)}/{live.setsTotal}{live.load ? ` · ${live.load} ${live.unit}` : ""} · {live.reps} {t("pon.")}</>}
@@ -54,8 +54,8 @@ export default function LiveTrainingBar({ C, t, onOpen }) {
       </span>
 
       <span style={{ textAlign: "right", flexShrink: 0 }}>
-        <span style={{ display: "block", fontFamily: C.mono, fontWeight: 700, fontSize: 17, color: C.accent }}>{fmtElapsed(live.startedAt)}</span>
-        <Mono style={{ color: C.muted2, fontSize: 9, letterSpacing: "0.1em" }}>{t("TRENING")}</Mono>
+        <span style={{ display: "block", fontFamily: C.mono, fontWeight: 700, fontSize: 15, color: C.accent }}>{fmtElapsed(live.startedAt)}</span>
+        <Mono style={{ color: C.muted2, fontSize: 8.5, letterSpacing: "0.1em" }}>{t("TRENING")}</Mono>
       </span>
     </button>
   );

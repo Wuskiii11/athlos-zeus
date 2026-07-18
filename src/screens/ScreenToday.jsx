@@ -174,7 +174,7 @@ function LiquidMetric({ value, max, label, color, decimals = 0, fillAlpha = 0.62
   const frontOp = fillAlpha, backOp = fillAlpha * 0.38;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 15 }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 11 }}>
       <div
         onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
         style={{
@@ -227,7 +227,7 @@ function LiquidMetric({ value, max, label, color, decimals = 0, fillAlpha = 0.62
           </span>
         </div>
       </div>
-      <span style={{ fontFamily: C.mono, fontSize: 10, fontWeight: 600, letterSpacing: "0.22em", color: dark ? "rgba(255,255,255,0.55)" : C.muted, textTransform: "uppercase" }}>{label}</span>
+      <span style={{ fontFamily: C.mono, fontSize: 9, fontWeight: 600, letterSpacing: "0.22em", color: dark ? "rgba(255,255,255,0.55)" : C.muted, textTransform: "uppercase" }}>{label}</span>
     </div>
   );
 }
@@ -266,9 +266,9 @@ function Slider({ label, value, min, max, step = 1, suffix = "", onChange, C }) 
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-        <Mono style={{ color: C.muted, fontSize: 10 }}>{label}</Mono>
-        <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: C.text }}>{value}{suffix}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+        <Mono style={{ color: C.muted, fontSize: 9 }}>{label}</Mono>
+        <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12, color: C.text }}>{value}{suffix}</span>
       </div>
       <div
         ref={trackRef}
@@ -292,8 +292,8 @@ function RatingDots({ label, value, onChange, C, count = 5 }) {
   const ring = dark ? "rgba(255,255,255,0.11)" : "#D9DEE4";
   return (
     <div>
-      <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 10, display: "block" }}>{label}</Mono>
-      <div style={{ display: "flex", gap: 8 }}>
+      <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 8, display: "block" }}>{label}</Mono>
+      <div style={{ display: "flex", gap: 6 }}>
         {Array.from({ length: count }, (_, i) => i + 1).map((n) => {
           const on = value === n;
           return (
@@ -303,7 +303,7 @@ function RatingDots({ label, value, onChange, C, count = 5 }) {
                 background: fill,
                 border: `1.5px solid ${on ? C.accent : ring}`,
                 color: on ? C.accent : C.muted,
-                fontFamily: C.display, fontWeight: 700, fontSize: 15,
+                fontFamily: C.display, fontWeight: 700, fontSize: 13.5,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: on ? `0 0 0 4px ${C.accent}1f` : "none",
                 transform: on ? "scale(1.08)" : "scale(1)",
@@ -326,21 +326,21 @@ function QuickAddSheet({ C, t, onClose, onSave }) {
   const valid = form.part && (form.part !== "Drugo" || form.customPart.trim());
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 30, background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.bg, borderRadius: "28px 28px 0 0", padding: "0 18px 32px", maxHeight: "88vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.bg, borderRadius: "28px 28px 0 0", padding: "0 13px 20px", maxHeight: "88vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         <div style={{ width: 36, height: 4, borderRadius: 999, background: C.border2, margin: "14px auto 20px" }} />
         {step === 0 ? (
           <>
-            <Mono style={{ color: C.muted, fontSize: 11, letterSpacing: "0.12em", marginBottom: 16, display: "block" }}>{t("HITRI VNOS")}</Mono>
+            <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.12em", marginBottom: 11, display: "block" }}>{t("HITRI VNOS")}</Mono>
             {[
               { icon: <IconHeal size={22} color={C.accent} />, label: t("Poškodba"), sub: t("Zabeleži poškodbo ali bolečino"), isActive: true },
               { icon: <IconScroll size={22} color={C.muted} />, label: t("Opomba"), sub: t("Splošna opomba o treningu"), isActive: false },
               { icon: <IconScales size={22} color={C.muted} />, label: t("Tehtanje"), sub: t("Zabeleži telesno težo"), isActive: false },
             ].map(({ icon, label, sub, isActive }, i) => (
-              <button key={i} onClick={() => isActive && setStep(1)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", marginBottom: 10, background: C.surface, border: `1px solid ${isActive ? C.accent : C.border}`, borderRadius: 16, cursor: isActive ? "pointer" : "default", textAlign: "left", opacity: isActive ? 1 : 0.42, WebkitTapHighlightColor: "transparent" }}>
-                <span style={{ width: 34, height: 34, borderRadius: 10, background: `${isActive ? C.accent : C.muted}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</span>
+              <button key={i} onClick={() => isActive && setStep(1)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 11px", marginBottom: 8, background: C.surface, border: `1px solid ${isActive ? C.accent : C.border}`, borderRadius: 14, cursor: isActive ? "pointer" : "default", textAlign: "left", opacity: isActive ? 1 : 0.42, WebkitTapHighlightColor: "transparent" }}>
+                <span style={{ width: 34, height: 34, borderRadius: 9, background: `${isActive ? C.accent : C.muted}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</span>
                 <span style={{ flex: 1 }}>
-                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text }}>{label}</span>
-                  <Mono style={{ color: C.muted, fontSize: 10 }}>{sub}</Mono>
+                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{label}</span>
+                  <Mono style={{ color: C.muted, fontSize: 9 }}>{sub}</Mono>
                 </span>
                 {isActive && <span style={{ color: C.muted }}>›</span>}
               </button>
@@ -348,31 +348,31 @@ function QuickAddSheet({ C, t, onClose, onSave }) {
           </>
         ) : (
           <>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
-              <button onClick={() => setStep(0)} style={{ background: "none", border: `1px solid ${C.border2}`, borderRadius: 8, cursor: "pointer", color: C.muted, fontSize: 17, padding: "4px 10px", lineHeight: 1, WebkitTapHighlightColor: "transparent" }}>←</button>
-              <Mono style={{ color: C.muted, fontSize: 11, letterSpacing: "0.12em" }}>{t("NOVA POŠKODBA")}</Mono>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 13 }}>
+              <button onClick={() => setStep(0)} style={{ background: "none", border: `1px solid ${C.border2}`, borderRadius: 8, cursor: "pointer", color: C.muted, fontSize: 15, padding: "4px 8px", lineHeight: 1, WebkitTapHighlightColor: "transparent" }}>←</button>
+              <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.12em" }}>{t("NOVA POŠKODBA")}</Mono>
             </div>
-            <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 8, display: "block" }}>{t("DEL TELESA")}</Mono>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 18 }}>
+            <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 6, display: "block" }}>{t("DEL TELESA")}</Mono>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 13 }}>
               {PARTS.map(p => (
-                <button key={p} onClick={() => setForm(f => ({ ...f, part: p }))} style={{ padding: "8px 12px", borderRadius: 999, border: `1px solid ${form.part === p ? C.accent : C.border2}`, background: form.part === p ? `${C.accent}1f` : "transparent", color: form.part === p ? C.accent : C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 13.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t(p)}</button>
+                <button key={p} onClick={() => setForm(f => ({ ...f, part: p }))} style={{ padding: "6px 9px", borderRadius: 999, border: `1px solid ${form.part === p ? C.accent : C.border2}`, background: form.part === p ? `${C.accent}1f` : "transparent", color: form.part === p ? C.accent : C.text2, fontFamily: C.display, fontWeight: 600, fontSize: 12, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{t(p)}</button>
               ))}
             </div>
             {form.part === "Drugo" && (
-              <div style={{ animation: "athlosFade 0.2s ease", marginBottom: 18 }}>
-                <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 8, display: "block" }}>{t("KJE JE POŠKODBA")}</Mono>
-                <input value={form.customPart} onChange={e => setForm(f => ({ ...f, customPart: e.target.value }))} placeholder={t("npr. Zapestje, Trebušna mišica...")} autoFocus style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: C.surface, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: "16px", outline: "none", boxSizing: "border-box" }} />
+              <div style={{ animation: "athlosFade 0.2s ease", marginBottom: 13 }}>
+                <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 6, display: "block" }}>{t("KJE JE POŠKODBA")}</Mono>
+                <input value={form.customPart} onChange={e => setForm(f => ({ ...f, customPart: e.target.value }))} placeholder={t("npr. Zapestje, Trebušna mišica...")} autoFocus style={{ width: "100%", padding: "9px 10px", borderRadius: 10, border: `1px solid ${C.border2}`, background: C.surface, color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: "16px", outline: "none", boxSizing: "border-box" }} />
               </div>
             )}
-            <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 8, display: "block" }}>{t("STOPNJA")}</Mono>
-            <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
+            <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 6, display: "block" }}>{t("STOPNJA")}</Mono>
+            <div style={{ display: "flex", gap: 6, marginBottom: 13 }}>
               {[[1, t("LAHKA"), C.accent], [2, t("ZMERNA"), C.yellow || "#f59e0b"], [3, t("HUDA"), C.red || "#ef4444"]].map(([g, label, col]) => (
-                <button key={g} onClick={() => setForm(f => ({ ...f, grade: g }))} style={{ flex: 1, padding: "11px 0", borderRadius: 12, border: `1px solid ${form.grade === g ? col : C.border2}`, background: form.grade === g ? `${col}1f` : "transparent", color: form.grade === g ? col : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 12.5, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{g} · {label}</button>
+                <button key={g} onClick={() => setForm(f => ({ ...f, grade: g }))} style={{ flex: 1, padding: "8px 0", borderRadius: 10, border: `1px solid ${form.grade === g ? col : C.border2}`, background: form.grade === g ? `${col}1f` : "transparent", color: form.grade === g ? col : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 11, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>{g} · {label}</button>
               ))}
             </div>
-            <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 6, display: "block" }}>{t("OPIS")}</Mono>
-            <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder={t("Opiši simptome ali lokacijo bolečine...")} rows={3} style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: `1px solid ${C.border2}`, background: C.surface, color: C.text, fontFamily: C.display, fontSize: "14px", resize: "none", outline: "none", marginBottom: 18, boxSizing: "border-box" }} />
-            <button onClick={() => { if (!valid) return; const partLabel = form.part === "Drugo" ? form.customPart.trim() : t(form.part); onSave({ name: `${t("Poškodba")} · ${partLabel}`, grade: form.grade, phase: 0, progressNote: form.note || t("Sveža poškodba — začetek protokola."), returnWeeks: form.grade * 2, returnDate: `${t("za")} ${form.grade * 2} ${t("tedna")}`, coachNote: "" }); onClose(); }} style={{ width: "100%", padding: "16px", borderRadius: 999, border: "none", background: valid ? C.btn : C.surface3, color: valid ? C.btnText : C.muted, fontFamily: C.display, fontWeight: 800, fontSize: 15.5, cursor: valid ? "pointer" : "default", letterSpacing: "0.04em", WebkitTapHighlightColor: "transparent" }}>{t("SHRANI POŠKODBO")}</button>
+            <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 5, display: "block" }}>{t("OPIS")}</Mono>
+            <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder={t("Opiši simptome ali lokacijo bolečine...")} rows={3} style={{ width: "100%", padding: "9px 10px", borderRadius: 10, border: `1px solid ${C.border2}`, background: C.surface, color: C.text, fontFamily: C.display, fontSize: "14px", resize: "none", outline: "none", marginBottom: 13, boxSizing: "border-box" }} />
+            <button onClick={() => { if (!valid) return; const partLabel = form.part === "Drugo" ? form.customPart.trim() : t(form.part); onSave({ name: `${t("Poškodba")} · ${partLabel}`, grade: form.grade, phase: 0, progressNote: form.note || t("Sveža poškodba — začetek protokola."), returnWeeks: form.grade * 2, returnDate: `${t("za")} ${form.grade * 2} ${t("tedna")}`, coachNote: "" }); onClose(); }} style={{ width: "100%", padding: "11px", borderRadius: 999, border: "none", background: valid ? C.btn : C.surface3, color: valid ? C.btnText : C.muted, fontFamily: C.display, fontWeight: 800, fontSize: 14, cursor: valid ? "pointer" : "default", letterSpacing: "0.04em", WebkitTapHighlightColor: "transparent" }}>{t("SHRANI POŠKODBO")}</button>
           </>
         )}
       </div>
@@ -465,20 +465,20 @@ function StatsSheet({ C, lang, onClose }) {
   const isGood = (m.good === "down" && diff <= 0) || (m.good === "up" && diff >= 0);
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 30, background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.bg, borderRadius: "28px 28px 0 0", padding: "0 18px 44px", maxHeight: "92vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.bg, borderRadius: "28px 28px 0 0", padding: "0 13px 30px", maxHeight: "92vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         <div style={{ width: 36, height: 4, borderRadius: 999, background: C.border2, margin: "14px auto 20px" }} />
-        <Mono style={{ color: C.muted, fontSize: 10, letterSpacing: "0.12em", display: "block", marginBottom: 20 }}>
+        <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.12em", display: "block", marginBottom: 14 }}>
           {lang === "en" ? "BODY STATS · 14 DAYS" : "TELESNA STATISTIKA · 14 DNI"}
         </Mono>
         {/* Metric tabs */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 24, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none" }}>
+        <div style={{ display: "flex", gap: 5, marginBottom: 16, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none" }}>
           {STAT_METRICS.map(sm => (
             <button key={sm.key} onClick={() => setMetric(sm.key)} style={{
-              flexShrink: 0, padding: "8px 16px", borderRadius: 999,
+              flexShrink: 0, padding: "6px 11px", borderRadius: 999,
               border: `1.5px solid ${metric === sm.key ? sm.color : C.border}`,
               background: metric === sm.key ? `${sm.color}22` : "transparent",
               color: metric === sm.key ? sm.color : C.muted,
-              fontFamily: C.display, fontWeight: 700, fontSize: 14.5,
+              fontFamily: C.display, fontWeight: 700, fontSize: 13,
               cursor: "pointer", transition: "all 0.15s", WebkitTapHighlightColor: "transparent",
             }}>
               {lang === "en" ? sm.labelEn : sm.label}
@@ -486,28 +486,28 @@ function StatsSheet({ C, lang, onClose }) {
           ))}
         </div>
         {/* Current value + diff */}
-        <div style={{ marginBottom: 22 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 49.5, color: C.text, letterSpacing: "-0.03em", lineHeight: 1 }}>{current}</span>
-            <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 20, color: C.muted }}>{m.unit}</span>
-            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: isGood ? C.accent : C.red, marginLeft: 4 }}>
+        <div style={{ marginBottom: 15 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 40, color: C.text, letterSpacing: "-0.03em", lineHeight: 1 }}>{current}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 17, color: C.muted }}>{m.unit}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: isGood ? C.accent : C.red, marginLeft: 4 }}>
               {diff > 0 ? "+" : ""}{diff}{m.unit}
             </span>
           </div>
-          <div style={{ fontFamily: C.display, fontSize: 14.5, color: C.muted, marginTop: 5 }}>
+          <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, marginTop: 4 }}>
             {lang === "en" ? m.trendEN : m.trendSL}
           </div>
         </div>
         {/* Chart */}
-        <div style={{ marginBottom: 22 }}>
+        <div style={{ marginBottom: 15 }}>
           <SparkChart data={m.data} color={m.color} C={C} metricKey={m.key} />
         </div>
         {/* Min / Avg / Max */}
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 6 }}>
           {[["MIN", minV], [lang === "en" ? "AVG" : "POVP", avg], ["MAX", maxV]].map(([lbl, val]) => (
-            <div key={lbl} style={{ flex: 1, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
-              <Mono style={{ color: C.muted, fontSize: 9, display: "block" }}>{lbl}</Mono>
-              <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, marginTop: 4 }}>{val} {m.unit}</div>
+            <div key={lbl} style={{ flex: 1, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: "9px 6px", textAlign: "center" }}>
+              <Mono style={{ color: C.muted, fontSize: 8.5, display: "block" }}>{lbl}</Mono>
+              <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text, marginTop: 4 }}>{val} {m.unit}</div>
             </div>
           ))}
         </div>
@@ -774,14 +774,14 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       : t("Telo kaže znake utrujenosti — danes daj prednost regeneraciji.");
 
   return (
-    <div style={{ padding: "8px 20px 40px", color: C.text, position: "relative" }}>
+    <div style={{ padding: "6px 14px 26px", color: C.text, position: "relative" }}>
       {/* Header — greeting + date, bell + avatar. Calm; no eyebrow, no glow. */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "10px 0 34px", ...rise(0.03) }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "8px 0 22px", ...rise(0.03) }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 27, color: C.text, lineHeight: 1.1, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text, lineHeight: 1.1, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {t("Živjo,")} {(profile?.name || "Športnik").trim().split(/\s+/)[0]}
           </div>
-          <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 13, color: C.muted, marginTop: 4 }}>{dateStr}</div>
+          <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 4 }}>{dateStr}</div>
         </div>
         <button onClick={() => setOpenNotifs(true)} aria-label={t("Obvestila")} style={{
           width: 42, height: 42, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
@@ -802,24 +802,24 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
         }}>
           {profile?.photo
             ? <img src={profile.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text2 }}>{(profile?.name || "A").trim()[0].toUpperCase()}</span>}
+            : <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text2 }}>{(profile?.name || "A").trim()[0].toUpperCase()}</span>}
         </button>
       </div>
 
       {/* 2 · WEEKLY CALENDAR STRIP — quiet, today the only filled cell */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 32, ...rise(0.06) }}>
+      <div style={{ display: "flex", gap: 5, marginBottom: 20, ...rise(0.06) }}>
         {week.map((d) => (
           <button key={d.iso} onClick={() => go("season")} aria-label={`${d.label} ${d.num}`} style={{
-            flex: 1, padding: "6px 0 8px", background: "none", border: "none", cursor: "pointer",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
+            flex: 1, padding: "5px 0 6px", background: "none", border: "none", cursor: "pointer",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
             WebkitTapHighlightColor: "transparent",
           }}>
-            <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9.5, letterSpacing: "0.06em", color: d.isToday ? C.text : C.muted2 }}>{d.label}</span>
+            <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9, letterSpacing: "0.06em", color: d.isToday ? C.text : C.muted2 }}>{d.label}</span>
             <span style={{
               width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
               background: d.isToday ? C.accent : C.surface2,
               color: d.isToday ? C.btnText : C.text2,
-              fontFamily: C.display, fontWeight: 700, fontSize: 13.5,
+              fontFamily: C.display, fontWeight: 700, fontSize: 12,
             }}>{d.num}</span>
             <span aria-hidden="true" style={{ width: 4, height: 4, borderRadius: "50%", background: d.done ? C.accent : "transparent" }} />
           </button>
@@ -829,23 +829,23 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       {/* 3 · RECOVERY + TRAINING LOAD — two premium liquid-fill metrics;
           tap either for the full breakdown. */}
       <button onClick={() => setOpenBattery(true)} aria-label={t("Pripravljenost")} style={{
-        width: "100%", background: "none", border: "none", padding: 0, margin: "4px 0 22px",
+        width: "100%", background: "none", border: "none", padding: 0, margin: "4px 0 14px",
         cursor: "pointer", WebkitTapHighlightColor: "transparent",
-        display: "flex", justifyContent: "center", gap: 42, flexWrap: "wrap", ...rise(0.1),
+        display: "flex", justifyContent: "center", gap: 26, flexWrap: "wrap", ...rise(0.1),
       }}>
-        <LiquidMetric value={hasData ? battery : 0} max={100} label={t("Pripravljenost")} color={C.accent} decimals={0} fillAlpha={0.58} C={C} size={124} />
-        <LiquidMetric value={strain ?? 0} max={21} label={t("Obremenitev")} color={C.name === "dark" ? "#E6EBF0" : "#8A929C"} decimals={1} fillAlpha={0.2} C={C} size={124} />
+        <LiquidMetric value={hasData ? battery : 0} max={100} label={t("Pripravljenost")} color={C.accent} decimals={0} fillAlpha={0.58} C={C} size={100} />
+        <LiquidMetric value={strain ?? 0} max={21} label={t("Obremenitev")} color={C.name === "dark" ? "#E6EBF0" : "#8A929C"} decimals={1} fillAlpha={0.2} C={C} size={100} />
       </button>
 
       {/* 4 · TODAY'S RECOMMENDATION — AI call + short explanation */}
-      <div style={{ marginBottom: 32, ...rise(0.13) }}>
+      <div style={{ marginBottom: 20, ...rise(0.13) }}>
         <SectionLabel>{t("PRIPOROČILO")}</SectionLabel>
         <Card>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ width: 9, height: 9, borderRadius: "50%", background: tone, flexShrink: 0 }} />
-            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text, lineHeight: 1.25 }}>{t(rec.text)}</span>
+            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, lineHeight: 1.25 }}>{t(rec.text)}</span>
           </div>
-          <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted, lineHeight: 1.5, margin: "12px 0 0" }}>{explain}</p>
+          <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, lineHeight: 1.5, margin: "9px 0 0" }}>{explain}</p>
         </Card>
       </div>
 
@@ -854,13 +854,13 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       {checkinPending && (
         <button onClick={() => setOpenBattery(true)} aria-label={t("Izpolni današnji check-in")} style={{
           width: "100%", textAlign: "left", cursor: "pointer", WebkitTapHighlightColor: "transparent",
-          display: "flex", alignItems: "center", gap: 12, marginBottom: 32,
-          background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, padding: "16px 18px",
+          display: "flex", alignItems: "center", gap: 9, marginBottom: 20,
+          background: C.surface, border: `1px solid ${C.border}`, borderRadius: 15, padding: "11px 13px",
           ...rise(0.14),
         }}>
           <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{t("Izpolni današnji check-in")}</span>
-            <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 13, color: C.muted, marginTop: 3, lineHeight: 1.4 }}>{t("Odgovori na vprašanja in posodobi svojo pripravljenost.")}</span>
+            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Izpolni današnji check-in")}</span>
+            <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 3, lineHeight: 1.4 }}>{t("Odgovori na vprašanja in posodobi svojo pripravljenost.")}</span>
           </span>
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6" /></svg>
         </button>
@@ -868,11 +868,11 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
 
       {/* 4b · RECENT CHECK-INS — real logged entries, same column style as the
           workout meta row so it sits cleanly with the rest of the home page. */}
-      <div style={{ marginBottom: 32, ...rise(0.15) }}>
+      <div style={{ marginBottom: 20, ...rise(0.15) }}>
         <SectionLabel>{t("ZADNJI CHECK-INI")}</SectionLabel>
         <Card>
           {recentCheckins.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "6px 0", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 15 }}>
+            <div style={{ textAlign: "center", padding: "5px 0", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 13.5 }}>
               {t("Še ni check-inov. Izpolni jutranji check-in zgoraj.")}
             </div>
           ) : recentCheckins.map((r, idx) => {
@@ -886,16 +886,16 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
               { k: t("HIDRACIJA"), v: r.hydration != null ? `${r.hydration}%` : "—" },
             ];
             return (
-              <div key={r.date} style={{ padding: "14px 0", borderTop: idx ? `1px solid ${C.border}` : "none" }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{dLabel}</span>
-                  {isToday && <Mono style={{ fontSize: 8.5, color: C.accent }}>{t("DANES")}</Mono>}
+              <div key={r.date} style={{ padding: "10px 0", borderTop: idx ? `1px solid ${C.border}` : "none" }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 9 }}>
+                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13.5, color: C.text }}>{dLabel}</span>
+                  {isToday && <Mono style={{ fontSize: 8, color: C.accent }}>{t("DANES")}</Mono>}
                 </div>
                 <div style={{ display: "flex" }}>
                   {metrics.map((m, i) => (
                     <div key={m.k} style={{ flex: 1, borderLeft: i ? `1px solid ${C.border}` : "none", paddingLeft: i ? 14 : 0 }}>
-                      <div style={{ fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.1em", color: C.muted2, marginBottom: 6 }}>{m.k}</div>
-                      <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16.5, color: C.text }}>{m.v}</div>
+                      <div style={{ fontFamily: C.mono, fontSize: 8, letterSpacing: "0.1em", color: C.muted2, marginBottom: 5 }}>{m.k}</div>
+                      <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14.5, color: C.text }}>{m.v}</div>
                     </div>
                   ))}
                 </div>
@@ -906,26 +906,26 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 5 · TODAY'S WORKOUT — name · meta · big Start button */}
-      <div style={{ marginBottom: 32, ...rise(0.16) }}>
+      <div style={{ marginBottom: 20, ...rise(0.16) }}>
         <SectionLabel>{t("DANAŠNJI TRENING")} · 17:00</SectionLabel>
         <Card pad={22}>
-          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 25, margin: "0 0 18px", color: C.text, lineHeight: 1.12, letterSpacing: "-0.01em" }}>{t("Moč · Spodnji del")}</h2>
-          <div style={{ display: "flex", marginBottom: 22 }}>
+          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 21, margin: "0 0 13px", color: C.text, lineHeight: 1.12, letterSpacing: "-0.01em" }}>{t("Moč · Spodnji del")}</h2>
+          <div style={{ display: "flex", marginBottom: 15 }}>
             {[
               { k: t("TRAJANJE"), v: `62 ${t("min")}` },
               { k: t("KALORIJE"), v: "~480" },
               { k: t("TEŽAVNOST"), v: t("Srednja") },
             ].map((m, i) => (
               <div key={m.k} style={{ flex: 1, borderLeft: i ? `1px solid ${C.border}` : "none", paddingLeft: i ? 14 : 0 }}>
-                <div style={{ fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.1em", color: C.muted2, marginBottom: 6 }}>{m.k}</div>
-                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 16.5, color: C.text }}>{m.v}</div>
+                <div style={{ fontFamily: C.mono, fontSize: 8, letterSpacing: "0.1em", color: C.muted2, marginBottom: 5 }}>{m.k}</div>
+                <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14.5, color: C.text }}>{m.v}</div>
               </div>
             ))}
           </div>
           <button onClick={() => go("train")} style={{
-            width: "100%", height: 54, borderRadius: 16, border: "none", background: C.btn, color: C.btnText,
-            fontFamily: C.display, fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center",
-            justifyContent: "center", gap: 10, cursor: "pointer", WebkitTapHighlightColor: "transparent",
+            width: "100%", height: 46, borderRadius: 12, border: "none", background: C.btn, color: C.btnText,
+            fontFamily: C.display, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center",
+            justifyContent: "center", gap: 8, cursor: "pointer", WebkitTapHighlightColor: "transparent",
           }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z" /></svg>
             {t("Začni trening")}
@@ -934,9 +934,9 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 6 · RECOVERY SUMMARY — Sleep · Recovery · Fatigue · Mood in one row */}
-      <div style={{ marginBottom: 32, ...rise(0.19) }}>
+      <div style={{ marginBottom: 20, ...rise(0.19) }}>
         <SectionLabel>{t("STANJE")}</SectionLabel>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 6 }}>
           <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Spanje").toUpperCase()} value={hasData ? `${checkin.sleepH}h` : "—"} barPct={hasData ? Math.min(1, (checkin.sleepH || 0) / 8) : 0} />
           <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Okrevanje").toUpperCase()} value={hasData ? `${recScore}%` : "—"} barPct={hasData ? recScore / 100 : 0} />
           <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Utrujenost").toUpperCase()} value={hasData ? `${fatigue}/5` : "—"} barPct={hasData ? fatigue / 5 : 0} />
@@ -945,17 +945,17 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 7 · WEEKLY PROGRESS — streak · completed/goal · progress bar */}
-      <div style={{ marginBottom: 32, ...rise(0.22) }}>
+      <div style={{ marginBottom: 20, ...rise(0.22) }}>
         <SectionLabel action={t("Koledar")} onAction={() => go("season")}>{t("TA TEDEN")}</SectionLabel>
         <Card onClick={() => go("season")}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 16 }}>
-            <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 36, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{streak}</span>
-              <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted }}>{t("dni zapored")}</span>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 11 }}>
+            <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{streak}</span>
+              <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted }}>{t("dni zapored")}</span>
             </span>
             <span style={{ textAlign: "right" }}>
-              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text }}>{doneWorkouts}</span>
-              <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted }}> / {WEEKLY_GOAL} {t("treningov")}</span>
+              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 15.5, color: C.text }}>{doneWorkouts}</span>
+              <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted }}> / {WEEKLY_GOAL} {t("treningov")}</span>
             </span>
           </div>
           <div style={{ height: 8, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
@@ -965,9 +965,9 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 8 · QUICK STATS — 4 compact cards */}
-      <div style={{ marginBottom: 8, ...rise(0.25) }}>
+      <div style={{ marginBottom: 6, ...rise(0.25) }}>
         <SectionLabel>{t("HITRE STATISTIKE")}</SectionLabel>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           <StatTile label={t("OBREMENITEV")} value={t("Optimalna")} sub={t("7-dnevno povprečje")} />
           <StatTile label={t("Okrevanje").toUpperCase()} value={hasData ? `${recScore}%` : "—"} sub={hasData ? `${components.length} ${t("vira")}` : t("Ni podatkov")} />
           <StatTile label={t("TREND")} value={trend} valueColor={battery >= 70 ? C.accent : C.text} sub={t("vs. včeraj")} />
@@ -982,35 +982,35 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
         <div onClick={(e) => { if (e.target === e.currentTarget) setOpenNotifs(false); }} style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(20,18,14,0.55)" }}>
           <DragSheet onClose={() => setOpenNotifs(false)} style={{
             position: "absolute", bottom: 0, left: 0, right: 0, maxHeight: "70%", overflowY: "auto",
-            background: C.bg, borderRadius: "28px 28px 0 0", padding: "16px 20px",
+            background: C.bg, borderRadius: "28px 28px 0 0", padding: "11px 14px",
             paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
             animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
           }}>
             <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 18px" }} />
 
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 14.5, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("Obvestila")}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
+              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("Obvestila")}</span>
               <span style={{ flex: 1, height: 1, background: C.border }} />
             </div>
 
             {notifs.length === 0 && (
-              <div style={{ textAlign: "center", padding: "26px 20px 32px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 16.5 }}>
+              <div style={{ textAlign: "center", padding: "17px 14px 20px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 14.5 }}>
                 {t("Nič novega.")}
               </div>
             )}
 
             {notifs.map((nf) => (
               <button key={nf.id} onClick={nf.onTap} style={{
-                width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", marginBottom: 10,
-                background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
+                width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 11px", marginBottom: 8,
+                background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14,
                 cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent",
               }}>
                 <span style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   {nf.icon}
                 </span>
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 16, color: C.text }}>{nf.title}</span>
-                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.muted, marginTop: 2, lineHeight: 1.35 }}>{nf.text}</span>
+                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{nf.title}</span>
+                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, marginTop: 2, lineHeight: 1.35 }}>{nf.text}</span>
                 </span>
                 <span style={{ color: C.muted, flexShrink: 0 }}>›</span>
               </button>
@@ -1024,58 +1024,58 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
         <div onClick={(e) => { if (e.target === e.currentTarget) setOpenBattery(false); }} style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(20,18,14,0.55)" }}>
           <DragSheet onClose={() => setOpenBattery(false)} style={{
             position: "absolute", bottom: 0, left: 0, right: 0, maxHeight: "88%", overflowY: "auto",
-            background: C.bg, borderRadius: "28px 28px 0 0", padding: "16px 20px",
+            background: C.bg, borderRadius: "28px 28px 0 0", padding: "11px 14px",
             paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
             animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
           }}>
             <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 18px" }} />
 
             {/* header — score, status, season */}
-            <div style={{ textAlign: "center", marginBottom: 18 }}>
-              <Mono style={{ color: C.gold, fontSize: 10, letterSpacing: "0.3em" }}>{t("READINESS · BATERIJA")}</Mono>
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 10, marginTop: 10 }}>
-                <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 51.5, color: C.text, lineHeight: 1 }}>{(battery / 10).toFixed(1)}</span>
-                <Mono style={{ color: tone, fontSize: 11, letterSpacing: "0.22em" }}>{battery >= 70 ? "PARATUS" : battery >= 40 ? "CAUTION" : "REQUIES"}</Mono>
+            <div style={{ textAlign: "center", marginBottom: 13 }}>
+              <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.3em" }}>{t("READINESS · BATERIJA")}</Mono>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 8, marginTop: 8 }}>
+                <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 42, color: C.text, lineHeight: 1 }}>{(battery / 10).toFixed(1)}</span>
+                <Mono style={{ color: tone, fontSize: 10, letterSpacing: "0.22em" }}>{battery >= 70 ? "PARATUS" : battery >= 40 ? "CAUTION" : "REQUIES"}</Mono>
               </div>
-              <div style={{ marginTop: 10 }}>
-                <span style={{ padding: "5px 11px", borderRadius: 999, background: `${tone}1a`, border: `1px solid ${tone}50`, display: "inline-block" }}>
-                  <Mono style={{ color: tone, fontSize: 10 }}>{season === "off" ? t("OFF-SEASON") : t("MID-SEASON")}</Mono>
+              <div style={{ marginTop: 8 }}>
+                <span style={{ padding: "4px 8px", borderRadius: 999, background: `${tone}1a`, border: `1px solid ${tone}50`, display: "inline-block" }}>
+                  <Mono style={{ color: tone, fontSize: 9 }}>{season === "off" ? t("OFF-SEASON") : t("MID-SEASON")}</Mono>
                 </span>
               </div>
-              <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 16, color: C.text2, margin: "10px 0 0", lineHeight: 1.5 }}>{t(rec.text)}</p>
+              <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 14, color: C.text2, margin: "8px 0 0", lineHeight: 1.5 }}>{t(rec.text)}</p>
             </div>
 
             {/* quick metrics — tap for the metric history */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
               {[
                 { icon: <IconMoon size={20} color={tone} />, label: t("SPANJE"), val: `${checkin.sleepH}h` },
                 { icon: <IconFace size={20} color={tone} />, label: t("POČUTJE"), val: `${checkin.mood}/5` },
                 { icon: <IconBolt size={18} color={tone} />, label: t("SORNOST"), val: `${checkin.soreness}/5` },
               ].map(({ icon, label, val }) => (
-                <button key={label} onClick={() => setOpenStats(true)} style={{ flex: 1, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 14, padding: "10px 6px", textAlign: "center", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
-                  <div style={{ display: "flex", justifyContent: "center", marginBottom: 5 }}>{icon}</div>
+                <button key={label} onClick={() => setOpenStats(true)} style={{ flex: 1, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "8px 5px", textAlign: "center", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+                  <div style={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>{icon}</div>
                   <Mono style={{ color: C.muted, fontSize: 8, letterSpacing: "0.04em" }}>{label}</Mono>
-                  <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14.5, color: C.text, marginTop: 2 }}>{val}</div>
+                  <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13, color: C.text, marginTop: 2 }}>{val}</div>
                 </button>
               ))}
             </div>
 
             {/* breakdown — engraved section */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 0 12px" }}>
-              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 13.5, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("RAZČLENITEV")}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "0 0 9px" }}>
+              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("RAZČLENITEV")}</span>
               <span style={{ flex: 1, height: 1, background: C.border }} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 14 }}>
               {components.map((c) => (
                 <div key={c.key}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 5 }}>
-                    <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text }}>{t(c.label)}</span>
-                      <Mono style={{ color: C.muted2, fontSize: 9 }}>{t(c.sub)}</Mono>
-                    </span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
                     <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                      <Mono style={{ color: C.muted2, fontSize: 9 }}>{Math.round(c.weight * 100)}%</Mono>
-                      <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 14.5, color: c.score >= 70 ? C.accent : c.score >= 40 ? C.yellow : C.red }}>{c.score}</span>
+                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t(c.label)}</span>
+                      <Mono style={{ color: C.muted2, fontSize: 8.5 }}>{t(c.sub)}</Mono>
+                    </span>
+                    <span style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                      <Mono style={{ color: C.muted2, fontSize: 8.5 }}>{Math.round(c.weight * 100)}%</Mono>
+                      <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 13, color: c.score >= 70 ? C.accent : c.score >= 40 ? C.yellow : C.red }}>{c.score}</span>
                     </span>
                   </div>
                   <div style={{ height: 5, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
@@ -1083,15 +1083,15 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
                   </div>
                 </div>
               ))}
-              <Mono style={{ color: C.muted2, fontSize: 9, marginTop: 2 }}>{t("7-dnevno drseče okno · uteži se prilagodijo razpoložljivim podatkom")}</Mono>
+              <Mono style={{ color: C.muted2, fontSize: 8.5, marginTop: 2 }}>{t("7-dnevno drseče okno · uteži se prilagodijo razpoložljivim podatkom")}</Mono>
             </div>
 
             {/* inputs — engraved section */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 0 14px" }}>
-              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 13.5, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("JUTRANJI CHECK-IN")}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "0 0 10px" }}>
+              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("JUTRANJI CHECK-IN")}</span>
               <span style={{ flex: 1, height: 1, background: C.border }} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Slider label={t("SPANEC")} value={checkin.sleepH} min={4} max={10} step={0.1} suffix="h" onChange={(v) => setC("sleepH", v)} C={C} />
               <RatingDots label={t("KAKOVOST SPANJA")} value={checkin.sleepQuality} onChange={(v) => setC("sleepQuality", v)} C={C} />
               <RatingDots label={t("POČUTJE")} value={checkin.mood} onChange={(v) => setC("mood", v)} C={C} />
@@ -1099,14 +1099,14 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
               <RatingDots label={t("STRES")} value={checkin.stress} onChange={(v) => setC("stress", v)} C={C} />
               <Slider label={t("HIDRACIJA")} value={checkin.hydration} min={0} max={120} suffix="%" onChange={(v) => setC("hydration", v)} C={C} />
               <div>
-                <Mono style={{ color: C.muted, fontSize: 10, marginBottom: 6, display: "block" }}>{t("FAZA SEZONE")}</Mono>
-                <div style={{ display: "flex", gap: 8 }}>
+                <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 5, display: "block" }}>{t("FAZA SEZONE")}</Mono>
+                <div style={{ display: "flex", gap: 6 }}>
                   {[["mid", t("Sredina sezone")], ["off", t("Off-season")]].map(([val, lbl]) => (
-                    <button key={val} onClick={() => setC("season", val)} style={{ flex: 1, padding: "9px", borderRadius: 10, cursor: "pointer", border: `1px solid ${checkin.season === val ? C.accent : C.border2}`, background: checkin.season === val ? `${C.accent}1f` : "transparent", color: checkin.season === val ? C.accent : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 13.5, WebkitTapHighlightColor: "transparent" }}>{lbl}</button>
+                    <button key={val} onClick={() => setC("season", val)} style={{ flex: 1, padding: "7px", borderRadius: 9, cursor: "pointer", border: `1px solid ${checkin.season === val ? C.accent : C.border2}`, background: checkin.season === val ? `${C.accent}1f` : "transparent", color: checkin.season === val ? C.accent : C.muted, fontFamily: C.display, fontWeight: 700, fontSize: 12, WebkitTapHighlightColor: "transparent" }}>{lbl}</button>
                   ))}
                 </div>
               </div>
-              <Mono style={{ color: C.muted2, fontSize: 9 }}>{t("HRV/RHR pridejo iz Apple Health · prehrana iz dnevnika · hitrost iz treninga")}</Mono>
+              <Mono style={{ color: C.muted2, fontSize: 8.5 }}>{t("HRV/RHR pridejo iz Apple Health · prehrana iz dnevnika · hitrost iz treninga")}</Mono>
             </div>
           </DragSheet>
         </div>

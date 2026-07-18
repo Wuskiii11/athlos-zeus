@@ -76,23 +76,23 @@ export default function AthleteDetail({
           const rx = readinessRx(athlete.readiness)
           return (
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 14,
+              display: 'flex', alignItems: 'center', gap: 10,
               background: 'var(--surface)', border: '1px solid var(--line)',
-              borderRadius: 16, padding: '13px 16px', margin: '10px 0 4px',
+              borderRadius: 14, padding: '13px 16px', margin: '10px 0 4px',
             }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase' }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5, letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase' }}>
                   {t("Today's training")}
                 </div>
-                <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 5 }}>{t(rx.note)}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>{t(rx.note)}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: rx.color }}>{t(rx.load)}</div>
-                <div style={{ fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>{t('intensity')}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: rx.color }}>{t(rx.load)}</div>
+                <div style={{ fontSize: 8.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>{t('intensity')}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: rx.color }}>{t(rx.volume)}</div>
-                <div style={{ fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>{t('volume')}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: rx.color }}>{t(rx.volume)}</div>
+                <div style={{ fontSize: 8.5, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>{t('volume')}</div>
               </div>
             </div>
           )

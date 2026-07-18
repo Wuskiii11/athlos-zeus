@@ -92,19 +92,19 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
   // Consistent design-system form field — rounded, soft dark fill, hairline
   // border that lights up green on focus.
   const inp = {
-    width: "100%", padding: "15px 16px", boxSizing: "border-box",
-    background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 16,
-    color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 16.5,
+    width: "100%", padding: "11px 11px", boxSizing: "border-box",
+    background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 14,
+    color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 14.5,
     outline: "none", transition: "border-color 0.2s", caretColor: C.accent,
   };
-  const label = { fontFamily: C.mono, fontSize: 10, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, display: "block", marginBottom: 8 };
+  const label = { fontFamily: C.mono, fontSize: 9, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: C.muted, display: "block", marginBottom: 6 };
 
   if (launching) return <LaunchAnimation onDone={() => onLogin(pendingUser)} C={C} />;
 
   const socialBtn = {
-    flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-    padding: "14px 10px", borderRadius: 16, border: "none", background: C.surface2,
-    color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15.5,
+    flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+    padding: "10px 8px", borderRadius: 14, border: "none", background: C.surface2,
+    color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 14,
     cursor: "pointer", WebkitTapHighlightColor: "transparent",
   };
 
@@ -139,12 +139,12 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         <h1 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 34, letterSpacing: "-0.02em", color: C.text, lineHeight: 1.05, margin: 0 }}>
           {mode === "signup" ? t("Registracija") : t("Prijava")}
         </h1>
-        <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 15.5, color: C.muted, margin: "8px 0 28px", lineHeight: 1.4 }}>
+        <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 14, color: C.muted, margin: "6px 0 18px", lineHeight: 1.4 }}>
           {t("sistem, ki pozna vsakega športnika")}
         </p>
 
         {/* ── Email ── */}
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 11 }}>
           <span style={label}>{t("E-POŠTA")}</span>
           <input type="email" value={email}
             onChange={e => { setEmail(e.target.value); setError(""); }}
@@ -173,37 +173,37 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
         </div>
 
         {error && (
-          <div style={{ color: C.red, fontSize: 14, marginTop: 14, fontFamily: C.display, padding: "11px 14px", borderRadius: 12, background: `${C.red}1f`, border: `1px solid ${C.red}55` }}>
+          <div style={{ color: C.red, fontSize: 12.5, marginTop: 10, fontFamily: C.display, padding: "8px 10px", borderRadius: 10, background: `${C.red}1f`, border: `1px solid ${C.red}55` }}>
             {t(error)}
           </div>
         )}
 
-        <button onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} style={{ alignSelf: "flex-end", background: "none", border: "none", color: C.muted, fontFamily: C.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 12, padding: 0 }}>
+        <button onClick={() => window.open(LANDING_URL, "_blank", "noopener,noreferrer")} style={{ alignSelf: "flex-end", background: "none", border: "none", color: C.muted, fontFamily: C.display, fontSize: 12, fontWeight: 500, cursor: "pointer", marginTop: 9, padding: 0 }}>
           {t("Pozabljeno geslo?")}
         </button>
 
         {/* ── Primary CTA — solid brand green ── */}
-        <PrimaryBtn onClick={submit} disabled={busy} style={{ marginTop: 20 }}>
+        <PrimaryBtn onClick={submit} disabled={busy} style={{ marginTop: 14 }}>
           {busy ? t("Počakaj…") : mode === "signup" ? t("Ustvari račun") : t("Vstopi")}
         </PrimaryBtn>
 
         {/* ── Secondary — soft surface, toggles login/signup ── */}
         <button onClick={() => { setMode(m => (m === "signup" ? "login" : "signup")); setError(""); }} style={{
-          width: "100%", height: 52, marginTop: 10, borderRadius: 18, border: "none",
+          width: "100%", height: 52, marginTop: 8, borderRadius: 15, border: "none",
           background: C.surface2, color: C.text,
-          fontFamily: C.display, fontWeight: 600, fontSize: 15.5,
+          fontFamily: C.display, fontWeight: 600, fontSize: 14,
           cursor: "pointer", WebkitTapHighlightColor: "transparent",
         }}>
           {mode === "signup" ? t("Prijava") : t("Registracija")}
         </button>
 
         {/* ── Social ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0 14px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "16px 0 10px" }}>
           <div style={{ flex: 1, height: 1, background: C.border }} />
-          <span style={{ ...label, marginBottom: 0, fontSize: 9.5 }}>{t("ALI")}</span>
+          <span style={{ ...label, marginBottom: 0, fontSize: 9 }}>{t("ALI")}</span>
           <div style={{ flex: 1, height: 1, background: C.border }} />
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 8 }}>
           <button onClick={() => social("apple")} style={socialBtn}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
             Apple
@@ -214,7 +214,7 @@ export default function LoginScreen({ profile, setProfile, onLogin, onPrivacy })
           </button>
         </div>
 
-        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: C.muted2, fontFamily: C.display, fontSize: 13.5, fontWeight: 500, cursor: "pointer", marginTop: 16, padding: 0, textAlign: "center", width: "100%" }}>
+        <button onClick={onPrivacy} style={{ background: "none", border: "none", color: C.muted2, fontFamily: C.display, fontSize: 12, fontWeight: 500, cursor: "pointer", marginTop: 11, padding: 0, textAlign: "center", width: "100%" }}>
           {t("Politika zasebnosti")}
         </button>
       </div>
