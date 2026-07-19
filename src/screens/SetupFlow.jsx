@@ -67,11 +67,42 @@ const FLOW = ["name", "acq", "birth", "gender", "body", "waist", "quote", "sport
 const ACQ_OPTIONS = ["Instagram", "Prijatelj / soigralec", "Google", "TikTok", "Trener / klub", "Drugo"];
 const GOAL_OPTIONS = ["Moč", "Mišična masa", "Eksplozivnost", "Hitrost", "Vzdržljivost", "Izguba maščobe", "Preventiva poškodb", "Splošna kondicija"];
 const EXP_OPTIONS = ["0–1 let", "1–3 let", "3–5 let", "5+ let"];
-const INJURY_OPTIONS = ["Koleno", "Gleženj", "Rama", "Hrbet", "Kolk", "Hamstring", "Zapestje"];
 const EQUIPMENT_OPTIONS = ["Fitnes klub", "Domače uteži / ročke", "Drog za zgibe", "Elastike", "Samo lastna teža"];
 
 const SETUP_KEY = "athlos:setup";
 const loadSaved = () => { try { return JSON.parse(localStorage.getItem(SETUP_KEY) || "{}"); } catch { return {}; } };
+
+// Best-effort mapping from the free-text injury description to the known body
+// regions the offline coach avoids when picking exercises (coachOffline.js
+// pool `area` tags) — a word-boundary match on the Slovenian stem so e.g.
+// "bolečina v kolenu" still flags "Koleno" without over-matching substrings.
+const INJURY_STEMS = { Koleno: "kolen", Gleženj: "gležn", Rama: "\\bram", Hrbet: "hrbt", Kolk: "\\bkolk", Hamstring: "hamstring", Zapestje: "zapest" };
+function guessInjuryAreas(text) {
+  const s = String(text || "").toLowerCase();
+  return Object.entries(INJURY_STEMS)
+    .filter(([, stem]) => new RegExp(stem.startsWith("\\b") ? stem : `\\b${stem}`, "i").test(s))
+    .map(([region]) => region);
+}
+
+// Downscale to ≤512px JPEG data URL — same ceiling as the profile-photo
+// upload (ScreenSettings), kept local-only here since onboarding runs before
+// there's necessarily an authenticated account to upload to.
+const compressToDataUrl = (file) => new Promise((resolve, reject) => {
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    const max = 512;
+    const scale = Math.min(1, max / Math.max(img.width, img.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+    resolve(canvas.toDataURL("image/jpeg", 0.85));
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("bad image")); };
+  img.src = url;
+});
 
 // ── Inline birth-date wheels — no tap-to-open sheet: the three columns sit
 // right on the step, with one full-width accent bar across the selected row
@@ -167,15 +198,21 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const [customSport, setCustomSport] = useState(saved.customSport || "");
   const [goals, setGoals] = useState(saved.goals || []);
   const [customGoal, setCustomGoal] = useState(saved.customGoal || "");
+  // Free-typed years of experience — kept as a string while editing (like
+  // waist/bodyFat below) so the field can be cleared and retyped normally;
+  // parsed to a number only in finish().
   const [experience, setExperience] = useState(() => {
-    const n = parseInt(saved.experience, 10);   // old string presets ("1–3 let") → number
-    return Number.isFinite(n) ? n : 3;
+    const n = parseInt(saved.experience, 10);   // old wheel value / string presets ("1–3 let") → number
+    return Number.isFinite(n) ? String(n) : "3";
   });
   const [injuries, setInjuries] = useState(saved.injuries || []);
   const [injuryNote, setInjuryNote] = useState(saved.injuryNote || "");
+  const [hasInjury, setHasInjury] = useState(saved.hasInjury ?? (saved.injuryNote ? true : null));
+  const [injuryPhoto, setInjuryPhoto] = useState(saved.injuryPhoto || "");
   const [equipment, setEquipment] = useState(saved.equipment || []);
   const scrollRef = useRef(null);
   const rootRef = useRef(null);
+  const injuryFileRef = useRef(null);
   const t = useT();
   const lang = useLang();
 
@@ -185,10 +222,10 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     try {
       localStorage.setItem(SETUP_KEY, JSON.stringify({
         step, username, acquisition, birth, gender, height, weight, waist, bodyFat,
-        sport, customSport, goals, customGoal, experience, injuries, injuryNote, equipment,
+        sport, customSport, goals, customGoal, experience, injuries, injuryNote, hasInjury, injuryPhoto, equipment,
       }));
     } catch {}
-  }, [step, username, acquisition, birth, gender, height, weight, waist, bodyFat, sport, customSport, goals, customGoal, experience, injuries, injuryNote, equipment]);
+  }, [step, username, acquisition, birth, gender, height, weight, waist, bodyFat, sport, customSport, goals, customGoal, experience, injuries, injuryNote, hasInjury, injuryPhoto, equipment]);
 
   // Reset scroll to top on every step change
   useEffect(() => {
@@ -280,14 +317,22 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     setNameMsg("");
     next();
   };
+  const onInjuryFile = async (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = ""; // allow picking the same file again after removing it
+    if (!f) return;
+    try { setInjuryPhoto(await compressToDataUrl(f)); } catch {}
+  };
   const finish = () => {
     const finalSport = sport === "Drugo" ? (customSport.trim() || "Drugo") : sport;
     const finalGoals = [...goals, ...(customGoal.trim() ? [customGoal.trim()] : [])];
     try { localStorage.removeItem(SETUP_KEY); } catch {}
+    const finalInjuries = hasInjury ? guessInjuryAreas(injuryNote) : [];
     onDone({
       username: username.trim() || "Športnik", birth, height, weight, sport: finalSport,
       acquisition, gender, waist: waist ? +waist : null, bodyFat: bodyFat ? +bodyFat : null,
-      goals: finalGoals, experience, injuries, injuryNote: injuryNote.trim(), equipment,
+      goals: finalGoals, experience: experience === "" ? 0 : +experience, injuries: finalInjuries,
+      injuryNote: hasInjury ? injuryNote.trim() : "", injuryPhoto: hasInjury ? injuryPhoto : "", equipment,
     });
   };
 
@@ -299,7 +344,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   };
 
   const STEP_TITLES = {
-    name:      { title: "Uporabniško\nime",        sub: "KAKO TE BOMO KLICALI" },
+    name:      { title: "Uporabniško ime",         sub: "KAKO TE BOMO KLICALI" },
     acq:       { title: "Kako si\nslišal za nas?", sub: "" },
     birth:     { title: "Datum\nrojstva",          sub: "" },
     gender:    { title: "Spol",                    sub: "ZA IZRAČUN NORM IN KALORIJ" },
@@ -308,7 +353,7 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     waist:     { title: "Obseg pasu\n& body fat",  sub: "ČE VEŠ — DRUGAČE PRESKOČI" },
     quote:     { title: "",                        sub: "" }, // custom render
     sport:     { title: "Kateri šport\ntreniraš?", sub: "ZA PERSONALIZACIJO PROGRAMA" },
-    goals:     { title: "Kaj je tvoj cilj?",       sub: "IZBERI SVOJ GLAVNI CILJ" },
+    goals:     { title: "Kaj so tvoji cilji?",     sub: "IZBERI ENEGA ALI VEČ" },
     exp:       { title: "Koliko let\nizkušenj imaš?", sub: "S FITNESOM / TRENINGOM MOČI" },
     injuries:  { title: "Poškodbe?",               sub: "TRENUTNE IN PRETEKLE — ZA VARNO PROGRAMIRANJE" },
     equipment: { title: "Kakšno opremo\nimaš na voljo?", sub: "PROGRAM SE PRILAGODI OPREMI" },
@@ -319,10 +364,14 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   // each option catalogued with a roman numeral; picking fills the bronze
   // socket (design-system list language instead of stacked boxes)
   const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
-  const Choice = ({ options, value, onPick, subs, labels, icons }) => (
+  // `multi` turns the same tablet into a checklist: any number of rows can be
+  // active at once (values/onPick take an array + toggle instead of a single
+  // value + select), and the trailing roman numeral swaps for a checkbox so
+  // "pick several" reads clearly instead of implying a ranked single answer.
+  const Choice = ({ options, value, values, multi, onPick, subs, labels, icons }) => (
     <div data-gsap-list="true" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {options.map((o, i) => {
-        const active = value === o;
+        const active = multi ? (values || []).includes(o) : value === o;
         return (
           <button key={o} onClick={(e) => { popPick(e.currentTarget); onPick(o); }} style={{
             width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 10,
@@ -348,10 +397,23 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
               <span style={{ display: "block", fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15, color: C.text }}>{labels ? labels[i] : o}</span>
               {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
             </span>
-            {/* roman numeral, right — grey until the box is picked */}
-            <span style={{ flexShrink: 0, minWidth: 28, textAlign: "right", fontFamily: C.mono, fontSize: active ? 13.5 : 11, fontWeight: active ? 700 : 600, letterSpacing: "0.06em", color: active ? C.accent : C.muted2, transition: "color 0.15s, font-size 0.15s" }}>
-              {ROMAN[i]}
-            </span>
+            {/* trailing indicator: checkbox for a checklist, roman numeral
+                (grey until picked) for a single-choice tablet */}
+            {multi ? (
+              <span aria-hidden="true" style={{
+                flexShrink: 0, width: 22, height: 22, borderRadius: "50%",
+                border: `1.5px solid ${active ? C.accent : C.border2}`,
+                background: active ? C.accent : "transparent",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "background 0.15s, border-color 0.15s",
+              }}>
+                {active && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.btnText} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>}
+              </span>
+            ) : (
+              <span style={{ flexShrink: 0, minWidth: 28, textAlign: "right", fontFamily: C.mono, fontSize: active ? 13.5 : 11, fontWeight: active ? 700 : 600, letterSpacing: "0.06em", color: active ? C.accent : C.muted2, transition: "color 0.15s, font-size 0.15s" }}>
+                {ROMAN[i]}
+              </span>
+            )}
           </button>
         );
       })}
@@ -413,11 +475,17 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         <button onClick={() => (step > 0 ? back() : onBack?.())} style={{ background: "none", border: "none", color: C.muted, fontSize: 24.5, cursor: "pointer", lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>‹</button>
       </div>
 
-      {/* Step content */}
-      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "18px 18px 25px", display: "flex", flexDirection: "column", overflowY: "auto", scrollbarWidth: "none" }}>
+      {/* Step content — the height/weight step is pinned (no outer scroll): the
+          wheel columns already scroll internally, and letting the page scroll
+          too meant a drag on the wheel could also rubber-band the whole step. */}
+      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "18px 18px 25px", display: "flex", flexDirection: "column", overflowY: key === "body" ? "hidden" : "auto", scrollbarWidth: "none" }}>
         {key !== "quote" && key !== "vision" && (
-          <div style={{ marginBottom: 18 }}>
-            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, textTransform: "uppercase", margin: 0, color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
+          <div style={{ marginBottom: 18, textAlign: key === "name" ? "center" : "left" }}>
+            <h2 style={{
+              fontFamily: C.display, fontWeight: 800, fontSize: 24, textTransform: "uppercase", margin: 0,
+              color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em",
+              whiteSpace: key === "name" ? "nowrap" : "pre-line",
+            }}>
               {t(STEP_TITLES[key].title)}
             </h2>
           </div>
@@ -663,49 +731,125 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
         )}
 
         {key === "goals" && (
-          // Single-choice: picking a goal pops the tile, then auto-advances
-          // (the short delay lets the pop play before animStep's fade-out).
-          <Choice
-            options={GOAL_OPTIONS}
-            labels={GOAL_OPTIONS.map(t)}
-            value={goals[0] || ""}
-            onPick={(o) => { setGoals([o]); setTimeout(next, 200); }}
-          />
-        )}
-
-        {key === "exp" && (
+          // Multi-choice: any number of goals can be active; picking one just
+          // toggles it (no auto-advance) — "Nadaljuj" unlocks once ≥1 is picked.
           <>
-            <NumberWheelInline label={t("Izberi število let")} unit={t("let")} min={0} max={30} value={experience} onChange={setExperience} C={C} />
-            <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={next}>{t("Nadaljuj")}</PrimaryBtn>
+            <Choice
+              multi
+              options={GOAL_OPTIONS}
+              labels={GOAL_OPTIONS.map(t)}
+              values={goals}
+              onPick={toggle(setGoals)}
+            />
+            <div style={{ flex: 1, minHeight: 16 }} />
+            <PrimaryBtn onClick={next} disabled={goals.length === 0} style={{ opacity: goals.length ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
           </>
         )}
 
+        {key === "exp" && (() => {
+          const clean = (v) => v.replace(/[^\d]/g, "").slice(0, 2); // digits only, 0–99
+          const n = experience === "" ? null : +experience;
+          const expOk = experience !== "" && n >= 0 && n <= 30;
+          return (
+            <>
+              <Mono style={{ color: C.muted, fontSize: 9 }}>{t("ŠTEVILO LET IZKUŠENJ")}</Mono>
+              <input
+                value={experience}
+                onChange={(e) => setExperience(clean(e.target.value))}
+                inputMode="numeric" placeholder={t("npr. 3")} autoFocus
+                style={{ ...inp, borderColor: expOk || experience === "" ? C.border2 : C.red, fontSize: 24, fontWeight: 800, textAlign: "center" }}
+              />
+              {experience !== "" && !expOk && <span style={{ color: C.red, fontFamily: C.display, fontSize: 12, marginTop: 5, display: "block" }}>{t("Vnesi realno število let (0–30).")}</span>}
+              <div style={{ flex: 1 }} />
+              <PrimaryBtn onClick={() => expOk && next()} style={{ opacity: expOk ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+            </>
+          );
+        })()}
+
         {key === "injuries" && (
-          // Single-choice: pick a region → pop, then auto-advance. Skip = no injuries.
+          // Simple Yes/No gate. "Ne" auto-advances (no injuries). "Da" reveals
+          // a free-text description + an optional photo of the injury; both
+          // are captured before "Nadaljuj" unlocks.
           <>
-            <Choice
-              options={INJURY_OPTIONS}
-              labels={INJURY_OPTIONS.map(t)}
-              value={injuries[0] || ""}
-              onPick={(o) => { setInjuries([o]); setInjuryNote(""); setTimeout(next, 200); }}
-            />
+            <div data-gsap-list="true" style={{ display: "flex", gap: 10 }}>
+              {[{ v: false, label: t("Ne") }, { v: true, label: t("Da") }].map(({ v, label }) => {
+                const active = hasInjury === v;
+                return (
+                  <button key={label} onClick={(e) => {
+                    popPick(e.currentTarget);
+                    setHasInjury(v);
+                    if (!v) { setInjuries([]); setInjuryNote(""); setInjuryPhoto(""); setTimeout(next, 200); }
+                  }} style={{
+                    flex: 1, padding: "20px 11px", borderRadius: 15, cursor: "pointer",
+                    background: active ? `${C.accent}14` : C.surface2,
+                    border: `1.5px solid ${active ? C.accent : "transparent"}`,
+                    fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text,
+                    transition: "background 0.15s, border-color 0.15s",
+                    WebkitTapHighlightColor: "transparent",
+                  }}>{label}</button>
+                );
+              })}
+            </div>
+
+            {hasInjury === true && (
+              <div style={{ animation: "athlosFade 0.25s ease", marginTop: 16 }}>
+                <Mono style={{ color: C.muted, fontSize: 9 }}>{t("KATERO POŠKODBO IMAŠ?")}</Mono>
+                <textarea
+                  value={injuryNote}
+                  onChange={(e) => setInjuryNote(e.target.value)}
+                  placeholder={t("npr. Bolečina v desnem kolenu pri počepu...")}
+                  rows={3}
+                  style={{ ...inp, resize: "none", fontWeight: 500 }}
+                />
+
+                <Mono style={{ color: C.muted, fontSize: 9, marginTop: 16, display: "block" }}>{t("SLIKA POŠKODBE (NEOBVEZNO)")}</Mono>
+                <input ref={injuryFileRef} type="file" accept="image/*" onChange={onInjuryFile} style={{ display: "none" }} />
+                {injuryPhoto ? (
+                  <div style={{ position: "relative", marginTop: 8, width: 96, height: 96 }}>
+                    <img src={injuryPhoto} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 14, border: `1px solid ${C.border}` }} />
+                    <button onClick={() => setInjuryPhoto("")} aria-label={t("Odstrani sliko")} style={{
+                      position: "absolute", top: -7, right: -7, width: 24, height: 24, borderRadius: "50%",
+                      background: C.surface3, border: `1px solid ${C.border2}`, color: C.text, fontSize: 14, lineHeight: 1,
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent",
+                    }}>×</button>
+                  </div>
+                ) : (
+                  <button onClick={() => injuryFileRef.current?.click()} style={{
+                    marginTop: 8, width: 96, height: 96, borderRadius: 14, cursor: "pointer",
+                    background: C.surface2, border: `1.5px dashed ${C.border2}`, color: C.muted,
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5,
+                    WebkitTapHighlightColor: "transparent",
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5" /><circle cx="8.5" cy="10.5" r="1.5" /><path d="M21 15l-5-5L5 19" /></svg>
+                    <span style={{ fontFamily: C.mono, fontSize: 8 }}>{t("DODAJ SLIKO")}</span>
+                  </button>
+                )}
+              </div>
+            )}
+
             <div style={{ flex: 1, minHeight: 16 }} />
-            <SkipBtn onClick={() => { setInjuries([]); setInjuryNote(""); next(); }} />
+            {hasInjury === true
+              ? <PrimaryBtn onClick={next} disabled={!injuryNote.trim()} style={{ opacity: injuryNote.trim() ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
+              : <SkipBtn onClick={() => { setHasInjury(false); setInjuries([]); setInjuryNote(""); setInjuryPhoto(""); next(); }} />}
           </>
         )}
 
         {key === "equipment" && (
-          // Single-choice: pick equipment → pop, then auto-advance.
+          // Multi-choice: any number of equipment types can be active; picking
+          // one just toggles it (no auto-advance) — "Nadaljuj" unlocks once ≥1
+          // is picked, or Skip entirely if none applies.
           <>
             <Choice
+              multi
               options={EQUIPMENT_OPTIONS}
               labels={EQUIPMENT_OPTIONS.map(t)}
-              value={equipment[0] || ""}
-              onPick={(o) => { setEquipment([o]); setTimeout(next, 200); }}
+              values={equipment}
+              onPick={toggle(setEquipment)}
             />
             <div style={{ flex: 1, minHeight: 16 }} />
-            <SkipBtn onClick={() => { setEquipment([]); next(); }} />
+            {equipment.length > 0
+              ? <PrimaryBtn onClick={next}>{t("Nadaljuj")}</PrimaryBtn>
+              : <SkipBtn onClick={() => { setEquipment([]); next(); }} />}
           </>
         )}
 

@@ -71,16 +71,27 @@ function LoadStepper({ value, unit, onChange, C, step = 2.5 }) {
   );
 }
 
-/* ───────────────────────── progression chart ───────────────────────── */
+/* ───────────────────────── progression chart ─────────────────────────
+   Same visual language as the "Napredovanje · teža" chart in VBTSheet:
+   dashed horizontal grid + y-axis labels, area fill under the primary
+   (load) line, hollow dots per point with the current one filled + bigger,
+   week labels under each dot (bold + accent on the last one). */
 function Progression({ C, t }) {
-  const W = 300, H = 120, pad = 6;
+  const W = 320, H = 170;
+  const padL = 36, padR = 14, padT = 14, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
   const load = [38, 44, 50, 58, 66, 78, 92, 110];
   const vel = [108, 100, 92, 86, 74, 64, 52, 40];
-  const toPts = (arr) => arr.map((v, i) => {
-    const x = pad + (i / (arr.length - 1)) * (W - pad * 2);
-    const y = pad + (1 - (v - 30) / 90) * (H - pad * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
+  const weekLabels = ["T-7", "T-6", "T-5", "T-4", "T-3", "T-2", "T-1", t("ZDAJ")];
+  const yMin = 30, yMax = 120;
+  const gridVals = [120, 90, 60, 30];
+
+  const mx = (i) => padL + (i / (load.length - 1)) * plotW;
+  const my = (v) => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+  const loadPts = load.map((v, i) => `${mx(i).toFixed(1)},${my(v).toFixed(1)}`).join(" ");
+  const velPts = vel.map((v, i) => `${mx(i).toFixed(1)},${my(v).toFixed(1)}`).join(" ");
+  const areaPts = `${padL},${padT + plotH} ${loadPts} ${mx(load.length - 1).toFixed(1)},${padT + plotH}`;
+
   return (
     <div style={{ background: C.surface2, borderRadius: 18, padding: 20, marginBottom: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
@@ -93,16 +104,34 @@ function Progression({ C, t }) {
           <div><span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, letterSpacing: "-0.01em" }}>0.58</span><span style={{ fontFamily: C.mono, fontSize: 9, color: C.muted }}> M/S {t("HITR.")}</span></div>
         </div>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="120" style={{ display: "block" }}>
-        <polyline points={toPts(load)} fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        <polyline points={toPts(vel)} fill="none" stroke={C.muted2} strokeWidth="2" strokeDasharray="4 4" strokeLinecap="round" />
-        <circle cx={W - pad} cy={pad + (1 - (load[7] - 30) / 90) * (H - pad * 2)} r="4" fill={C.accent} />
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="auto" style={{ display: "block" }}>
+        {/* horizontal grid */}
+        {gridVals.map((v) => (
+          <g key={v}>
+            <line x1={padL} y1={my(v)} x2={padL + plotW} y2={my(v)} stroke={C.border} strokeWidth="0.8" strokeDasharray="3 5" />
+            <text x={padL - 4} y={my(v) + 3} fontSize="8" fill={C.muted2} textAnchor="end" fontFamily="monospace">{v}</text>
+          </g>
+        ))}
+        {/* area fill under the load line */}
+        <polygon points={areaPts} fill={`${C.accent}10`} />
+        {/* velocity — secondary, dashed, no dots */}
+        <polyline points={velPts} fill="none" stroke={C.muted2} strokeWidth="2" strokeDasharray="4 4" strokeLinecap="round" />
+        {/* load — primary line */}
+        <polyline points={loadPts} fill="none" stroke={C.accent} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* dots + x labels */}
+        {load.map((v, i) => {
+          const cx = mx(i), cy = my(v);
+          const isLast = i === load.length - 1;
+          return (
+            <g key={i}>
+              {isLast
+                ? <circle cx={cx} cy={cy} r="7.5" fill={C.accent} />
+                : <circle cx={cx} cy={cy} r="5" fill={C.bg} stroke={C.accent} strokeWidth="1.8" />}
+              <text x={cx} y={padT + plotH + 18} fontSize="8" fill={isLast ? C.accent : C.muted2} textAnchor="middle" fontFamily="monospace" fontWeight={isLast ? "700" : "400"}>{weekLabels[i]}</text>
+            </g>
+          );
+        })}
       </svg>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-        <Mono style={{ color: C.muted2, fontSize: 8.5 }}>T-7</Mono>
-        <Mono style={{ color: C.muted2, fontSize: 8.5 }}>T-4</Mono>
-        <Mono style={{ color: C.text2, fontSize: 8.5 }}>{t("ZDAJ")}</Mono>
-      </div>
       <div style={{ display: "flex", gap: 11, marginTop: 8 }}>
         <span style={{ display: "flex", alignItems: "center", gap: 5 }}><span style={{ width: 14, height: 2, background: C.accent }} /><Mono style={{ color: C.muted, fontSize: 8.5 }}>{t("Obremenitev · kg")}</Mono></span>
         <span style={{ display: "flex", alignItems: "center", gap: 5 }}><span style={{ width: 14, height: 0, borderTop: `2px dashed ${C.muted2}` }} /><Mono style={{ color: C.muted, fontSize: 8.5 }}>{t("Hitrost · m/s")}</Mono></span>
@@ -345,10 +374,10 @@ export default function ScreenTrain({ go, user }) {
           </div>
         </div>
 
-        {/* session flow — one vertical timeline: warm-up → super-set A → cool-down */}
-        <div style={{ position: "relative", marginBottom: 6 }}>
-          <span style={{ position: "absolute", left: 16, top: 20, bottom: 20, width: 1, background: C.border2 }} />
-
+        {/* session flow — warm-up and cool-down are standalone cards; the
+            connecting line only runs between the super-set exercises
+            themselves (A1 → A3), not out into the gaps around the cards. */}
+        <div style={{ marginBottom: 6 }}>
           {/* warm up */}
           <BlockCard C={C} onClick={() => setStarted(true)}
             icon={<svg width="20" height="20" viewBox="0 0 24 24" fill={C.muted}><path d="M12 2c1 3-1 4-1 6a3 3 0 006 0c0-1 0-2-1-3 3 2 5 5 5 9a9 9 0 11-18 0c0-4 3-7 6-9 0 2 2 3 4 3-2-2-1-4 0-6z" /></svg>}
@@ -360,20 +389,23 @@ export default function ScreenTrain({ go, user }) {
             <Mono style={{ color: C.muted2, fontSize: 9 }}>{SESSION.rounds} {t("KROGI")} · {SESSION.rest}s {t("ODMOR")}</Mono>
           </div>
 
-          {SESSION.block.map((e, i) => (
-            <button key={i} onClick={() => { if (e.chart || e.tag === "VBT") { setVbtEx(i); } else { setStarted(true); setExIdx(i); } }}
-              style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "9px 0", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", position: "relative", WebkitTapHighlightColor: "transparent" }}>
-              <span style={{ width: 32, height: 32, borderRadius: "50%", background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 10.5, color: C.text2, flexShrink: 0, position: "relative", zIndex: 1 }}>{e.block}</span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, letterSpacing: "-0.01em" }}>{t(e.name)}</span>
-                  {e.tag && <span style={{ fontFamily: C.mono, fontSize: 8.5, fontWeight: 700, color: C.muted, border: `1px solid ${C.border2}`, borderRadius: 6, padding: "1px 4px", letterSpacing: "0.08em" }}>{e.tag}</span>}
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 16, top: 16, bottom: 16, width: 1, background: C.border2 }} />
+            {SESSION.block.map((e, i) => (
+              <button key={i} onClick={() => { if (e.chart || e.tag === "VBT") { setVbtEx(i); } else { setStarted(true); setExIdx(i); } }}
+                style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "9px 0", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", position: "relative", WebkitTapHighlightColor: "transparent" }}>
+                <span style={{ width: 32, height: 32, borderRadius: "50%", background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.mono, fontWeight: 700, fontSize: 10.5, color: C.text2, flexShrink: 0, position: "relative", zIndex: 1 }}>{e.block}</span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15.5, color: C.text, letterSpacing: "-0.01em" }}>{t(e.name)}</span>
+                    {e.tag && <span style={{ fontFamily: C.mono, fontSize: 8.5, fontWeight: 700, color: C.muted, border: `1px solid ${C.border2}`, borderRadius: 6, padding: "1px 4px", letterSpacing: "0.08em" }}>{e.tag}</span>}
+                  </span>
+                  <Mono style={{ color: C.muted, fontSize: 10 }}>{e.reps} {t("pon.")} · {e.load > 0 ? `${e.load} ${e.unit.toLowerCase()}` : `${e.reps} ${e.unit.toLowerCase()} / ${t("stran")}`}</Mono>
                 </span>
-                <Mono style={{ color: C.muted, fontSize: 10 }}>{e.reps} {t("pon.")} · {e.load > 0 ? `${e.load} ${e.unit.toLowerCase()}` : `${e.reps} ${e.unit.toLowerCase()} / ${t("stran")}`}</Mono>
-              </span>
-              <span style={{ color: C.muted2 }}>›</span>
-            </button>
-          ))}
+                <span style={{ color: C.muted2 }}>›</span>
+              </button>
+            ))}
+          </div>
 
           <div style={{ height: 6 }} />
 
@@ -544,6 +576,26 @@ export default function ScreenTrain({ go, user }) {
 
       {/* progression chart (only for the main lift) — secondary context */}
       {ex.chart && <Progression C={C} t={t} />}
+
+      {/* exercise stats — tonnage + total reps, once every set is checked off
+          (WHOOP-style pair of numbers sitting right under the chart). */}
+      {ex.chart && exLogs.length > 0 && doneCount === exLogs.length && (() => {
+        const tonnage = Math.round(exLogs.reduce((s, x) => s + x.reps * (x.load || 0), 0) * 10) / 10;
+        const totalReps = exLogs.reduce((s, x) => s + x.reps, 0);
+        return (
+          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+            <div style={{ flex: 1, background: C.surface2, borderRadius: 16, padding: "13px 14px" }}>
+              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text, letterSpacing: "-0.01em" }}>{tonnage}</span>
+              <span style={{ fontFamily: C.mono, fontSize: 11, fontWeight: 600, color: C.muted, marginLeft: 4 }}>{ex.unit.toLowerCase()}</span>
+              <Mono style={{ color: C.muted, fontSize: 8.5, letterSpacing: "0.14em", marginTop: 3, display: "block" }}>{t("TONAŽA")}</Mono>
+            </div>
+            <div style={{ flex: 1, background: C.surface2, borderRadius: 16, padding: "13px 14px" }}>
+              <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text, letterSpacing: "-0.01em" }}>{totalReps}</span>
+              <Mono style={{ color: C.muted, fontSize: 8.5, letterSpacing: "0.14em", marginTop: 3, display: "block" }}>{t("SKUPAJ PONOVITEV")}</Mono>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* next exercise */}
       <Pressable onClick={nextExercise} style={{ width: "100%", height: 56, padding: 0, borderRadius: 15, border: "none", background: C.btn, color: C.btnText, fontFamily: C.display, fontWeight: 800, fontSize: 14.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, letterSpacing: "0.02em" }}>

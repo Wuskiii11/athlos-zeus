@@ -598,7 +598,7 @@ export default function AthlosApp() {
             ...profile, name: info.username, birth: info.birth, height: info.height, weight: info.weight, sport: info.sport || profile.sport,
             // extended onboarding (spec §01)
             acquisition: info.acquisition, gender: info.gender, waist: info.waist, bodyFat: info.bodyFat,
-            goals: info.goals, experience: info.experience, injuries: info.injuries, injuryNote: info.injuryNote, equipment: info.equipment,
+            goals: info.goals, experience: info.experience, injuries: info.injuries, injuryNote: info.injuryNote, injuryPhoto: info.injuryPhoto, equipment: info.equipment,
           };
           setProfile(np);
           if (user) saveProfile(user.id, np).catch(() => {});

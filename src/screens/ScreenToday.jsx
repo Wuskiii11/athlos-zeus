@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../theme";
-import { Mono, Icon, Card, SectionLabel, StatTile } from "../components/UI";
+import { Mono, Icon, Card, SectionLabel, StatTile, PrimaryBtn } from "../components/UI";
 import { useT, useLang } from "../lib/i18n";
 import { readinessFromCheckin, recommendation, DEFAULT_CHECKIN } from "../lib/readiness";
 import { readinessFromWhoop, hasWhoopDemo, whoopSeries } from "../lib/readinessLive";
@@ -61,6 +61,21 @@ const IconFace = ({ size = 18, color }) => (
 const IconBolt = ({ size = 18, color }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
     <path d="M13 2L4 13.5h7L9.5 22 20 10.5h-7L13 2z" />
+  </svg>
+);
+// Muscle soreness — dumbbell, same stroke language as the rest of the set.
+const IconDumbbell = ({ size = 20, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6.5 6.5v11M17.5 6.5v11" />
+    <path d="M3.5 9v6M20.5 9v6" />
+    <path d="M6.5 12h11" />
+  </svg>
+);
+// Stress — a calm, minimal brain glyph, matching IconFace's line weight.
+const IconBrain = ({ size = 20, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9.5 4.5a3 3 0 00-3 3v.3A3.2 3.2 0 004.5 11a3.2 3.2 0 001 5.6 3 3 0 003 3.4h1a2 2 0 002-2v-11a3 3 0 00-2-2.9V5a1 1 0 00-1-1z" />
+    <path d="M14.5 4.5a3 3 0 013 3v.3a3.2 3.2 0 012 3.2 3.2 3.2 0 01-1 5.6 3 3 0 01-3 3.4h-1a2 2 0 01-2-2v-11a3 3 0 012-2.9V5a1 1 0 011-1z" />
   </svg>
 );
 const IconHeal = ({ size = 20, color }) => (
@@ -254,66 +269,125 @@ function MiniSpark({ data, color, C, h = 44 }) {
   );
 }
 
-function Slider({ label, value, min, max, step = 1, suffix = "", onChange, C }) {
-  const trackRef = useRef(null);
-  const toValue = (clientX) => {
-    const rect = trackRef.current?.getBoundingClientRect();
-    if (!rect) return value;
-    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    const raw = min + pct * (max - min);
-    return parseFloat((Math.round(raw / step) * step).toFixed(2));
-  };
-  const pct = ((value - min) / (max - min)) * 100;
+// Premium 1–5 answer selector for the Morning Check-in — rounded chips (not
+// circles): a subtle bordered surface at rest, accent-filled + elevated with
+// a spring scale-up once picked. Same "one soft glow" restraint as PrimaryBtn
+// (reuses C.glowSoft) so a selected answer reads as a small, satisfying CTA.
+function AnswerScale({ value, onChange, C, t, count = 5 }) {
+  const dark = C.name === "dark";
+  const fill = dark ? "rgba(255,255,255,0.05)" : C.surface2;
+  const ring = dark ? "rgba(255,255,255,0.10)" : C.border2;
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-        <Mono style={{ color: C.muted, fontSize: 9 }}>{label}</Mono>
-        <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12, color: C.text }}>{value}{suffix}</span>
+      <div style={{ display: "flex", gap: 8 }}>
+        {Array.from({ length: count }, (_, i) => i + 1).map((n) => {
+          const on = value === n;
+          return (
+            <button key={n} onClick={() => onChange(n)} aria-label={String(n)} aria-pressed={on} style={{
+              flex: 1, height: 46, borderRadius: 13, cursor: "pointer", padding: 0,
+              border: `1.5px solid ${on ? C.btn : ring}`,
+              background: on ? C.btn : fill,
+              color: on ? C.btnText : C.muted,
+              fontFamily: C.display, fontWeight: 800, fontSize: 15,
+              boxShadow: on ? C.glowSoft : "none",
+              transform: on ? "scale(1.06)" : "scale(1)",
+              WebkitTapHighlightColor: "transparent",
+              transition: "transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s, border-color 0.18s, box-shadow 0.18s, color 0.18s",
+            }}>{n}</button>
+          );
+        })}
       </div>
-      <div
-        ref={trackRef}
-        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); onChange(toValue(e.clientX)); }}
-        onPointerMove={(e) => { if (e.buttons > 0) onChange(toValue(e.clientX)); }}
-        style={{ height: 10, borderRadius: 999, background: C.surface3, cursor: "pointer", position: "relative", userSelect: "none", touchAction: "none", overflow: "hidden" }}
-      >
-        <div style={{ width: `${pct}%`, height: "100%", borderRadius: 999, background: C.accent, pointerEvents: "none" }} />
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, padding: "0 2px" }}>
+        <Mono style={{ color: C.muted2, fontSize: 8 }}>{t("SLABO")}</Mono>
+        <Mono style={{ color: C.muted2, fontSize: 8 }}>{t("ODLIČNO")}</Mono>
       </div>
     </div>
   );
 }
 
-// Discrete 1–5 rating: five numbered circles, evenly spread across the full
-// width. The fill matches the ZEUS chat bubble (theme-aware) so it feels part
-// of the same surface family. Tap one and ONLY that circle's ring + number turn
-// accent green — plus a soft halo and a subtle lift for a premium feel.
-function RatingDots({ label, value, onChange, C, count = 5 }) {
-  const dark = C.name === "dark";
-  const fill = dark ? "rgba(255,255,255,0.07)" : "#FFFFFF";
-  const ring = dark ? "rgba(255,255,255,0.11)" : "#D9DEE4";
+// ── Morning Check-in — dedicated flagship flow (Header → progress → one
+// question at a time → premium answer scale → Continue/Back), instead of a
+// dense all-at-once list buried in the readiness breakdown sheet. Reuses the
+// exact same `checkin` state and `setC` setter (no business-logic changes) —
+// this only redesigns how those same four answers get collected.
+function MorningCheckinFlow({ checkin, setC, onClose, C, t }) {
+  const [step, setStep] = useState(0);
+  const STEPS = [
+    { key: "sleepQuality", Icon: IconMoon, title: t("Kako si spal?"), sub: t("Kakovost spanja vpliva na okrevanje čez noč.") },
+    { key: "mood", Icon: IconFace, title: t("Kakšno je tvoje počutje?"), sub: t("Splošno razpoloženje in energija danes.") },
+    { key: "soreness", Icon: IconDumbbell, title: t("Kako boleče so mišice?"), sub: t("Napetost ali bolečina po zadnjem treningu.") },
+    { key: "stress", Icon: IconBrain, title: t("Kako stresen je dan?"), sub: t("Psihična obremenitev vpliva na regeneracijo.") },
+  ];
+  const total = STEPS.length;
+  const cur = STEPS[step];
+  const value = checkin[cur.key];
+  const pct = Math.round(((step + 1) / total) * 100);
+  const isLast = step === total - 1;
+
+  const next = () => { if (value == null) return; if (isLast) onClose(); else setStep((s) => s + 1); };
+  const back = () => setStep((s) => Math.max(0, s - 1));
+
   return (
-    <div>
-      <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 8, display: "block" }}>{label}</Mono>
-      <div style={{ display: "flex", gap: 6 }}>
-        {Array.from({ length: count }, (_, i) => i + 1).map((n) => {
-          const on = value === n;
-          return (
-            <div key={n} style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-              <button onClick={() => onChange(n)} aria-label={String(n)} style={{
-                width: 42, height: 42, flexShrink: 0, borderRadius: "50%", cursor: "pointer", padding: 0,
-                background: fill,
-                border: `1.5px solid ${on ? C.accent : ring}`,
-                color: on ? C.accent : C.muted,
-                fontFamily: C.display, fontWeight: 700, fontSize: 13.5,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: on ? `0 0 0 4px ${C.accent}1f` : "none",
-                transform: on ? "scale(1.08)" : "scale(1)",
-                WebkitTapHighlightColor: "transparent",
-                transition: "border-color 0.16s, color 0.16s, box-shadow 0.16s, transform 0.16s cubic-bezier(0.22,1,0.36,1)",
-              }}>{n}</button>
+    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{ position: "fixed", inset: 0, zIndex: 45, background: "rgba(20,18,14,0.55)" }}>
+      <DragSheet onClose={onClose} style={{
+        position: "absolute", bottom: 0, left: 0, right: 0, maxHeight: "88%", overflowY: "auto",
+        background: C.bg, borderRadius: "28px 28px 0 0", padding: "11px 20px",
+        paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
+        animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
+      }}>
+        <style>{`@keyframes athlosCkStepIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }`}</style>
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 22px" }} />
+
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: step === 0 ? 8 : 22 }}>
+          <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.3em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
+          <h2 style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 21, color: C.text, margin: "8px 0 0", letterSpacing: "-0.01em" }}>
+            {t("Kako se počutiš danes?")}
+          </h2>
+        </div>
+
+        {step === 0 && (
+          <p style={{ fontFamily: C.display, fontSize: 13, color: C.muted, textAlign: "center", lineHeight: 1.5, margin: "0 0 22px" }}>
+            {t("Odgovori na 4 kratka vprašanja — ATHLOS iz njih izračuna tvojo pravo pripravljenost.")}
+          </p>
+        )}
+
+        {/* Progress */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+            <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPRAŠANJE")} {step + 1} {t("OD")} {total}</Mono>
+            <Mono style={{ color: C.muted2, fontSize: 9 }}>{pct}%</Mono>
+          </div>
+          <div style={{ height: 5, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
+            <div style={{ width: `${pct}%`, height: "100%", borderRadius: 999, background: C.accent, transition: "width 0.5s cubic-bezier(.22,1,.36,1)" }} />
+          </div>
+        </div>
+
+        {/* Question card — remounts per step (key=cur.key) so it slides/fades in fresh */}
+        <div key={cur.key} style={{ animation: "athlosCkStepIn 0.32s cubic-bezier(.22,1,.36,1)" }}>
+          <Card pad={22} style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 12, marginBottom: 22 }}>
+              <span style={{ width: 52, height: 52, borderRadius: "50%", background: `${C.accent}16`, border: `1px solid ${C.accent}33`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <cur.Icon size={24} color={C.accent} />
+              </span>
+              <div>
+                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, letterSpacing: "-0.01em" }}>{cur.title}</div>
+                <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, marginTop: 6, lineHeight: 1.45 }}>{cur.sub}</div>
+              </div>
             </div>
-          );
-        })}
-      </div>
+            <AnswerScale value={value} onChange={(v) => setC(cur.key, v)} C={C} t={t} />
+          </Card>
+        </div>
+
+        <PrimaryBtn onClick={next} disabled={value == null} style={{ opacity: value == null ? 0.5 : 1 }}>
+          {isLast ? t("Dokončaj") : t("Naprej")}
+        </PrimaryBtn>
+        {step > 0 && (
+          <button onClick={back} style={{ width: "100%", background: "none", border: "none", padding: "13px 0 2px", color: C.muted, fontFamily: C.display, fontWeight: 600, fontSize: 13, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+            {t("Nazaj")}
+          </button>
+        )}
+      </DragSheet>
     </div>
   );
 }
@@ -610,6 +684,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
   const lang = useLang();
   const [openStats, setOpenStats] = useState(false);
   const [openBattery, setOpenBattery] = useState(false); // battery-info sheet (tap the score)
+  const [openCheckin, setOpenCheckin] = useState(false);  // dedicated Morning Check-in flow
   const [openNotifs, setOpenNotifs] = useState(false);   // notifications sheet (bell, top-right)
   const [checkin, setCheckin] = useState(loadCheckin);
   useEffect(() => { try { localStorage.setItem(CHECKIN_KEY, JSON.stringify(checkin)); } catch {} }, [checkin]);
@@ -707,7 +782,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
     try { prompted = localStorage.getItem(key); } catch {}
     if (prompted === todayIso) return;
     try { localStorage.setItem(key, todayIso); } catch {}
-    const id = setTimeout(() => setOpenBattery(true), 650);
+    const id = setTimeout(() => setOpenCheckin(true), 650);
     return () => clearTimeout(id);
   }, [checkinPending, user?.id]);
 
@@ -837,8 +912,26 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
         <LiquidMetric value={strain ?? 0} max={21} label={t("Obremenitev")} color={C.name === "dark" ? "#E6EBF0" : "#8A929C"} decimals={1} fillAlpha={0.2} C={C} size={100} />
       </button>
 
+      {/* 3a · MORNING CHECK-IN — sits right under readiness + training load, so
+          it's the first thing the athlete sees if today's check-in is still
+          pending. Simple dark card, no emoji; tapping opens the check-in entry. */}
+      {checkinPending && (
+        <button onClick={() => setOpenCheckin(true)} aria-label={t("Izpolni današnji check-in")} style={{
+          width: "100%", textAlign: "left", cursor: "pointer", WebkitTapHighlightColor: "transparent",
+          display: "flex", alignItems: "center", gap: 9, marginBottom: 20,
+          background: C.surface, border: `1px solid ${C.border}`, borderRadius: 15, padding: "11px 13px",
+          ...rise(0.13),
+        }}>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Izpolni današnji check-in")}</span>
+            <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 3, lineHeight: 1.4 }}>{t("Odgovori na vprašanja in posodobi svojo pripravljenost.")}</span>
+          </span>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6" /></svg>
+        </button>
+      )}
+
       {/* 4 · TODAY'S RECOMMENDATION — AI call + short explanation */}
-      <div style={{ marginBottom: 20, ...rise(0.13) }}>
+      <div style={{ marginBottom: 20, ...rise(0.16) }}>
         <SectionLabel>{t("PRIPOROČILO")}</SectionLabel>
         <Card>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -849,26 +942,9 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
         </Card>
       </div>
 
-      {/* 4a · MORNING CHECK-IN — simple dark card, no emoji. Only until today's
-          check-in is done; tapping opens the check-in entry. */}
-      {checkinPending && (
-        <button onClick={() => setOpenBattery(true)} aria-label={t("Izpolni današnji check-in")} style={{
-          width: "100%", textAlign: "left", cursor: "pointer", WebkitTapHighlightColor: "transparent",
-          display: "flex", alignItems: "center", gap: 9, marginBottom: 20,
-          background: C.surface, border: `1px solid ${C.border}`, borderRadius: 15, padding: "11px 13px",
-          ...rise(0.14),
-        }}>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Izpolni današnji check-in")}</span>
-            <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 3, lineHeight: 1.4 }}>{t("Odgovori na vprašanja in posodobi svojo pripravljenost.")}</span>
-          </span>
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-      )}
-
       {/* 4b · RECENT CHECK-INS — real logged entries, same column style as the
           workout meta row so it sits cleanly with the rest of the home page. */}
-      <div style={{ marginBottom: 20, ...rise(0.15) }}>
+      <div style={{ marginBottom: 20, ...rise(0.19) }}>
         <SectionLabel>{t("ZADNJI CHECK-INI")}</SectionLabel>
         <Card>
           {recentCheckins.length === 0 ? (
@@ -906,7 +982,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 5 · TODAY'S WORKOUT — name · meta · big Start button */}
-      <div style={{ marginBottom: 20, ...rise(0.16) }}>
+      <div style={{ marginBottom: 20, ...rise(0.22) }}>
         <SectionLabel>{t("DANAŠNJI TRENING")} · 17:00</SectionLabel>
         <Card pad={22}>
           <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 21, margin: "0 0 13px", color: C.text, lineHeight: 1.12, letterSpacing: "-0.01em" }}>{t("Moč · Spodnji del")}</h2>
@@ -934,7 +1010,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 6 · RECOVERY SUMMARY — Sleep · Recovery · Fatigue · Mood in one row */}
-      <div style={{ marginBottom: 20, ...rise(0.19) }}>
+      <div style={{ marginBottom: 20, ...rise(0.25) }}>
         <SectionLabel>{t("STANJE")}</SectionLabel>
         <div style={{ display: "flex", gap: 6 }}>
           <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Spanje").toUpperCase()} value={hasData ? `${checkin.sleepH}h` : "—"} barPct={hasData ? Math.min(1, (checkin.sleepH || 0) / 8) : 0} />
@@ -1092,12 +1168,23 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
               <span style={{ flex: 1, height: 1, background: C.border }} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <Slider label={t("SPANEC")} value={checkin.sleepH} min={4} max={10} step={0.1} suffix="h" onChange={(v) => setC("sleepH", v)} C={C} />
-              <RatingDots label={t("KAKOVOST SPANJA")} value={checkin.sleepQuality} onChange={(v) => setC("sleepQuality", v)} C={C} />
-              <RatingDots label={t("POČUTJE")} value={checkin.mood} onChange={(v) => setC("mood", v)} C={C} />
-              <RatingDots label={t("SORNOST (MIŠICE)")} value={checkin.soreness} onChange={(v) => setC("soreness", v)} C={C} />
-              <RatingDots label={t("STRES")} value={checkin.stress} onChange={(v) => setC("stress", v)} C={C} />
-              <Slider label={t("HIDRACIJA")} value={checkin.hydration} min={0} max={120} suffix="%" onChange={(v) => setC("hydration", v)} C={C} />
+              {/* Compact summary of today's answers — the actual Q&A flow now
+                  lives in its own dedicated MorningCheckinFlow sheet. */}
+              <button onClick={() => setOpenCheckin(true)} style={{
+                display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left",
+                background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 14, padding: "11px 13px",
+                cursor: "pointer", WebkitTapHighlightColor: "transparent",
+              }}>
+                <span style={{ flex: 1, minWidth: 0, display: "flex", gap: 12 }}>
+                  {[[t("SPANJE"), `${checkin.sleepQuality}/5`], [t("POČUTJE"), `${checkin.mood}/5`], [t("SORNOST"), `${checkin.soreness}/5`], [t("STRES"), `${checkin.stress}/5`]].map(([k, v]) => (
+                    <span key={k}>
+                      <Mono style={{ color: C.muted2, fontSize: 7.5, display: "block" }}>{k}</Mono>
+                      <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 12.5, color: C.text }}>{v}</span>
+                    </span>
+                  ))}
+                </span>
+                <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 11.5, color: C.accent, flexShrink: 0, whiteSpace: "nowrap" }}>{t("Uredi")}</span>
+              </button>
               <div>
                 <Mono style={{ color: C.muted, fontSize: 9, marginBottom: 5, display: "block" }}>{t("FAZA SEZONE")}</Mono>
                 <div style={{ display: "flex", gap: 6 }}>
@@ -1110,6 +1197,11 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
             </div>
           </DragSheet>
         </div>
+      )}
+
+      {/* ── MORNING CHECK-IN — dedicated flagship flow, one question at a time ── */}
+      {openCheckin && (
+        <MorningCheckinFlow checkin={checkin} setC={setC} onClose={() => setOpenCheckin(false)} C={C} t={t} />
       )}
     </div>
   );

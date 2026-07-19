@@ -837,7 +837,11 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
               </div>
             )}
 
-            {/* people rail — me (+ new chat) and clubmates, reference stories row */}
+            {/* people rail — me (+ new chat), then whoever you've actually
+                messaged, most-recently-active conversation first (`convs` is
+                already sorted that way by listConversations/loadConvs). Starting
+                or replying to a chat surfaces that person here automatically —
+                this is conversation history, not the full clubmate roster. */}
             <div className="athlos-scroll" style={{ display: "flex", gap: 10, overflowX: "auto", scrollbarWidth: "none", padding: "2px 2px 10px" }}>
               <button onClick={() => setView("new-chat")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0, width: 60 }}>
                 <span style={{ position: "relative" }}>
@@ -848,13 +852,16 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
                 </span>
                 <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 10, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>{t("Jaz")}</span>
               </button>
-              {clubmates.filter(m => !blocks.includes(m.user_id)).slice(0, 12).map(m => (
-                <button key={m.user_id} onClick={() => startChat(m.user_id, m)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0, width: 60 }}>
+              {convs
+                .filter(c => c.type === "direct" && c.otherUser && !blocks.includes(c.otherUser.user_id))
+                .slice(0, 12)
+                .map(c => (
+                <button key={c.id} onClick={() => openConv(c)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", WebkitTapHighlightColor: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, flexShrink: 0, width: 60 }}>
                   <span style={{ padding: 2, borderRadius: "50%", border: `1.5px solid ${C.accent}55` }}>
-                    <Avatar initials={m.initials} photo={m.photo} size={52} />
+                    <Avatar initials={convInitials(c)} photo={c.otherUser?.photo} size={52} />
                   </span>
                   <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 10, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 60 }}>
-                    {(m.name || "?").trim().split(/\s+/)[0]}
+                    {(c.otherUser?.name || "?").trim().split(/\s+/)[0]}
                   </span>
                 </button>
               ))}
