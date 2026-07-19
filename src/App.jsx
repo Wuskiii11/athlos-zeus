@@ -784,7 +784,7 @@ export default function AthlosApp() {
           </div>}
 
           {/* Pickers */}
-          {dp && <DatePicker value={dp.value} onChange={v => { dp.onChange(v); setDp(null); }} onClose={() => setDp(null)} futureDays={dp.futureDays} />}
+          {dp && <DatePicker value={dp.value} onChange={v => { dp.onChange(v); setDp(null); }} onClose={() => setDp(null)} futureDays={dp.futureDays} wheel={dp.wheel} yearsAhead={dp.yearsAhead} label={dp.label} />}
           {tp && <TimePicker value={tp.value} onChange={v => { tp.onChange(v); setTp(null); }} onClose={() => setTp(null)} />}
         </div>
       )}

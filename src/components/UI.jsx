@@ -6,19 +6,24 @@ export function useCountUp(target) {
   return target;
 }
 
-export function Pressable({ children, onClick, style, scale = 0.98, disabled }) {
+export function Pressable({ children, onClick, style, scale = 0.98, disabled, className }) {
   const [pressed, setPressed] = useState(false);
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      className={className}
       onPointerDown={() => !disabled && setPressed(true)}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
       style={{
         cursor: disabled ? "default" : "pointer",
         transition: "transform 0.12s ease, opacity 0.12s",
-        transform: pressed ? `scale(${scale})` : "scale(1)",
+        // transform is only set inline while actively pressed — resting/hover
+        // transforms (e.g. .at-card-hover's lift) come from CSS, and inline
+        // style always wins over a stylesheet rule, so this can't stay
+        // unconditionally "scale(1)" or the CSS hover lift would be dead code.
+        ...(pressed ? { transform: `scale(${scale})` } : {}),
         WebkitTapHighlightColor: "transparent",
         opacity: disabled ? 0.45 : 1,
         ...style,
@@ -207,6 +212,7 @@ export const PrimaryBtn = ({ children, onClick, style, disabled }) => {
     <button
       onClick={onClick}
       disabled={disabled}
+      className="at-btn-primary"
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
@@ -220,7 +226,10 @@ export const PrimaryBtn = ({ children, onClick, style, disabled }) => {
         boxShadow: pressed ? "none" : C.glowSoft,
         WebkitTapHighlightColor: "transparent",
         transition: "transform 0.12s ease, box-shadow 0.12s ease",
-        transform: pressed ? "scale(0.98)" : "scale(1)",
+        // only set inline while pressed — resting/hover comes from
+        // .at-btn-primary in index.css (inline style otherwise wins and the
+        // CSS hover-lift would never get a chance to apply)
+        ...(pressed ? { transform: "scale(0.98)" } : {}),
         ...style,
       }}
     >
@@ -347,7 +356,7 @@ export function Card({ children, onClick, style, pad = 16, radius = 18 }) {
     ...style,
   };
   return onClick
-    ? <Pressable onClick={onClick} scale={0.99} style={{ ...base, width: "100%", textAlign: "left", display: "block" }}>{children}</Pressable>
+    ? <Pressable onClick={onClick} scale={0.99} className="at-card-hover" style={{ ...base, width: "100%", textAlign: "left", display: "block" }}>{children}</Pressable>
     : <div style={base}>{children}</div>;
 }
 
@@ -391,6 +400,6 @@ export function StatTile({ label, value, sub, onClick, barPct, color, valueColor
     ...style,
   };
   return onClick
-    ? <Pressable onClick={onClick} scale={0.98} style={{ ...base, width: "100%", display: "block" }}>{inner}</Pressable>
+    ? <Pressable onClick={onClick} scale={0.98} className="at-card-hover" style={{ ...base, width: "100%", display: "block" }}>{inner}</Pressable>
     : <div style={base}>{inner}</div>;
 }

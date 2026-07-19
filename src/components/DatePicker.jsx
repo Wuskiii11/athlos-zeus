@@ -212,7 +212,99 @@ function BirthDatePicker({ value, onChange, onClose }) {
   );
 }
 
-export default function DatePicker({ value, onChange, onClose, futureDays }) {
+/* ── Future wheel picker — same day/month/year WheelColumn mechanics as
+   BirthDatePicker (the "isti kolesce kot datum rojstva" ask), but scoped to
+   today…+yearsAhead instead of birth-year…now-10-years, and no age hero
+   (there's no "age" concept for an event date). Used for scheduling things
+   like community events. ── */
+function FutureWheelDatePicker({ value, onChange, onClose, yearsAhead = 2, label }) {
+  const C = useTheme();
+  const t = useT();
+  const lang = useLang();
+  const months = lang === "en" ? MONTHS_EN : MONTHS_SL;
+  const minDate = new Date(); minDate.setHours(0, 0, 0, 0);
+  const maxDate = new Date(minDate); maxDate.setFullYear(maxDate.getFullYear() + yearsAhead);
+  const init = value ? new Date(value + "T00:00:00") : minDate;
+
+  const startY = minDate.getFullYear();
+  const endY = maxDate.getFullYear();
+  const years = Array.from({ length: endY - startY + 1 }, (_, i) => startY + i);
+  const monthIdxs = Array.from({ length: 12 }, (_, i) => i);
+
+  const [day, setDay] = useState(init.getDate());
+  const [month, setMonth] = useState(init.getMonth());
+  const [year, setYear] = useState(Math.max(startY, Math.min(init.getFullYear(), endY)));
+
+  const dim = daysInMonth(year, month);
+  const days = Array.from({ length: dim }, (_, i) => i + 1);
+
+  // Clamp day when the month/year combo shortens it (e.g. 31 → 28/29/30)
+  useEffect(() => { if (day > dim) setDay(dim); }, [dim]); // eslint-disable-line
+  // Clamp so the date can never land before today…
+  useEffect(() => { if (year === startY && month < minDate.getMonth()) setMonth(minDate.getMonth()); }, [year]); // eslint-disable-line
+  useEffect(() => { if (year === startY && month === minDate.getMonth() && day < minDate.getDate()) setDay(minDate.getDate()); }, [year, month]); // eslint-disable-line
+  // …or past the +yearsAhead ceiling.
+  useEffect(() => { if (year === endY && month > maxDate.getMonth()) setMonth(maxDate.getMonth()); }, [year]); // eslint-disable-line
+  useEffect(() => { if (year === endY && month === maxDate.getMonth() && day > maxDate.getDate()) setDay(maxDate.getDate()); }, [year, month]); // eslint-disable-line
+
+  const sel = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const confirm = () => { onChange(sel); onClose(); };
+
+  const fmtSel = () => {
+    const d = new Date(sel + "T00:00:00");
+    return `${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()}`;
+  };
+
+  return (
+    <div style={{
+      position: "absolute", inset: 0, zIndex: 60,
+      background: C.bg, color: C.text,
+      display: "flex", flexDirection: "column",
+      paddingTop: "max(env(safe-area-inset-top, 16px), 16px)",
+      paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)",
+      animation: "dpFull 0.34s cubic-bezier(.22,1,.36,1)",
+      overflow: "hidden",
+    }}>
+      <style>{`@keyframes dpFull { from { transform:translateY(5%); opacity:0; } to { transform:translateY(0); opacity:1; } }`}</style>
+
+      <button onClick={onClose} aria-label={t("Prekliči")} style={{
+        position: "absolute", top: "max(env(safe-area-inset-top, 14px), 14px)", left: 18, zIndex: 2,
+        width: 38, height: 38, borderRadius: "50%", cursor: "pointer",
+        background: C.surface, border: `1px solid ${C.border}`,
+        color: C.text, fontSize: 18, lineHeight: 1,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        WebkitTapHighlightColor: "transparent",
+      }}>×</button>
+
+      <div style={{ textAlign: "center", padding: "30px 16px 8px" }}>
+        <Mono style={{ color: C.gold, fontSize: 9, letterSpacing: "0.26em" }}>{label || t("IZBRANI DATUM")}</Mono>
+        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 32, color: C.text, marginTop: 10, letterSpacing: "-0.02em" }}>
+          {fmtSel()}
+        </div>
+      </div>
+
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "0 10px" }}>
+        <WheelColumn items={days} value={day} onChange={setDay} width={62} C={C} />
+        <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width={140} C={C} render={(m) => months[m]} />
+        <WheelColumn items={years} value={year} onChange={setYear} width={78} C={C} />
+      </div>
+
+      <div style={{ padding: "8px 16px 5px" }}>
+        <button onClick={confirm} style={{
+          width: "100%", padding: "11px", borderRadius: 999, border: "none",
+          background: C.btn, color: C.btnText,
+          fontFamily: C.display, fontWeight: 700, fontSize: 14,
+          cursor: "pointer", WebkitTapHighlightColor: "transparent",
+        }}>
+          {t("Potrdi datum")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function DatePicker({ value, onChange, onClose, futureDays, wheel, yearsAhead, label }) {
+  if (wheel) return <FutureWheelDatePicker value={value} onChange={onChange} onClose={onClose} yearsAhead={yearsAhead} label={label} />;
   if (futureDays != null) return <FutureDatePicker value={value} onChange={onChange} onClose={onClose} futureDays={futureDays} />;
   return <BirthDatePicker value={value} onChange={onChange} onClose={onClose} />;
 }

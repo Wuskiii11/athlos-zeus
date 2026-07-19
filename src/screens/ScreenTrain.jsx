@@ -23,10 +23,11 @@ const SESSION = {
   stats: { time: "62", intens: "82", volume: "8.6", kcal: "480" },
   warmup: { name: "Ogrevanje", info: "5 vaj · 8 min" },
   cooldown: { name: "Ohlajanje", info: "4 koraki · 7 min" },
+  // Exercise names are always English — see the note in lib/coachOffline.js.
   block: [
-    { block: "A1", cat: "GLAVNI DVIG", name: "Počep", tag: "VBT", reps: 5, load: 120, unit: "KG", sets: 4, chart: true },
-    { block: "A2", cat: "EKSPLOZIVNOST", name: "Skok na zaboj", reps: 3, load: 60, unit: "CM", sets: 3 },
-    { block: "A3", cat: "STABILNOST", name: "Köbenhavnska deska", reps: 30, load: 0, unit: "S", sets: 3 },
+    { block: "A1", cat: "GLAVNI DVIG", name: "Squat", tag: "VBT", reps: 5, load: 120, unit: "KG", sets: 4, chart: true },
+    { block: "A2", cat: "EKSPLOZIVNOST", name: "Box jump", reps: 3, load: 60, unit: "CM", sets: 3 },
+    { block: "A3", cat: "STABILNOST", name: "Copenhagen plank", reps: 30, load: 0, unit: "S", sets: 3 },
   ],
 };
 

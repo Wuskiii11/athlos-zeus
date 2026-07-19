@@ -1,28 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Plus } from "lucide-react";
 import { useTheme } from "../theme";
 import ScreenChat from "./ScreenChat";
+import CommunityDetail, { CreateCommunitySheet } from "./widgets/CommunityDetail";
+import { listCommunities, joinCommunity, leaveCommunity, getCommunity, hasSupabase } from "../lib/api";
 
 // ══════════════════════════════════════════════════════════════
 // ATHLOS — Community
 // Two sections: Private (real groups + chats — the existing ScreenChat
 // engine, Supabase-backed) and Public (discover communities). Premium,
 // minimal, WHOOP-inspired but fully ATHLOS.
+//
+// Public communities are real rows (public.communities / community_members
+// in Supabase, see supabase/schema.sql) — currently seeded with exactly two:
+// Slovenija and Muharji, every already-registered athlete added as a member.
 // ══════════════════════════════════════════════════════════════
-
-// ── Mock data (→ Supabase later) ─────────────────────────────
-// communities → public.communities (public, discoverable)
-const FEATURED = {
-  id: "sl", flag: "🇸🇮", name: "Slovenia",
-  description: "Official Athlos community for athletes from Slovenia. Share workouts, compete on leaderboards and connect with local members.",
-  members: 2438, activeToday: 412,
-};
-
-const TRENDING = [
-  { id: "hr", icon: "🇭🇷", name: "Croatia",          members: 1800 },
-  { id: "run", icon: "🏃", name: "Running",           members: 9200 },
-  { id: "cyc", icon: "🚴", name: "Cycling",           members: 6100 },
-  { id: "str", icon: "🏋️", name: "Strength Training", members: 8400 },
-];
 
 const fmt = (n) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k` : `${n}`);
 const haptic = () => { try { navigator.vibrate?.(8); } catch {} };
@@ -84,13 +76,28 @@ function SearchBar({ value, onChange, placeholder, C }) {
   );
 }
 
+// Picture for a community: a real photo (Muharji, once it has one) beats an
+// emoji flag (Slovenija's 🇸🇮) beats a plain first-letter disc (same graceful
+// fallback used for people's avatars elsewhere in the app).
+function CommunityPicture({ community, size, C }) {
+  const base = { width: size, height: size, borderRadius: "50%", flexShrink: 0, background: C.surface3, border: `1px solid ${C.border2}`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" };
+  if (community.image_url) return <span style={base}><img src={community.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></span>;
+  if (community.flag) return <span style={{ ...base, fontSize: size * 0.42 }}>{community.flag}</span>;
+  return <span style={{ ...base, fontFamily: C.display, fontWeight: 700, fontSize: size * 0.42, color: C.muted }}>{(community.name || "?").trim().charAt(0).toUpperCase()}</span>;
+}
+
 // ── CommunityCard — variant "featured" (hero) or "trending" ──
-function CommunityCard({ community, variant, C, onJoin }) {
-  const [joined, setJoined] = useState(false);
+function CommunityCard({ community, variant, C, onToggleJoin, onOpen }) {
+  const joined = !!community.myRole;
+  const isAdmin = community.myRole === "admin";
+  // A private community can't be self-joined (needs its invite code) — send
+  // that tap to the detail screen, which has the actual code-entry field,
+  // instead of firing a join request that RLS would just silently refuse.
+  const isPrivate = community.privacy === "private";
   const JoinBtn = (
     <button
       className="ath-press"
-      onClick={(e) => { e.stopPropagation(); haptic(); setJoined((v) => !v); onJoin?.(community); }}
+      onClick={(e) => { e.stopPropagation(); haptic(); (!joined && isPrivate) ? onOpen?.(community) : onToggleJoin?.(community); }}
       style={{
         border: "none", borderRadius: 999, padding: "7px 13px", cursor: "pointer", flexShrink: 0,
         fontFamily: C.display, fontWeight: 800, fontSize: 11.5, WebkitTapHighlightColor: "transparent",
@@ -100,47 +107,56 @@ function CommunityCard({ community, variant, C, onJoin }) {
         outline: joined ? `1px solid ${C.border2}` : "none",
         transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
       }}>
-      {joined ? "Joined" : "Join"}
+      {joined ? "Joined" : isPrivate ? "Enter code" : "Join"}
     </button>
+  );
+  // Small precious badge — only the actual community admin(s) see this on
+  // their own card, not a generic decoration.
+  const AdminBadge = isAdmin && (
+    <span style={{ fontFamily: C.mono, fontSize: 8, fontWeight: 700, letterSpacing: "0.14em", color: C.accent, border: `1px solid ${C.accent}45`, background: `${C.accent}14`, borderRadius: 999, padding: "2px 7px", flexShrink: 0 }}>ADMIN</span>
   );
 
   if (variant === "featured") {
     return (
-      <div style={{
-        position: "relative", overflow: "hidden", borderRadius: 18, padding: 20,
+      <div className="ath-press" onClick={() => onOpen?.(community)} style={{
+        position: "relative", overflow: "hidden", borderRadius: 18, padding: 20, cursor: "pointer",
         background: `radial-gradient(120% 90% at 85% -10%, ${C.accent}1f, transparent 55%), ${C.surface}`,
         border: `1px solid ${C.accent}22`,
         boxShadow: `0 10px 34px rgba(0,0,0,0.4), 0 0 0 1px ${C.accent}0a`,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ width: 58, height: 58, borderRadius: "50%", flexShrink: 0, fontSize: 24, background: C.surface3, border: `1px solid ${C.border2}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{community.flag}</span>
+          <CommunityPicture community={community} size={58} C={C} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.18em", color: C.accent, marginBottom: 4 }}>FEATURED</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+              <span style={{ fontFamily: C.mono, fontSize: 8.5, letterSpacing: "0.18em", color: C.accent }}>FEATURED</span>
+              {AdminBadge}
+            </div>
             <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, letterSpacing: "-0.01em" }}>{community.name}</div>
           </div>
           {JoinBtn}
         </div>
-        <p style={{ fontFamily: C.display, fontSize: 12, lineHeight: 1.55, color: C.text2, margin: "10px 0 11px" }}>{community.description}</p>
-        <div style={{ display: "flex", gap: 8 }}>
-          {[["Members", fmt(community.members)], ["Active today", fmt(community.activeToday)]].map(([k, v]) => (
-            <div key={k} style={{ flex: 1, borderRadius: 14, padding: "9px 10px", background: C.surface2, border: `1px solid ${C.border}` }}>
-              <div style={{ fontFamily: C.mono, fontSize: 8, letterSpacing: "0.12em", color: C.muted2 }}>{k.toUpperCase()}</div>
-              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, marginTop: 4 }}>{v}</div>
-            </div>
-          ))}
+        {community.description && <p style={{ fontFamily: C.display, fontSize: 12, lineHeight: 1.55, color: C.text2, margin: "10px 0 11px" }}>{community.description}</p>}
+        <div style={{ display: "flex", gap: 8, marginTop: community.description ? 0 : 12 }}>
+          <div style={{ flex: 1, borderRadius: 14, padding: "9px 10px", background: C.surface2, border: `1px solid ${C.border}` }}>
+            <div style={{ fontFamily: C.mono, fontSize: 8, letterSpacing: "0.12em", color: C.muted2 }}>MEMBERS</div>
+            <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, marginTop: 4 }}>{fmt(community.members)}</div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="ath-press" style={{
-      display: "flex", alignItems: "center", gap: 10, padding: "9px 11px",
+    <div className="ath-press" onClick={() => onOpen?.(community)} style={{
+      display: "flex", alignItems: "center", gap: 10, padding: "9px 11px", cursor: "pointer",
       background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16,
     }}>
-      <span style={{ width: 44, height: 44, borderRadius: "50%", flexShrink: 0, fontSize: 17, background: C.surface3, display: "flex", alignItems: "center", justifyContent: "center" }}>{community.icon}</span>
+      <CommunityPicture community={community} size={44} C={C} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{community.name}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{community.name}</div>
+          {AdminBadge}
+        </div>
         <div style={{ fontFamily: C.display, fontSize: 11, color: C.muted, marginTop: 2 }}>{fmt(community.members)} members</div>
       </div>
       {JoinBtn}
@@ -165,26 +181,60 @@ function PrivateTab({ user, profile, onConvOpenChange }) {
   );
 }
 
-// ── Public ────────────────────────────────────────────────────
-function PublicTab({ C }) {
+// ── Public — real communities (public.communities / community_members in
+// Supabase). Slovenija (has a description) leads as the featured hero; any
+// others (Muharji, and whatever gets added later) list below it. ──
+function PublicTab({ C, user, onOpen, reloadRef }) {
   const [q, setQ] = useState("");
-  const trending = TRENDING.filter((c) => c.name.toLowerCase().includes(q.trim().toLowerCase()));
+  const [communities, setCommunities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const reload = useCallback(() => {
+    listCommunities(user?.id).then(setCommunities).catch(() => {}).finally(() => setLoading(false));
+  }, [user?.id]);
+  useEffect(() => { reload(); }, [reload]);
+  // Let the parent screen trigger a refresh too (e.g. right after creating
+  // a new community, or when a detail view is closed after a join/leave).
+  useEffect(() => { if (reloadRef) reloadRef.current = reload; }, [reloadRef, reload]);
+
+  const toggleJoin = async (community) => {
+    // Optimistic — flip locally first, then fire the real request.
+    const wasJoined = !!community.myRole;
+    setCommunities((list) => list.map((c) => c.id === community.id
+      ? { ...c, myRole: wasJoined ? null : "member", members: c.members + (wasJoined ? -1 : 1) }
+      : c));
+    if (!hasSupabase) return; // demo mode: no persistence to reload from — keep the optimistic flip
+    try {
+      if (wasJoined) await leaveCommunity(community.id, user?.id);
+      else await joinCommunity(community.id, user?.id);
+    } catch {}
+    reload();
+  };
+
+  // Search by name, description, sport or country (spec: "tags" don't exist
+  // as their own concept in this data model, so they're not searched).
+  const needle = q.trim().toLowerCase();
+  const filtered = !needle ? communities : communities.filter((c) =>
+    [c.name, c.description, c.sport, c.country].some((f) => f && f.toLowerCase().includes(needle)));
+  const featured = !q && filtered.find((c) => c.slug === "slovenija");
+  const rest = filtered.filter((c) => c !== featured);
+
   return (
     <div style={{ animation: "athlosCommFade 0.3s ease" }}>
       <div style={{ marginBottom: 15 }}>
         <SearchBar value={q} onChange={setQ} placeholder="Search communities…" C={C} />
       </div>
 
-      {!q && (
+      {featured && (
         <div style={{ marginBottom: 17 }}>
-          <CommunityCard community={FEATURED} variant="featured" C={C} />
+          <CommunityCard community={featured} variant="featured" C={C} onToggleJoin={toggleJoin} onOpen={onOpen} />
         </div>
       )}
 
-      <SectionHeader C={C}>Trending Communities</SectionHeader>
+      <SectionHeader C={C}>{featured ? "Communities" : "All Communities"}</SectionHeader>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {trending.map((c) => <CommunityCard key={c.id} community={c} variant="trending" C={C} />)}
-        {trending.length === 0 && (
+        {rest.map((c) => <CommunityCard key={c.id} community={c} variant="trending" C={C} onToggleJoin={toggleJoin} onOpen={onOpen} />)}
+        {!loading && filtered.length === 0 && (
           <div style={{ textAlign: "center", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 13, padding: "15px 0" }}>
             No communities match “{q}”.
           </div>
@@ -201,6 +251,22 @@ function PublicTab({ C }) {
 export default function ScreenCommunity({ user, profile, onConvOpenChange }) {
   const C = useTheme();
   const [tab, setTab] = useState("private");
+  const [openCommunity, setOpenCommunity] = useState(null); // full community row, or null
+  const [showCreate, setShowCreate] = useState(false);
+  const publicReloadRef = useRef(null);
+
+  const openDetail = async (community) => {
+    haptic();
+    // Re-fetch the full row (invite_code etc. aren't on the list-view shape).
+    const full = await getCommunity(community.id, user?.id).catch(() => null);
+    setOpenCommunity(full || community);
+    onConvOpenChange?.(true); // same full-screen treatment as an open chat
+  };
+  const closeDetail = () => {
+    setOpenCommunity(null);
+    onConvOpenChange?.(false);
+    publicReloadRef.current?.();
+  };
 
   return (
     <div style={{ padding: "8px 13px 26px", color: C.text, position: "relative", minHeight: "100%" }}>
@@ -224,7 +290,28 @@ export default function ScreenCommunity({ user, profile, onConvOpenChange }) {
 
       {tab === "private"
         ? <PrivateTab user={user} profile={profile} onConvOpenChange={onConvOpenChange} />
-        : <PublicTab C={C} />}
+        : <PublicTab C={C} user={user} onOpen={openDetail} reloadRef={publicReloadRef} />}
+
+      {/* Create Community FAB — Public tab only */}
+      {tab === "public" && (
+        <button onClick={() => { haptic(); setShowCreate(true); }} aria-label="Create Community" style={{
+          position: "fixed", bottom: "calc(90px + env(safe-area-inset-bottom, 0px))", right: 20, zIndex: 5,
+          width: 54, height: 54, borderRadius: "50%", border: "none", cursor: "pointer",
+          background: C.accent, color: C.btnText, display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: `0 10px 26px ${C.accent}45`, WebkitTapHighlightColor: "transparent",
+        }}>
+          <Plus size={24} strokeWidth={2.3} />
+        </button>
+      )}
+
+      {openCommunity && (
+        <CommunityDetail community={openCommunity} user={user} C={C} onClose={closeDetail} onChanged={() => publicReloadRef.current?.()} />
+      )}
+
+      {showCreate && (
+        <CreateCommunitySheet user={user} C={C} onClose={() => setShowCreate(false)}
+          onCreated={(c) => { publicReloadRef.current?.(); if (c) openDetail(c); }} />
+      )}
     </div>
   );
 }

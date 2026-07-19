@@ -326,6 +326,104 @@ create policy "blocks select" on public.blocks for select using (blocker_id = au
 create policy "blocks insert" on public.blocks for insert with check (blocker_id = auth.uid());
 create policy "blocks delete" on public.blocks for delete using (blocker_id = auth.uid());
 
+-- ════════════════════════════════════════════════════════════
+-- Communities — public, discoverable groups (Slovenija, Muharji, …)
+-- ════════════════════════════════════════════════════════════
+create table if not exists public.communities (
+  id          uuid primary key default gen_random_uuid(),
+  slug        text unique not null,   -- stable key, e.g. 'slovenija'
+  name        text not null,
+  description text,
+  flag        text,        -- emoji shown as the community's picture (e.g. '🇸🇮')
+  image_url   text,        -- real photo/logo URL (Storage) — takes priority over `flag`
+  created_at  timestamptz default now()
+);
+
+alter table public.communities enable row level security;
+
+drop policy if exists "communities read" on public.communities;
+create policy "communities read" on public.communities for select using (true);
+
+create table if not exists public.community_members (
+  community_id uuid not null references public.communities(id) on delete cascade,
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  role         text not null default 'member' check (role in ('member','admin')),
+  joined_at    timestamptz default now(),
+  primary key (community_id, user_id)
+);
+
+alter table public.community_members enable row level security;
+
+drop policy if exists "cmem select" on public.community_members;
+drop policy if exists "cmem insert" on public.community_members;
+drop policy if exists "cmem delete" on public.community_members;
+
+-- Public communities: the member roster is visible to everyone (like seeing
+-- who's in a public channel before you join) — matches `communities read`.
+create policy "cmem select" on public.community_members for select using (true);
+-- A user can only ever add THEMSELVES.
+create policy "cmem insert" on public.community_members for insert with check (user_id = auth.uid());
+-- A user can leave a community themselves.
+create policy "cmem delete" on public.community_members for delete using (user_id = auth.uid());
+
+-- Same escalation-lock pattern as profiles.role (see lock_profile_role
+-- above): a client joining via the app can only ever become 'member'; only
+-- the SQL editor / service role (auth.uid() is null there) may grant 'admin'.
+create or replace function public.lock_community_member_role()
+returns trigger language plpgsql security definer as $$
+begin
+  if auth.uid() is null then
+    return new;
+  end if;
+  if tg_op = 'INSERT' then
+    new.role := 'member';
+  else
+    new.role := old.role;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists community_members_lock_role on public.community_members;
+create trigger community_members_lock_role
+  before insert or update on public.community_members
+  for each row execute procedure public.lock_community_member_role();
+
+-- Seed the two real communities (idempotent — safe to re-run).
+insert into public.communities (slug, name, description, flag)
+values ('slovenija', 'Slovenija', 'Uradna Athlos skupnost za športnike iz Slovenije. Deli treninge, tekmuj na lestvicah in poveži se z lokalnimi člani.', '🇸🇮')
+on conflict (slug) do nothing;
+
+-- ⚠️ Ni še prave slike zate — ko jo dobiš (image_url v Storage ali drug
+-- javen URL), zaženi: update public.communities set image_url = '...' where slug = 'muharji';
+insert into public.communities (slug, name, description, image_url)
+values ('muharji', 'Muharji', null, null)
+on conflict (slug) do nothing;
+
+-- Backfill: doda VSE trenutno registrirane uporabnike kot člane obeh
+-- skupnosti. Enkratno — kdorkoli se registrira ODSLEJ, se NE pridruži
+-- samodejno (na uporabnikovo željo).
+insert into public.community_members (community_id, user_id, role)
+select c.id, p.id, 'member'
+from public.communities c
+cross join public.profiles p
+where c.slug in ('slovenija', 'muharji')
+on conflict (community_id, user_id) do nothing;
+
+-- Naredi SVOJ račun administratorja OBEH skupnosti — zamenjaj spodnji
+-- e-naslov s svojim pravim, PREDEN poženeš to skripto.
+do $$
+declare
+  admin_id uuid;
+begin
+  select id into admin_id from auth.users where email = 'PUT_YOUR_EMAIL_HERE';
+  if admin_id is not null then
+    update public.community_members set role = 'admin'
+    where user_id = admin_id
+      and community_id in (select id from public.communities where slug in ('slovenija', 'muharji'));
+  end if;
+end $$;
+
 -- Storage bucket for chat attachments (public so image URLs render directly)
 insert into storage.buckets (id, name, public) values ('chat-attachments', 'chat-attachments', true)
   on conflict (id) do nothing;
@@ -345,3 +443,283 @@ drop policy if exists "avatars upd"   on storage.objects;
 create policy "avatars read"  on storage.objects for select using (bucket_id = 'avatars');
 create policy "avatars write" on storage.objects for insert to authenticated with check (bucket_id = 'avatars');
 create policy "avatars upd"   on storage.objects for update to authenticated using (bucket_id = 'avatars') with check (bucket_id = 'avatars');
+
+-- ════════════════════════════════════════════════════════════
+-- Communities — full module: create-your-own, private (invite code),
+-- feed (posts/likes/comments), events, member follows.
+-- Weekly rankings/"active members" are computed from real `workouts` rows —
+-- there is no distance/calorie/strain telemetry anywhere in this app, so the
+-- leaderboard only ever ranks by an actually-true number: workouts logged.
+-- ════════════════════════════════════════════════════════════
+
+alter table public.communities add column if not exists sport text;
+alter table public.communities add column if not exists country text;
+alter table public.communities add column if not exists privacy text not null default 'public' check (privacy in ('public','private'));
+alter table public.communities add column if not exists cover_url text;
+alter table public.communities add column if not exists rules text;
+alter table public.communities add column if not exists weekly_challenge text;
+alter table public.communities add column if not exists invite_code text;
+alter table public.communities add column if not exists created_by uuid references auth.users(id) on delete set null;
+
+create unique index if not exists communities_invite_code_unique
+  on public.communities (invite_code) where invite_code is not null;
+
+-- Membership-checking helpers, security definer so RLS on other tables can
+-- call them without recursing (same trick as is_conversation_member above).
+create or replace function public.is_community_member(cid uuid)
+returns boolean language sql security definer as $$
+  select exists (
+    select 1 from public.community_members
+    where community_id = cid and user_id = auth.uid()
+  );
+$$;
+
+create or replace function public.is_community_admin(cid uuid)
+returns boolean language sql security definer as $$
+  select exists (
+    select 1 from public.community_members
+    where community_id = cid and user_id = auth.uid() and role = 'admin'
+  );
+$$;
+
+-- "communities read" (using true, above) is a full-ROW public policy so
+-- public communities stay browsable/searchable — but Postgres RLS can't
+-- filter individual COLUMNS, and invite_code must stay admin-only (the
+-- entire point of a private community). The client-side queries in api.js
+-- never select invite_code directly for that reason; it's only ever
+-- fetched through this function, which enforces the admin check itself.
+create or replace function public.get_community_invite_code(cid uuid)
+returns text language sql security definer as $$
+  select invite_code from public.communities
+  where id = cid and public.is_community_admin(cid);
+$$;
+
+-- Same client-can-only-be-'member' lock as before, PLUS one exception: the
+-- creator of a brand-new community becomes its admin automatically (the
+-- create_community() RPC below relies on this to grant itself admin).
+create or replace function public.lock_community_member_role()
+returns trigger language plpgsql security definer as $$
+declare
+  is_creator boolean;
+begin
+  if auth.uid() is null then
+    return new; -- SQL editor / service role — developer has full control
+  end if;
+  if tg_op = 'INSERT' then
+    select (created_by = auth.uid()) into is_creator
+    from public.communities where id = new.community_id;
+    if coalesce(is_creator, false) and new.role = 'admin' then
+      return new; -- bootstrap admin for your OWN new community — allowed
+    end if;
+    new.role := 'member';
+  else
+    new.role := old.role;
+  end if;
+  return new;
+end;
+$$;
+
+-- Only a community's own admin(s) can edit it (description, cover, rules,
+-- weekly challenge, …). Creation itself goes through create_community()
+-- below, so there's no separate "communities insert" policy for clients.
+drop policy if exists "communities update" on public.communities;
+create policy "communities update" on public.communities
+  for update using (public.is_community_admin(id)) with check (public.is_community_admin(id));
+
+-- Anyone can self-join a PUBLIC community directly; a PRIVATE one requires
+-- going through join_community_by_code() (security definer, below) instead.
+drop policy if exists "cmem insert" on public.community_members;
+create policy "cmem insert" on public.community_members for insert with check (
+  user_id = auth.uid() and (
+    (select privacy from public.communities where id = community_id) = 'public'
+    or (select created_by from public.communities where id = community_id) = auth.uid()
+  )
+);
+
+-- Client-facing community creation. Any signed-in athlete can start a
+-- community; the creator becomes its admin in the same atomic call.
+create or replace function public.create_community(
+  p_name text, p_description text, p_sport text, p_country text,
+  p_privacy text, p_cover_url text, p_image_url text, p_rules text
+) returns public.communities
+language plpgsql security definer as $$
+declare
+  c public.communities;
+  s text;
+  code text;
+begin
+  s := lower(regexp_replace(trim(p_name), '[^a-zA-Z0-9]+', '-', 'g')) || '-' || substr(gen_random_uuid()::text, 1, 6);
+  code := upper(substr(md5(random()::text), 1, 6));
+
+  insert into public.communities
+    (slug, name, description, sport, country, privacy, cover_url, image_url, rules, invite_code, created_by)
+  values
+    (s, trim(p_name), nullif(trim(coalesce(p_description, '')), ''), nullif(trim(coalesce(p_sport, '')), ''),
+     nullif(trim(coalesce(p_country, '')), ''), coalesce(nullif(p_privacy, ''), 'public'),
+     p_cover_url, p_image_url, nullif(trim(coalesce(p_rules, '')), ''), code, auth.uid())
+  returning * into c;
+
+  insert into public.community_members (community_id, user_id, role) values (c.id, auth.uid(), 'admin');
+
+  return c;
+end;
+$$;
+
+-- Join a PRIVATE community by its 6-character invite code (public ones just
+-- use the normal "cmem insert" self-join policy above, no code needed).
+create or replace function public.join_community_by_code(p_code text)
+returns public.communities
+language plpgsql security definer as $$
+declare
+  c public.communities;
+begin
+  select * into c from public.communities where invite_code = upper(trim(p_code));
+  if c.id is null then
+    raise exception 'Invalid invite code';
+  end if;
+  insert into public.community_members (community_id, user_id, role)
+  values (c.id, auth.uid(), 'member')
+  on conflict do nothing;
+  return c;
+end;
+$$;
+
+-- ── Feed: posts, likes, comments ──────────────────────────────
+create table if not exists public.community_posts (
+  id           uuid primary key default gen_random_uuid(),
+  community_id uuid not null references public.communities(id) on delete cascade,
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  content      text,
+  image_url    text,
+  pinned       boolean not null default false,
+  created_at   timestamptz default now()
+);
+
+alter table public.community_posts enable row level security;
+
+drop policy if exists "posts select" on public.community_posts;
+drop policy if exists "posts insert" on public.community_posts;
+drop policy if exists "posts delete" on public.community_posts;
+
+create policy "posts select" on public.community_posts for select using (public.is_community_member(community_id));
+create policy "posts insert" on public.community_posts for insert with check (
+  user_id = auth.uid() and public.is_community_member(community_id)
+  and (pinned = false or public.is_community_admin(community_id))
+);
+create policy "posts delete" on public.community_posts for delete using (
+  user_id = auth.uid() or public.is_community_admin(community_id)
+);
+
+create index if not exists community_posts_feed on public.community_posts (community_id, pinned desc, created_at desc);
+
+create table if not exists public.community_post_likes (
+  post_id    uuid not null references public.community_posts(id) on delete cascade,
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz default now(),
+  primary key (post_id, user_id)
+);
+
+alter table public.community_post_likes enable row level security;
+
+drop policy if exists "likes select" on public.community_post_likes;
+drop policy if exists "likes insert" on public.community_post_likes;
+drop policy if exists "likes delete" on public.community_post_likes;
+
+create policy "likes select" on public.community_post_likes for select using (
+  exists (select 1 from public.community_posts p where p.id = post_id and public.is_community_member(p.community_id))
+);
+create policy "likes insert" on public.community_post_likes for insert with check (user_id = auth.uid());
+create policy "likes delete" on public.community_post_likes for delete using (user_id = auth.uid());
+
+create table if not exists public.community_post_comments (
+  id         uuid primary key default gen_random_uuid(),
+  post_id    uuid not null references public.community_posts(id) on delete cascade,
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  content    text not null,
+  created_at timestamptz default now()
+);
+
+alter table public.community_post_comments enable row level security;
+
+drop policy if exists "comments select" on public.community_post_comments;
+drop policy if exists "comments insert" on public.community_post_comments;
+drop policy if exists "comments delete" on public.community_post_comments;
+
+create policy "comments select" on public.community_post_comments for select using (
+  exists (select 1 from public.community_posts p where p.id = post_id and public.is_community_member(p.community_id))
+);
+create policy "comments insert" on public.community_post_comments for insert with check (user_id = auth.uid());
+create policy "comments delete" on public.community_post_comments for delete using (user_id = auth.uid());
+
+create index if not exists community_post_comments_post on public.community_post_comments (post_id, created_at);
+
+-- ── Events ──────────────────────────────────────────────────────
+create table if not exists public.community_events (
+  id           uuid primary key default gen_random_uuid(),
+  community_id uuid not null references public.communities(id) on delete cascade,
+  title        text not null,
+  description  text,
+  date         date not null,
+  time         text default '10:00',
+  location     text,
+  created_by   uuid references auth.users(id) on delete set null,
+  created_at   timestamptz default now()
+);
+
+alter table public.community_events enable row level security;
+
+drop policy if exists "events select" on public.community_events;
+drop policy if exists "events insert" on public.community_events;
+drop policy if exists "events delete" on public.community_events;
+
+create policy "events select" on public.community_events for select using (public.is_community_member(community_id));
+create policy "events insert" on public.community_events for insert with check (public.is_community_admin(community_id));
+create policy "events delete" on public.community_events for delete using (public.is_community_admin(community_id));
+
+create index if not exists community_events_date on public.community_events (community_id, date);
+
+create table if not exists public.community_event_participants (
+  event_id  uuid not null references public.community_events(id) on delete cascade,
+  user_id   uuid not null references auth.users(id) on delete cascade,
+  joined_at timestamptz default now(),
+  primary key (event_id, user_id)
+);
+
+alter table public.community_event_participants enable row level security;
+
+drop policy if exists "eventp select" on public.community_event_participants;
+drop policy if exists "eventp insert" on public.community_event_participants;
+drop policy if exists "eventp delete" on public.community_event_participants;
+
+create policy "eventp select" on public.community_event_participants for select using (true);
+create policy "eventp insert" on public.community_event_participants for insert with check (user_id = auth.uid());
+create policy "eventp delete" on public.community_event_participants for delete using (user_id = auth.uid());
+
+-- ── Follows (Members tab "Follow" button) — a plain athlete-to-athlete
+-- relationship, not scoped to one community. ──
+create table if not exists public.follows (
+  follower_id uuid not null references auth.users(id) on delete cascade,
+  followee_id uuid not null references auth.users(id) on delete cascade,
+  created_at  timestamptz default now(),
+  primary key (follower_id, followee_id),
+  check (follower_id <> followee_id)
+);
+
+alter table public.follows enable row level security;
+
+drop policy if exists "follows select" on public.follows;
+drop policy if exists "follows insert" on public.follows;
+drop policy if exists "follows delete" on public.follows;
+
+create policy "follows select" on public.follows for select using (true);
+create policy "follows insert" on public.follows for insert with check (follower_id = auth.uid());
+create policy "follows delete" on public.follows for delete using (follower_id = auth.uid());
+
+-- Storage bucket for community cover photos / logos / feed post images.
+insert into storage.buckets (id, name, public) values ('community-media', 'community-media', true)
+  on conflict (id) do nothing;
+
+drop policy if exists "community-media read"  on storage.objects;
+drop policy if exists "community-media write" on storage.objects;
+create policy "community-media read"  on storage.objects for select using (bucket_id = 'community-media');
+create policy "community-media write" on storage.objects for insert to authenticated with check (bucket_id = 'community-media');

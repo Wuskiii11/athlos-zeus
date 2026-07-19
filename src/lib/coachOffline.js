@@ -12,49 +12,52 @@ const norm = (s) => String(s || "").toLowerCase();
 
 // Small exercise bank, each tagged with the body areas it stresses (for injury-aware swaps).
 const POOL = {
+  // Exercise names are always English (industry-standard gym vocabulary,
+  // shown regardless of the SL/EN UI toggle) — only surrounding chrome
+  // (labels, session/day names) follows the language switch.
   lowerStrength: [
-    { n: "Počep", area: ["Koleno"] },
-    { n: "Rumunski mrtvi dvig", area: ["Spodnji hrbet"] },
-    { n: "Bolgarski počep", area: ["Koleno"] },
-    { n: "Nordijska zadnja loža", area: [] },
-    { n: "Most za zadnjico (hip thrust)", area: [] },
+    { n: "Squat", area: ["Koleno"] },
+    { n: "Romanian deadlift", area: ["Spodnji hrbet"] },
+    { n: "Bulgarian split squat", area: ["Koleno"] },
+    { n: "Nordic hamstring curl", area: [] },
+    { n: "Hip thrust", area: [] },
   ],
   upperStrength: [
-    { n: "Potisk s prsi", area: ["Rama"] },
-    { n: "Veslanje s palico", area: ["Spodnji hrbet"] },
-    { n: "Nadtlačni potisk", area: ["Rama"] },
-    { n: "Zgibi", area: ["Komolec"] },
-    { n: "Face pull (zadnja rama)", area: [] },
+    { n: "Bench press", area: ["Rama"] },
+    { n: "Barbell row", area: ["Spodnji hrbet"] },
+    { n: "Overhead press", area: ["Rama"] },
+    { n: "Pull-ups", area: ["Komolec"] },
+    { n: "Face pull", area: [] },
   ],
   power: [
-    { n: "Skok na zaboj", area: ["Koleno", "Gleženj"] },
-    { n: "Met medicinke ob tla", area: [] },
+    { n: "Box jump", area: ["Koleno", "Gleženj"] },
+    { n: "Medicine ball slam", area: [] },
     { n: "Hang power clean", area: ["Spodnji hrbet"] },
     { n: "Broad jump", area: ["Koleno"] },
   ],
   speed: [
-    { n: "Fly sprint 20m", area: [] },
-    { n: "Pospeševanja 30m", area: [] },
+    { n: "Flying sprint 20m", area: [] },
+    { n: "Accelerations 30m", area: [] },
     { n: "A-skip / B-skip", area: [] },
-    { n: "Hribski sprint", area: [] },
+    { n: "Hill sprint", area: [] },
   ],
   conditioning: [
-    { n: "Veslač 4×400 m", area: [] },
-    { n: "Kettlebell zamahi", area: ["Spodnji hrbet"] },
-    { n: "Bike intervali 6×1 min", area: [] },
+    { n: "Rower 4×400m", area: [] },
+    { n: "Kettlebell swings", area: ["Spodnji hrbet"] },
+    { n: "Bike intervals 6×1 min", area: [] },
     { n: "Sled push", area: [] },
   ],
   core: [
-    { n: "Deska", area: ["Spodnji hrbet"] },
-    { n: "Mrtvi hrošč", area: [] },
+    { n: "Plank", area: ["Spodnji hrbet"] },
+    { n: "Dead bug", area: [] },
     { n: "Pallof press", area: [] },
-    { n: "Stranska deska", area: [] },
+    { n: "Side plank", area: [] },
   ],
   mobility: [
-    { n: "90/90 boki", area: [] },
-    { n: "Mačka–kamela", area: [] },
-    { n: "Razteg upogibalk kolka", area: [] },
-    { n: "Mobilnost ramen s palico", area: [] },
+    { n: "90/90 hip switch", area: [] },
+    { n: "Cat-cow", area: [] },
+    { n: "Hip flexor stretch", area: [] },
+    { n: "Shoulder mobility (stick)", area: [] },
   ],
 };
 

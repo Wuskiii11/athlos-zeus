@@ -1136,3 +1136,329 @@ export async function syncMyClubCard(userId, { readiness, note } = {}) {
     .eq("user_id", userId)
     .then(() => {}, () => {});
 }
+
+// ── Communities — public, discoverable groups ────────────────
+// No local/demo backend for these (they only make sense as a shared, real
+// roster) — without Supabase this returns a small read-only mock so the
+// Public tab still has something to show in demo mode.
+const DEMO_COMMUNITIES = [
+  { id: "slovenija", slug: "slovenija", name: "Slovenija", flag: "🇸🇮", image_url: null,
+    description: "Uradna Athlos skupnost za športnike iz Slovenije. Deli treninge, tekmuj na lestvicah in poveži se z lokalnimi člani.",
+    members: 1, myRole: null },
+  { id: "muharji", slug: "muharji", name: "Muharji", flag: null, image_url: null,
+    description: null, members: 1, myRole: null },
+];
+
+// Every general-purpose communities query selects exactly these columns —
+// NEVER "*". invite_code must stay admin-only (that's the whole point of a
+// private community); the RLS policy is a full-row public "select true" so
+// it can't enforce that itself. See get_community_invite_code() in
+// schema.sql for the one legitimate way to read it.
+const COMMUNITY_COLUMNS = "id, slug, name, description, sport, country, privacy, flag, image_url, cover_url, rules, weekly_challenge, created_by, created_at";
+
+// All communities, with a live member count and (if `userId` is given) the
+// caller's own role — 'admin' | 'member' | null (not joined).
+export async function listCommunities(userId) {
+  if (!hasSupabase) return DEMO_COMMUNITIES;
+  try {
+    const { data: rows, error } = await supabase.from("communities").select(COMMUNITY_COLUMNS).order("name");
+    if (error || !rows) return [];
+    const { data: members } = await supabase.from("community_members").select("community_id, user_id, role");
+    return rows.map((c) => {
+      const mine = members?.find((m) => m.community_id === c.id && m.user_id === userId);
+      return {
+        ...c,
+        members: members?.filter((m) => m.community_id === c.id).length || 0,
+        myRole: mine?.role || null,
+      };
+    });
+  } catch { return []; }
+}
+
+// Member roster for one community — names/photos via the same public RPC
+// used everywhere else (community_members itself has no profile columns,
+// and `profiles` RLS only allows reading your own row directly).
+export async function listCommunityMembers(communityId) {
+  if (!hasSupabase) return [];
+  try {
+    const { data: rows, error } = await supabase
+      .from("community_members").select("user_id, role, joined_at")
+      .eq("community_id", communityId).order("joined_at");
+    if (error || !rows) return [];
+    const pubs = await getPublicProfiles(rows.map((r) => r.user_id));
+    return rows.map((r) => ({ ...r, name: pubs[r.user_id]?.name || "Športnik", photo: pubs[r.user_id]?.photo || null }));
+  } catch { return []; }
+}
+
+// Join a community as an ordinary member (the server-side trigger locks the
+// role to 'member' regardless of what's sent — see lock_community_member_role).
+export async function joinCommunity(communityId, userId) {
+  if (!hasSupabase || !communityId || !userId) return;
+  await supabase.from("community_members").insert({ community_id: communityId, user_id: userId }).then(() => {}, () => {});
+}
+
+export async function leaveCommunity(communityId, userId) {
+  if (!hasSupabase || !communityId || !userId) return;
+  await supabase.from("community_members").delete().eq("community_id", communityId).eq("user_id", userId).then(() => {}, () => {});
+}
+
+// One community's full detail row (used by the community detail screen —
+// listCommunities() already has this shape, this just fetches a single one).
+export async function getCommunity(communityId, userId) {
+  if (!hasSupabase) return DEMO_COMMUNITIES.find((c) => c.id === communityId) || null;
+  try {
+    const { data: c, error } = await supabase.from("communities").select(COMMUNITY_COLUMNS).eq("id", communityId).maybeSingle();
+    if (error || !c) return null;
+    const { data: members } = await supabase.from("community_members").select("user_id, role").eq("community_id", communityId);
+    const mine = members?.find((m) => m.user_id === userId);
+    return { ...c, members: members?.length || 0, myRole: mine?.role || null };
+  } catch { return null; }
+}
+
+// Create a brand-new community — the caller becomes its admin (see
+// create_community() RPC: one atomic insert + auto-admin-membership).
+export async function createCommunity(userId, { name, description, sport, country, privacy, coverUrl, imageUrl, rules } = {}) {
+  if (!hasSupabase || !userId || !name?.trim()) return null;
+  const { data, error } = await supabase.rpc("create_community", {
+    p_name: name.trim(), p_description: description || null, p_sport: sport || null, p_country: country || null,
+    p_privacy: privacy === "private" ? "private" : "public",
+    p_cover_url: coverUrl || null, p_image_url: imageUrl || null, p_rules: rules || null,
+  });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// Join a PRIVATE community using its 6-character invite code.
+export async function joinCommunityByCode(code, userId) {
+  if (!hasSupabase || !userId || !code?.trim()) return null;
+  const { data, error } = await supabase.rpc("join_community_by_code", { p_code: code.trim() });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// The ONLY legitimate way to read a private community's invite code — the
+// RPC itself checks that the caller is that community's admin, so this
+// simply returns null for anyone else instead of leaking it.
+export async function getCommunityInviteCode(communityId) {
+  if (!hasSupabase || !communityId) return null;
+  try {
+    const { data } = await supabase.rpc("get_community_invite_code", { cid: communityId });
+    return data || null;
+  } catch { return null; }
+}
+
+// Upload a cover photo / logo / feed post image — same pattern as
+// uploadChatFile, its own bucket (community-media) for a clean separation.
+export async function uploadCommunityMedia(file, userId) {
+  if (!hasSupabase) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+  const ext = file.name.split(".").pop() || "bin";
+  const path = `${userId}/${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("community-media").upload(path, file);
+  if (error) throw new Error(error.message);
+  const { data: { publicUrl } } = supabase.storage.from("community-media").getPublicUrl(path);
+  return publicUrl;
+}
+
+// ── Overview stats — everything here is a real query (no invented numbers):
+// total workouts logged by members, how many members trained in the last 7
+// days, and the next upcoming event. ──
+export async function getCommunityOverview(communityId) {
+  if (!hasSupabase || !communityId) return { totalWorkouts: 0, activeMembers: 0, memberCount: 0, weeklyChallenge: null, nextEvent: null };
+  try {
+    const [{ data: c }, { data: members }] = await Promise.all([
+      supabase.from("communities").select("weekly_challenge").eq("id", communityId).maybeSingle(),
+      supabase.from("community_members").select("user_id").eq("community_id", communityId),
+    ]);
+    const ids = (members || []).map((m) => m.user_id);
+    let totalWorkouts = 0, activeMembers = 0;
+    if (ids.length) {
+      const since = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+      const { data: workouts } = await supabase.from("workouts").select("user_id, date").in("user_id", ids);
+      totalWorkouts = workouts?.length || 0;
+      activeMembers = new Set((workouts || []).filter((w) => w.date >= since).map((w) => w.user_id)).size;
+    }
+    const { data: nextEvent } = await supabase
+      .from("community_events").select("*").eq("community_id", communityId)
+      .gte("date", new Date().toISOString().slice(0, 10)).order("date").limit(1).maybeSingle();
+    return { totalWorkouts, activeMembers, memberCount: ids.length, weeklyChallenge: c?.weekly_challenge || null, nextEvent: nextEvent || null };
+  } catch { return { totalWorkouts: 0, activeMembers: 0, memberCount: 0, weeklyChallenge: null, nextEvent: null }; }
+}
+
+// Weekly leaderboard — ranked by workouts actually logged in the last 7
+// days. Distance/calories/strain don't exist anywhere in this app's data
+// model, so this is the one metric that's real rather than invented.
+export async function getCommunityLeaderboard(communityId, days = 7) {
+  if (!hasSupabase || !communityId) return [];
+  try {
+    const { data: members } = await supabase.from("community_members").select("user_id").eq("community_id", communityId);
+    const ids = (members || []).map((m) => m.user_id);
+    if (!ids.length) return [];
+    const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+    const { data: workouts } = await supabase.from("workouts").select("user_id").in("user_id", ids).gte("date", since);
+    const counts = {};
+    ids.forEach((id) => { counts[id] = 0; });
+    (workouts || []).forEach((w) => { counts[w.user_id] = (counts[w.user_id] || 0) + 1; });
+    const pubs = await getPublicProfiles(ids);
+    return ids
+      .map((id) => ({ user_id: id, name: pubs[id]?.name || "Športnik", photo: pubs[id]?.photo || null, workouts: counts[id] || 0 }))
+      .sort((a, b) => b.workouts - a.workouts);
+  } catch { return []; }
+}
+
+// ── Feed: posts, likes, comments ──────────────────────────────
+// Paginated (range) — `before` is the created_at cursor of the last post
+// already shown, so "load more" can page backward through history.
+export async function listCommunityPosts(communityId, userId, { limit = 15, before } = {}) {
+  if (!hasSupabase || !communityId) return [];
+  try {
+    let q = supabase.from("community_posts").select("*").eq("community_id", communityId)
+      .order("pinned", { ascending: false }).order("created_at", { ascending: false }).limit(limit);
+    if (before) q = q.lt("created_at", before);
+    const { data: posts, error } = await q;
+    if (error || !posts?.length) return [];
+    const ids = posts.map((p) => p.id);
+    const [{ data: likes }, { data: comments }, pubs] = await Promise.all([
+      supabase.from("community_post_likes").select("post_id, user_id").in("post_id", ids),
+      supabase.from("community_post_comments").select("post_id").in("post_id", ids),
+      getPublicProfiles(posts.map((p) => p.user_id)),
+    ]);
+    return posts.map((p) => ({
+      ...p,
+      name: pubs[p.user_id]?.name || "Športnik",
+      photo: pubs[p.user_id]?.photo || null,
+      likeCount: likes?.filter((l) => l.post_id === p.id).length || 0,
+      likedByMe: !!likes?.some((l) => l.post_id === p.id && l.user_id === userId),
+      commentCount: comments?.filter((c) => c.post_id === p.id).length || 0,
+    }));
+  } catch { return []; }
+}
+
+export async function createCommunityPost(communityId, userId, { content, imageUrl, pinned = false } = {}) {
+  if (!hasSupabase || !communityId || !userId || (!content?.trim() && !imageUrl)) return null;
+  const { data, error } = await supabase.from("community_posts")
+    .insert({ community_id: communityId, user_id: userId, content: content?.trim() || null, image_url: imageUrl || null, pinned })
+    .select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// Authorization (own post or community admin) is enforced by RLS — the
+// delete simply no-ops if the caller isn't allowed to.
+export async function deleteCommunityPost(postId) {
+  if (!hasSupabase) return;
+  await supabase.from("community_posts").delete().eq("id", postId).then(() => {}, () => {});
+}
+
+export async function toggleCommunityPostLike(postId, userId, liked) {
+  if (!hasSupabase || !postId || !userId) return;
+  if (liked) await supabase.from("community_post_likes").delete().eq("post_id", postId).eq("user_id", userId).then(() => {}, () => {});
+  else await supabase.from("community_post_likes").insert({ post_id: postId, user_id: userId }).then(() => {}, () => {});
+}
+
+export async function listPostComments(postId) {
+  if (!hasSupabase || !postId) return [];
+  try {
+    const { data: rows, error } = await supabase
+      .from("community_post_comments").select("*").eq("post_id", postId).order("created_at");
+    if (error || !rows) return [];
+    const pubs = await getPublicProfiles(rows.map((r) => r.user_id));
+    return rows.map((r) => ({ ...r, name: pubs[r.user_id]?.name || "Športnik", photo: pubs[r.user_id]?.photo || null }));
+  } catch { return []; }
+}
+
+export async function addPostComment(postId, userId, content) {
+  if (!hasSupabase || !postId || !userId || !content?.trim()) return null;
+  const { data, error } = await supabase.from("community_post_comments")
+    .insert({ post_id: postId, user_id: userId, content: content.trim() }).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ── Events ──────────────────────────────────────────────────────
+export async function listCommunityEvents(communityId, userId) {
+  if (!hasSupabase || !communityId) return [];
+  try {
+    const { data: rows, error } = await supabase
+      .from("community_events").select("*").eq("community_id", communityId).order("date");
+    if (error || !rows) return [];
+    const ids = rows.map((r) => r.id);
+    const { data: parts } = ids.length
+      ? await supabase.from("community_event_participants").select("event_id, user_id").in("event_id", ids)
+      : { data: [] };
+    return rows.map((r) => ({
+      ...r,
+      participants: parts?.filter((p) => p.event_id === r.id).length || 0,
+      joinedByMe: !!parts?.some((p) => p.event_id === r.id && p.user_id === userId),
+    }));
+  } catch { return []; }
+}
+
+export async function createCommunityEvent(communityId, userId, { title, description, date, time, location } = {}) {
+  if (!hasSupabase || !communityId || !userId || !title?.trim() || !date) return null;
+  const { data, error } = await supabase.from("community_events")
+    .insert({ community_id: communityId, created_by: userId, title: title.trim(), description: description || null, date, time: time || "10:00", location: location || null })
+    .select().single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function joinCommunityEvent(eventId, userId) {
+  if (!hasSupabase || !eventId || !userId) return;
+  await supabase.from("community_event_participants").insert({ event_id: eventId, user_id: userId }).then(() => {}, () => {});
+}
+
+export async function leaveCommunityEvent(eventId, userId) {
+  if (!hasSupabase || !eventId || !userId) return;
+  await supabase.from("community_event_participants").delete().eq("event_id", eventId).eq("user_id", userId).then(() => {}, () => {});
+}
+
+// ── Members directory (+ follow) ─────────────────────────────
+// Weekly workout counts reuse the same real query as the leaderboard.
+export async function listCommunityMembersDetailed(communityId, userId) {
+  if (!hasSupabase || !communityId) return [];
+  try {
+    const [{ data: rows, error }, following] = await Promise.all([
+      supabase.from("community_members").select("user_id, role, joined_at").eq("community_id", communityId).order("joined_at"),
+      listMyFollowing(userId),
+    ]);
+    if (error || !rows) return [];
+    const ids = rows.map((r) => r.user_id);
+    const since = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+    const [pubs, { data: workouts }] = await Promise.all([
+      getPublicProfiles(ids),
+      ids.length ? supabase.from("workouts").select("user_id").in("user_id", ids).gte("date", since) : Promise.resolve({ data: [] }),
+    ]);
+    const followingSet = new Set(following);
+    return rows.map((r) => ({
+      ...r,
+      name: pubs[r.user_id]?.name || "Športnik",
+      photo: pubs[r.user_id]?.photo || null,
+      weeklyWorkouts: workouts?.filter((w) => w.user_id === r.user_id).length || 0,
+      followedByMe: followingSet.has(r.user_id),
+    }));
+  } catch { return []; }
+}
+
+export async function listMyFollowing(userId) {
+  if (!hasSupabase || !userId) return [];
+  try {
+    const { data } = await supabase.from("follows").select("followee_id").eq("follower_id", userId);
+    return (data || []).map((r) => r.followee_id);
+  } catch { return []; }
+}
+
+export async function followUser(followerId, followeeId) {
+  if (!hasSupabase || !followerId || !followeeId || followerId === followeeId) return;
+  await supabase.from("follows").insert({ follower_id: followerId, followee_id: followeeId }).then(() => {}, () => {});
+}
+
+export async function unfollowUser(followerId, followeeId) {
+  if (!hasSupabase || !followerId || !followeeId) return;
+  await supabase.from("follows").delete().eq("follower_id", followerId).eq("followee_id", followeeId).then(() => {}, () => {});
+}

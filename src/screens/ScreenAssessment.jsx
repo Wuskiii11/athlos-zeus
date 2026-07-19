@@ -7,7 +7,7 @@ import { IcBolt, IcPulse, IcDumbbell, IcJump, IcHeart } from "../components/Icon
 const BENCHMARKS = [
   { id: "sprint10", icon: <IcBolt size={20} />, name: "Sprint 10m", unit: "s", mine: 1.76, team: 1.82, top10: 1.68, elite: 1.58, lower: true },
   { id: "sprint30", icon: <IcPulse size={20} />, name: "Sprint 30m", unit: "s", mine: 4.12, team: 4.28, top10: 3.95, elite: 3.72, lower: true },
-  { id: "squat",   icon: <IcDumbbell size={20} />, name: "Počep 1RM",  unit: "kg", mine: 140,  team: 122,  top10: 155,  elite: 180,  lower: false },
+  { id: "squat",   icon: <IcDumbbell size={20} />, name: "Squat 1RM",  unit: "kg", mine: 140,  team: 122,  top10: 155,  elite: 180,  lower: false },
   { id: "jump",    icon: <IcJump size={20} />, name: "V. skok",    unit: "cm", mine: 54,   team: 49,   top10: 62,   elite: 74,   lower: false },
   { id: "vo2",     icon: <IcHeart size={20} />, name: "VO₂max",    unit: "",   mine: 56,   team: 51,   top10: 62,   elite: 70,   lower: false },
 ];

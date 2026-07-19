@@ -244,3 +244,27 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+/* ── Premium micro-interactions — hover-capable pointers only (mouse/
+   trackpad), so a tap on touch never leaves a "stuck" hover state.
+   Cards lift + gain shadow; icon buttons and primary CTAs lift slightly
+   faster. Pressing (any input) still uses the existing scale-down. ── */
+@media (hover: hover) and (pointer: fine) {
+  .at-card-hover {
+    transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s cubic-bezier(0.22,1,0.36,1);
+  }
+  .at-card-hover:hover {
+    transform: translateY(-3px) scale(1.008);
+    box-shadow: 0 16px 34px rgba(0,0,0,0.32);
+  }
+  .at-iconbtn { transition: border-color 0.18s ease, opacity 0.18s ease, transform 0.18s ease; }
+  .at-iconbtn:hover {
+    /* currentColor === the button's own `color` (theme-correct in both
+       dark/light without a JS branch), just made fully opaque on hover */
+    border-color: currentColor;
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+  .at-btn-primary { transition: transform 0.16s cubic-bezier(0.22,1,0.36,1), box-shadow 0.16s cubic-bezier(0.22,1,0.36,1); }
+  .at-btn-primary:hover { transform: translateY(-2px); }
+}

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { Moon, Smile, Zap, Dumbbell, Brain, Bandage, ScrollText, Scale, Sun, ChevronRight, Gauge } from "lucide-react";
 import { useTheme } from "../theme";
 import { Mono, Icon, Card, SectionLabel, StatTile, PrimaryBtn } from "../components/UI";
 import { useT, useLang } from "../lib/i18n";
@@ -18,6 +20,11 @@ const loadCheckin = () => {
   try { return { ...DEFAULT_CHECKIN, ...NEUTRAL_CHECKIN, touched: false, ...JSON.parse(localStorage.getItem(CHECKIN_KEY) || "{}") }; }
   catch { return { ...DEFAULT_CHECKIN, ...NEUTRAL_CHECKIN, touched: false }; }
 };
+
+// Light tactile confirmation on the primary taps (sheet-openers, nav) — this
+// is a phone app, not a website, so touch feedback (not hover) is the actual
+// premium-feel lever. Same 8ms tick as ScreenCommunity.jsx, for consistency.
+const haptic = () => { try { navigator.vibrate?.(8); } catch {} };
 
 const DAYS_SL = ["NED", "PON", "TOR", "SRE", "ČET", "PET", "SOB"];
 const DAYS_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -42,62 +49,16 @@ function useCountUp(target, dur = 900, delay = 200) {
   return n;
 }
 
-// ── Greek-inspired icon set (line-art, referencing classical mythology) ─────
-const IconMoon = ({ size = 18, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" fill={color} />
-    <circle cx="17" cy="5" r="0.9" fill={color} opacity="0.5" />
-    <circle cx="19.5" cy="8.5" r="0.55" fill={color} opacity="0.35" />
-  </svg>
-);
-const IconFace = ({ size = 18, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round">
-    <circle cx="12" cy="12" r="9" />
-    <path d="M8.5 15c.8 1.2 2 1.8 3.5 1.8s2.7-.6 3.5-1.8" />
-    <circle cx="9.5" cy="10" r="0.7" fill={color} />
-    <circle cx="14.5" cy="10" r="0.7" fill={color} />
-  </svg>
-);
-const IconBolt = ({ size = 18, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <path d="M13 2L4 13.5h7L9.5 22 20 10.5h-7L13 2z" />
-  </svg>
-);
-// Muscle soreness — dumbbell, same stroke language as the rest of the set.
-const IconDumbbell = ({ size = 20, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6.5 6.5v11M17.5 6.5v11" />
-    <path d="M3.5 9v6M20.5 9v6" />
-    <path d="M6.5 12h11" />
-  </svg>
-);
-// Stress — a calm, minimal brain glyph, matching IconFace's line weight.
-const IconBrain = ({ size = 20, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9.5 4.5a3 3 0 00-3 3v.3A3.2 3.2 0 004.5 11a3.2 3.2 0 001 5.6 3 3 0 003 3.4h1a2 2 0 002-2v-11a3 3 0 00-2-2.9V5a1 1 0 00-1-1z" />
-    <path d="M14.5 4.5a3 3 0 013 3v.3a3.2 3.2 0 012 3.2 3.2 3.2 0 01-1 5.6 3 3 0 01-3 3.4h-1a2 2 0 01-2-2v-11a3 3 0 012-2.9V5a1 1 0 011-1z" />
-  </svg>
-);
-const IconHeal = ({ size = 20, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round">
-    <rect x="3" y="3" width="18" height="18" rx="4" />
-    <path d="M12 8v8M8 12h8" />
-  </svg>
-);
-const IconScroll = ({ size = 20, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round">
-    <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
-    <path d="M9 7h6M9 11h5M9 15h4" />
-  </svg>
-);
-const IconScales = ({ size = 20, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3v18M6 3h12" />
-    <path d="M4.5 9.5l4 7h-8l4-7z" />
-    <path d="M19.5 9.5l-4 7h8l-4-7z" />
-  </svg>
-);
+// ── Icon set — Lucide throughout (one premium, consistent library instead of
+// scattered hand-drawn SVGs), thin 1.6 stroke to match the app's line weight.
+const IconMoon     = ({ size = 18, color }) => <Moon size={size} color={color} strokeWidth={1.6} />;
+const IconFace     = ({ size = 18, color }) => <Smile size={size} color={color} strokeWidth={1.6} />;
+const IconBolt     = ({ size = 18, color }) => <Zap size={size} color={color} strokeWidth={1.6} />;
+const IconDumbbell = ({ size = 20, color }) => <Dumbbell size={size} color={color} strokeWidth={1.6} />;
+const IconBrain    = ({ size = 20, color }) => <Brain size={size} color={color} strokeWidth={1.6} />;
+const IconHeal     = ({ size = 20, color }) => <Bandage size={size} color={color} strokeWidth={1.6} />;
+const IconScroll   = ({ size = 20, color }) => <ScrollText size={size} color={color} strokeWidth={1.6} />;
+const IconScales   = ({ size = 20, color }) => <Scale size={size} color={color} strokeWidth={1.6} />;
 
 // Scroll-driven "slosh": returns a ref for the water group. Scrolling injects
 // velocity; a spring tilts + bounces the liquid and settles it back to level.
@@ -476,6 +437,16 @@ const STAT_METRICS = [
     data: [3, 2, 4, 3, 2, 1, 3, 4, 3, 2, 2, 3, 2, 2],
     trendSL: "Povprečje 2.6/5", trendEN: "Average 2.6/5", good: "down",
   },
+  {
+    key: "recovery", label: "Okrevanje", labelEn: "Recovery", unit: "%", color: "#00C878",
+    data: [58, 62, 55, 68, 71, 64, 60, 66, 72, 69, 65, 70, 74, 71],
+    trendSL: "Povprečje 66%", trendEN: "Average 66%", good: "up",
+  },
+  {
+    key: "mood", label: "Počutje", labelEn: "Mood", unit: "/5", color: "#C9A727",
+    data: [3, 4, 3, 4, 5, 4, 3, 4, 4, 5, 4, 3, 4, 5],
+    trendSL: "Povprečje 3.9/5", trendEN: "Average 3.9/5", good: "up",
+  },
 ];
 
 function SparkChart({ data, color, C, metricKey }) {
@@ -528,8 +499,8 @@ function SparkChart({ data, color, C, metricKey }) {
   );
 }
 
-function StatsSheet({ C, lang, onClose }) {
-  const [metric, setMetric] = useState("weight");
+function StatsSheet({ C, lang, onClose, initialMetric = "weight" }) {
+  const [metric, setMetric] = useState(initialMetric);
   const m = STAT_METRICS.find(x => x.key === metric);
   const current = m.data[m.data.length - 1];
   const diff = Math.round((current - m.data[0]) * 10) / 10;
@@ -683,11 +654,27 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
   const t = useT();
   const lang = useLang();
   const [openStats, setOpenStats] = useState(false);
+  const [statsMetric, setStatsMetric] = useState("weight"); // which tab StatsSheet opens on
   const [openBattery, setOpenBattery] = useState(false); // battery-info sheet (tap the score)
   const [openCheckin, setOpenCheckin] = useState(false);  // dedicated Morning Check-in flow
   const [openNotifs, setOpenNotifs] = useState(false);   // notifications sheet (bell, top-right)
   const [checkin, setCheckin] = useState(loadCheckin);
   useEffect(() => { try { localStorage.setItem(CHECKIN_KEY, JSON.stringify(checkin)); } catch {} }, [checkin]);
+
+  // Page-load entrance — every [data-rise] section (header, gauges, cards…)
+  // fades and lifts in together, power3.out, a soft stagger between them.
+  // Runs once on mount only, and is skipped for prefers-reduced-motion.
+  const rootRef = useRef(null);
+  useEffect(() => {
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const els = rootRef.current?.querySelectorAll("[data-rise]");
+    if (!els?.length) return;
+    if (reduceMotion) { gsap.set(els, { opacity: 1 }); return; }
+    const tween = gsap.fromTo(els,
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.07, clearProps: "opacity,transform" });
+    return () => tween.kill();
+  }, []);
 
   // Restore today's real check-in from the account (cross-device) — only
   // overrides the local draft if the cloud actually has today's row, so it
@@ -762,7 +749,10 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
   const tone = rec.tone === "accent" ? C.accent : rec.tone === "yellow" ? C.yellow : C.red;
   const shown = useCountUp(battery);
 
-  const rise = (d) => ({ animation: `athlosRise 0.55s cubic-bezier(0.22,1,0.36,1) ${d}s both` });
+  // Initial inline state only (opacity 0, no CSS keyframe) — the GSAP effect
+  // below (see rootRef) staggers every [data-rise] section in on mount:
+  // opacity 0→1, y 28→0, power3.out, matching the rest of the app's motion.
+  const rise = () => ({ opacity: 0 });
 
   // ── Notifications (bell, top-left) — built from state the app already has:
   // today's check-in, unread chats, and the upcoming session. Recomputed every
@@ -849,30 +839,34 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       : t("Telo kaže znake utrujenosti — danes daj prednost regeneraciji.");
 
   return (
-    <div style={{ padding: "6px 14px 26px", color: C.text, position: "relative" }}>
-      {/* Header — greeting + date, bell + avatar. Calm; no eyebrow, no glow. */}
-      <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "8px 0 22px", ...rise(0.03) }}>
+    <div ref={rootRef} style={{ padding: "6px 14px 26px", color: C.text, position: "relative" }}>
+      {/* Header — mono date eyebrow above a large greeting; actions are quiet
+          hairline circles so the name owns the row. */}
+      <div data-rise style={{ display: "flex", alignItems: "flex-start", gap: 8, margin: "10px 0 24px", ...rise() }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, color: C.text, lineHeight: 1.1, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
+            <span aria-hidden="true" style={{ width: 5, height: 5, borderRadius: "50%", background: C.accent, flexShrink: 0 }} />
+            <Mono style={{ color: C.muted2, fontSize: 9, letterSpacing: "0.22em" }}>{dateStr}</Mono>
+          </div>
+          <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 26, color: C.text, lineHeight: 1.06, letterSpacing: "-0.03em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {t("Živjo,")} {(profile?.name || "Športnik").trim().split(/\s+/)[0]}
           </div>
-          <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 4 }}>{dateStr}</div>
         </div>
-        <button onClick={() => setOpenNotifs(true)} aria-label={t("Obvestila")} style={{
-          width: 42, height: 42, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
-          background: C.surface2, border: "none",
+        <button onClick={() => { haptic(); setOpenNotifs(true); }} aria-label={t("Obvestila")} className="at-iconbtn" style={{
+          width: 40, height: 40, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
+          background: "transparent", border: `1px solid ${C.border2}`,
           display: "flex", alignItems: "center", justifyContent: "center",
           color: C.text2, WebkitTapHighlightColor: "transparent", position: "relative",
         }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.7 21a2 2 0 01-3.4 0" />
           </svg>
-          {bellDot && <span aria-hidden="true" style={{ position: "absolute", top: 3, right: 3, width: 8, height: 8, borderRadius: "50%", background: C.red, border: `1.5px solid ${C.bg}` }} />}
+          {bellDot && <span aria-hidden="true" style={{ position: "absolute", top: 2, right: 2, width: 8, height: 8, borderRadius: "50%", background: C.red, border: `1.5px solid ${C.bg}` }} />}
         </button>
-        <button onClick={() => go("settings")} aria-label={t("Profil")} style={{
-          width: 42, height: 42, borderRadius: "50%", padding: 0, overflow: "hidden", flexShrink: 0,
-          border: "none", background: C.surface2, cursor: "pointer", WebkitTapHighlightColor: "transparent",
+        <button onClick={() => { haptic(); go("settings"); }} aria-label={t("Profil")} className="at-iconbtn" style={{
+          width: 40, height: 40, borderRadius: "50%", padding: 0, overflow: "hidden", flexShrink: 0,
+          border: `1px solid ${C.border2}`, background: "transparent", cursor: "pointer", WebkitTapHighlightColor: "transparent",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           {profile?.photo
@@ -882,9 +876,9 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 2 · WEEKLY CALENDAR STRIP — quiet, today the only filled cell */}
-      <div style={{ display: "flex", gap: 5, marginBottom: 20, ...rise(0.06) }}>
+      <div data-rise style={{ display: "flex", gap: 5, marginBottom: 20, ...rise() }}>
         {week.map((d) => (
-          <button key={d.iso} onClick={() => go("season")} aria-label={`${d.label} ${d.num}`} style={{
+          <button key={d.iso} onClick={() => { haptic(); go("season"); }} aria-label={`${d.label} ${d.num}`} style={{
             flex: 1, padding: "5px 0 6px", background: "none", border: "none", cursor: "pointer",
             display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
             WebkitTapHighlightColor: "transparent",
@@ -903,10 +897,10 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
 
       {/* 3 · RECOVERY + TRAINING LOAD — two premium liquid-fill metrics;
           tap either for the full breakdown. */}
-      <button onClick={() => setOpenBattery(true)} aria-label={t("Pripravljenost")} style={{
+      <button data-rise onClick={() => { haptic(); setOpenBattery(true); }} aria-label={t("Pripravljenost")} style={{
         width: "100%", background: "none", border: "none", padding: 0, margin: "4px 0 14px",
         cursor: "pointer", WebkitTapHighlightColor: "transparent",
-        display: "flex", justifyContent: "center", gap: 26, flexWrap: "wrap", ...rise(0.1),
+        display: "flex", justifyContent: "center", gap: 26, flexWrap: "wrap", ...rise(),
       }}>
         <LiquidMetric value={hasData ? battery : 0} max={100} label={t("Pripravljenost")} color={C.accent} decimals={0} fillAlpha={0.58} C={C} size={100} />
         <LiquidMetric value={strain ?? 0} max={21} label={t("Obremenitev")} color={C.name === "dark" ? "#E6EBF0" : "#8A929C"} decimals={1} fillAlpha={0.2} C={C} size={100} />
@@ -916,35 +910,44 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
           it's the first thing the athlete sees if today's check-in is still
           pending. Simple dark card, no emoji; tapping opens the check-in entry. */}
       {checkinPending && (
-        <button onClick={() => setOpenCheckin(true)} aria-label={t("Izpolni današnji check-in")} style={{
+        <button data-rise onClick={() => { haptic(); setOpenCheckin(true); }} aria-label={t("Izpolni današnji check-in")} className="at-card-hover" style={{
           width: "100%", textAlign: "left", cursor: "pointer", WebkitTapHighlightColor: "transparent",
-          display: "flex", alignItems: "center", gap: 9, marginBottom: 20,
-          background: C.surface, border: `1px solid ${C.border}`, borderRadius: 15, padding: "11px 13px",
-          ...rise(0.13),
+          display: "flex", alignItems: "center", gap: 11, marginBottom: 20,
+          background: C.surface, border: `1px solid ${C.accent}2e`, borderRadius: 16, padding: "12px 13px",
+          ...rise(),
         }}>
+          <span style={{ width: 40, height: 40, borderRadius: 13, flexShrink: 0, background: `${C.accent}16`, border: `1px solid ${C.accent}33`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Sun size={19} color={C.accent} strokeWidth={1.7} />
+          </span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Izpolni današnji check-in")}</span>
             <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 3, lineHeight: 1.4 }}>{t("Odgovori na vprašanja in posodobi svojo pripravljenost.")}</span>
           </span>
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={C.muted2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6" /></svg>
+          <ChevronRight size={19} color={C.muted2} strokeWidth={2} style={{ flexShrink: 0 }} />
         </button>
       )}
 
-      {/* 4 · TODAY'S RECOMMENDATION — AI call + short explanation */}
-      <div style={{ marginBottom: 20, ...rise(0.16) }}>
+      {/* 4 · TODAY'S RECOMMENDATION — the day's one call-to-focus: an icon chip
+          + a heavier headline make this the section's clear focal point,
+          instead of a same-weight card among same-weight cards. */}
+      <div data-rise style={{ marginBottom: 20, ...rise() }}>
         <SectionLabel>{t("PRIPOROČILO")}</SectionLabel>
-        <Card>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ width: 9, height: 9, borderRadius: "50%", background: tone, flexShrink: 0 }} />
-            <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text, lineHeight: 1.25 }}>{t(rec.text)}</span>
+        <Card pad={20}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+            <span style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, background: `${tone}18`, border: `1px solid ${tone}38`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Gauge size={21} color={tone} strokeWidth={1.7} />
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, lineHeight: 1.28, letterSpacing: "-0.01em" }}>{t(rec.text)}</span>
+              <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, lineHeight: 1.55, margin: "7px 0 0" }}>{explain}</p>
+            </div>
           </div>
-          <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, lineHeight: 1.5, margin: "9px 0 0" }}>{explain}</p>
         </Card>
       </div>
 
       {/* 4b · RECENT CHECK-INS — real logged entries, same column style as the
           workout meta row so it sits cleanly with the rest of the home page. */}
-      <div style={{ marginBottom: 20, ...rise(0.19) }}>
+      <div data-rise style={{ marginBottom: 20, ...rise() }}>
         <SectionLabel>{t("ZADNJI CHECK-INI")}</SectionLabel>
         <Card>
           {recentCheckins.length === 0 ? (
@@ -982,7 +985,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 5 · TODAY'S WORKOUT — name · meta · big Start button */}
-      <div style={{ marginBottom: 20, ...rise(0.22) }}>
+      <div data-rise style={{ marginBottom: 20, ...rise() }}>
         <SectionLabel>{t("DANAŠNJI TRENING")} · 17:00</SectionLabel>
         <Card pad={22}>
           <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 21, margin: "0 0 13px", color: C.text, lineHeight: 1.12, letterSpacing: "-0.01em" }}>{t("Moč · Spodnji del")}</h2>
@@ -998,7 +1001,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
               </div>
             ))}
           </div>
-          <button onClick={() => go("train")} style={{
+          <button onClick={() => { try { navigator.vibrate?.(12); } catch {} go("train"); }} style={{
             width: "100%", height: 46, borderRadius: 12, border: "none", background: C.btn, color: C.btnText,
             fontFamily: C.display, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center",
             justifyContent: "center", gap: 8, cursor: "pointer", WebkitTapHighlightColor: "transparent",
@@ -1010,20 +1013,20 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 6 · RECOVERY SUMMARY — Sleep · Recovery · Fatigue · Mood in one row */}
-      <div style={{ marginBottom: 20, ...rise(0.25) }}>
+      <div data-rise style={{ marginBottom: 20, ...rise() }}>
         <SectionLabel>{t("STANJE")}</SectionLabel>
         <div style={{ display: "flex", gap: 6 }}>
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Spanje").toUpperCase()} value={hasData ? `${checkin.sleepH}h` : "—"} barPct={hasData ? Math.min(1, (checkin.sleepH || 0) / 8) : 0} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Okrevanje").toUpperCase()} value={hasData ? `${recScore}%` : "—"} barPct={hasData ? recScore / 100 : 0} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Utrujenost").toUpperCase()} value={hasData ? `${fatigue}/5` : "—"} barPct={hasData ? fatigue / 5 : 0} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => setOpenBattery(true)} label={t("Počutje").toUpperCase()} value={hasData ? `${checkin.mood}/5` : "—"} barPct={hasData ? checkin.mood / 5 : 0} />
+          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("sleep"); setOpenStats(true); }} label={t("Spanje").toUpperCase()} value={hasData ? `${checkin.sleepH}h` : "—"} barPct={hasData ? Math.min(1, (checkin.sleepH || 0) / 8) : 0} />
+          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("recovery"); setOpenStats(true); }} label={t("Okrevanje").toUpperCase()} value={hasData ? `${recScore}%` : "—"} barPct={hasData ? recScore / 100 : 0} />
+          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("soreness"); setOpenStats(true); }} label={t("Utrujenost").toUpperCase()} value={hasData ? `${fatigue}/5` : "—"} barPct={hasData ? fatigue / 5 : 0} />
+          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("mood"); setOpenStats(true); }} label={t("Počutje").toUpperCase()} value={hasData ? `${checkin.mood}/5` : "—"} barPct={hasData ? checkin.mood / 5 : 0} />
         </div>
       </div>
 
       {/* 7 · WEEKLY PROGRESS — streak · completed/goal · progress bar */}
-      <div style={{ marginBottom: 20, ...rise(0.22) }}>
+      <div data-rise style={{ marginBottom: 20, ...rise() }}>
         <SectionLabel action={t("Koledar")} onAction={() => go("season")}>{t("TA TEDEN")}</SectionLabel>
-        <Card onClick={() => go("season")}>
+        <Card onClick={() => { haptic(); go("season"); }}>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 11 }}>
             <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
               <span style={{ fontFamily: C.display, fontWeight: 800, fontSize: 29, color: C.text, lineHeight: 1, letterSpacing: "-0.02em" }}>{streak}</span>
@@ -1041,17 +1044,17 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {/* 8 · QUICK STATS — 4 compact cards */}
-      <div style={{ marginBottom: 6, ...rise(0.25) }}>
+      <div data-rise style={{ marginBottom: 6, ...rise() }}>
         <SectionLabel>{t("HITRE STATISTIKE")}</SectionLabel>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           <StatTile label={t("OBREMENITEV")} value={t("Optimalna")} sub={t("7-dnevno povprečje")} />
-          <StatTile label={t("Okrevanje").toUpperCase()} value={hasData ? `${recScore}%` : "—"} sub={hasData ? `${components.length} ${t("vira")}` : t("Ni podatkov")} />
+          <StatTile onClick={() => { haptic(); setStatsMetric("recovery"); setOpenStats(true); }} label={t("Okrevanje").toUpperCase()} value={hasData ? `${recScore}%` : "—"} sub={hasData ? `${components.length} ${t("vira")}` : t("Ni podatkov")} />
           <StatTile label={t("TREND")} value={trend} valueColor={battery >= 70 ? C.accent : C.text} sub={t("vs. včeraj")} />
           <StatTile label={t("KALORIJE DANES")} value="480" sub="kcal" />
         </div>
       </div>
 
-      {openStats && <StatsSheet C={C} lang={lang} onClose={() => setOpenStats(false)} />}
+      {openStats && <StatsSheet C={C} lang={lang} initialMetric={statsMetric} onClose={() => setOpenStats(false)} />}
 
       {/* ── NOTIFICATIONS — bottom sheet, opens from the bell ── */}
       {openNotifs && (
@@ -1128,7 +1131,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
                 { icon: <IconFace size={20} color={tone} />, label: t("POČUTJE"), val: `${checkin.mood}/5` },
                 { icon: <IconBolt size={18} color={tone} />, label: t("SORNOST"), val: `${checkin.soreness}/5` },
               ].map(({ icon, label, val }) => (
-                <button key={label} onClick={() => setOpenStats(true)} style={{ flex: 1, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "8px 5px", textAlign: "center", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
+                <button key={label} onClick={() => { haptic(); setOpenStats(true); }} style={{ flex: 1, background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "8px 5px", textAlign: "center", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
                   <div style={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>{icon}</div>
                   <Mono style={{ color: C.muted, fontSize: 8, letterSpacing: "0.04em" }}>{label}</Mono>
                   <div style={{ fontFamily: C.display, fontWeight: 700, fontSize: 13, color: C.text, marginTop: 2 }}>{val}</div>
@@ -1170,7 +1173,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {/* Compact summary of today's answers — the actual Q&A flow now
                   lives in its own dedicated MorningCheckinFlow sheet. */}
-              <button onClick={() => setOpenCheckin(true)} style={{
+              <button onClick={() => { haptic(); setOpenCheckin(true); }} style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left",
                 background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 14, padding: "11px 13px",
                 cursor: "pointer", WebkitTapHighlightColor: "transparent",

@@ -31,9 +31,9 @@ function BatteryBar({ pct, C }) {
 function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
   const batCol = athlete.battery >= 70 ? C.accent : athlete.battery >= 40 ? C.yellow : C.red;
   const lastTraining = [
-    { name: "Počep", sets: 4, reps: 5, load: "120 kg" },
-    { name: "Skok na zaboj", sets: 3, reps: 3, load: "60 cm" },
-    { name: "Köbenhavnska deska", sets: 3, reps: "30s", load: "—" },
+    { name: "Squat", sets: 4, reps: 5, load: "120 kg" },
+    { name: "Box jump", sets: 3, reps: 3, load: "60 cm" },
+    { name: "Copenhagen plank", sets: 3, reps: "30s", load: "—" },
   ];
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 20, background: C.bg, display: "flex", flexDirection: "column", animation: "athlosFade 0.2s ease", overflowY: "auto" }}>
@@ -64,7 +64,7 @@ function AthleteDetailSheet({ athlete, C, t, onClose, go }) {
 
         {/* metric tiles */}
         <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-          {[["Sprint", athlete.sprint], ["Počep 1RM", athlete.squat]].map(([l, v]) => (
+          {[["Sprint", athlete.sprint], ["Squat 1RM", athlete.squat]].map(([l, v]) => (
             <div key={l} style={{ flex: 1, background: C.surface2, borderRadius: 16, padding: "10px 11px" }}>
               <Mono style={{ color: C.muted, fontSize: 8.5, letterSpacing: "0.16em", textTransform: "uppercase", display: "block" }}>{t(l.toUpperCase())}</Mono>
               <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 18, color: C.text, marginTop: 5, letterSpacing: "-0.01em" }}>{v}</div>

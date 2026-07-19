@@ -13,7 +13,7 @@ export default function ScreenSession({ go }) {
         <BackBtn onClick={() => go("train")} />
         <div style={{ minWidth: 0 }}>
           <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.16em", display: "block", marginBottom: 5 }}>{t("TRENING V ŽIVO")}</Mono>
-          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, margin: 0, color: C.text, letterSpacing: "-0.02em", lineHeight: 1.05 }}>{t("Počep")} — {t("serija")} 3/5</h2>
+          <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 22, margin: 0, color: C.text, letterSpacing: "-0.02em", lineHeight: 1.05 }}>Squat — {t("serija")} 3/5</h2>
         </div>
       </header>
 

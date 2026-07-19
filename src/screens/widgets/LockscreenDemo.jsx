@@ -56,7 +56,7 @@ export default function LockscreenDemo({ onClose, t }) {
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 9 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: "'Poppins',system-ui,sans-serif", fontWeight: 800, fontSize: 22, textTransform: "uppercase", color: "#F4EFE6", lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {live ? `${live.block} · ${t(live.exName)}` : "A1 · Počep"}
+              {live ? `${live.block} · ${t(live.exName)}` : "A1 · Squat"}
             </div>
             <Mono style={{ color: restLeft ? "#00FF87" : "rgba(244,239,230,0.55)", fontSize: 10, letterSpacing: "0.08em", marginTop: 5, display: "block" }}>
               {restLeft
