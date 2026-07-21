@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import gsap from "gsap";
-import { Moon, Smile, Zap, Dumbbell, Brain, Bandage, ScrollText, Scale, Sun, ChevronRight, Gauge } from "lucide-react";
+import { Moon, Smile, Zap, Dumbbell, Brain, Bandage, ScrollText, Scale, ChevronRight, HeartPulse } from "lucide-react";
 import { useTheme } from "../theme";
-import { Mono, Icon, Card, SectionLabel, StatTile, PrimaryBtn } from "../components/UI";
+import { Mono, Card, SectionLabel, StatTile, PrimaryBtn, MetricCard } from "../components/UI";
 import { useT, useLang } from "../lib/i18n";
 import { readinessFromCheckin, recommendation, DEFAULT_CHECKIN } from "../lib/readiness";
 import { readinessFromWhoop, hasWhoopDemo, whoopSeries } from "../lib/readinessLive";
-import { checkinPendingToday } from "../lib/notifications";
+import { checkinPendingToday, unreadNotificationCount } from "../lib/notifications";
+import { takeIntent } from "../lib/intent";
 import { syncMyClubCard, saveCheckin, getTodayCheckin, listCheckins } from "../lib/api";
-import { loadWellness, markWellnessDone } from "./widgets/CheckinCard";
+import { loadWellness, markWellnessDone, adoptLocalWellness, syncWellnessFromCheckins } from "./widgets/CheckinCard";
 
 // Neutral slider positions — shown until the user actually drags something.
 // Not fed into the readiness score until `touched` is true (see below), so
@@ -83,8 +84,8 @@ function useSlosh() {
       vel += -0.045 * off;         // spring restoring force toward level
       vel *= 0.905;                // light damping → it rocks a few times (real water)
       off += vel;
-      const tilt = Math.max(-15, Math.min(15, off * 0.5));   // refined slosh — the water tips, never flips
-      const by = Math.max(-9, Math.min(9, off * 0.18));      // gentle vertical sway
+      const tilt = Math.max(-7, Math.min(7, off * 0.26));   // subdued slosh — a light tip, not a wobble
+      const by = Math.max(-4, Math.min(4, off * 0.09));     // barely-there vertical sway
       g.setAttribute("transform", `rotate(${tilt.toFixed(2)} 60 60) translate(0 ${by.toFixed(2)})`);
       if (Math.abs(off) < 0.03 && Math.abs(vel) < 0.03) {
         g.setAttribute("transform", "rotate(0 60 60)"); running = false; return;
@@ -93,7 +94,7 @@ function useSlosh() {
     };
     const onScroll = () => {
       const y = getY();
-      vel = Math.max(-34, Math.min(34, vel + (y - lastY) * 0.55));  // scroll speed → momentum
+      vel = Math.max(-15, Math.min(15, vel + (y - lastY) * 0.22));  // scroll speed → momentum (dialed down — was too twitchy on normal scrolls)
       lastY = y;
       if (!running) { running = true; raf = requestAnimationFrame(tick); }
     };
@@ -230,30 +231,48 @@ function MiniSpark({ data, color, C, h = 44 }) {
   );
 }
 
-// Premium 1–5 answer selector for the Morning Check-in — rounded chips (not
-// circles): a subtle bordered surface at rest, accent-filled + elevated with
-// a spring scale-up once picked. Same "one soft glow" restraint as PrimaryBtn
-// (reuses C.glowSoft) so a selected answer reads as a small, satisfying CTA.
+// 1–5 answer selector for the Morning Check-in.
+//
+// Deliberately NOT accent-coloured. Two reasons:
+//  · The sheet's one green element is the CTA. A green-filled chip sitting
+//    directly above a green button put all the colour at one end of the sheet
+//    and made the two compete.
+//  · Green means "good" everywhere else in ATHLOS, but this is an ordinal
+//    scale where 1 is a BAD answer. Painting a 1 or a 2 green states the
+//    opposite of what the answer means.
+// A picked chip is therefore solid ink-on-white (C.text fill, C.bg glyph):
+// maximum contrast, unmistakably selected, no hue.
+//
+// The row itself also encodes its own direction — the resting fill ramps up
+// across the five chips, so left reads lighter than right before the user has
+// touched anything. That is the POOR→GREAT axis stated by the control instead
+// of only by its end labels.
 function AnswerScale({ value, onChange, C, t, count = 5 }) {
   const dark = C.name === "dark";
-  const fill = dark ? "rgba(255,255,255,0.05)" : C.surface2;
   const ring = dark ? "rgba(255,255,255,0.10)" : C.border2;
+  const restFill = (n) => {
+    const k = (n - 1) / (count - 1); // 0 → 1 across the scale
+    return dark
+      ? `rgba(255,255,255,${(0.035 + k * 0.06).toFixed(3)})`
+      : `rgba(16,24,40,${(0.028 + k * 0.045).toFixed(3)})`;
+  };
   return (
     <div>
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
         {Array.from({ length: count }, (_, i) => i + 1).map((n) => {
           const on = value === n;
           return (
             <button key={n} onClick={() => onChange(n)} aria-label={String(n)} aria-pressed={on} style={{
-              flex: 1, height: 46, borderRadius: 13, cursor: "pointer", padding: 0,
-              border: `1.5px solid ${on ? C.btn : ring}`,
-              background: on ? C.btn : fill,
-              color: on ? C.btnText : C.muted,
-              fontFamily: C.display, fontWeight: 800, fontSize: 15,
-              boxShadow: on ? C.glowSoft : "none",
-              transform: on ? "scale(1.06)" : "scale(1)",
+              flex: "1 1 0", aspectRatio: "1 / 1", maxWidth: 56, borderRadius: "50%", cursor: "pointer", padding: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: `1.5px solid ${on ? C.text : ring}`,
+              background: on ? C.text : restFill(n),
+              color: on ? C.bg : C.muted,
+              fontFamily: C.display, fontWeight: on ? 800 : 700, fontSize: 15,
+              boxShadow: "none",
+              transform: on ? "scale(1.04)" : "scale(1)",
               WebkitTapHighlightColor: "transparent",
-              transition: "transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s, border-color 0.18s, box-shadow 0.18s, color 0.18s",
+              transition: "transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s, border-color 0.18s, color 0.18s",
             }}>{n}</button>
           );
         })}
@@ -274,10 +293,10 @@ function AnswerScale({ value, onChange, C, t, count = 5 }) {
 function MorningCheckinFlow({ checkin, setC, onClose, C, t }) {
   const [step, setStep] = useState(0);
   const STEPS = [
-    { key: "sleepQuality", Icon: IconMoon, title: t("Kako si spal?"), sub: t("Kakovost spanja vpliva na okrevanje čez noč.") },
-    { key: "mood", Icon: IconFace, title: t("Kakšno je tvoje počutje?"), sub: t("Splošno razpoloženje in energija danes.") },
-    { key: "soreness", Icon: IconDumbbell, title: t("Kako boleče so mišice?"), sub: t("Napetost ali bolečina po zadnjem treningu.") },
-    { key: "stress", Icon: IconBrain, title: t("Kako stresen je dan?"), sub: t("Psihična obremenitev vpliva na regeneracijo.") },
+    { key: "sleepQuality", title: t("Kako si spal?"), sub: t("Kakovost spanja vpliva na okrevanje čez noč.") },
+    { key: "mood", title: t("Kakšno je tvoje počutje?"), sub: t("Splošno razpoloženje in energija danes.") },
+    { key: "soreness", title: t("Kako boleče so mišice?"), sub: t("Napetost ali bolečina po zadnjem treningu.") },
+    { key: "stress", title: t("Kako stresen je dan?"), sub: t("Psihična obremenitev vpliva na regeneracijo.") },
   ];
   const total = STEPS.length;
   const cur = STEPS[step];
@@ -301,7 +320,8 @@ function MorningCheckinFlow({ checkin, setC, onClose, C, t }) {
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: step === 0 ? 8 : 22 }}>
-          <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.3em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
+          {/* muted, not accent — the sheet spends its green on the CTA alone */}
+          <Mono style={{ color: C.muted, fontSize: 9, letterSpacing: "0.3em" }}>{t("JUTRANJI CHECK-IN")}</Mono>
           <h2 style={{ fontFamily: C.heading, fontWeight: 800, fontSize: 21, color: C.text, margin: "8px 0 0", letterSpacing: "-0.01em" }}>
             {t("Kako se počutiš danes?")}
           </h2>
@@ -319,28 +339,30 @@ function MorningCheckinFlow({ checkin, setC, onClose, C, t }) {
             <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPRAŠANJE")} {step + 1} {t("OD")} {total}</Mono>
             <Mono style={{ color: C.muted2, fontSize: 9 }}>{pct}%</Mono>
           </div>
-          <div style={{ height: 5, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
-            <div style={{ width: `${pct}%`, height: "100%", borderRadius: 999, background: C.accent, transition: "width 0.5s cubic-bezier(.22,1,.36,1)" }} />
+          {/* white fill, not accent — progress is a fact, not the action */}
+          <div style={{ height: 4, borderRadius: 999, background: C.surface3, overflow: "hidden" }}>
+            <div style={{ width: `${pct}%`, height: "100%", borderRadius: 999, background: C.text, transition: "width 0.5s cubic-bezier(.22,1,.36,1)" }} />
           </div>
         </div>
 
         {/* Question card — remounts per step (key=cur.key) so it slides/fades in fresh */}
         <div key={cur.key} style={{ animation: "athlosCkStepIn 0.32s cubic-bezier(.22,1,.36,1)" }}>
           <Card pad={22} style={{ marginBottom: 20 }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 12, marginBottom: 22 }}>
-              <span style={{ width: 52, height: 52, borderRadius: "50%", background: `${C.accent}16`, border: `1px solid ${C.accent}33`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <cur.Icon size={24} color={C.accent} />
-              </span>
-              <div>
-                <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, letterSpacing: "-0.01em" }}>{cur.title}</div>
-                <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, marginTop: 6, lineHeight: 1.45 }}>{cur.sub}</div>
-              </div>
+            <div style={{ textAlign: "center", marginBottom: 22 }}>
+              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, letterSpacing: "-0.01em" }}>{cur.title}</div>
+              <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, marginTop: 6, lineHeight: 1.45 }}>{cur.sub}</div>
             </div>
             <AnswerScale value={value} onChange={(v) => setC(cur.key, v)} C={C} t={t} />
           </Card>
         </div>
 
-        <PrimaryBtn onClick={next} disabled={value == null} style={{ opacity: value == null ? 0.5 : 1 }}>
+        {/* Disabled is a quiet surface, not 50%-opacity green — a translucent
+            green button reads broken, a grey one reads "not yet". Same
+            treatment as the assessment flow's CTA. */}
+        <PrimaryBtn onClick={next} disabled={value == null} style={value == null ? {
+          background: C.name === "dark" ? "rgba(255,255,255,0.055)" : "rgba(16,24,40,0.05)",
+          color: C.muted2, boxShadow: "none",
+        } : undefined}>
           {isLast ? t("Dokončaj") : t("Naprej")}
         </PrimaryBtn>
         {step > 0 && (
@@ -657,24 +679,30 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
   const [statsMetric, setStatsMetric] = useState("weight"); // which tab StatsSheet opens on
   const [openBattery, setOpenBattery] = useState(false); // battery-info sheet (tap the score)
   const [openCheckin, setOpenCheckin] = useState(false);  // dedicated Morning Check-in flow
-  const [openNotifs, setOpenNotifs] = useState(false);   // notifications sheet (bell, top-right)
+  // Tapping a day in the week strip shows THAT day's readiness instead of
+  // navigating away — null means "today" (the live, editable check-in).
+  // Tapping the same day again (or today) returns to the live view.
+  const [selectedIso, setSelectedIso] = useState(null);
+  // Full check-in rows (not just the boolean "done" dot) for the current
+  // week, so a past day's readiness can be recomputed the same way today's
+  // is — from real sleep/mood/soreness/stress/hydration answers, not guessed.
+  const [weekCheckinRows, setWeekCheckinRows] = useState({});
   const [checkin, setCheckin] = useState(loadCheckin);
   useEffect(() => { try { localStorage.setItem(CHECKIN_KEY, JSON.stringify(checkin)); } catch {} }, [checkin]);
-
-  // Page-load entrance — every [data-rise] section (header, gauges, cards…)
-  // fades and lifts in together, power3.out, a soft stagger between them.
-  // Runs once on mount only, and is skipped for prefers-reduced-motion.
-  const rootRef = useRef(null);
   useEffect(() => {
-    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const els = rootRef.current?.querySelectorAll("[data-rise]");
-    if (!els?.length) return;
-    if (reduceMotion) { gsap.set(els, { opacity: 1 }); return; }
-    const tween = gsap.fromTo(els,
-      { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.07, clearProps: "opacity,transform" });
-    return () => tween.kill();
-  }, []);
+    let live = true;
+    listCheckins(user?.id, 8)
+      .then((rows) => {
+        if (!live) return;
+        const map = {};
+        rows.forEach((r) => { map[r.date] = r; });
+        setWeekCheckinRows(map);
+      })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [user?.id, checkin.touched]);
+
+  const rootRef = useRef(null);
 
   // Restore today's real check-in from the account (cross-device) — only
   // overrides the local draft if the cloud actually has today's row, so it
@@ -695,25 +723,93 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
   }, [user?.id]);
 
   // Recent check-in history (newest first) — the real entries the athlete has
-  // logged, surfaced on the home page. Reloads when today's check-in changes.
+  // logged, surfaced on the home page. Today's own check-in already shows as
+  // the stats row at the top of the card above, so this list starts at
+  // yesterday and shows at most 2 days (yesterday + the day before).
+  // Reloads when today's check-in changes.
   const [recentCheckins, setRecentCheckins] = useState([]);
   useEffect(() => {
     let live = true;
     listCheckins(user?.id, 7)
-      .then((rows) => { if (live) setRecentCheckins([...rows].reverse()); })
+      .then((rows) => {
+        if (!live) return;
+        const d = new Date();
+        const todayIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        setRecentCheckins([...rows].reverse().filter((r) => r.date !== todayIso).slice(0, 2));
+      })
       .catch(() => {});
     return () => { live = false; };
   }, [user?.id, checkin.touched]);
 
+  // "Has today's check-in been answered?" — real state, not a bare
+  // localStorage read in the render body. The old form recomputed only as a
+  // side effect of some *other* re-render happening to occur, so the card
+  // could keep claiming the check-in was pending after it had been answered.
+  // Seeded from storage, re-synced when the account id resolves, and set to
+  // false the moment an answer is recorded.
+  const [checkinPending, setCheckinPending] = useState(() => checkinPendingToday(user?.id));
+  // Streak / week-dot source, same real-state treatment as `checkinPending`
+  // and for the same reason: nothing here may fall back to a bare
+  // localStorage read that only happens to refresh when some UNRELATED
+  // re-render occurs. Every place that rewrites the wellness store below
+  // calls its setter explicitly.
+  const [wellDays, setWellDays] = useState(() => loadWellness(user?.id).days);
+
+  useEffect(() => {
+    // Claim anything recorded before the id existed, then re-read.
+    adoptLocalWellness(user?.id);
+    setCheckinPending(checkinPendingToday(user?.id));
+    setWellDays(loadWellness(user?.id).days);
+  }, [user?.id]);
+
+  // Reconcile the local streak/week-dot store with the account's real history.
+  //
+  // saveCheckin() already writes every answer to Supabase's `checkins` table
+  // (lib/api.js), so the DATA has never actually been at risk. But streak,
+  // the week dots and checkinPendingToday() all read a separate, LOCAL-ONLY
+  // "done" map (lib/widgets/CheckinCard.jsx) that nothing ever fed from the
+  // account — so a fresh device, a cleared browser, or a reinstall forgot
+  // every day the athlete had ever logged: streak back to 0, and today's
+  // check-in reported as still pending even when it was already done on
+  // another device. This pulls the account's check-in dates down once per
+  // login and folds them in (gaps only — never overwrites a local answer).
+  //
+  // 60 days is a pragmatic window, not a hard limit: markWellnessDone() keeps
+  // writing locally on every check-in regardless, so only a login on a device
+  // that has NEVER logged a given day locally depends on this fetch — and a
+  // streak long enough to outrun a 60-day resync already survived on the
+  // device(s) that built it.
+  useEffect(() => {
+    if (!user?.id) return;
+    let live = true;
+    listCheckins(user.id, 60).then((rows) => {
+      if (!live) return;
+      if (syncWellnessFromCheckins(user.id, rows)) {
+        setWellnessTick((n) => n + 1);
+        setCheckinPending(checkinPendingToday(user.id));
+      }
+    }).catch(() => {});
+    return () => { live = false; };
+  }, [user?.id]);
+
   // Any real interaction marks today as checked-in — from then on the score
   // reflects what was actually entered, persisted to the account and to the
-  // streak/notifications storage (both were previously never written to).
-  const setC = (k, v) => setCheckin((p) => {
-    const next = { ...p, [k]: v, touched: true };
+  // streak/notifications storage.
+  //
+  // The writes deliberately do NOT live inside the setCheckin updater. An
+  // updater must be pure: StrictMode double-invokes it, and React may replay
+  // the update queue, so a `saveCheckin()` in there fires a duplicate network
+  // write per tap and `markWellnessDone()` runs twice. Doing the effects here
+  // runs each exactly once per answer.
+  const setC = (k, v) => {
+    const next = { ...checkin, [k]: v, touched: true };
+    setCheckin(next);
     markWellnessDone(user?.id, next);
     saveCheckin(user?.id, next).catch(() => {});
-    return next;
-  });
+    // Flip the flag explicitly rather than waiting for the next render to
+    // re-read localStorage — see the checkinPending state below.
+    setCheckinPending(false);
+  };
 
   const now = new Date();
   const DAYS = lang === "en" ? DAYS_EN : DAYS_SL;
@@ -742,12 +838,37 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
     return today;
   })() : null;
   // Push the score onto the club card so the coach dashboard shows live data.
+  // Always today's real battery, regardless of which day is being BROWSED
+  // below — the coach dashboard must never learn a past day's number here.
   useEffect(() => { if (user?.id) syncMyClubCard(user.id, { readiness: hasData ? battery : null }); }, [user?.id, battery, hasData]);
+
   const rec = hasData
     ? recommendation(battery)
     : { key: "none", text: "Izpolni svoj prvi check-in, da vidiš pravo pripravljenost.", tone: "yellow" };
   const tone = rec.tone === "accent" ? C.accent : rec.tone === "yellow" ? C.yellow : C.red;
   const shown = useCountUp(battery);
+
+  // ── Viewing a past day (tapped in the week strip) ──────────────────────
+  // Recomputed from that day's REAL stored check-in (checkins table), the
+  // same engine used for today — never a guess. Every `view*` variable below
+  // is a PARALLEL copy used only by the two gauges, the Recovery Insight
+  // card and the STATUS row — `rec`/`tone`/`battery`/`components`/`recScore`
+  // above stay today-only and untouched, since the battery-info sheet and
+  // Quick Stats further down are deliberately always about today regardless
+  // of what's being browsed here.
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const viewingPast = !!(selectedIso && selectedIso !== todayIso);
+  const pastRow = viewingPast ? weekCheckinRows[selectedIso] : null;
+  const viewHasData = viewingPast ? !!pastRow : hasData;
+  const { battery: viewBattery, components: viewComponents } = viewingPast
+    ? (pastRow
+        ? readinessFromCheckin({
+            sleepQuality: pastRow.sleep_quality, mood: pastRow.mood, soreness: pastRow.soreness,
+            stress: pastRow.stress, sleepH: pastRow.sleep_h, hydration: pastRow.hydration,
+            season: checkin.season, cycleModifier: checkin.cycleModifier,
+          })
+        : { battery: 0, components: [] })
+    : { battery, components };
 
   // Initial inline state only (opacity 0, no CSS keyframe) — the GSAP effect
   // below (see rootRef) staggers every [data-rise] section in on mount:
@@ -757,14 +878,49 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
   // ── Notifications (bell, top-left) — built from state the app already has:
   // today's check-in, unread chats, and the upcoming session. Recomputed every
   // render, so submitting the questionnaire (a state update) clears its row.
-  const checkinPending = checkinPendingToday(user?.id);
+
+  // Page-load entrance — every [data-rise] section (header, gauges, cards…)
+  // fades and lifts in together, power3.out, a soft stagger between them.
+  // Runs once on mount only, and is skipped for prefers-reduced-motion.
+  //
+  // Deliberately mount-only. `rise()` puts an inline opacity:0 on every riser
+  // and ONLY this tween clears it, so re-running the effect is dangerous: the
+  // cleanup would kill a stagger mid-flight and strand whole sections at a
+  // partial opacity with no second chance. Anything that can mount LATER (the
+  // check-in card, whose visibility depends on `user?.id` resolving) must
+  // therefore carry its own CSS entrance instead of joining this stagger.
+  useEffect(() => {
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const els = rootRef.current?.querySelectorAll("[data-rise]");
+    if (!els?.length) return;
+    if (reduceMotion) { gsap.set(els, { opacity: 1 }); return; }
+    const tween = gsap.fromTo(els,
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.07, clearProps: "opacity,transform" });
+    return () => tween.kill();
+  }, []);
+
+  // Arriving here from the check-in notification: open it immediately, and
+  // record today as already prompted so the auto-open below can't reopen the
+  // sheet 650ms after the user deliberately closed it.
+  const cameFromNotification = useRef(false);
+  useEffect(() => {
+    if (!takeIntent("open-checkin")) return;
+    cameFromNotification.current = true;
+    try {
+      const d = new Date();
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      localStorage.setItem(`athlos:checkinPrompted:${user?.id || "local"}`, iso);
+    } catch {}
+    setOpenCheckin(true);
+  }, [user?.id]);
 
   // Auto-open the morning check-in the first time the home screen is shown on a
   // new day while it's still pending — so the user lands straight in it. Guarded
   // per user + date in localStorage, so it opens at most once a day; after that
   // the on-page card is the way back in.
   useEffect(() => {
-    if (!checkinPending) return;
+    if (!checkinPending || cameFromNotification.current) return;
     const d = new Date();
     const todayIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const key = `athlos:checkinPrompted:${user?.id || "local"}`;
@@ -776,33 +932,16 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
     return () => clearTimeout(id);
   }, [checkinPending, user?.id]);
 
-  const chatLine = chatUnread === 0 ? "" : lang === "en"
-    ? `${chatUnread} unread conversation${chatUnread === 1 ? "" : "s"}.`
-    : chatUnread === 1 ? "1 neprebran pogovor."
-    : chatUnread === 2 ? "2 neprebrana pogovora."
-    : chatUnread <= 4 ? `${chatUnread} neprebrani pogovori.`
-    : `${chatUnread} neprebranih pogovorov.`;
-  const notifs = [
-    checkinPending && {
-      id: "checkin", color: C.accent, icon: <IconFace size={25} color={C.accent} />,
-      title: t("Jutranji check-in"), text: t("Odgovori na 4 vprašanja in posodobi baterijo."),
-      onTap: () => setOpenNotifs(false),
-    },
-    chatUnread > 0 && {
-      id: "chat", color: C.gold, icon: <Icon name="chat" color={C.gold} size={25} />,
-      title: t("Nova sporočila"), text: chatLine,
-      onTap: () => { setOpenNotifs(false); go("chat"); },
-    },
-    now.getHours() < 17 && {
-      id: "train", color: C.red, icon: <Icon name="train" color={C.red} size={25} />,
-      title: t("Današnji trening"), text: t("Moč · spodnji del ob 17:00."),
-      onTap: () => { setOpenNotifs(false); go("train"); },
-    },
-  ].filter(Boolean);
-  const bellDot = checkinPending || chatUnread > 0;
+  // The dot tracks UNREAD notifications, not raw signals. Previously it stayed
+  // lit whenever a check-in was due even after the notification had been read,
+  // so clearing the inbox never cleared the bell. Same derivation the inbox
+  // uses (lib/notifications), so the two cannot disagree. Safe to read at
+  // render time: App re-keys the screen container per navigation, so returning
+  // from the inbox remounts this and re-reads.
+  const bellDot = unreadNotificationCount(user?.id, { chatUnread, now }) > 0;
 
   // Monday-first week strip: day letter + date, dot = check-in done that day
-  const wellDays = loadWellness(user?.id).days;
+  // (`wellDays` is the real state declared above, kept in sync by its setter.)
   const weekLetters = lang === "en" ? ["M", "T", "W", "T", "F", "S", "S"] : ["P", "T", "S", "Č", "P", "S", "N"];
   const monday = new Date(now);
   monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
@@ -824,19 +963,22 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
 
   // Derived metrics for the recovery row, weekly progress and quick stats —
   // "—" instead of a number wherever the input hasn't actually been entered.
+  // Today-only (used by Quick Stats + the battery-info sheet, unchanged from
+  // before the week-strip day picker existed):
   const recComp = components.find((c) => c.key === "recovery");
   const recScore = hasData ? (recComp ? recComp.score : battery) : null;
-  const fatigue = hasData ? Math.max(1, Math.min(5, checkin.soreness || 2)) : null;
   const WEEKLY_GOAL = 5;
   const doneWorkouts = Math.min(doneThisWeek, WEEKLY_GOAL);
   const trend = battery >= 70 ? "+6%" : battery >= 40 ? "−2%" : "−9%";
-  const explain = !hasData
-    ? t("Odgovori na spodnja vprašanja, da ATHLOS izračuna tvojo pravo pripravljenost.")
-    : rec.key === "full"
-    ? t("Regeneracija in počutje sta visoka — telo je pripravljeno na polno obremenitev.")
-    : rec.key === "light"
-      ? t("Nekateri kazalniki so nižji — danes izberi zmeren napor.")
-      : t("Telo kaže znake utrujenosti — danes daj prednost regeneraciji.");
+
+  // Same set, but for the day being VIEWED in the week strip (drives the two
+  // gauges, the Recovery Insight card and the STATUS row only).
+  const viewRecComp = viewComponents.find((c) => c.key === "recovery");
+  const viewRecScore = viewHasData ? (viewRecComp ? viewRecComp.score : viewBattery) : null;
+  const viewSoreness = viewingPast ? pastRow?.soreness : checkin.soreness;
+  const viewSleepH = viewingPast ? pastRow?.sleep_h : checkin.sleepH;
+  const viewMood = viewingPast ? pastRow?.mood : checkin.mood;
+  const viewFatigue = viewHasData ? Math.max(1, Math.min(5, viewSoreness || 2)) : null;
 
   return (
     <div ref={rootRef} style={{ padding: "6px 14px 26px", color: C.text, position: "relative" }}>
@@ -852,7 +994,7 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
             {t("Živjo,")} {(profile?.name || "Športnik").trim().split(/\s+/)[0]}
           </div>
         </div>
-        <button onClick={() => { haptic(); setOpenNotifs(true); }} aria-label={t("Obvestila")} className="at-iconbtn" style={{
+        <button onClick={() => { haptic(); go("notifications"); }} aria-label={t("Obvestila")} className="at-iconbtn" style={{
           width: 40, height: 40, borderRadius: "50%", cursor: "pointer", flexShrink: 0,
           background: "transparent", border: `1px solid ${C.border2}`,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -875,75 +1017,102 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
         </button>
       </div>
 
-      {/* 2 · WEEKLY CALENDAR STRIP — quiet, today the only filled cell */}
-      <div data-rise style={{ display: "flex", gap: 5, marginBottom: 20, ...rise() }}>
-        {week.map((d) => (
-          <button key={d.iso} onClick={() => { haptic(); go("season"); }} aria-label={`${d.label} ${d.num}`} style={{
-            flex: 1, padding: "5px 0 6px", background: "none", border: "none", cursor: "pointer",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-            WebkitTapHighlightColor: "transparent",
-          }}>
-            <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9, letterSpacing: "0.06em", color: d.isToday ? C.text : C.muted2 }}>{d.label}</span>
-            <span style={{
-              width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-              background: d.isToday ? C.accent : C.surface2,
-              color: d.isToday ? C.btnText : C.text2,
-              fontFamily: C.display, fontWeight: 700, fontSize: 12,
-            }}>{d.num}</span>
-            <span aria-hidden="true" style={{ width: 4, height: 4, borderRadius: "50%", background: d.done ? C.accent : "transparent" }} />
-          </button>
-        ))}
+      {/* 2 · WEEKLY CALENDAR STRIP — tap a day to see ITS readiness on the two
+          gauges below (future days are inert — there's nothing to show yet).
+          Tap the selected day again, or today, to return to the live view. */}
+      <div data-rise style={{ display: "flex", gap: 5, marginBottom: 8, ...rise() }}>
+        {week.map((d) => {
+          const isFuture = d.iso > todayIso;
+          const isSelected = selectedIso ? d.iso === selectedIso : d.isToday;
+          return (
+            <button key={d.iso} disabled={isFuture} onClick={() => {
+              if (isFuture) return;
+              haptic();
+              setSelectedIso((prev) => (d.iso === todayIso || prev === d.iso) ? null : d.iso);
+            }} aria-label={`${d.label} ${d.num}`} aria-pressed={isSelected} style={{
+              flex: 1, padding: "5px 0 6px", background: "none", border: "none",
+              cursor: isFuture ? "default" : "pointer", opacity: isFuture ? 0.4 : 1,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+              WebkitTapHighlightColor: "transparent",
+            }}>
+              <span style={{ fontFamily: C.mono, fontWeight: 600, fontSize: 9, letterSpacing: "0.06em", color: isSelected ? C.text : C.muted2 }}>{d.label}</span>
+              <span style={{
+                width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                background: isSelected ? C.accent : C.surface2,
+                color: isSelected ? C.btnText : C.text2,
+                fontFamily: C.display, fontWeight: 700, fontSize: 12,
+              }}>{d.num}</span>
+              <span aria-hidden="true" style={{ width: 4, height: 4, borderRadius: "50%", background: d.done ? C.accent : "transparent" }} />
+            </button>
+          );
+        })}
       </div>
 
+      {/* Small "viewing a past day" indicator + quick way back to today —
+          only shown once a non-today day is selected above. */}
+      {viewingPast && (
+        <div data-rise style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12, ...rise() }}>
+          <Mono style={{ color: C.muted2, fontSize: 9, letterSpacing: "0.14em" }}>
+            {(week.find((d) => d.iso === selectedIso)?.label || "").toUpperCase()} {week.find((d) => d.iso === selectedIso)?.num}
+          </Mono>
+          <button onClick={() => { haptic(); setSelectedIso(null); }} style={{
+            background: "none", border: "none", padding: "2px 8px", borderRadius: 999,
+            color: C.accent, fontFamily: C.mono, fontSize: 9, letterSpacing: "0.1em", fontWeight: 700,
+            cursor: "pointer", WebkitTapHighlightColor: "transparent",
+          }}>{t("← DANES")}</button>
+        </div>
+      )}
+
       {/* 3 · RECOVERY + TRAINING LOAD — two premium liquid-fill metrics;
-          tap either for the full breakdown. */}
+          tap either for the full breakdown (always today's, regardless of
+          which day is being browsed above). */}
       <button data-rise onClick={() => { haptic(); setOpenBattery(true); }} aria-label={t("Pripravljenost")} style={{
         width: "100%", background: "none", border: "none", padding: 0, margin: "4px 0 14px",
         cursor: "pointer", WebkitTapHighlightColor: "transparent",
         display: "flex", justifyContent: "center", gap: 26, flexWrap: "wrap", ...rise(),
       }}>
-        <LiquidMetric value={hasData ? battery : 0} max={100} label={t("Pripravljenost")} color={C.accent} decimals={0} fillAlpha={0.58} C={C} size={100} />
+        <LiquidMetric value={viewHasData ? viewBattery : 0} max={100} label={t("Pripravljenost")} color={C.accent} decimals={0} fillAlpha={0.58} C={C} size={100} />
         <LiquidMetric value={strain ?? 0} max={21} label={t("Obremenitev")} color={C.name === "dark" ? "#E6EBF0" : "#8A929C"} decimals={1} fillAlpha={0.2} C={C} size={100} />
       </button>
 
-      {/* 3a · MORNING CHECK-IN — sits right under readiness + training load, so
-          it's the first thing the athlete sees if today's check-in is still
-          pending. Simple dark card, no emoji; tapping opens the check-in entry. */}
+      {/* 3a · MORNING CHECK-IN — the day's primary action. Structurally the twin
+          of the Recovery Insight card below it (eyebrow + status dot, headline,
+          muted line) and sized off the same tokens, so the page keeps one card
+          rhythm: Card's default 16 pad / 18 radius, 17px headline. What marks
+          this one as the ACTION is the accent eyebrow and the chevron — not
+          extra size, and not a fourth row. No tinted background either: the
+          green is spent on the eyebrow and the chevron only. */}
+      {/* NOT a [data-rise] section: this card's visibility depends on
+          `user?.id`, so it can mount after the page-load stagger has already
+          run and would then be stranded at opacity 0 forever. A self-contained
+          CSS entrance plays correctly whenever it happens to mount. */}
       {checkinPending && (
-        <button data-rise onClick={() => { haptic(); setOpenCheckin(true); }} aria-label={t("Izpolni današnji check-in")} className="at-card-hover" style={{
-          width: "100%", textAlign: "left", cursor: "pointer", WebkitTapHighlightColor: "transparent",
-          display: "flex", alignItems: "center", gap: 11, marginBottom: 20,
-          background: C.surface, border: `1px solid ${C.accent}2e`, borderRadius: 16, padding: "12px 13px",
-          ...rise(),
-        }}>
-          <span style={{ width: 40, height: 40, borderRadius: 13, flexShrink: 0, background: `${C.accent}16`, border: `1px solid ${C.accent}33`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Sun size={19} color={C.accent} strokeWidth={1.7} />
-          </span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{t("Izpolni današnji check-in")}</span>
-            <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 11.5, color: C.muted, marginTop: 3, lineHeight: 1.4 }}>{t("Odgovori na vprašanja in posodobi svojo pripravljenost.")}</span>
-          </span>
-          <ChevronRight size={19} color={C.muted2} strokeWidth={2} style={{ flexShrink: 0 }} />
-        </button>
-      )}
-
-      {/* 4 · TODAY'S RECOMMENDATION — the day's one call-to-focus: an icon chip
-          + a heavier headline make this the section's clear focal point,
-          instead of a same-weight card among same-weight cards. */}
-      <div data-rise style={{ marginBottom: 20, ...rise() }}>
-        <SectionLabel>{t("PRIPOROČILO")}</SectionLabel>
-        <Card pad={20}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-            <span style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, background: `${tone}18`, border: `1px solid ${tone}38`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Gauge size={21} color={tone} strokeWidth={1.7} />
-            </span>
+        <Card
+          onClick={() => { haptic(); setOpenCheckin(true); }}
+          aria-label={t("Izpolni današnji check-in")}
+          style={{ marginBottom: 20, animation: "athlosRise 0.5s cubic-bezier(0.22,1,0.36,1) both" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, lineHeight: 1.28, letterSpacing: "-0.01em" }}>{t(rec.text)}</span>
-              <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, lineHeight: 1.55, margin: "7px 0 0" }}>{explain}</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <span aria-hidden="true" style={{ width: 5, height: 5, borderRadius: "50%", background: C.accent, flexShrink: 0 }} />
+                  <Mono style={{ color: C.accent, fontSize: 9.5, letterSpacing: "0.18em" }}>{t("DANEŠNJI CHECK-IN")}</Mono>
+                </div>
+                <Mono style={{ color: C.muted2, fontSize: 9.5, letterSpacing: "0.08em", flexShrink: 0 }}>{t("4 VPRAŠANJA")}</Mono>
+              </div>
+
+              <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, lineHeight: 1.3, letterSpacing: "-0.01em" }}>
+                {t("Izpolni današnji check-in")}
+              </div>
+              <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, lineHeight: 1.6, margin: "8px 0 0" }}>
+                {t("Odgovori na vprašanja in posodobi svojo pripravljenost.")}
+              </p>
             </div>
+            <ChevronRight size={17} color={C.accent} strokeWidth={2.2} style={{ flexShrink: 0 }} />
           </div>
         </Card>
-      </div>
+      )}
 
       {/* 4b · RECENT CHECK-INS — real logged entries, same column style as the
           workout meta row so it sits cleanly with the rest of the home page. */}
@@ -1012,14 +1181,29 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
         </Card>
       </div>
 
-      {/* 6 · RECOVERY SUMMARY — Sleep · Recovery · Fatigue · Mood in one row */}
+      {/* 6 · STATUS — Sleep · Recovery · Fatigue · Mood, all four on one row.
+          Four equal grid columns rather than flex: `minmax(0, 1fr)` makes the
+          tiles provably identical in width and lets them shrink together on a
+          narrow screen instead of one of them pushing the others out. */}
       <div data-rise style={{ marginBottom: 20, ...rise() }}>
         <SectionLabel>{t("STANJE")}</SectionLabel>
-        <div style={{ display: "flex", gap: 6 }}>
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("sleep"); setOpenStats(true); }} label={t("Spanje").toUpperCase()} value={hasData ? `${checkin.sleepH}h` : "—"} barPct={hasData ? Math.min(1, (checkin.sleepH || 0) / 8) : 0} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("recovery"); setOpenStats(true); }} label={t("Okrevanje").toUpperCase()} value={hasData ? `${recScore}%` : "—"} barPct={hasData ? recScore / 100 : 0} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("soreness"); setOpenStats(true); }} label={t("Utrujenost").toUpperCase()} value={hasData ? `${fatigue}/5` : "—"} barPct={hasData ? fatigue / 5 : 0} />
-          <StatTile style={{ flex: 1, minWidth: 0 }} onClick={() => { haptic(); setStatsMetric("mood"); setOpenStats(true); }} label={t("Počutje").toUpperCase()} value={hasData ? `${checkin.mood}/5` : "—"} barPct={hasData ? checkin.mood / 5 : 0} />
+        {/* Only Recovery carries the accent: it is the same quantity as the
+            readiness gauge above, which is already green. The other three are
+            neutral, so the row reads green · white · grey rather than as four
+            competing hues. */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 7 }}>
+          <MetricCard icon={Moon} label={t("Spanje").toUpperCase()}
+            value={viewHasData ? viewSleepH : null} unit="h"
+            onClick={() => { haptic(); setStatsMetric("sleep"); setOpenStats(true); }} />
+          <MetricCard icon={HeartPulse} accent label={t("Okrevanje").toUpperCase()}
+            value={viewHasData ? viewRecScore : null} unit="%"
+            onClick={() => { haptic(); setStatsMetric("recovery"); setOpenStats(true); }} />
+          <MetricCard icon={Zap} label={t("Utrujenost").toUpperCase()}
+            value={viewHasData ? viewFatigue : null} unit="/5"
+            onClick={() => { haptic(); setStatsMetric("soreness"); setOpenStats(true); }} />
+          <MetricCard icon={Smile} label={t("Počutje").toUpperCase()}
+            value={viewHasData ? viewMood : null} unit="/5"
+            onClick={() => { haptic(); setStatsMetric("mood"); setOpenStats(true); }} />
         </div>
       </div>
 
@@ -1055,48 +1239,6 @@ export default function ScreenToday({ go, profile, user, chatUnread = 0 }) {
       </div>
 
       {openStats && <StatsSheet C={C} lang={lang} initialMetric={statsMetric} onClose={() => setOpenStats(false)} />}
-
-      {/* ── NOTIFICATIONS — bottom sheet, opens from the bell ── */}
-      {openNotifs && (
-        <div onClick={(e) => { if (e.target === e.currentTarget) setOpenNotifs(false); }} style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(20,18,14,0.55)" }}>
-          <DragSheet onClose={() => setOpenNotifs(false)} style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, maxHeight: "70%", overflowY: "auto",
-            background: C.bg, borderRadius: "28px 28px 0 0", padding: "11px 14px",
-            paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
-            animation: "athlosRise 0.32s cubic-bezier(0.22,1,0.36,1)",
-          }}>
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 18px" }} />
-
-            <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
-              <span style={{ fontFamily: C.heading, fontWeight: 700, fontSize: 13, letterSpacing: "0.18em", textTransform: "uppercase", color: C.text, whiteSpace: "nowrap" }}>{t("Obvestila")}</span>
-              <span style={{ flex: 1, height: 1, background: C.border }} />
-            </div>
-
-            {notifs.length === 0 && (
-              <div style={{ textAlign: "center", padding: "17px 14px 20px", color: C.muted, fontFamily: C.display, fontStyle: "italic", fontSize: 14.5 }}>
-                {t("Nič novega.")}
-              </div>
-            )}
-
-            {notifs.map((nf) => (
-              <button key={nf.id} onClick={nf.onTap} style={{
-                width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 11px", marginBottom: 8,
-                background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14,
-                cursor: "pointer", textAlign: "left", WebkitTapHighlightColor: "transparent",
-              }}>
-                <span style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {nf.icon}
-                </span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text }}>{nf.title}</span>
-                  <span style={{ display: "block", fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, marginTop: 2, lineHeight: 1.35 }}>{nf.text}</span>
-                </span>
-                <span style={{ color: C.muted, flexShrink: 0 }}>›</span>
-              </button>
-            ))}
-          </DragSheet>
-        </div>
-      )}
 
       {/* ── BATTERY INFO — bottom sheet, opens from the medallion ── */}
       {openBattery && (

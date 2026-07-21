@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTheme } from "../theme";
 import { BackBtn, Pressable, Mono, SkeletonBlock } from "../components/UI";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { IcTrash } from "../components/Icons";
 import { useT } from "../lib/i18n";
 import {
@@ -401,72 +402,6 @@ function BgSheet({ current, C, t, onSelect, onClose }) {
             </button>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Block Confirm ────────────────────────────────────────────
-function BlockConfirm({ name, C, t, onConfirm, onCancel }) {
-  return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 70, background: "rgba(0,0,0,0.55)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-    }}>
-      <div style={{
-        background: C.bg, borderRadius: 16, padding: "17px 15px 14px", width: "88%", maxWidth: 320,
-        animation: "athlosFade 0.2s ease",
-      }}>
-        <div style={{ fontFamily: C.heading, fontSize: 16, fontWeight: 700, color: C.text, textAlign: "center", marginBottom: 6 }}>
-          {t("Blokiraj")} {name}
-        </div>
-        <div style={{ fontFamily: C.display, fontSize: 13, color: C.muted, textAlign: "center", marginBottom: 15, lineHeight: 1.4 }}>
-          {t("Uporabnik vam ne bo mogel pošiljati sporočil.")}
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={onCancel} style={{
-            flex: 1, padding: 14, borderRadius: 10, border: `1px solid ${C.border}`,
-            background: "transparent", color: C.text, fontFamily: C.display, fontWeight: 600, cursor: "pointer",
-          }}>{t("Prekliči")}</button>
-          <button onClick={onConfirm} style={{
-            flex: 1, padding: 14, borderRadius: 10, border: "none",
-            background: "#e5534b", color: "#fff",
-            fontFamily: C.display, fontWeight: 700, cursor: "pointer",
-          }}>{t("Blokiraj")}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Delete Message Menu ──────────────────────────────────────
-function MsgMenu({ msg, C, t, onDelete, onClose }) {
-  return (
-    <div
-      style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(0,0,0,0.45)" }}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0,
-        background: C.bg, borderRadius: "20px 20px 0 0", padding: "13px 13px 23px",
-        animation: "athlosRise 0.28s cubic-bezier(0.22,1,0.36,1)",
-      }}>
-        <div style={{ width: 32, height: 4, borderRadius: 2, background: C.border2, margin: "0 auto 16px" }} />
-        <button onClick={onDelete} style={{
-          width: "100%", padding: "10px 13px", borderRadius: 10, border: "none",
-          background: "rgba(229,83,75,0.1)", color: "#e5534b",
-          fontFamily: C.display, fontSize: 15, fontWeight: 600, cursor: "pointer", textAlign: "left",
-          display: "flex", alignItems: "center", gap: 8,
-        }}>
-          <IcTrash size={15} /> {t("Izbriši sporočilo")}
-        </button>
-        <button onClick={onClose} style={{
-          width: "100%", marginTop: 6, padding: "10px 13px", borderRadius: 10,
-          border: `1px solid ${C.border}`, background: "transparent", color: C.muted,
-          fontFamily: C.display, fontSize: 14, fontWeight: 600, cursor: "pointer",
-        }}>
-          {t("Prekliči")}
-        </button>
       </div>
     </div>
   );
@@ -1424,23 +1359,31 @@ export default function ScreenChat({ user, profile, onConvOpenChange }) {
         />
       )}
 
-      {blockTarget && (
-        <BlockConfirm
-          name={blockTarget.name}
-          C={C} t={t}
-          onConfirm={doBlock}
-          onCancel={() => setBlockTarget(null)}
-        />
-      )}
+      <ConfirmDialog
+        open={!!blockTarget}
+        onClose={() => setBlockTarget(null)}
+        tone="danger"
+        icon={
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" /><path d="M6.3 6.3l11.4 11.4" />
+          </svg>
+        }
+        title={`${t("Blokiraj")} ${blockTarget?.name || ""}`}
+        description={t("Uporabnik vam ne bo mogel pošiljati sporočil.")}
+        confirmLabel={t("Blokiraj")}
+        onConfirm={doBlock}
+      />
 
-      {msgMenu && (
-        <MsgMenu
-          msg={msgMenu}
-          C={C} t={t}
-          onDelete={doDeleteMsg}
-          onClose={() => setMsgMenu(null)}
-        />
-      )}
+      <ConfirmDialog
+        open={!!msgMenu}
+        onClose={() => setMsgMenu(null)}
+        tone="danger"
+        icon={<IcTrash size={30} />}
+        title={t("Izbriši sporočilo?")}
+        description={t("Sporočila po izbrisu ni mogoče obnoviti.")}
+        confirmLabel={t("Izbriši")}
+        onConfirm={doDeleteMsg}
+      />
     </>
   );
 }

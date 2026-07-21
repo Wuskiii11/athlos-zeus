@@ -353,7 +353,7 @@ export default function ScreenTrain({ go, user }) {
   /* ───────── overview — pre-start cockpit: hero panel + session timeline ───────── */
   if (!started) {
     return (
-      <div style={{ padding: "6px 13px 18px" }}>
+      <div style={{ padding: "15px 13px 18px" }}>
         {/* hero panel — focus is the headline, everything else one quiet line */}
         <div style={{ background: C.surface2, borderRadius: 18, padding: "17px 15px 15px", marginBottom: 18 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -447,7 +447,7 @@ export default function ScreenTrain({ go, user }) {
   /* ───────── completion — hero numbers, no tiles ───────── */
   if (finished) {
     return (
-      <div style={{ padding: "6px 14px 16px", display: "flex", flexDirection: "column", height: "100%", animation: "athlosFade 0.3s ease" }}>
+      <div style={{ padding: "15px 14px 16px", display: "flex", flexDirection: "column", height: "100%", animation: "athlosFade 0.3s ease" }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ width: 64, height: 64, borderRadius: "50%", border: `2px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
@@ -473,9 +473,9 @@ export default function ScreenTrain({ go, user }) {
   const activeIdx = exLogs.findIndex((x) => !x.done); // first open set = the one in play
 
   return (
-    <div style={{ padding: "6px 13px 18px" }}>
+    <div style={{ padding: "15px 13px 18px" }}>
       {/* top strip: back · lock · pause · quiet mono clock */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 13 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
         <BackBtn onClick={() => setStarted(false)} />
         <div style={{ flex: 1 }} />
         {/* mock lockscreen Live Activity demo (spec §07) */}

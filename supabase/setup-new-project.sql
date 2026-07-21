@@ -29,6 +29,21 @@ alter table public.profiles add column if not exists plan text default 'basic';
 alter table public.profiles add column if not exists lang text default 'sl';
 alter table public.profiles add column if not exists role text default 'athlete';
 alter table public.profiles add column if not exists theme text; -- 'light' | 'dark' (per-account)
+
+-- Extended onboarding (SetupFlow) — everything the athlete enters during setup
+-- is now persisted on their profile instead of living only in the local cache.
+-- Arrays (goals / injuries / equipment) go to jsonb; the injury photo is the
+-- compressed (<=512px) data URL, same as the avatar `photo` column.
+alter table public.profiles add column if not exists acquisition  text;
+alter table public.profiles add column if not exists gender       text;
+alter table public.profiles add column if not exists waist        numeric;
+alter table public.profiles add column if not exists body_fat     numeric;
+alter table public.profiles add column if not exists experience   numeric;
+alter table public.profiles add column if not exists goals        jsonb;
+alter table public.profiles add column if not exists injuries     jsonb;
+alter table public.profiles add column if not exists injury_note  text;
+alter table public.profiles add column if not exists injury_photo text;
+alter table public.profiles add column if not exists equipment    jsonb;
 -- Nekoga narediš za coacha (zamenjaj e-naslov):
 --   update public.profiles set role = 'coach'
 --   where id = (select id from auth.users where email = 'coach@primer.si');
@@ -126,6 +141,30 @@ drop trigger if exists profiles_lock_role on public.profiles;
 create trigger profiles_lock_role
   before insert or update on public.profiles
   for each row execute procedure public.lock_profile_role();
+
+-- ────────────────────────────────────────────────────────────
+-- Enak vzorec kot lock_profile_role: `plan` (naročniški nivo) je prav tako
+-- RAZVIJALSKO/plačilno nadzorovan — sprememba mora priti iz plačilnega
+-- webhooka ali admin akcije, NIKOLI iz navadnega profile-save klica v appu.
+create or replace function public.lock_profile_plan()
+returns trigger language plpgsql security definer as $$
+begin
+  if auth.uid() is null then
+    return new; -- SQL editor / service role (payment webhook) — poln nadzor
+  end if;
+  if tg_op = 'INSERT' then
+    new.plan := 'basic';       -- vsak nov uporabnik začne na basic
+  else
+    new.plan := old.plan;      -- klient ne more spremeniti svojega plana
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_lock_plan on public.profiles;
+create trigger profiles_lock_plan
+  before insert or update on public.profiles
+  for each row execute procedure public.lock_profile_plan();
 
 -- ════════════════════════════════════════════════════════════
 -- Sezona: koledarski dogodki (trening / tekma / regeneracija)
@@ -338,21 +377,33 @@ create policy "blocks delete" on public.blocks for delete using (blocker_id = au
 insert into storage.buckets (id, name, public) values ('chat-attachments', 'chat-attachments', true)
   on conflict (id) do nothing;
 
+-- Write/update are scoped to the caller's own folder (uploadChatAttachment()
+-- in api.js always writes to `${userId}/...`).
 drop policy if exists "chat-attach read"  on storage.objects;
 drop policy if exists "chat-attach write" on storage.objects;
 create policy "chat-attach read"  on storage.objects for select using (bucket_id = 'chat-attachments');
-create policy "chat-attach write" on storage.objects for insert to authenticated with check (bucket_id = 'chat-attachments');
+create policy "chat-attach write" on storage.objects for insert to authenticated with check (
+  bucket_id = 'chat-attachments' and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 -- Storage bucket for profile avatars (public so the photo URL renders directly)
 insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)
   on conflict (id) do nothing;
 
+-- Same own-folder scoping — uploadAvatar()/coach Settings.tsx both write to
+-- `${userId}/...`.
 drop policy if exists "avatars read"  on storage.objects;
 drop policy if exists "avatars write" on storage.objects;
 drop policy if exists "avatars upd"   on storage.objects;
 create policy "avatars read"  on storage.objects for select using (bucket_id = 'avatars');
-create policy "avatars write" on storage.objects for insert to authenticated with check (bucket_id = 'avatars');
-create policy "avatars upd"   on storage.objects for update to authenticated using (bucket_id = 'avatars') with check (bucket_id = 'avatars');
+create policy "avatars write" on storage.objects for insert to authenticated with check (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+);
+create policy "avatars upd" on storage.objects for update to authenticated using (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+) with check (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 -- ############## 2/3  coach-data.sql (samo tabele/RLS/storage, brez seed) ##############
 -- ─────────────────────────── tables ───────────────────────────
@@ -398,35 +449,141 @@ alter table public.athletes enable row level security;
 drop policy if exists "clubs read" on public.clubs;
 create policy "clubs read" on public.clubs for select to authenticated using (true);
 
--- coaches: read all (athletes need their coach); write only your own row
+-- Security-definer helper: the caller's own club_id. RLS policies below need
+-- "is this row in MY club", but a policy on `athletes` that subqueries
+-- `athletes` again from inside itself triggers Postgres's infinite-recursion
+-- guard on every single query against the table (42P17) — the exact failure
+-- mode `is_conversation_member()` above already exists to avoid.
+-- SECURITY DEFINER bypasses RLS for this one lookup, breaking the cycle.
+create or replace function public.my_club_id()
+returns uuid language sql security definer stable as $$
+  select club_id from public.athletes where user_id = auth.uid() limit 1;
+$$;
+
+-- coaches: read own row + coaches of your own club (own-club visibility, not
+-- every coach in the DB); write only your own row. Cross-club coach search
+-- (findClubs) goes through the coaches_by_name()/coach_name_for_club() RPCs
+-- below instead, which return only id/name/club_id — never anything more.
 drop policy if exists "coaches read"  on public.coaches;
 drop policy if exists "coaches write" on public.coaches;
 drop policy if exists "coaches upd"   on public.coaches;
-create policy "coaches read"  on public.coaches for select to authenticated using (true);
+create policy "coaches read" on public.coaches for select to authenticated using (
+  id = auth.uid() or club_id = public.my_club_id()
+);
 create policy "coaches write" on public.coaches for insert to authenticated with check (id = auth.uid());
 create policy "coaches upd"   on public.coaches for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
 
--- athletes: read all (single-club demo); an athlete updates their own row,
--- a coach updates athletes that belong to them.
+-- athletes: own row, your assigned athletes (coach), or teammates in your own
+-- club — NOT every athlete in the DB. Cross-club lookups (chat partner name,
+-- duplicate-membership check, club-search member counts) go through the
+-- SECURITY DEFINER RPCs below instead, which return only non-sensitive
+-- identity columns (never note/readiness/status/weight_kg/is_private).
 drop policy if exists "athletes read"   on public.athletes;
 drop policy if exists "athletes self"   on public.athletes;
 drop policy if exists "athletes coach"  on public.athletes;
 drop policy if exists "athletes cins"   on public.athletes;
-create policy "athletes read"  on public.athletes for select to authenticated using (true);
+create policy "athletes read" on public.athletes for select to authenticated using (
+  user_id = auth.uid()
+  or coach_id = auth.uid()
+  or club_id = public.my_club_id()
+);
 create policy "athletes self"  on public.athletes for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy "athletes coach" on public.athletes for update to authenticated using (coach_id = auth.uid()) with check (coach_id = auth.uid());
 create policy "athletes cins"  on public.athletes for insert to authenticated with check (coach_id = auth.uid());
+
+-- Public, non-sensitive identity slice for an athlete — mirrors
+-- public_profiles()/get_community_invite_code() in schema.sql. Used for chat
+-- partner display name (listConversations), duplicate-club-membership check
+-- (addAthleteToClub) — none of which need note/readiness/status/weight_kg.
+create or replace function public.athlete_identity(p_user_id uuid)
+returns table(id uuid, user_id uuid, name text, initials text, club_id uuid, coach_id uuid)
+language sql security definer as $$
+  select id, user_id, name, initials, club_id, coach_id
+  from public.athletes where user_id = p_user_id;
+$$;
+
+-- Member count for a club, for the public club-search flow — count only,
+-- never row content.
+create or replace function public.club_member_count(p_club_id uuid)
+returns bigint language sql security definer as $$
+  select count(*) from public.athletes where club_id = p_club_id and coach_id is not null;
+$$;
+
+-- Cross-club coach name search, for the public "find a club/coach" flow —
+-- id/name/club_id only, same non-sensitive slice as public_profiles().
+create or replace function public.coaches_by_name(q text)
+returns table(id uuid, name text, club_id uuid)
+language sql security definer as $$
+  select id, name, club_id from public.coaches where name ilike q;
+$$;
+
+-- Single coach name for a club, for club-search result cards.
+create or replace function public.coach_name_for_club(p_club_id uuid)
+returns text language sql security definer as $$
+  select name from public.coaches where club_id = p_club_id limit 1;
+$$;
+
+-- Only the athlete's CURRENTLY assigned coach may move them to a different
+-- coach/club or flip is_private — the athlete's own device keeps
+-- self-reporting readiness/status/note/weight_kg (see syncMyClubCard in
+-- api.js — a real, working feature, NOT locked down here). On INSERT
+-- (self-join), coach_id must be null or the club's REAL current coach —
+-- never an arbitrary id the client makes up.
+create or replace function public.lock_athlete_assignment()
+returns trigger language plpgsql security definer as $$
+declare
+  real_coach uuid;
+begin
+  if auth.uid() is null then
+    return new; -- SQL editor / service role — razvijalec ima poln nadzor
+  end if;
+
+  if tg_op = 'INSERT' then
+    if new.coach_id = auth.uid() then
+      return new; -- coach adding an athlete (addAthleteToClub) — že omejeno
+                   -- s "athletes cins" politiko
+    end if;
+    select id into real_coach from public.coaches where club_id = new.club_id;
+    if new.coach_id is not distinct from real_coach then
+      return new; -- self-join (athletes self join) z resničnim trenerjem — ok
+    end if;
+    new.coach_id := real_coach; -- popravi namesto da zavrne
+    return new;
+  end if;
+
+  -- UPDATE
+  if auth.uid() <> old.coach_id then
+    new.coach_id   := old.coach_id;
+    new.club_id    := old.club_id;
+    new.is_private := old.is_private;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists athletes_lock_assignment on public.athletes;
+create trigger athletes_lock_assignment
+  before insert or update on public.athletes
+  for each row execute procedure public.lock_athlete_assignment();
 
 -- ─────────────────────────── storage (avatars) ───────────────────────────
 insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)
   on conflict (id) do nothing;
 
+-- Own-folder scoping — uploadAvatar()/coach Settings.tsx both write to
+-- `${userId}/...`.
 drop policy if exists "avatars read"  on storage.objects;
 drop policy if exists "avatars write" on storage.objects;
 drop policy if exists "avatars upd"   on storage.objects;
 create policy "avatars read"  on storage.objects for select using (bucket_id = 'avatars');
-create policy "avatars write" on storage.objects for insert to authenticated with check (bucket_id = 'avatars');
-create policy "avatars upd"   on storage.objects for update to authenticated using (bucket_id = 'avatars') with check (bucket_id = 'avatars');
+create policy "avatars write" on storage.objects for insert to authenticated with check (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+);
+create policy "avatars upd" on storage.objects for update to authenticated using (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+) with check (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 -- ############## 3/3  demo-upgrade.sql ##############
 -- ATHLOS — demo upgrade: real clubs + community.
@@ -443,11 +600,17 @@ alter table public.clubs add column if not exists location text;
 alter table public.clubs add column if not exists conversation_id uuid references public.conversations (id) on delete set null;
 
 -- ── 2. clubs policies ─────────────────────────────────────────
--- Any authenticated user may create a club (the app only offers this in
--- coach onboarding). Editing is limited to the club's coach.
+-- Only a coach-role account may create a club — role itself is
+-- developer/SQL-editor controlled (see lock_profile_role above), and the
+-- app's coach-onboarding UI is already gated on profile.role === "coach"
+-- (App.jsx), so this matches actual usage and closes the direct-API-call hole
+-- where any athlete account could insert a club row. Editing stays limited
+-- to the club's coach.
 drop policy if exists "clubs insert" on public.clubs;
 create policy "clubs insert" on public.clubs
-  for insert to authenticated with check (true);
+  for insert to authenticated with check (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'coach')
+  );
 
 drop policy if exists "clubs update" on public.clubs;
 create policy "clubs update" on public.clubs

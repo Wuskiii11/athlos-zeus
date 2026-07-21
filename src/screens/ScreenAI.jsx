@@ -9,6 +9,13 @@ import {
 import { useT } from "../lib/i18n";
 import ZeusFunnel from "./ZeusFunnel";
 import { offlineCoachReply, planSessions } from "../lib/coachOffline";
+import DailyCoachCard from "../components/daily-coach/DailyCoachCard";
+import { getDailyCoachMetrics, todayIso as dailyCoachTodayIso } from "../components/daily-coach/getDailyCoachMetrics";
+
+// Daily Coach shows once per day, per account, the first time the chat opens
+// that day — tracked locally so re-opening the chat later the same day
+// doesn't repeat it.
+const dailyCoachShownKey = (userId) => `athlos:dailyCoachShown:${userId || "local"}`;
 
 // Does this reply look like a weekly training plan (→ save to calendar)?
 function looksLikePlan(t) {
@@ -266,6 +273,21 @@ export default function ScreenAI({ user, profile }) {
         }
       } catch {}
     })();
+    // Daily Coach — once per account per day, prepended above everything
+    // else the first time the chat opens that day. Local-only marker (not a
+    // real ai_messages row — it's not an LLM exchange), so functional
+    // setState here is safe regardless of whether the history-restore above
+    // finishes first.
+    (async () => {
+      let alreadyShown = false;
+      try { alreadyShown = localStorage.getItem(dailyCoachShownKey(user?.id)) === dailyCoachTodayIso(); } catch {}
+      if (alreadyShown) return;
+      try {
+        const { metrics, dateIso } = await getDailyCoachMetrics(user?.id);
+        setMsgs((m) => [{ from: "bot", type: "daily-coach", metrics, dateIso, time: nowTime() }, ...m]);
+        try { localStorage.setItem(dailyCoachShownKey(user?.id), dateIso); } catch {}
+      } catch {}
+    })();
     if (returningRef.current) {
       // "How did it go last time?" only makes sense once the athlete has
       // actually trained — completing the ZEUS funnel isn't a training
@@ -342,8 +364,9 @@ export default function ScreenAI({ user, profile }) {
     const question = q || (att?.isImage ? "Poglej priloženo sliko in komentiraj kot trener." : "Poglej priloženo datoteko in komentiraj kot trener.");
     const attachment = att ? { name: att.name, mime: att.mime, data: att.dataUrl.split(",")[1] } : null;
     try {
-      // Real AI via the ai-coach Edge Function (memory injected); null → local demo answers
-      let finalText = await askAI(user?.id, question, history, profile || {}, memory, attachment);
+      // Real AI via the ai-coach Edge Function (server reads profile/memory
+      // itself from the verified caller); null → local demo answers
+      let finalText = await askAI(user?.id, question, history, attachment);
       if (!finalText) {
         finalText = att
           ? "Priponke si lahko ogledam šele, ko je povezan AI strežnik — do takrat mi jo opiši z besedami."
@@ -422,6 +445,13 @@ export default function ScreenAI({ user, profile }) {
           panels with a faint green "oracle" breath, like an answered oracle. */}
       <div ref={scrollRef} style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", scrollbarWidth: "none", padding: "9px 13px 6px", display: "flex", flexDirection: "column", gap: 10 }}>
         {msgs.map((m, i) => {
+          if (m.type === "daily-coach") {
+            return (
+              <div key={i} style={{ width: "100%", animation: "athlosMsgBot 0.32s cubic-bezier(0.22,1,0.36,1) both" }}>
+                <DailyCoachCard metrics={m.metrics} t={t} userId={user?.id} dateIso={m.dateIso} />
+              </div>
+            );
+          }
           const isMine = m.from === "user";
           return (
             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: isMine ? "flex-end" : "flex-start", animation: `${isMine ? "athlosMsgUser" : "athlosMsgBot"} 0.32s cubic-bezier(0.22,1,0.36,1) both` }}>

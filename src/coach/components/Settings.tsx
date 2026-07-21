@@ -57,7 +57,7 @@ export default function Settings({
       const { data: u } = await supabase.auth.getUser()
       const uid = u?.user?.id
       if (!uid) return
-      const path = `coach-${uid}`
+      const path = `${uid}/avatar.jpg`
       await supabase.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type })
       const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path)
       const url = `${pub.publicUrl}?t=${Date.now()}`

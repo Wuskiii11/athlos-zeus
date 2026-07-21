@@ -32,6 +32,56 @@ export function markWellnessDone(userId, answers, date = new Date()) {
   saveWellness(userId, { ...s, days: { ...s.days, [iso]: answers } });
 }
 
+// A check-in answered before auth resolves is written to the "local"
+// namespace, because `user?.id` was still undefined. Once the account id
+// arrives, every later read looks in `athlos:wellness:<id>` — which is empty —
+// and the day reads as never done, permanently.
+//
+// ScreenToday auto-opens the check-in 650ms after mount, so that window is not
+// theoretical: it is the normal path on a cold start. Fold the local days into
+// the account's namespace as soon as an id exists. The account always wins on
+// a collision, and the local bucket is cleared so this runs at most once.
+export function adoptLocalWellness(userId) {
+  if (!userId) return false;
+  const localDays = loadWellness(null).days || {};
+  if (!Object.keys(localDays).length) return false;
+  const mine = loadWellness(userId);
+  saveWellness(userId, { ...mine, days: { ...localDays, ...(mine.days || {}) } });
+  try { localStorage.removeItem(storeKey(null)); } catch {}
+  return true;
+}
+
+// Fold the account's real check-in history (already synced to Supabase by
+// lib/api.js's saveCheckin/listCheckins) into this local "done" map.
+//
+// This is the actual cross-device gap: the check-in ANSWERS are safely in the
+// `checkins` table the moment they're submitted, but streak, the week dots and
+// checkinPendingToday() all read ONLY this local store — which starts empty on
+// a new device, a cleared browser, or a reinstall. Without this fold, someone
+// who checked in every day for a month sees their streak reset to 0 the first
+// time they open the app on a different device, and the app tells them
+// today's check-in is still pending even though it already happened elsewhere.
+//
+// `rows` come from lib/api.js listCheckins(userId, days) — real Supabase rows
+// when available, its own local cache otherwise. A day already present here is
+// never touched, since it may hold the richer answer object markWellnessDone
+// writes; a day known only from the cloud gets a lightweight marker, because
+// every consumer of `days[iso]` (streak, week dots, checkinPendingToday) only
+// ever tests truthiness and never reads into an entry it didn't write itself.
+export function syncWellnessFromCheckins(userId, rows) {
+  if (!rows?.length) return false;
+  const s = loadWellness(userId);
+  const days = { ...s.days };
+  let changed = false;
+  for (const row of rows) {
+    if (!row?.date || days[row.date]) continue;
+    days[row.date] = { fromCloud: true };
+    changed = true;
+  }
+  if (changed) saveWellness(userId, { ...s, days });
+  return changed;
+}
+
 // Consecutive days ending today (or yesterday, when today isn't done yet —
 // the streak isn't lost until the day is actually missed).
 export function computeStreak(days, now = new Date()) {

@@ -267,4 +267,32 @@
   }
   .at-btn-primary { transition: transform 0.16s cubic-bezier(0.22,1,0.36,1), box-shadow 0.16s cubic-bezier(0.22,1,0.36,1); }
   .at-btn-primary:hover { transform: translateY(-2px); }
+
+  /* MetricCard (Sleep · Recovery · Fatigue · Mood): lift + a brighter rim.
+     The two colours come from custom properties set inline by the component,
+     because this stylesheet cannot see which theme is active. The `transition`
+     is set inline too — Pressable already writes one, and an inline
+     declaration always beats a rule here, so declaring it again in this block
+     would be dead code. */
+  .at-metric-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--at-hover-border);
+    box-shadow: var(--at-hover-shadow);
+  }
+}
+
+/* Keyboard focus must stay visible even though the cards have no default
+   outline — the hover lift above is pointer-only and does nothing for a
+   keyboard user. */
+.at-metric-card:focus-visible {
+  outline: 2px solid var(--at-hover-border);
+  outline-offset: 2px;
+}
+
+/* A metric's figure re-enters when its value changes (MetricCard keys the
+   span on the value), so a check-in submit updates the row with a soft rise
+   instead of a hard swap. */
+@keyframes athlosMetricIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
 }

@@ -44,3 +44,6 @@ scripts/
 
 # personal health data — never commit
 scripts/whoop-sample/
+
+# Supabase CLI local link cache (project ref/connection metadata, machine-local)
+supabase/.temp/

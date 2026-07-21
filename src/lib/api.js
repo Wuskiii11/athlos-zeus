@@ -14,6 +14,7 @@ import { supabase, hasSupabase, supabaseUrl, supabaseKey } from "./supabase";
 export { hasSupabase };
 
 const LS = "athlos:v1";
+const CHECKIN_LS = "athlos:checkins";
 const readLS = () => {
   try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch { return {}; }
 };
@@ -123,7 +124,21 @@ export async function signInWithProvider(provider) {
 }
 
 export async function signOut() {
-  if (hasSupabase) await supabase.auth.signOut();
+  if (hasSupabase) {
+    await supabase.auth.signOut();
+    // Everything under LS in cloud mode is just an offline mirror of this
+    // account's Supabase data (profile, AI chat history, learned coach
+    // memory, any locally-queued chat messages) — safe to drop, it's
+    // refetched on next sign-in. `athlos:prefs` (theme/lang/consent) is a
+    // SEPARATE localStorage key (see App.jsx) and is untouched here — those
+    // are device-level, not this account's data.
+    try { localStorage.removeItem(LS); } catch {}
+    try { localStorage.removeItem(CHECKIN_LS); } catch {}
+    return;
+  }
+  // Local/offline demo mode: LS IS the only copy of this on-device demo
+  // account's data (no cloud to resync from) — clearing it here would
+  // silently delete it on every logout. Just end the session, same as today.
   writeLS({ registered: false });
 }
 
@@ -182,14 +197,33 @@ export async function deleteAccount() {
 // ── Profile ──────────────────────────────────────────────────
 const hasProfileData = (p) => !!(p && (p.name || p.sport || p.birth || p.role === "coach"));
 
-// Real columns on the `profiles` table. Everything else the app keeps on the
-// profile object (goals, injuries, equipment, …) lives only in the local cache —
-// sending it to Supabase would 400 the whole upsert on the unknown column.
-// NOTE: `role` is intentionally NOT here. It is developer-controlled (coach vs
-// athlete) and must never be writable from the client — the app only ever reads
-// it. A DB trigger (profiles_lock_role, see supabase/schema.sql) enforces the
-// same rule server-side, so only a developer via Supabase can grant "coach".
-const PROFILE_COLUMNS = ["name", "sport", "birth", "height", "weight", "photo", "plan", "lang", "theme"];
+// Real columns on the `profiles` table whose JS key matches the column name.
+// NOTE: `role` and `plan` are intentionally NOT here. `role` is developer-
+// controlled (coach vs athlete); `plan` (subscription tier) must come from a
+// payment webhook/admin action, never a normal profile-save call — both are
+// only ever read by the app, never written. DB triggers (profiles_lock_role,
+// profiles_lock_plan — see supabase/schema.sql) enforce the same rule
+// server-side regardless of what a direct API call might try to send.
+const PROFILE_COLUMNS = ["name", "sport", "birth", "height", "weight", "photo", "lang", "theme"];
+
+// Extended onboarding (SetupFlow) fields → their snake_case DB columns. Kept
+// separate because the JS profile uses camelCase while Postgres is snake_case,
+// and the array fields (goals / injuries / equipment) land in jsonb. The injury
+// photo is the compressed data URL, stored just like the avatar. Persisting
+// these means a re-login on any device restores the full onboarding answers
+// instead of them living only in this device's local cache.
+const PROFILE_EXTRA = {
+  acquisition: "acquisition",
+  gender: "gender",
+  waist: "waist",
+  bodyFat: "body_fat",
+  experience: "experience",
+  goals: "goals",
+  injuries: "injuries",
+  injuryNote: "injury_note",
+  injuryPhoto: "injury_photo",
+  equipment: "equipment",
+};
 
 export async function loadProfile(userId) {
   const cached = readLS().profileCache?.[userId] || null;
@@ -200,7 +234,15 @@ export async function loadProfile(userId) {
       // Cloud is the source of truth for its columns (name, lang, theme, …); the
       // cache carries the extra fields. Only trust a completed row (else a bare
       // auto-created row with no name would force setup again).
-      if (!error && hasProfileData(data)) return { ...(cached || {}), ...data };
+      if (!error && hasProfileData(data)) {
+        // Map the extended onboarding columns (snake_case) back onto the
+        // camelCase keys the app reads (profile.bodyFat, .injuryPhoto, …).
+        const mapped = { ...data };
+        for (const [jsKey, col] of Object.entries(PROFILE_EXTRA)) {
+          if (data[col] != null) mapped[jsKey] = data[col];
+        }
+        return { ...(cached || {}), ...mapped };
+      }
     } catch {}
     // Cloud empty/unreachable → the local cache (a finished setup survives).
     return cached;
@@ -214,14 +256,22 @@ export async function saveProfile(userId, profile) {
     // blocked cloud write.
     const cache = readLS().profileCache || {};
     writeLS({ profileCache: { ...cache, [userId]: profile } });
-    // Send only real columns; extra keys would fail the whole upsert.
+    // Map the JS profile onto real DB columns — core (same-name) columns plus
+    // the extended onboarding fields (camelCase key → snake_case column).
     const row = { id: userId, updated_at: new Date().toISOString() };
     for (const k of PROFILE_COLUMNS) if (profile[k] != null) row[k] = profile[k];
+    for (const [jsKey, col] of Object.entries(PROFILE_EXTRA)) if (profile[jsKey] != null) row[col] = profile[jsKey];
+
     let { error } = await supabase.from("profiles").upsert(row);
-    // `theme` column may not be migrated yet — retry without it rather than fail.
-    if (error && /theme/i.test(error.message || "")) {
-      const { theme, ...rest } = row;
-      ({ error } = await supabase.from("profiles").upsert(rest));
+    // `theme` was added after the rest of the schema, so on an older DB it may
+    // not be migrated yet — that one column is safe to drop and retry, since
+    // it's cosmetic. Anything else failing (in particular the onboarding
+    // fields: injuries, experience, goals, equipment, ...) must NOT be
+    // silently dropped — the caller needs to know the save didn't fully land.
+    if (error && /theme/i.test(error.message || "") && "theme" in row) {
+      const retry = { ...row };
+      delete retry.theme;
+      ({ error } = await supabase.from("profiles").upsert(retry));
     }
     if (error) throw new Error(error.message);
     return;
@@ -412,26 +462,45 @@ async function saveAiMessage(userId, role, content) {
 // Ask the AI coach via the "ai-coach" Edge Function. Returns the reply text,
 // or null when the function isn't deployed / no backend — caller falls back
 // to the local demo answers, so the screen never breaks.
-export async function askAI(userId, question, history = [], profile = {}, memory = null, attachment = null) {
-  try { await saveAiMessage(userId, "user", attachment ? `[priponka: ${attachment.name}] ${question}` : question); } catch {}
-  if (!hasSupabase) return null;
+//
+// The caller's profile/memory are no longer passed in — the function
+// verifies the caller's JWT and reads their own profile/coach_memory rows
+// itself, so a forged body can no longer influence the AI's context. The
+// function is also now the sole writer of `ai_messages` (question + reply),
+// since it needs an authoritative count for its own rate limit; the client
+// only logs locally in offline/no-backend mode, where no edge function
+// exists to do it.
+export async function askAI(userId, question, history = [], attachment = null) {
+  if (!hasSupabase) {
+    try { await saveAiMessage(userId, "user", attachment ? `[priponka: ${attachment.name}] ${question}` : question); } catch {}
+    return null;
+  }
   try {
     const { data, error } = await supabase.functions.invoke("ai-coach", {
       body: {
         question,
         history: history.slice(-12).map((m) => ({ role: m.role, content: m.content })),
-        profile: { name: profile.name, sport: profile.sport, height: profile.height, weight: profile.weight },
-        memory: memory || undefined,   // učeča se baza (cilj/nivo/faza/oprema/poškodbe + opombe + feedback)
         attachment: attachment || undefined, // { name, mime, data(base64) } — slika/PDF za vision
       },
     });
-    if (error || !data?.reply) return null;
-    // The agent "learns": pull any [[NOTE: ...]] it emits into the memory base,
-    // strip them from the athlete-facing reply, and store the clean text.
-    const { text, notes } = parseCoachReply(data.reply);
-    for (const n of notes) { try { await addCoachNote(userId, n); } catch {} }
-    try { await saveAiMessage(userId, "assistant", text); } catch {}
-    return text;
+    if (error) {
+      // Distinguish "you've hit your hourly limit" from a generic failure —
+      // otherwise the caller would silently show a canned offline demo
+      // answer as if it were a real reply, which is misleading.
+      try {
+        const payload = await error.context?.json();
+        if (payload?.error === "rate_limited") {
+          const min = payload.retryAfterMin || 60;
+          return `Dosegel si urno omejitev vprašanj AI trenerju. Poskusi znova čez ${min} minut.`;
+        }
+      } catch {}
+      return null;
+    }
+    if (!data?.reply) return null;
+    // The agent "learns": the function already stripped/stored [[NOTE: ...]]
+    // markers server-side and returns the parsed notes for the memory base.
+    for (const n of data.notes || []) { try { await addCoachNote(userId, n); } catch {} }
+    return data.reply;
   } catch {
     return null;
   }
@@ -491,18 +560,6 @@ export async function addCoachNote(userId, note) {
   const mem = (await loadCoachMemory(userId)) || {};
   mem.notes = [...(mem.notes || []), text].slice(-60);
   return saveCoachMemory(userId, mem);
-}
-
-// Pull any [[NOTE: ...]] markers the agent emits (to remember something) out of a reply.
-// Returns the athlete-facing text (markers stripped) + the extracted notes.
-export function parseCoachReply(reply) {
-  const r = String(reply || "");
-  const notes = [];
-  const re = /\[\[NOTE:\s*([^\]]+?)\s*\]\]/gi;
-  let m;
-  while ((m = re.exec(r)) !== null) { const t = m[1].trim(); if (t) notes.push(t); }
-  const text = r.replace(/\[\[NOTE:[^\]]*\]\]/gi, "").replace(/\n{3,}/g, "\n\n").trim();
-  return { text, notes };
 }
 
 // ── Chat ─────────────────────────────────────────────────────
@@ -621,9 +678,18 @@ export async function listConversations(userId) {
             .from("conversation_members").select("user_id").eq("conversation_id", conv.id).neq("user_id", userId);
           const otherId = others?.[0]?.user_id;
           if (otherId) {
-            const { data: ath } = await supabase
-              .from("athletes").select("name, initials, clubs(name)").eq("user_id", otherId).maybeSingle();
-            otherUser = { user_id: otherId, name: ath?.name || "Neznano", initials: ath?.initials || "?", club: ath?.clubs?.name || "" };
+            // athletes RLS is now scoped to own row/own club/own coach, so a
+            // DM partner outside all three needs the narrow identity RPC
+            // (id/name/initials/club_id — never note/readiness/etc) instead
+            // of a raw table read.
+            const { data: athRows } = await supabase.rpc("athlete_identity", { p_user_id: otherId });
+            const ath = athRows?.[0] || null;
+            let clubName = "";
+            if (ath?.club_id) {
+              const { data: club } = await supabase.from("clubs").select("name").eq("id", ath.club_id).maybeSingle();
+              clubName = club?.name || "";
+            }
+            otherUser = { user_id: otherId, name: ath?.name || "Neznano", initials: ath?.initials || "?", club: clubName };
           }
         }
         return withBgOverride({ ...conv, lastMsg, otherUser });
@@ -898,9 +964,11 @@ export async function addAthleteToClub(coachId, club, user) {
   if (String(club.id).startsWith("local-")) {
     throw new Error("Your club is saved on this device only for now — adding athletes unlocks once the database upgrade is applied.");
   }
-  const { data: existing } = await supabase
-    .from("athletes").select("id").eq("user_id", user.user_id).maybeSingle();
-  if (existing) throw new Error("This athlete is already in a club.");
+  // athletes RLS no longer exposes rows outside your own club/roster, so a
+  // candidate who's already in a DIFFERENT club needs the narrow identity
+  // RPC for this duplicate-membership check rather than a raw table read.
+  const { data: existingRows } = await supabase.rpc("athlete_identity", { p_user_id: user.user_id });
+  if (existingRows?.length) throw new Error("This athlete is already in a club.");
   const { error } = await supabase.from("athletes").insert({
     user_id: user.user_id, club_id: club.id, coach_id: coachId,
     name: user.name, initials: initialsOf(user.name), note: "New in the club",
@@ -936,9 +1004,12 @@ export async function findClubs(q) {
   if (!hasSupabase || !q || q.trim().length < 2) return [];
   const term = `%${q.trim()}%`;
   try {
+    // coaches RLS is now scoped to your own club, so cross-club search goes
+    // through the narrow coaches_by_name() RPC (id/name/club_id only)
+    // instead of a raw table read.
     const [byName, coaches] = await Promise.all([
       supabase.from("clubs").select("*").ilike("name", term),
-      supabase.from("coaches").select("id, name, club_id").ilike("name", term),
+      supabase.rpc("coaches_by_name", { q: term }),
     ]);
     const map = new Map();
     (byName.data || []).forEach(c => map.set(c.id, normClub(c)));
@@ -950,11 +1021,14 @@ export async function findClubs(q) {
     }
     const clubs = [...map.values()];
     const results = await Promise.all(clubs.map(async (club) => {
-      const [{ count }, { data: coach }] = await Promise.all([
-        supabase.from("athletes").select("id", { count: "exact", head: true }).eq("club_id", club.id).not("coach_id", "is", null),
-        supabase.from("coaches").select("name").eq("club_id", club.id).maybeSingle(),
+      // Same reasoning: member count and per-club coach name for OTHER
+      // clubs' rows go through RPCs (club_member_count / coach_name_for_club)
+      // instead of raw athletes/coaches reads.
+      const [{ data: count }, { data: coachName }] = await Promise.all([
+        supabase.rpc("club_member_count", { p_club_id: club.id }),
+        supabase.rpc("coach_name_for_club", { p_club_id: club.id }),
       ]);
-      return { ...club, members: count || 0, coachName: coach?.name || "" };
+      return { ...club, members: count || 0, coachName: coachName || "" };
     }));
     return results;
   } catch { return []; }
@@ -995,13 +1069,15 @@ export async function leaveClub(userId, membershipId, conversationId) {
 export async function getClubInfo(clubId) {
   if (!hasSupabase || !clubId) return null;
   try {
-    const [{ count }, { data: coach }, { data: club }] = await Promise.all([
-      supabase.from("athletes").select("id", { count: "exact", head: true }).eq("club_id", clubId).not("coach_id", "is", null),
-      supabase.from("coaches").select("name").eq("club_id", clubId).maybeSingle(),
+    // athletes/coaches RLS is scoped to your own club/roster — a club this
+    // caller isn't a member of needs the same narrow RPCs as findClubs().
+    const [{ data: count }, { data: coachName }, { data: club }] = await Promise.all([
+      supabase.rpc("club_member_count", { p_club_id: clubId }),
+      supabase.rpc("coach_name_for_club", { p_club_id: clubId }),
       supabase.from("clubs").select("*").eq("id", clubId).maybeSingle(),
     ]);
     if (!club) return null;
-    return { ...normClub(club), members: count || 0, coachName: coach?.name || "" };
+    return { ...normClub(club), members: count || 0, coachName: coachName || "" };
   } catch { return null; }
 }
 
@@ -1077,7 +1153,6 @@ export async function updateCoachName(coachId, newName) {
 // data yet" and only becomes real once they submit their first check-in.
 // Cloud-first (per account, survives devices); localStorage is the
 // device-level cache/fallback, keyed by date the same way.
-const CHECKIN_LS = "athlos:checkins";
 const readCheckinLS = () => { try { return JSON.parse(localStorage.getItem(CHECKIN_LS)) || {}; } catch { return {}; } };
 const writeCheckinLS = (days) => { try { localStorage.setItem(CHECKIN_LS, JSON.stringify(days)); } catch {} };
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -1278,10 +1353,17 @@ export async function getCommunityOverview(communityId) {
     const ids = (members || []).map((m) => m.user_id);
     let totalWorkouts = 0, activeMembers = 0;
     if (ids.length) {
+      // Members' `workouts` rows are RLS-private (own-row-only select), so a
+      // plain client query only ever sees the caller's own rows. Go through
+      // get_community_workout_counts() instead — a security-definer RPC that
+      // returns just a per-user COUNT for fellow members (see schema.sql).
       const since = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
-      const { data: workouts } = await supabase.from("workouts").select("user_id, date").in("user_id", ids);
-      totalWorkouts = workouts?.length || 0;
-      activeMembers = new Set((workouts || []).filter((w) => w.date >= since).map((w) => w.user_id)).size;
+      const [{ data: allTime }, { data: windowed }] = await Promise.all([
+        supabase.rpc("get_community_workout_counts", { cid: communityId }),
+        supabase.rpc("get_community_workout_counts", { cid: communityId, since }),
+      ]);
+      totalWorkouts = (allTime || []).reduce((sum, r) => sum + Number(r.workouts), 0);
+      activeMembers = (windowed || []).filter((r) => Number(r.workouts) > 0).length;
     }
     const { data: nextEvent } = await supabase
       .from("community_events").select("*").eq("community_id", communityId)
@@ -1300,10 +1382,13 @@ export async function getCommunityLeaderboard(communityId, days = 7) {
     const ids = (members || []).map((m) => m.user_id);
     if (!ids.length) return [];
     const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
-    const { data: workouts } = await supabase.from("workouts").select("user_id").in("user_id", ids).gte("date", since);
+    // Same RLS problem as getCommunityOverview() — go through the
+    // security-definer RPC so every member's count comes back, not just
+    // the caller's own.
+    const { data: workoutCounts } = await supabase.rpc("get_community_workout_counts", { cid: communityId, since });
     const counts = {};
     ids.forEach((id) => { counts[id] = 0; });
-    (workouts || []).forEach((w) => { counts[w.user_id] = (counts[w.user_id] || 0) + 1; });
+    (workoutCounts || []).forEach((r) => { counts[r.user_id] = Number(r.workouts); });
     const pubs = await getPublicProfiles(ids);
     return ids
       .map((id) => ({ user_id: id, name: pubs[id]?.name || "Športnik", photo: pubs[id]?.photo || null, workouts: counts[id] || 0 }))
@@ -1419,7 +1504,9 @@ export async function leaveCommunityEvent(eventId, userId) {
 }
 
 // ── Members directory (+ follow) ─────────────────────────────
-// Weekly workout counts reuse the same real query as the leaderboard.
+// Weekly workout counts reuse the same real query as the leaderboard —
+// via get_community_workout_counts(), since `workouts` itself is RLS-
+// private per-user (see getCommunityLeaderboard() above for why).
 export async function listCommunityMembersDetailed(communityId, userId) {
   if (!hasSupabase || !communityId) return [];
   try {
@@ -1430,16 +1517,18 @@ export async function listCommunityMembersDetailed(communityId, userId) {
     if (error || !rows) return [];
     const ids = rows.map((r) => r.user_id);
     const since = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
-    const [pubs, { data: workouts }] = await Promise.all([
+    const [pubs, { data: workoutCounts }] = await Promise.all([
       getPublicProfiles(ids),
-      ids.length ? supabase.from("workouts").select("user_id").in("user_id", ids).gte("date", since) : Promise.resolve({ data: [] }),
+      ids.length ? supabase.rpc("get_community_workout_counts", { cid: communityId, since }) : Promise.resolve({ data: [] }),
     ]);
+    const countMap = {};
+    (workoutCounts || []).forEach((r) => { countMap[r.user_id] = Number(r.workouts); });
     const followingSet = new Set(following);
     return rows.map((r) => ({
       ...r,
       name: pubs[r.user_id]?.name || "Športnik",
       photo: pubs[r.user_id]?.photo || null,
-      weeklyWorkouts: workouts?.filter((w) => w.user_id === r.user_id).length || 0,
+      weeklyWorkouts: countMap[r.user_id] || 0,
       followedByMe: followingSet.has(r.user_id),
     }));
   } catch { return []; }

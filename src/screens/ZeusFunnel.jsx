@@ -50,10 +50,19 @@ export default function ZeusFunnel({ onDone, profile }) {
   // The signup onboarding (SetupFlow) already asked about goals, equipment
   // and injuries — never ask the same thing twice. A step is dropped when
   // the profile carries a real answer; finish() seeds the setup from it.
+  //
+  // Injuries are checked by SHAPE, not by length. "No injuries" is a real
+  // answer that produces an empty array, so a `.length > 0` test read it as
+  // "never asked" and made anyone healthy answer the same question twice.
+  // The three states are distinguishable because only SetupFlow ever writes
+  // this field and `loadProfile` maps the jsonb column back verbatim:
+  //   undefined → never asked (legacy account, or setup predates the step)
+  //   []        → asked, answered "Brez poškodb"
+  //   [...]     → asked, answered with regions
   const answered = {
     goal: (profile?.goals || []).length > 0,
     equipment: (profile?.equipment || []).length > 0,
-    injuries: (profile?.injuries || []).length > 0 || !!(profile?.injuryNote || "").trim(),
+    injuries: Array.isArray(profile?.injuries) || !!(profile?.injuryNote || "").trim(),
   };
   const steps = STEPS.filter((s) => !answered[s.key]);
   const total = steps.length;

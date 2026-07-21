@@ -12,11 +12,17 @@ alter table public.clubs add column if not exists location text;
 alter table public.clubs add column if not exists conversation_id uuid references public.conversations (id) on delete set null;
 
 -- ── 2. clubs policies ─────────────────────────────────────────
--- Any authenticated user may create a club (the app only offers this in
--- coach onboarding). Editing is limited to the club's coach.
+-- Only a coach-role account may create a club — role itself is
+-- developer/SQL-editor controlled (see lock_profile_role in schema.sql), and
+-- the app's coach-onboarding UI is already gated on profile.role === "coach"
+-- (App.jsx), so this matches actual usage and closes the direct-API-call hole
+-- where any athlete account could insert a club row. Editing stays limited
+-- to the club's coach.
 drop policy if exists "clubs insert" on public.clubs;
 create policy "clubs insert" on public.clubs
-  for insert to authenticated with check (true);
+  for insert to authenticated with check (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'coach')
+  );
 
 drop policy if exists "clubs update" on public.clubs;
 create policy "clubs update" on public.clubs

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTheme, LANDING_URL } from "../theme";
 import { Pressable } from "../components/UI";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { uploadAvatar } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -29,28 +30,9 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
   // Full-screen profile-photo preview (tap the avatar, TikTok-style)
   const [photoPreview, setPhotoPreview] = useState(false);
 
-  // Logout confirmation dialog — logout only fires after the user confirms
+  // Logout confirmation dialog — logout only fires after the user confirms.
+  // Escape/Android-back dismissal is handled inside ConfirmDialog itself.
   const [confirmLogout, setConfirmLogout] = useState(false);
-
-  // Dismiss the dialog on Escape (desktop) and on Android/browser back — the
-  // back gesture closes the modal instead of leaving the screen. Purely modal
-  // UX: it adds one transient history entry while open and removes it on close.
-  useEffect(() => {
-    if (!confirmLogout) return;
-    const close = () => setConfirmLogout(false);
-    const onKey = (e) => { if (e.key === "Escape") close(); };
-    window.addEventListener("keydown", onKey);
-    window.history.pushState({ athlosDialog: "logout" }, "");
-    window.addEventListener("popstate", close);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("popstate", close);
-      // Closed via button/backdrop (not back)? Pop our entry to keep history clean.
-      if (window.history.state && window.history.state.athlosDialog === "logout") {
-        window.history.back();
-      }
-    };
-  }, [confirmLogout]);
 
   const initial = (profile.name || "?").trim().charAt(0).toUpperCase();
   // Real account e-mail — hidden for the offline/local session (no address)
@@ -314,33 +296,21 @@ export default function ScreenSettings({ profile, setProfile, user, theme, setTh
         </div>
       )}
 
-      {/* Logout confirmation — bottom sheet, faithful to the reference design.
-          Theme-aware so it reads correctly in the app's dark mode too. The user
-          is only signed out after confirming. */}
-      {confirmLogout && (
-        <div
-          onClick={(e) => { if (e.target === e.currentTarget) setConfirmLogout(false); }}
-          style={{ position: "fixed", inset: 0, zIndex: 95, background: "rgba(12,14,20,0.5)", animation: "athlosFade 0.2s ease", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
-        >
-          <div role="dialog" aria-modal="true" aria-label={t("Ali si prepričan, da se želiš odjaviti?")} style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: C.surface, borderRadius: "32px 32px 0 0", padding: "40px 24px max(28px, env(safe-area-inset-bottom, 28px))", boxShadow: C.name === "dark" ? "0 -18px 50px rgba(0,0,0,0.55)" : "0 -18px 50px rgba(16,24,40,0.18)", animation: "athlosRise 0.36s cubic-bezier(0.22,1,0.36,1)" }}>
-            {/* neutral ID/session badge */}
-            <div style={{ width: 88, height: 88, borderRadius: "50%", margin: "0 auto 22px", background: C.surface2, border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="5" width="18" height="14" rx="3" />
-                <circle cx="8.5" cy="11" r="2" />
-                <path d="M5.4 16.2a3.2 3.2 0 016.2 0" />
-                <path d="M14.5 10h3.5M14.5 13.6h3.5" />
-              </svg>
-            </div>
-            <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 19, lineHeight: 1.25, textAlign: "center", color: C.text, margin: "0 auto 12px", maxWidth: 260, letterSpacing: "-0.01em" }}>{t("Ali si prepričan, da se želiš odjaviti?")}</h3>
-            <p style={{ fontFamily: C.display, fontSize: 12.5, fontWeight: 500, lineHeight: 1.6, textAlign: "center", color: C.muted, margin: "0 auto 28px", maxWidth: 300 }}>{t("Z odjavo boš zaključil trenutno sejo in ne boš več imel dostopa do svojega računa.")}</p>
-            {/* coral destructive pill */}
-            <Pressable onClick={onLogout} scale={0.97} style={{ width: "100%", padding: "17px", borderRadius: 999, border: "none", background: "#E5544A", color: "#FFFFFF", fontFamily: C.display, fontWeight: 700, fontSize: 14.5, marginBottom: 9, boxShadow: "0 12px 26px rgba(229,84,74,0.4)" }}>{t("Odjava")}</Pressable>
-            {/* neutral cancel pill */}
-            <Pressable onClick={() => setConfirmLogout(false)} scale={0.97} style={{ width: "100%", padding: "17px", borderRadius: 999, border: `1px solid ${C.border2}`, background: C.name === "dark" ? C.surface2 : "#FFFFFF", color: C.text, fontFamily: C.display, fontWeight: 700, fontSize: 14.5, boxShadow: C.name === "dark" ? "none" : "0 6px 18px rgba(16,24,40,0.08)" }}>{t("Prekliči")}</Pressable>
-          </div>
-        </div>
-      )}
+      {/* Logout confirmation — shared ConfirmDialog. Its own primary button
+          was already styled as a destructive coral pill before this pass
+          (ending your session is the one "off-path exit" action, same
+          convention as iOS's own red-styled Sign Out row) — tone="danger"
+          matches that, rather than softening it to the accent green. */}
+      <ConfirmDialog
+        open={confirmLogout}
+        onClose={() => setConfirmLogout(false)}
+        tone="danger"
+        title={`Are you sure you want to log out${profile?.name ? `, ${profile.name}` : ""}?`}
+        description={t("Z odjavo boš zaključil trenutno sejo in ne boš več imel dostopa do svojega računa.")}
+        confirmLabel={t("Odjava")}
+        onConfirm={onLogout}
+        cancelLabel={t("Prekliči")}
+      />
     </div>
   );
 }

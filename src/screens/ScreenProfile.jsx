@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTheme } from "../theme";
 import { Pressable, PrimaryBtn, BackBtn } from "../components/UI";
 import { useT } from "../lib/i18n";
+import { isNameAllowed } from "../lib/moderation";
 
 export const SPORTS = [
   "Hokej", "Košarka", "Nogomet", "Odbojka", "Rokomet", "Borilne veščine", "Tenis",
@@ -13,6 +14,7 @@ export default function ScreenProfile({ go, profile, setProfile }) {
   const t = useT();
   const fileRef = React.useRef(null);
   const [name, setName] = useState(profile.name);
+  const [nameErr, setNameErr] = useState("");
   const known = SPORTS.includes(profile.sport);
   const [sport, setSport] = useState(known ? profile.sport : "Drugo");
   const [customSport, setCustomSport] = useState(known ? "" : profile.sport);
@@ -29,6 +31,7 @@ export default function ScreenProfile({ go, profile, setProfile }) {
   };
 
   const save = () => {
+    if (!isNameAllowed(name)) { setNameErr("To ime ni dovoljeno — izberi drugo."); return; }
     const finalSport = sport === "Drugo" ? (customSport.trim() || "Drugo") : sport;
     // Merge — never replace the whole profile (would drop plan/lang/height/weight)
     setProfile((p) => ({ ...p, name: name.trim() || "Športnik", sport: finalSport, photo }));
@@ -68,10 +71,11 @@ export default function ScreenProfile({ go, profile, setProfile }) {
       <span style={label}>{t("IME")}</span>
       <input
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => { setName(e.target.value); setNameErr(""); }}
         placeholder={t("Tvoje ime")}
-        style={{ ...field, marginBottom: 16 }}
+        style={{ ...field, marginBottom: nameErr ? 5 : 16, ...(nameErr ? { borderColor: C.red } : {}) }}
       />
+      {nameErr && <span style={{ color: C.red, fontFamily: C.display, fontSize: 12, marginBottom: 16, display: "block" }}>{t(nameErr)}</span>}
 
       <span style={label}>{t("ŠPORT")}</span>
       <Pressable onClick={() => setPickSport((v) => !v)} scale={0.99} style={{ ...field, display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left" }}>

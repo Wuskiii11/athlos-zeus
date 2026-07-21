@@ -54,6 +54,8 @@ const EN = {
   "ZADNJI CHECK-INI": "RECENT CHECK-INS",
   "Odgovori na vprašanja in posodobi svojo pripravljenost.": "Answer the questions and update your readiness.",
   "Izpolni današnji check-in": "Complete today's check-in",
+  "DANEŠNJI CHECK-IN": "TODAY'S CHECK-IN",
+  "4 VPRAŠANJA": "4 QUESTIONS",
   "Še ni check-inov. Izpolni jutranji check-in zgoraj.": "No check-ins yet. Fill in the morning check-in above.",
   "ENERGIJA": "ENERGY",
   "FAZA": "PHASE",
@@ -74,6 +76,8 @@ const EN = {
   "Spletna stran": "Website",
   "Izberi višino (cm)": "Select your height (cm)",
   "Izberi težo (kg)": "Select your weight (kg)",
+  "VIŠINA": "HEIGHT",
+  "Tapni za izbiro": "Tap to select",
   "Tvoj ITM": "Your BMI",
   "PODHRANJENOST": "UNDERWEIGHT",
   "DEBELOST": "OBESE",
@@ -316,6 +320,15 @@ const EN = {
   "Ramo": "Shoulder",
   "Komolec": "Elbow",
   "Drugo": "Other",
+
+  // ── ZEUS funnel — the injury step rendered half-English without these
+  // (Koleno/Rama/Gleženj/Kolk/Zapestje resolved, the rest fell back to SL) ──
+  "Spodnji hrbet": "Lower back",
+  "Vrat": "Neck",
+  "Brez poškodb": "No injuries",
+  "Imaš kakšne poškodbe ali omejitve?": "Any injuries or limitations?",
+  "ZEUS SE JIM BO IZOGNIL": "ZEUS WILL WORK AROUND THEM",
+  "Aktiviraj ZEUS": "Activate ZEUS",
   "STOPNJA": "SEVERITY",
   "LAHKA": "MILD",
   "ZMERNA": "MODERATE",
@@ -392,6 +405,7 @@ const EN = {
   "Vpiši ime …": "Type a name …",
   "Nisi še v klubu — poišči prijatelja po imenu zgoraj.": "You're not in a club yet — find a friend by name above.",
   "To ime je že zasedeno — izberi drugo.": "That name is already taken — pick another.",
+  "To ime ni dovoljeno — izberi drugo.": "That name isn't allowed — pick another.",
   "Preverjam…": "Checking…",
 
   // ── Notifications (bell on home) ──
@@ -442,6 +456,65 @@ const EN = {
   "Datum\nrojstva": "Date of\nbirth",
   "Višina\n& teža": "Height\n& weight",
   "Kateri šport\ntreniraš?": "Which sport\ndo you play?",
+
+  // ── Notifications inbox (ScreenNotifications) ──
+  "Vse": "All",
+  "Neprebrano": "Unread",
+  "Pomembno": "Important",
+  "Označi vse kot prebrano": "Mark all as read",
+  "Označi kot prebrano": "Mark as read",
+  // swipe-reveal labels — short by necessity, they sit in a 64px gutter
+  "Prebrano": "Read",
+  "Skrij": "Dismiss",
+  "Nič novega": "You're all caught up",
+  "Nič tukaj": "Nothing here",
+  "Ko bo kaj potrebovalo tvojo pozornost, se bo pojavilo tukaj.": "When something needs your attention, it'll show up here.",
+  "Poskusi drug filter — morda je kaj v drugi kategoriji.": "Try another filter — there may be something in a different category.",
+  "Nazaj na Danes": "Back to Today",
+  "Pokaži vse": "Show all",
+  "Odgovori na 4 vprašanja in posodobi svojo pripravljenost.": "Answer 4 questions and update your readiness.",
+
+  // ── Initial assessment (SetupFlow) ──
+  // Chapter narration — the eyebrow above every question, so progress reads
+  // as "a profile is being built", not "N questions remain".
+  "Ustvarjam tvoj profil": "Building your profile",
+  "Merim tvojo osnovo": "Measuring your baseline",
+  "Spoznavam tvoj trening": "Learning your training",
+  "POLOVICA JE ZA TEBOJ": "HALFWAY THERE",
+  "SKORAJ PRIPRAVLJENO": "ALMOST READY",
+  // Questions (unwrapped — same wording, no forced line breaks)
+  "Kako si slišal za nas?": "How did you hear about us?",
+  "Datum rojstva": "Date of birth",
+  "Višina & teža": "Height & weight",
+  "Obseg pasu & body fat": "Waist & body fat",
+  "Kateri šport treniraš?": "Which sport do you play?",
+  "Koliko let izkušenj imaš?": "How many years of experience?",
+  "Kakšno opremo imaš na voljo?": "What equipment do you have?",
+  "Začetni test": "Initial test",
+  // Supporting lines
+  "Tako te bodo videli soigralci in trener.": "This is how teammates and your coach will see you.",
+  "Norme in obremenitve se računajo glede na starost.": "Benchmarks and training loads are calculated by age.",
+  "Za izračun norm in kalorij.": "Used to calculate benchmarks and calories.",
+  "Osnova za bremena, kalorije in spremljanje napredka.": "The basis for loads, calories and tracking progress.",
+  "Če veš — drugače preskoči.": "If you know them — otherwise skip.",
+  "Program se prilagodi zahtevam tvojega športa.": "Your program adapts to the demands of your sport.",
+  "Izberi enega ali več.": "Pick one or more.",
+  "S fitnesom in treningom moči.": "With the gym and strength training.",
+  "Trenutne in pretekle — da program ostane varen.": "Current and past — so your program stays safe.",
+  "Vaje izbiramo samo iz tega, kar res imaš.": "We only pick exercises from what you actually have.",
+  // Calls to action
+  "Začnimo": "Let's begin",
+  "Potrdi mere": "Confirm measurements",
+  "Sem pripravljen": "I'm ready",
+  "Zakleni cilje": "Lock in my goals",
+  "Zaključi profil": "Finish my profile",
+  "Zgradi moj profil": "Build my profile",
+  // Body-composition readout
+  "ITM": "BMI",
+  "Podhranjenost": "Underweight",
+  "Optimalno": "Optimal",
+  "Povečana teža": "Overweight",
+  "Debelost": "Obese",
   "KAKO TE BOMO KLICALI": "WHAT SHOULD WE CALL YOU",
   "ZA PRILAGODITEV PROGRAMA": "TO PERSONALIZE YOUR PROGRAM",
   "ZA IZRAČUN BREMEN IN KALORIJ": "TO CALCULATE LOADS AND CALORIES",
@@ -491,6 +564,7 @@ const EN = {
   "Zmerna": "Moderate",
   "Visoka": "High",
   "PRIPOROČILO": "RECOMMENDATION",
+  "VPOGLED V REGENERACIJO": "RECOVERY INSIGHT",
   "Regeneracija in počutje sta visoka — telo je pripravljeno na polno obremenitev.": "Recovery and mood are high — your body is ready for a full load.",
   "Nekateri kazalniki so nižji — danes izberi zmeren napor.": "Some markers are lower — go moderate today.",
   "Telo kaže znake utrujenosti — danes daj prednost regeneraciji.": "Your body is showing fatigue — prioritize recovery today.",
@@ -765,6 +839,20 @@ const EN = {
   "Za dostop do računa se boš moral znova prijaviti.": "You'll need to sign in again to access your account.",
   "Ali si prepričan, da se želiš odjaviti?": "Are you sure you want to Log Out?",
   "Z odjavo boš zaključil trenutno sejo in ne boš več imel dostopa do svojega računa.": "By logging out, you will be ending your current session and will no longer have access to your account.",
+
+  // ── Confirmation dialogs (ConfirmDialog) ──
+  "Blokiraj": "Block",
+  "Uporabnik vam ne bo mogel pošiljati sporočil.": "This person won't be able to message you.",
+  "Izbriši sporočilo?": "Delete this message?",
+  "Sporočila po izbrisu ni mogoče obnoviti.": "Messages can't be recovered once deleted.",
+  "Izbriši": "Delete",
+  "Zapusti skupnost?": "Leave this community?",
+  "Ne boš več videl objav ali sodeloval na lestvici te skupnosti.": "You'll no longer see posts or appear on this community's leaderboard.",
+  "Zapusti": "Leave",
+  "Izbriši objavo?": "Delete this post?",
+  "Objave po izbrisu ni mogoče obnoviti.": "This post can't be recovered once deleted.",
+  "Izbriši dogodek?": "Delete this event?",
+  "Dogodka po izbrisu ni mogoče obnoviti.": "This event can't be recovered once deleted.",
 
   // ── Profile ──
   "MOJ PROFIL": "MY PROFILE",

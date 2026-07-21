@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useTheme, useDatePicker, useTimePicker } from "../theme";
 import { Pressable, PrimaryBtn, Mono, SkeletonBlock } from "../components/UI";
-import { IcBall, IcBolt } from "../components/Icons";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { IcBall, IcBolt, IcTrash } from "../components/Icons";
 import { listEvents, addEvent, deleteEvent, replaceEvents } from "../lib/api";
 import { useT, useLang } from "../lib/i18n";
 
@@ -750,7 +751,10 @@ export default function ScreenSeason({ profile, user }) {
     }
   };
 
-  const onDelete = (id) => {
+  // onDelete just requests confirmation (below); doDeleteEvent is the real,
+  // previously-instant action, now gated behind the confirm dialog.
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const doDeleteEvent = (id) => {
     setEvents((list) => list.filter((x) => x.id !== id));
     deleteEvent(user?.id, id).catch(() => {});
   };
@@ -853,11 +857,22 @@ export default function ScreenSeason({ profile, user }) {
       )}
 
       {loaded && calView === "week" && (
-        <WeekView C={C} t={t} lang={lang} weekOffset={weekOffset} setWeekOffset={setWeekOffset} events={events} onDelete={onDelete} onAddManual={() => setMode("add")} />
+        <WeekView C={C} t={t} lang={lang} weekOffset={weekOffset} setWeekOffset={setWeekOffset} events={events} onDelete={setConfirmDeleteId} onAddManual={() => setMode("add")} />
       )}
       {loaded && calView === "month" && (
-        <MonthView C={C} t={t} lang={lang} monthOffset={monthOffset} setMonthOffset={setMonthOffset} events={events} onDelete={onDelete} />
+        <MonthView C={C} t={t} lang={lang} monthOffset={monthOffset} setMonthOffset={setMonthOffset} events={events} onDelete={setConfirmDeleteId} />
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteId != null}
+        onClose={() => setConfirmDeleteId(null)}
+        tone="danger"
+        icon={<IcTrash size={30} />}
+        title={t("Izbriši dogodek?")}
+        description={t("Dogodka po izbrisu ni mogoče obnoviti.")}
+        confirmLabel={t("Izbriši")}
+        onConfirm={() => { doDeleteEvent(confirmDeleteId); setConfirmDeleteId(null); }}
+      />
     </div>
   );
 }

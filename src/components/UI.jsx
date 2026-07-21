@@ -6,7 +6,7 @@ export function useCountUp(target) {
   return target;
 }
 
-export function Pressable({ children, onClick, style, scale = 0.98, disabled, className }) {
+export function Pressable({ children, onClick, style, scale = 0.98, disabled, className, ...rest }) {
   const [pressed, setPressed] = useState(false);
   return (
     <button
@@ -28,6 +28,7 @@ export function Pressable({ children, onClick, style, scale = 0.98, disabled, cl
         opacity: disabled ? 0.45 : 1,
         ...style,
       }}
+      {...rest}
     >
       {children}
     </button>
@@ -137,6 +138,29 @@ export const Pill = ({ children, fill, color }) => {
     </span>
   );
 };
+
+// Small in-row action pill with an active/inactive state (Follow/Following,
+// Join/Joined, …) — built on Pressable so it gets the same press-scale
+// feedback as everything else without depending on any screen-local CSS
+// class. One shared primitive instead of the same pill hand-rolled per
+// screen with slightly different values each time.
+export function ToggleChip({ active, onClick, icon, label, activeIcon, activeLabel, style }) {
+  const C = useTheme();
+  return (
+    <Pressable onClick={onClick} scale={0.94} style={{
+      flexShrink: 0, display: "flex", alignItems: "center", gap: 5, borderRadius: 999,
+      padding: "7px 13px", fontFamily: C.display, fontWeight: 700, fontSize: 11.5,
+      background: active ? "transparent" : C.accent, color: active ? C.muted : C.btnText,
+      boxShadow: active ? "none" : `0 4px 14px ${C.accent}30`,
+      outline: active ? `1px solid ${C.border2}` : "none",
+      transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+      ...style,
+    }}>
+      {active ? activeIcon : icon}
+      {active ? activeLabel : label}
+    </Pressable>
+  );
+}
 
 export function LanguageSwitcher({ value = "sl", onChange, style, variant = "default" }) {
   const C = useTheme();
@@ -341,7 +365,7 @@ export function SettingsBlock({ title, children }) {
 // Soft dark surface card. Pass onClick to make it a pressable row.
 // Glass-like: an extremely soft top sheen + hairline over the flat fill gives
 // premium depth without any obvious gradient.
-export function Card({ children, onClick, style, pad = 16, radius = 18 }) {
+export function Card({ children, onClick, style, pad = 16, radius = 18, ...rest }) {
   const C = useTheme();
   const dark = C.name === "dark";
   const base = {
@@ -356,8 +380,8 @@ export function Card({ children, onClick, style, pad = 16, radius = 18 }) {
     ...style,
   };
   return onClick
-    ? <Pressable onClick={onClick} scale={0.99} className="at-card-hover" style={{ ...base, width: "100%", textAlign: "left", display: "block" }}>{children}</Pressable>
-    : <div style={base}>{children}</div>;
+    ? <Pressable onClick={onClick} scale={0.99} className="at-card-hover" style={{ ...base, width: "100%", textAlign: "left", display: "block" }} {...rest}>{children}</Pressable>
+    : <div style={base} {...rest}>{children}</div>;
 }
 
 // Small uppercase section header with an optional right-aligned action.
@@ -370,6 +394,90 @@ export function SectionLabel({ children, action, onAction, style }) {
         <button onClick={onAction} style={{ background: "none", border: "none", color: C.accent, fontFamily: C.display, fontWeight: 600, fontSize: 12, cursor: "pointer", padding: 0, WebkitTapHighlightColor: "transparent" }}>{action}</button>
       )}
     </div>
+  );
+}
+
+// ── MetricCard — an icon-led health metric (Sleep, Recovery, Fatigue, Mood).
+//
+// Distinct from StatTile below, which is the label-led tile used for tabular
+// stats: this one leads with a glyph and puts the NUMBER first in the reading
+// order, with the label demoted to a caption underneath it.
+//
+// That inversion is the whole point. Label-above-value is the generic
+// dashboard order — you read a caption, then hunt for the figure. Every app
+// this is meant to sit beside (WHOOP, Oura, Apple Health) puts the figure
+// first and uses the label to confirm what you just read. Combined with a
+// left-aligned column and the icon pinned top-left, the card scans in one
+// downward sweep instead of radiating from a centre point.
+//
+// Colour is deliberately scarce: the glyph is a soft neutral, and `accent`
+// turns exactly one card green. Surface, border and shadow are copied from
+// Card so these are visibly the same material as every other card in the app.
+export function MetricCard({ icon: Glyph, label, value, unit, accent = false, onClick, style }) {
+  const C = useTheme();
+  const dark = C.name === "dark";
+  const has = value != null;
+  return (
+    <Pressable
+      onClick={onClick}
+      scale={0.98}
+      className="at-metric-card"
+      aria-label={label}
+      style={{
+        display: "flex", flexDirection: "column", alignItems: "stretch",
+        width: "100%", minWidth: 0, minHeight: 98,
+        padding: "12px 12px 13px", borderRadius: 18, textAlign: "left",
+        background: dark
+          ? "linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0) 44%), #181818"
+          : "linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 42%), #FFFFFF",
+        border: `1px solid ${dark ? "rgba(255,255,255,0.045)" : "rgba(16,24,40,0.05)"}`,
+        boxShadow: dark
+          ? "0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)"
+          : "0 2px 12px rgba(16,24,40,0.05)",
+        "--at-hover-border": dark ? "rgba(255,255,255,0.14)" : "rgba(16,24,40,0.13)",
+        "--at-hover-shadow": dark
+          ? "0 2px 4px rgba(0,0,0,0.42), 0 14px 30px rgba(0,0,0,0.32)"
+          : "0 2px 4px rgba(16,24,40,0.05), 0 14px 28px rgba(16,24,40,0.10)",
+        // Declared here, not in the stylesheet: Pressable writes `transition`
+        // inline and an inline rule always wins, so border-color and shadow
+        // would otherwise never animate.
+        transition: "transform 0.18s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s ease, opacity 0.12s",
+        ...style,
+      }}
+    >
+      {/* Glyph sits low-contrast and top-left so it anchors the card without
+          competing with the figure — an icon that outshines its own number is
+          the thing that makes a tile read as a widget. */}
+      <Glyph size={16} strokeWidth={1.8} color={accent ? C.accent : C.muted}
+        style={{ flexShrink: 0, display: "block" }} />
+
+      <span style={{ flex: 1, minHeight: 14 }} />
+
+      {/* value — the focus. `key` restarts the entrance whenever the number
+          changes, so a check-in submit updates it with a soft rise instead of
+          a hard swap. */}
+      <span style={{ display: "flex", alignItems: "baseline", gap: 2, minWidth: 0 }}>
+        <span key={String(value)} style={{
+          fontFamily: C.display, fontWeight: 700, fontSize: "clamp(18px, 5.6vw, 24px)",
+          lineHeight: 1, letterSpacing: "-0.035em", color: has ? C.text : C.muted2,
+          animation: "athlosMetricIn 0.34s cubic-bezier(0.22,1,0.36,1)",
+        }}>{has ? value : "—"}</span>
+        {has && unit && (
+          <span style={{
+            fontFamily: C.display, fontWeight: 500, fontSize: 11,
+            color: C.muted2, letterSpacing: "-0.01em",
+          }}>{unit}</span>
+        )}
+      </span>
+
+      {/* label — demoted to a caption under the figure */}
+      <span style={{
+        display: "block", marginTop: 6,
+        fontFamily: C.mono, fontSize: 8, fontWeight: 600, letterSpacing: "0.11em",
+        textTransform: "uppercase", color: C.muted2,
+        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+      }}>{label}</span>
+    </Pressable>
   );
 }
 

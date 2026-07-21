@@ -18,6 +18,7 @@ import ScreenCommunity from "./screens/ScreenCommunity";
 import WelcomeTour from "./screens/WelcomeTour";
 import ScreenClub from "./screens/ScreenClub";
 import ScreenAssessment from "./screens/ScreenAssessment";
+import ScreenNotifications from "./screens/ScreenNotifications";
 import LoginScreen from "./screens/LoginScreen";
 import SetupFlow from "./screens/SetupFlow";
 import ConsentScreen from "./screens/ConsentScreen";
@@ -26,6 +27,7 @@ import { countUnreadChats } from "./lib/notifications";
 import { LangContext, makeT } from "./lib/i18n";
 import CoachApp from "./coach/CoachApp";
 import LiveTrainingBar from "./screens/widgets/LiveTrainingBar";
+import LiquidGlassNav, { GlassSurface } from "./components/LiquidGlass";
 
 // AI sits last: it renders as the round logo button on the right edge of the
 // nav pill, not as a regular tab.
@@ -36,6 +38,19 @@ const NAV = [
   { id: "settings", label: "Profil",  icon: "profile" },
   { id: "ai",       label: "AI",      icon: "ai" },
 ];
+// Stable reference (not recomputed per render) — LiquidGlassNav's capsule
+// measuring effect depends on this array's identity, so a fresh .filter()
+// result every render would re-measure on every unrelated re-render, not just
+// on tab changes (and would restart the spring mid-flight).
+const NAV_TABS = NAV.filter(n => n.id !== "ai");
+// Swipe navigates the four real tabs only — never ZEUS.
+//
+// ZEUS is reached deliberately, by tapping the round mark; it is not a
+// neighbour in the tab strip, so it must not be a neighbour to the gesture
+// either. Including it made "ai" index 4 and "settings" index 3, so a swipe
+// right inside the chat dropped you into Profil — and the reverse (a swipe
+// left on Profil) dropped you into a live conversation you never asked for.
+const SWIPE_TAB_IDS = NAV_TABS.map(n => n.id);
 
 // Premium loading experience — motion only, no bars/spinner/percent/skeleton.
 // The Athlos "A" materializes from darkness (fade + 0.96→1 scale), a thin ring
@@ -259,7 +274,7 @@ export default function AthlosApp() {
   // for the logged-in user, so we never overwrite the stored profile with defaults)
   useEffect(() => {
     if (!profileLoaded.current || !user) return;
-    saveProfile(user.id, profile).catch(() => {});
+    saveProfile(user.id, profile).catch((err) => console.error("saveProfile failed:", err));
   }, [profile, user]);
 
   useEffect(() => {
@@ -319,7 +334,7 @@ export default function AthlosApp() {
     };
   }, []);
 
-  const navActive = ["train","session","report","fuel"].includes(screen) ? "today"
+  const navActive = ["train","session","report","fuel","notifications"].includes(screen) ? "today"
     : ["profile","account"].includes(screen) ? "settings"
     : screen;
 
@@ -350,8 +365,6 @@ export default function AthlosApp() {
     return () => { live = false; clearInterval(iv); };
   }, [user, screen]);
 
-  const tabIds = NAV.map(n => n.id);
-
   const onTouchStart = (e) => {
     touchStartY.current = touchCurY.current = e.touches[0].clientY;
     touchStartX.current = touchCurX.current = e.touches[0].clientX;
@@ -374,12 +387,14 @@ export default function AthlosApp() {
   const onTouchEnd   = () => {
     const dx = touchCurX.current - touchStartX.current;
     const dy = touchCurY.current - touchStartY.current;
-    // Left/right swipe → move to the previous/next tab (only on a top-level tab screen).
+    // Left/right swipe → move to the previous/next tab (only on a top-level tab
+    // screen, and only among the four real tabs — indexOf returns -1 on "ai",
+    // so the ZEUS chat neither swipes out nor can be swiped into).
     if (!swipeBlocked.current && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-      const idx = tabIds.indexOf(screen);
+      const idx = SWIPE_TAB_IDS.indexOf(screen);
       if (idx !== -1) {
         const next = idx + (dx < 0 ? 1 : -1);
-        if (next >= 0 && next < tabIds.length) { setPullDist(0); go(tabIds[next]); return; }
+        if (next >= 0 && next < SWIPE_TAB_IDS.length) { setPullDist(0); go(SWIPE_TAB_IDS[next]); return; }
       }
     }
     if (pullDist > 44 && !refreshing) {
@@ -436,6 +451,7 @@ export default function AthlosApp() {
       case "chat":       return <ScreenCommunity user={user} profile={profile} onConvOpenChange={setChatConvOpen} />;
       case "club":       return <ScreenClub go={go} profile={profile} />;
       case "assessment": return <ScreenAssessment go={go} profile={profile} />;
+      case "notifications": return <ScreenNotifications go={go} user={user} chatUnread={chatUnread} />;
       default:         return <ScreenToday go={go} profile={profile} />;
     }
   };
@@ -453,14 +469,8 @@ export default function AthlosApp() {
       button, button:active { transition: none; transform: none; }
     }
 
-    /* Bottom nav tab — matches the coach app's bounce-on-select exactly */
-    .athlos-navbtn:active { transform: scale(0.88); }
-    .athlos-navbtn.active { animation: athlosNavBounce 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    @keyframes athlosNavBounce {
-      0%   { transform: scale(1); }
-      40%  { transform: scale(1.15); }
-      100% { transform: scale(1); }
-    }
+    /* (The bottom-nav press state now lives in LiquidGlassNav, which drives it
+       from pointer events so the glass stays put while the glyph recedes.) */
 
     /* True full-screen: size against the phone shell (fixed top:0/bottom:0 — the
        only reliably full-height box). NO viewport units here: an explicit
@@ -601,7 +611,7 @@ export default function AthlosApp() {
             goals: info.goals, experience: info.experience, injuries: info.injuries, injuryNote: info.injuryNote, injuryPhoto: info.injuryPhoto, equipment: info.equipment,
           };
           setProfile(np);
-          if (user) saveProfile(user.id, np).catch(() => {});
+          if (user) saveProfile(user.id, np).catch((err) => console.error("saveProfile (onboarding) failed:", err));
           profileLoaded.current = true;
           setNeedsSetup(false);
           setRegistered(true);
@@ -726,60 +736,56 @@ export default function AthlosApp() {
             {/* Live training widget (spec §07) — sticky across tabs while a workout runs */}
             {screen !== "train" && <LiveTrainingBar C={C} t={t} onOpen={() => go("train")} />}
 
-            {/* Same WHOOP-style nav as the coach app: 4 icon+label tabs in a
-                solid rounded pill, plus a separate round AI-logo button of
-                the same diameter as the pill's height, same gap between them. */}
+            {/* Liquid Glass floating nav — see components/LiquidGlass.jsx for
+                the material (SDF-driven backdrop refraction, layered light,
+                specular rim) and the spring solver that drives the capsule.
+                The round AI button is the SAME GlassSurface, so the two pieces
+                are provably one material rather than two lookalikes. */}
             <div style={{ display: "flex", alignItems: "center", gap: 12, pointerEvents: "auto" }}>
-              <nav style={{
-                flex: 1, display: "flex", alignItems: "center", minWidth: 0,
-                background: C.surface, border: `1px solid ${C.border}`,
-                borderRadius: 999, padding: "9px 10px",
-                boxShadow: theme === "dark"
-                  ? "0 10px 30px rgba(0,0,0,0.42)"
-                  : "0 10px 30px rgba(16,24,40,0.10)",
-              }}>
-                {NAV.filter(n => n.id !== "ai").map(n => {
-                  const active = navActive === n.id;
-                  const color = active ? C.accent : C.muted2;
-                  return (
-                    <button
-                      key={n.id}
-                      onClick={() => go(n.id)}
-                      className={active ? "athlos-navbtn active" : "athlos-navbtn"}
-                      style={{
-                        flex: 1, background: "none", border: "none", cursor: "pointer",
-                        display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                        padding: "4px 0", position: "relative",
-                        fontFamily: C.display, WebkitTapHighlightColor: "transparent",
-                      }}
-                    >
-                      <Icon name={n.icon} size={22} color={color} />
-                      <span style={{ fontSize: 10, fontWeight: 500, color }}>{t(n.label)}</span>
-                      {n.id === "chat" && chatUnread > 0 && (
-                        <span aria-hidden="true" style={{ position: "absolute", top: 0, right: "26%", width: 7, height: 7, borderRadius: "50%", background: C.red }} />
-                      )}
-                    </button>
-                  );
-                })}
-              </nav>
-              {/* AI — the round ATHLOS-mark button, same size/material as the coach app */}
-              <button
-                onClick={() => go("ai")}
-                aria-label="AI"
+              <LiquidGlassNav
+                tabs={NAV_TABS}
+                active={navActive}
+                dark={theme === "dark"}
+                badges={{ chat: chatUnread }}
+                onSelect={go}
+                label={(n) => t(n.label)}
+                renderIcon={(n, on, dark) => (
+                  <Icon
+                    name={n.icon}
+                    size={on ? 23 : 21}
+                    color={on
+                      ? (dark ? "#FFFFFF" : "#0F1729")
+                      : (dark ? "rgba(255,255,255,0.46)" : "rgba(16,24,40,0.45)")}
+                  />
+                )}
+              />
+              {/* AI — the one place the brand green still lives down here, so it
+                  reads as an action rather than a fifth tab. */}
+              <GlassSurface
+                dark={theme === "dark"}
+                radius="50%"
                 style={{
-                  flex: "0 0 auto", width: 58, height: 58, borderRadius: "50%",
-                  padding: 0, cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: C.surface, border: `1px solid ${C.border}`,
-                  boxShadow: navActive === "ai"
-                    ? (theme === "dark" ? "0 0 16px rgba(0,255,135,0.30)" : "0 0 16px rgba(18,128,90,0.25)")
-                    : "none",
-                  WebkitTapHighlightColor: "transparent",
-                  transition: "box-shadow 0.2s ease, transform 0.15s ease",
+                  flex: "0 0 auto", width: 58, height: 58,
+                  transform: navActive === "ai" ? "scale(1.045)" : "scale(1)",
+                  transition: "transform 0.42s cubic-bezier(0.22,1,0.36,1)",
                 }}
               >
-                <Icon name="ai" size={26} color={C.accent} />
-              </button>
+                <button
+                  onClick={() => go("ai")}
+                  aria-label="AI"
+                  aria-current={navActive === "ai" ? "page" : undefined}
+                  style={{
+                    width: "100%", height: "100%", borderRadius: "50%",
+                    background: "none", border: "none", padding: 0, cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: navActive === "ai" ? `inset 0 0 0 1px ${C.accent}44` : "none",
+                    transition: "box-shadow 0.42s cubic-bezier(0.22,1,0.36,1)",
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                >
+                  <Icon name="ai" size={26} color={C.accent} />
+                </button>
+              </GlassSurface>
             </div>
           </div>}
 

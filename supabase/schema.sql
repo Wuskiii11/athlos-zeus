@@ -21,6 +21,21 @@ alter table public.profiles add column if not exists plan text default 'basic';
 alter table public.profiles add column if not exists lang text default 'sl';
 alter table public.profiles add column if not exists role text default 'athlete';
 alter table public.profiles add column if not exists theme text; -- 'light' | 'dark' (per-account)
+
+-- Extended onboarding (SetupFlow) — everything the athlete enters during setup
+-- is now persisted on their profile instead of living only in the local cache.
+-- Arrays (goals / injuries / equipment) go to jsonb; the injury photo is the
+-- compressed (<=512px) data URL, same as the avatar `photo` column.
+alter table public.profiles add column if not exists acquisition  text;
+alter table public.profiles add column if not exists gender       text;
+alter table public.profiles add column if not exists waist        numeric;
+alter table public.profiles add column if not exists body_fat     numeric;
+alter table public.profiles add column if not exists experience   numeric;
+alter table public.profiles add column if not exists goals        jsonb;
+alter table public.profiles add column if not exists injuries     jsonb;
+alter table public.profiles add column if not exists injury_note  text;
+alter table public.profiles add column if not exists injury_photo text;
+alter table public.profiles add column if not exists equipment    jsonb;
 -- Nekoga narediš za coacha (zamenjaj e-naslov):
 --   update public.profiles set role = 'coach'
 --   where id = (select id from auth.users where email = 'coach@primer.si');
@@ -118,6 +133,30 @@ drop trigger if exists profiles_lock_role on public.profiles;
 create trigger profiles_lock_role
   before insert or update on public.profiles
   for each row execute procedure public.lock_profile_role();
+
+-- ────────────────────────────────────────────────────────────
+-- Enak vzorec kot lock_profile_role: `plan` (naročniški nivo) je prav tako
+-- RAZVIJALSKO/plačilno nadzorovan — sprememba mora priti iz plačilnega
+-- webhooka ali admin akcije, NIKOLI iz navadnega profile-save klica v appu.
+create or replace function public.lock_profile_plan()
+returns trigger language plpgsql security definer as $$
+begin
+  if auth.uid() is null then
+    return new; -- SQL editor / service role (payment webhook) — poln nadzor
+  end if;
+  if tg_op = 'INSERT' then
+    new.plan := 'basic';       -- vsak nov uporabnik začne na basic
+  else
+    new.plan := old.plan;      -- klient ne more spremeniti svojega plana
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_lock_plan on public.profiles;
+create trigger profiles_lock_plan
+  before insert or update on public.profiles
+  for each row execute procedure public.lock_profile_plan();
 
 -- ════════════════════════════════════════════════════════════
 -- Sezona: koledarski dogodki (trening / tekma / regeneracija)
@@ -390,59 +429,84 @@ create trigger community_members_lock_role
   for each row execute procedure public.lock_community_member_role();
 
 -- Seed the two real communities (idempotent — safe to re-run).
-insert into public.communities (slug, name, description, flag)
-values ('slovenija', 'Slovenija', 'Uradna Athlos skupnost za športnike iz Slovenije. Deli treninge, tekmuj na lestvicah in poveži se z lokalnimi člani.', '🇸🇮')
+-- Slike so v aplikaciji (public/img), zato jih strežemo z root-relativno potjo.
+insert into public.communities (slug, name, description, flag, image_url)
+values ('slovenija', 'Slovenija', 'Uradna Athlos skupnost za športnike iz Slovenije. Deli treninge, tekmuj na lestvicah in poveži se z lokalnimi člani.', '🇸🇮', '/img/slovenia.jpg')
 on conflict (slug) do nothing;
 
--- ⚠️ Ni še prave slike zate — ko jo dobiš (image_url v Storage ali drug
--- javen URL), zaženi: update public.communities set image_url = '...' where slug = 'muharji';
 insert into public.communities (slug, name, description, image_url)
-values ('muharji', 'Muharji', null, null)
+values ('muharji', 'Muharji', null, '/img/fly.png')
 on conflict (slug) do nothing;
 
--- Backfill: doda VSE trenutno registrirane uporabnike kot člane obeh
--- skupnosti. Enkratno — kdorkoli se registrira ODSLEJ, se NE pridruži
--- samodejno (na uporabnikovo željo).
-insert into public.community_members (community_id, user_id, role)
-select c.id, p.id, 'member'
-from public.communities c
-cross join public.profiles p
-where c.slug in ('slovenija', 'muharji')
-on conflict (community_id, user_id) do nothing;
+-- Nastavi/posodobi slike tudi za ŽE obstoječe vrstice (insert zgoraj z
+-- "on conflict do nothing" jih ne bi spremenil).
+update public.communities set image_url = '/img/slovenia.jpg' where slug = 'slovenija';
+update public.communities set image_url = '/img/fly.png'       where slug = 'muharji';
 
--- Naredi SVOJ račun administratorja OBEH skupnosti — zamenjaj spodnji
--- e-naslov s svojim pravim, PREDEN poženeš to skripto.
+-- Nihče se NE pridruži samodejno — vsak nov uporabnik začne brez skupnosti in
+-- se pridruži izrecno v aplikaciji. (Prej je bil tu "backfill", ki je s cross
+-- joinom dodal VSAK profil v obe skupnosti — prav zato so se novi računi
+-- prikazali kot že včlanjeni. Odstranjeno.)
+
+-- Naredi SVOJ račun administratorja OBEH skupnosti — zamenjaj spodnji e-naslov
+-- s svojim pravim, PREDEN poženeš to skripto. Vstavi te kot člana z vlogo
+-- 'admin' (cross join, ki te je prej dodal, ne obstaja več). Teče kot SQL
+-- editor, zato role-lock trigger dovoli 'admin'. Idempotentno.
 do $$
 declare
   admin_id uuid;
 begin
-  select id into admin_id from auth.users where email = 'PUT_YOUR_EMAIL_HERE';
+  select id into admin_id from auth.users where email = 'nigga@nigga.com';
   if admin_id is not null then
-    update public.community_members set role = 'admin'
-    where user_id = admin_id
-      and community_id in (select id from public.communities where slug in ('slovenija', 'muharji'));
+    insert into public.community_members (community_id, user_id, role)
+    select c.id, admin_id, 'admin'
+    from public.communities c
+    where c.slug in ('slovenija', 'muharji')
+    on conflict (community_id, user_id) do update set role = 'admin';
   end if;
 end $$;
+
+-- ── Enkratno čiščenje (NEOBVEZNO) ────────────────────────────────────────────
+-- Ker je stari backfill v obe skupnosti dodal vse obstoječe profile, so tam
+-- morda računi, ki se niso pridružili sami. Odkomentiraj naslednji blok in ga
+-- poženi ENKRAT, da odstraniš vse člane RAZEN administratorjev (čist začetek —
+-- pravi člani se nato spet pridružijo iz aplikacije):
+-- delete from public.community_members
+-- where role <> 'admin'
+--   and community_id in (select id from public.communities where slug in ('slovenija', 'muharji'));
 
 -- Storage bucket for chat attachments (public so image URLs render directly)
 insert into storage.buckets (id, name, public) values ('chat-attachments', 'chat-attachments', true)
   on conflict (id) do nothing;
 
+-- Write/update are scoped to the caller's own folder (uploadChatAttachment()
+-- in api.js always writes to `${userId}/...`) — an authenticated user can no
+-- longer write into another user's folder in this shared public bucket.
 drop policy if exists "chat-attach read"  on storage.objects;
 drop policy if exists "chat-attach write" on storage.objects;
 create policy "chat-attach read"  on storage.objects for select using (bucket_id = 'chat-attachments');
-create policy "chat-attach write" on storage.objects for insert to authenticated with check (bucket_id = 'chat-attachments');
+create policy "chat-attach write" on storage.objects for insert to authenticated with check (
+  bucket_id = 'chat-attachments' and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 -- Storage bucket for profile avatars (public so the photo URL renders directly)
 insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)
   on conflict (id) do nothing;
 
+-- Same own-folder scoping — uploadAvatar()/coach Settings.tsx both write to
+-- `${userId}/...`.
 drop policy if exists "avatars read"  on storage.objects;
 drop policy if exists "avatars write" on storage.objects;
 drop policy if exists "avatars upd"   on storage.objects;
 create policy "avatars read"  on storage.objects for select using (bucket_id = 'avatars');
-create policy "avatars write" on storage.objects for insert to authenticated with check (bucket_id = 'avatars');
-create policy "avatars upd"   on storage.objects for update to authenticated using (bucket_id = 'avatars') with check (bucket_id = 'avatars');
+create policy "avatars write" on storage.objects for insert to authenticated with check (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+);
+create policy "avatars upd" on storage.objects for update to authenticated using (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+) with check (
+  bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+);
 
 -- ════════════════════════════════════════════════════════════
 -- Communities — full module: create-your-own, private (invite code),
@@ -480,6 +544,29 @@ returns boolean language sql security definer as $$
     select 1 from public.community_members
     where community_id = cid and user_id = auth.uid() and role = 'admin'
   );
+$$;
+
+-- Aggregate-only bridge into `workouts` for a community's own members. The
+-- workouts table itself stays fully private per-user ("own workouts select"
+-- above: auth.uid() = user_id) — a plain client-side query for OTHER
+-- members' workouts is silently filtered to zero rows by that RLS policy,
+-- which is exactly why the leaderboard/overview never showed anyone else's
+-- workout count. This returns only a per-user workout COUNT (never the
+-- underlying rows), and only to a caller who is themselves a member of cid.
+create or replace function public.get_community_workout_counts(cid uuid, since date default null)
+returns table(user_id uuid, workouts bigint)
+language plpgsql security definer as $$
+begin
+  if not public.is_community_member(cid) then
+    return;
+  end if;
+  return query
+    select w.user_id, count(*)::bigint
+    from public.workouts w
+    where w.user_id in (select cm.user_id from public.community_members cm where cm.community_id = cid)
+      and (since is null or w.date >= since)
+    group by w.user_id;
+end;
 $$;
 
 -- "communities read" (using true, above) is a full-ROW public policy so
@@ -719,7 +806,11 @@ create policy "follows delete" on public.follows for delete using (follower_id =
 insert into storage.buckets (id, name, public) values ('community-media', 'community-media', true)
   on conflict (id) do nothing;
 
+-- Same own-folder scoping — uploadCommunityMedia() in api.js writes to
+-- `${userId}/...`.
 drop policy if exists "community-media read"  on storage.objects;
 drop policy if exists "community-media write" on storage.objects;
 create policy "community-media read"  on storage.objects for select using (bucket_id = 'community-media');
-create policy "community-media write" on storage.objects for insert to authenticated with check (bucket_id = 'community-media');
+create policy "community-media write" on storage.objects for insert to authenticated with check (
+  bucket_id = 'community-media' and (storage.foldername(name))[1] = auth.uid()::text
+);

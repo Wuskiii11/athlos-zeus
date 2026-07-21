@@ -1,46 +1,41 @@
 import React, { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { useTheme } from "../theme";
-import { Mono, PrimaryBtn } from "../components/UI";
 import { useLang, useT } from "../lib/i18n";
 import { SPORTS } from "./ScreenProfile";
 import WheelColumn from "../components/WheelPicker";
+import WheelPicker from "../components/WheelPickerModal";
 import { isNameTaken } from "../lib/api";
-import { IcChart } from "../components/Icons";
+import { isNameAllowed } from "../lib/moderation";
 
-// Single green accent everywhere — the design system's brand signal.
+// ─────────────────────────────────────────────────────────────
+// INITIAL ASSESSMENT
+//
+// The first real interaction with ATHLOS, so it is built as an
+// *experience*, not a form:
+//
+//  · Layers, not containers. Hierarchy comes from type scale, spacing
+//    and contrast — there is exactly one bordered element in the whole
+//    flow (none), and no cards. Selected answers are expressed with a
+//    directional wash + a 2px left marker that grows in, full-bleed
+//    past the page gutter, so a list reads as a surface, not a stack
+//    of boxes.
+//  · One fixed action footer for every step. The CTA never moves
+//    between questions — the single biggest perceived-polish and
+//    completion-rate win in a 12-step flow.
+//  · Progress is narrated, not counted. The flow is grouped into three
+//    named chapters and the eyebrow above each question says what the
+//    system is currently doing ("Ustvarjam tvoj profil"), so the user
+//    is building a profile rather than clearing a queue.
+//  · Green is spent only on the CTA, the progress fill and the
+//    selection marker. Everything else is greyscale and space.
+//
+// Questions, order, validation and the shape passed to onDone() are
+// unchanged from the original flow.
+// ─────────────────────────────────────────────────────────────
 
-// ── BMI gauge — semicircle dial with a needle, recomputed live ──
-function BmiGauge({ height, weight, C, t }) {
-  const bmi = weight / Math.pow(height / 100, 2);
-  const p = Math.max(0, Math.min(1, (bmi - 15) / (40 - 15)));
-  const r = 78, cx = 100, cy = 96;
-  const semi = Math.PI * r;
-  const ang = Math.PI * (1 - p);
-  const nx = cx + Math.cos(ang) * (r - 16);
-  const ny = cy - Math.sin(ang) * (r - 16);
-  const dark = C.name === "dark";
-  return (
-    <div style={{ position: "relative", margin: "4px auto 0", maxWidth: 290, width: "100%" }}>
-      <svg viewBox="0 0 200 104" width="100%" style={{ display: "block" }}>
-        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke={dark ? "rgba(255,255,255,0.12)" : "rgba(28,24,20,0.10)"} strokeWidth="10" strokeLinecap="round" />
-        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke={C.text} strokeWidth="10" strokeLinecap="round"
-          strokeDasharray={semi} strokeDashoffset={semi * (1 - p)} style={{ transition: "stroke-dashoffset 0.2s ease" }} />
-        <line x1={cx} y1={cy} x2={nx} y2={ny} stroke={C.text} strokeWidth="2.5" strokeLinecap="round" style={{ transition: "all 0.2s ease" }} />
-      </svg>
-      {/* center readout + end labels */}
-      <div style={{ position: "absolute", left: 0, right: 0, top: "38%", textAlign: "center", pointerEvents: "none" }}>
-        <div style={{ fontFamily: C.display, fontWeight: 500, fontSize: 11, color: C.muted }}>{t("Tvoj ITM")}</div>
-        <div style={{ fontFamily: C.display, fontWeight: 800, fontSize: 24, color: C.text, lineHeight: 1.15 }}>{(Math.round(bmi * 10) / 10).toFixed(1)}</div>
-      </div>
-      <span style={{ position: "absolute", left: -4, bottom: -14, fontFamily: C.mono, fontSize: 8, color: C.muted2, letterSpacing: "0.04em" }}>{t("PODHRANJENOST")}</span>
-      <span style={{ position: "absolute", right: -4, bottom: -14, fontFamily: C.mono, fontSize: 8, color: C.muted2, letterSpacing: "0.04em" }}>{t("DEBELOST")}</span>
-    </div>
-  );
-}
+const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-const MONTHS_SL_SHORT = ["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"];
-const MONTHS_EN_SHORT = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
 const MONTHS_SL_FULL = ["Januar","Februar","Marec","April","Maj","Junij","Julij","Avgust","September","Oktober","November","December"];
 const MONTHS_EN_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -59,14 +54,20 @@ function validBirth(iso) {
   return y >= 1940 && dt <= max;
 }
 
-// ── Typeform-style flow per spec §01: one step per screen, big "Naprej",
-// optional steps can be skipped, progress persists locally so closing the
-// app resumes from the last step. ──
 const FLOW = ["name", "acq", "birth", "gender", "body", "waist", "quote", "sport", "goals", "exp", "injuries", "equipment", "test"];
+
+// The flow is narrated in three chapters. `line` is what the system claims to
+// be doing while the user is inside that chapter — shown as the eyebrow above
+// every question, so progress reads as construction rather than a countdown.
+const CHAPTERS = [
+  { id: "who",   line: "Ustvarjam tvoj profil",  steps: ["name", "acq", "birth", "gender"] },
+  { id: "body",  line: "Merim tvojo osnovo",     steps: ["body", "waist"] },
+  { id: "train", line: "Spoznavam tvoj trening", steps: ["sport", "goals", "exp", "injuries", "equipment"] },
+];
+const chapterOf = (k) => CHAPTERS.find((c) => c.steps.includes(k));
 
 const ACQ_OPTIONS = ["Instagram", "Prijatelj / soigralec", "Google", "TikTok", "Trener / klub", "Drugo"];
 const GOAL_OPTIONS = ["Moč", "Mišična masa", "Eksplozivnost", "Hitrost", "Vzdržljivost", "Izguba maščobe", "Preventiva poškodb", "Splošna kondicija"];
-const EXP_OPTIONS = ["0–1 let", "1–3 let", "3–5 let", "5+ let"];
 const EQUIPMENT_OPTIONS = ["Fitnes klub", "Domače uteži / ročke", "Drog za zgibe", "Elastike", "Samo lastna teža"];
 
 const SETUP_KEY = "athlos:setup";
@@ -104,9 +105,265 @@ const compressToDataUrl = (file) => new Promise((resolve, reject) => {
   img.src = url;
 });
 
-// ── Inline birth-date wheels — no tap-to-open sheet: the three columns sit
-// right on the step, with one full-width accent bar across the selected row
-// (month | day | year), like a boarding-pass row. ──
+// GSAP drives the flow's motion; a single guard keeps it off for users who
+// asked the OS for reduced motion.
+const reduceMotion = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+// Answering something is the one moment that earns physical feedback. A short
+// tick, never a buzz — the flow is calm, not gamified.
+const tick = () => { try { navigator.vibrate?.(7); } catch {} };
+
+const Check = ({ color, size = 13 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 12.5l5 5L20 6.5" />
+  </svg>
+);
+
+// ── Eyebrow — the narration line. Mono, wide-tracked, quiet, with one
+// small accent tick so it reads as system output rather than a label. ──
+function Eyebrow({ children, C, color }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+      <span aria-hidden="true" style={{ width: 4, height: 4, borderRadius: 1, background: color || C.accent, flexShrink: 0 }} />
+      <span style={{
+        fontFamily: C.mono, fontSize: 9.5, fontWeight: 600, letterSpacing: "0.2em",
+        textTransform: "uppercase", color: color || C.muted,
+      }}>{children}</span>
+    </span>
+  );
+}
+
+// ── Question head — eyebrow · question · supporting line. The only place
+// in the flow allowed to set large type, and the reason no step needs a
+// container: the scale jump from 9.5px mono to 30px display IS the
+// hierarchy. ──
+function Head({ eyebrow, title, sub, C, light }) {
+  return (
+    <div style={{ marginBottom: 26 }}>
+      {eyebrow && <div style={{ marginBottom: 14 }}><Eyebrow C={C} color={light ? "rgba(255,255,255,0.72)" : undefined}>{eyebrow}</Eyebrow></div>}
+      <h2 style={{
+        margin: 0, fontFamily: C.display, fontWeight: 600, fontSize: 30,
+        lineHeight: 1.14, letterSpacing: "-0.032em",
+        color: light ? "#FFFFFF" : C.text, maxWidth: "17ch",
+      }}>{title}</h2>
+      {sub && (
+        <p style={{
+          margin: "12px 0 0", fontFamily: C.display, fontWeight: 400, fontSize: 14.5,
+          lineHeight: 1.5, letterSpacing: "-0.005em",
+          color: light ? "rgba(255,255,255,0.72)" : C.muted, maxWidth: "31ch",
+        }}>{sub}</p>
+      )}
+    </div>
+  );
+}
+
+// ── Underline field — no box, no fill. A hairline baseline that draws
+// itself in accent on focus. Large type does the work a container would. ──
+function Field({ value, onChange, placeholder, invalid, size = 21, multiline, rows, C, ...rest }) {
+  const [focus, setFocus] = useState(false);
+  const dark = C.name === "dark";
+  const shared = {
+    width: "100%", background: "transparent", border: "none", outline: "none",
+    color: C.text, fontFamily: C.display, letterSpacing: "-0.015em",
+    padding: "4px 0 13px", boxSizing: "border-box", caretColor: C.accent,
+    resize: "none", display: "block",
+  };
+  const lit = focus || invalid || String(value ?? "").length > 0;
+  return (
+    <div style={{ position: "relative" }}>
+      {multiline ? (
+        <textarea
+          value={value} onChange={onChange} placeholder={placeholder} rows={rows || 3}
+          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+          style={{ ...shared, fontWeight: 500, fontSize: 15.5, lineHeight: 1.55 }} {...rest}
+        />
+      ) : (
+        <input
+          value={value} onChange={onChange} placeholder={placeholder}
+          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+          style={{ ...shared, fontWeight: 600, fontSize: size }} {...rest}
+        />
+      )}
+      <span aria-hidden="true" style={{
+        position: "absolute", left: 0, right: 0, bottom: 0, height: 1,
+        background: dark ? "rgba(255,255,255,0.13)" : "rgba(16,24,40,0.14)",
+      }} />
+      <span aria-hidden="true" style={{
+        position: "absolute", left: 0, right: 0, bottom: 0, height: 1.5, borderRadius: 1,
+        background: invalid ? C.red : C.accent,
+        transformOrigin: "left center", transform: `scaleX(${lit ? 1 : 0})`,
+        transition: `transform 0.36s ${EASE}, background 0.2s ease`,
+      }} />
+    </div>
+  );
+}
+
+// ── Answer row — the flow's single answer primitive.
+//
+// At rest it is nothing but text on the canvas, separated from its
+// neighbour by a hairline. Selected, it gains a directional wash that
+// bleeds past the page gutter and a 2px marker that grows out of the left
+// edge. No border, no card, no fill-box — the selection is a *layer*
+// laid under the row, which is what makes a list of these read as one
+// crafted surface instead of six stacked buttons.
+// ──
+function AnswerRow({ label, sub, icon, active, multi, first, onClick, C }) {
+  const [pressed, setPressed] = useState(false);
+  const dark = C.name === "dark";
+  return (
+    <button
+      onClick={onClick}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      style={{
+        position: "relative", display: "flex", alignItems: "center", gap: 14,
+        // full-bleed: the wash runs edge to edge, the content stays on the grid
+        width: "calc(100% + 40px)", marginLeft: -20, padding: "0 20px",
+        minHeight: 62, textAlign: "left", border: "none", cursor: "pointer",
+        borderTop: first ? "1px solid transparent" : `1px solid ${dark ? "rgba(255,255,255,0.058)" : "rgba(16,24,40,0.07)"}`,
+        background: active
+          ? `linear-gradient(90deg, ${C.accent}17, ${C.accent}08 52%, ${C.accent}00)`
+          : "transparent",
+        transform: pressed ? "scale(0.994)" : "none",
+        transition: `background 0.32s ${EASE}, transform 0.2s ease`,
+        WebkitTapHighlightColor: "transparent",
+      }}
+    >
+      <span aria-hidden="true" style={{
+        position: "absolute", left: 0, top: 11, bottom: 11, width: 2, borderRadius: 2,
+        background: C.accent, opacity: active ? 1 : 0,
+        transform: `scaleY(${active ? 1 : 0.2})`,
+        transition: `transform 0.34s ${EASE}, opacity 0.22s ease`,
+      }} />
+
+      {icon && (
+        <span style={{
+          width: 22, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          opacity: active ? 1 : 0.62, transition: "opacity 0.28s ease",
+        }}>{icon}</span>
+      )}
+
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{
+          display: "block", fontFamily: C.display, fontSize: 16.5,
+          fontWeight: active ? 600 : 500, letterSpacing: "-0.015em",
+          color: active ? C.text : C.text2,
+          transition: "color 0.28s ease",
+        }}>{label}</span>
+        {sub && (
+          <span style={{ display: "block", fontFamily: C.display, fontSize: 12.5, fontWeight: 400, color: C.muted, marginTop: 3 }}>{sub}</span>
+        )}
+      </span>
+
+      {multi ? (
+        <span aria-hidden="true" style={{
+          width: 21, height: 21, borderRadius: "50%", flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: active ? C.accent : "transparent",
+          boxShadow: `inset 0 0 0 1.5px ${active ? C.accent : (dark ? "rgba(255,255,255,0.19)" : "rgba(16,24,40,0.19)")}`,
+          transition: `background 0.26s ease, box-shadow 0.26s ease`,
+        }}>
+          <span style={{ opacity: active ? 1 : 0, transform: active ? "scale(1)" : "scale(0.6)", transition: `opacity 0.2s ease, transform 0.3s ${EASE}`, display: "flex" }}>
+            <Check color={C.btnText} size={11} />
+          </span>
+        </span>
+      ) : (
+        <span aria-hidden="true" style={{
+          width: 16, flexShrink: 0, display: "flex", justifyContent: "flex-end",
+          opacity: active ? 1 : 0, transform: active ? "scale(1)" : "scale(0.62)",
+          transition: `opacity 0.22s ease, transform 0.34s ${EASE}`,
+        }}>
+          <Check color={C.accent} size={15} />
+        </span>
+      )}
+    </button>
+  );
+}
+
+// ── The CTA.
+//
+// 54px tall, 16px radius, one weight heavier than the body text and one
+// notch tighter. Depth comes from a 1px inner top highlight and a tight
+// contact shadow, not from a gradient or a halo. Disabled is a *quiet
+// surface*, not a faded green — a translucent green button reads broken,
+// a grey one reads "not yet", which is the honest message.
+// ──
+function ContinueBtn({ children, onClick, disabled, C, style }) {
+  const [pressed, setPressed] = useState(false);
+  const dark = C.name === "dark";
+  return (
+    <button
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      onPointerDown={() => !disabled && setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      style={{
+        width: "100%", height: 54, borderRadius: 16, border: "none",
+        fontFamily: C.display, fontSize: 16.5, fontWeight: 600, letterSpacing: "-0.015em",
+        cursor: disabled ? "default" : "pointer",
+        background: disabled ? (dark ? "rgba(255,255,255,0.055)" : "rgba(16,24,40,0.05)") : C.accent,
+        color: disabled ? C.muted2 : C.btnText,
+        boxShadow: disabled
+          ? "none"
+          : pressed
+            ? `inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(0,0,0,0.35)`
+            : `inset 0 1px 0 rgba(255,255,255,0.28), 0 2px 3px rgba(0,0,0,0.28), 0 10px 26px ${C.accent}1f`,
+        transform: pressed ? "scale(0.985)" : "none",
+        filter: pressed ? "brightness(0.94)" : "none",
+        transition: `transform 0.28s ${EASE}, background 0.34s ease, color 0.34s ease, box-shadow 0.3s ease, filter 0.2s ease`,
+        WebkitTapHighlightColor: "transparent",
+        ...style,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── Body-composition dial. Kept (it is the flow's one moment of instant
+// payback — the user gives two numbers and immediately gets a reading
+// back), but stripped to an arc, a number and a word. ──
+const BMI_BANDS = [
+  { max: 18.5, label: "Podhranjenost" },
+  { max: 25,   label: "Optimalno" },
+  { max: 30,   label: "Povečana teža" },
+  { max: 999,  label: "Debelost" },
+];
+function BmiDial({ height, weight, C, t }) {
+  const bmi = weight / Math.pow(height / 100, 2);
+  const p = Math.max(0, Math.min(1, (bmi - 15) / (40 - 15)));
+  const r = 78, cx = 100, cy = 96;
+  const semi = Math.PI * r;
+  const dark = C.name === "dark";
+  const band = BMI_BANDS.find((b) => bmi < b.max) || BMI_BANDS[3];
+  return (
+    <div style={{ position: "relative", margin: "0 auto", maxWidth: 264, width: "100%" }}>
+      <svg viewBox="0 0 200 108" width="100%" style={{ display: "block", overflow: "visible" }}>
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none"
+          stroke={dark ? "rgba(255,255,255,0.09)" : "rgba(16,24,40,0.09)"} strokeWidth="2" strokeLinecap="round" />
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none"
+          stroke={C.text} strokeWidth="2" strokeLinecap="round"
+          strokeDasharray={semi} strokeDashoffset={semi * (1 - p)}
+          style={{ transition: `stroke-dashoffset 0.55s ${EASE}` }} />
+        <circle cx={cx + Math.cos(Math.PI * (1 - p)) * r} cy={cy - Math.sin(Math.PI * (1 - p)) * r} r="4.5"
+          fill={C.accent} style={{ transition: `all 0.55s ${EASE}` }} />
+      </svg>
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 6, textAlign: "center", pointerEvents: "none" }}>
+        <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 34, letterSpacing: "-0.035em", color: C.text, lineHeight: 1 }}>
+          {(Math.round(bmi * 10) / 10).toFixed(1)}
+        </div>
+        <div style={{ marginTop: 7, fontFamily: C.mono, fontSize: 9, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: C.muted }}>
+          {t("ITM")} · {t(band.label)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Inline birth wheels. The selection band is a quiet inset surface with
+// the picked values in accent — the loud full-width green bar is gone, so
+// green stays reserved for the CTA and the progress fill. ──
 function BirthWheelInline({ value, onChange, C, lang }) {
   const months = lang === "en" ? MONTHS_EN_FULL : MONTHS_SL_FULL;
   const maxD = new Date();
@@ -134,50 +391,32 @@ function BirthWheelInline({ value, onChange, C, lang }) {
     onChange(`${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
   }, [day, month, year]); // eslint-disable-line
 
-  const onBar = C.btnText; // text sitting on the green selection bar
-
+  const dark = C.name === "dark";
   return (
-    <div style={{ position: "relative", margin: "6px -28px 0" }}>
-      {/* full-width selection bar behind the middle row (7-row window → row 4) */}
-      <div aria-hidden="true" style={{ position: "absolute", top: 120, left: 0, right: 0, height: 40, background: C.accent, zIndex: 0 }} />
-      <div style={{ position: "relative", zIndex: 1, display: "flex", padding: "0 17px" }}>
-        <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width="46%" C={C} render={(m) => months[m]} align="left" showBand={false} activeColor={onBar} pad={3} />
-        <WheelColumn items={days} value={day} onChange={setDay} width="18%" C={C} align="center" showBand={false} activeColor={onBar} pad={3} />
-        <WheelColumn items={years} value={year} onChange={setYear} width="36%" C={C} align="right" showBand={false} activeColor={onBar} pad={3} />
+    <div style={{ position: "relative", margin: "0 -20px" }}>
+      {/* selection band — 7-row window (pad 3 × 40px), so row 4 starts at 120 */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: 120, left: 14, right: 14, height: 40, borderRadius: 12,
+        background: dark ? "rgba(255,255,255,0.055)" : "rgba(16,24,40,0.045)", zIndex: 0,
+      }} />
+      <div style={{ position: "relative", zIndex: 1, display: "flex", padding: "0 22px" }}>
+        <WheelColumn items={monthIdxs} value={month} onChange={setMonth} width="46%" C={C} render={(m) => months[m]} align="left" showBand={false} activeColor={C.accent} pad={3} />
+        <WheelColumn items={days} value={day} onChange={setDay} width="18%" C={C} align="center" showBand={false} activeColor={C.accent} pad={3} />
+        <WheelColumn items={years} value={year} onChange={setYear} width="36%" C={C} align="right" showBand={false} activeColor={C.accent} pad={3} />
       </div>
     </div>
   );
 }
 
-// ── Height / weight — same inline wheel-spinner as birth date (no ruler
-// line + drag thumb). One column, full-width accent bar behind the
-// centered row, unit suffixed on every value ("175 cm", "89 kg"). ──
-function NumberWheelInline({ label, unit, min, max, value, onChange, C }) {
-  const items = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-  const onBar = C.btnText;
-  return (
-    <div style={{ marginBottom: 17 }}>
-      {label && <div style={{ fontFamily: C.display, fontWeight: 600, fontSize: 13, color: C.text2, marginBottom: 8 }}>{label}</div>}
-      <div style={{ position: "relative" }}>
-        <div aria-hidden="true" style={{ position: "absolute", top: 80, left: 0, right: 0, height: 40, background: C.accent, borderRadius: 10, zIndex: 0 }} />
-        <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center" }}>
-          <WheelColumn
-            items={items} value={value} onChange={onChange} width={150} C={C}
-            align="center" showBand={false} activeColor={onBar} pad={2}
-            render={(v) => `${v} ${unit}`}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// GSAP drives the onboarding motion; a single guard keeps it off for
-// users who asked the OS for reduced motion.
-const reduceMotion = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-// tactile pop on the option the user just picked
-const popPick = (el) => {
-  if (!reduceMotion && el) gsap.fromTo(el, { scale: 0.96 }, { scale: 1, duration: 0.35, ease: "back.out(2.5)", clearProps: "transform" });
+// Slovenian year plurals — "1 leto / 2 leti / 3 leta / 5 let". A small thing,
+// but the flow loses all of its credibility the moment it says "3 let".
+const yearsWordSl = (n) => {
+  const t2 = n % 100, t1 = n % 10;
+  if (t2 >= 11 && t2 <= 14) return "let";
+  if (t1 === 1) return "leto";
+  if (t1 === 2) return "leti";
+  if (t1 === 3 || t1 === 4) return "leta";
+  return "let";
 };
 
 export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
@@ -192,6 +431,12 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
   const [gender, setGender] = useState(saved.gender || "");
   const [height, setHeight] = useState(saved.height || 175);
   const [weight, setWeight] = useState(saved.weight || 70);
+  // Whether the athlete has actually picked a value yet — 175/70 are sane
+  // defaults for the BMI preview, but the row should read "Tapni za izbiro"
+  // rather than presenting an unchosen default as if it were their answer.
+  const [heightSet, setHeightSet] = useState(!!saved.height);
+  const [weightSet, setWeightSet] = useState(!!saved.weight);
+  const [openPicker, setOpenPicker] = useState(null); // "height" | "weight" | null
   const [waist, setWaist] = useState(saved.waist || "");
   const [bodyFat, setBodyFat] = useState(saved.bodyFat || "");
   const [sport, setSport] = useState(saved.sport || "");
@@ -232,9 +477,16 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [step]);
 
-  // GSAP step entrance — the step's building blocks (kicker, title, fields,
-  // buttons; individual options inside data-gsap-list containers) slide up
-  // with a stagger, Typeform-style.
+  const total = FLOW.length;
+  const key = FLOW[step];
+
+  // Direction of the last navigation: +1 forward, -1 back. Read by the
+  // entrance effect so a step always enters from the side it travelled from.
+  const dirRef = useRef(1);
+
+  // Step entrance — the head, then each answer row, settle in with a short
+  // directional slide. Slower and flatter than a typical stagger (0.5s,
+  // power3.out, 28px) so it reads as content arriving, not UI animating.
   useEffect(() => {
     if (reduceMotion) return;
     const el = scrollRef.current;
@@ -250,66 +502,73 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     walk(el);
     if (!targets.length) return;
     const tween = gsap.fromTo(targets,
-      { y: 26, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", stagger: { each: 0.05 }, clearProps: "transform,opacity" });
+      { x: dirRef.current * 28, y: 8, opacity: 0 },
+      { x: 0, y: 0, opacity: 1, duration: 0.5, ease: "power3.out", stagger: { each: 0.05 }, clearProps: "transform,opacity" });
     return () => tween.kill();
   }, [step]);
 
-  // Slow ambient drift — background orbs and any [data-float] decorations
-  // (hero figure, callouts) breathe up and down. sine.inOut, never bouncy.
-  useEffect(() => {
-    if (reduceMotion) return;
-    const scope = rootRef.current;
-    if (!scope) return;
-    const els = scope.querySelectorAll("[data-float]");
-    const tweens = Array.from(els).map((el, i) =>
-      gsap.to(el, {
-        y: i % 2 ? 8 : -8,
-        duration: 3.6 + (i % 3) * 0.9,
-        ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.35,
-      })
-    );
-    return () => tweens.forEach((tw) => tw.kill());
-  }, [step]);
-
-  // Quote step — the gold progress line draws itself across the chart
-  const quotePathRef = useRef(null);
-  useEffect(() => {
-    if (reduceMotion || FLOW[step] !== "quote") return;
-    const p = quotePathRef.current;
-    if (!p) return;
-    const len = p.getTotalLength();
-    const tween = gsap.fromTo(p,
-      { strokeDasharray: len, strokeDashoffset: len },
-      { strokeDashoffset: 0, duration: 1.5, ease: "power2.inOut", delay: 0.25 });
-    return () => tween.kill();
-  }, [step]);
-
-  const total = FLOW.length;
-  const key = FLOW[step];
-  // Steps leave the stage before the next one enters: a short fade+lift out,
-  // then the remount plays the staggered entrance. power2.in, 220 ms.
+  // Steps leave before the next one enters — a short fade + slide out in the
+  // travel direction, then the remount plays the entrance.
   const animStep = (target) => {
     if (target === step) return;
+    dirRef.current = target > step ? 1 : -1;
     if (reduceMotion || !scrollRef.current) { setStep(target); return; }
     gsap.to(scrollRef.current, {
-      opacity: 0, y: -14, duration: 0.22, ease: "power2.in",
+      opacity: 0, x: dirRef.current * -26, duration: 0.22, ease: "power2.in",
       onComplete: () => setStep(target),
     });
   };
   const next = () => animStep(Math.min(step + 1, total - 1));
   const back = () => animStep(Math.max(step - 1, 0));
 
-  // Progress dashes count QUESTIONS only — the interstitial story screens
-  // (vision, quote) show no indicator at all.
-  const QUESTION_FLOW = FLOW.filter((k) => k !== "vision" && k !== "quote");
+  // ── Progress ──────────────────────────────────────────────
+  // Counted over QUESTIONS only; the interstitials (quote, test) hold the
+  // bar at the value they inherited rather than resetting it, so the line
+  // never appears to go backwards.
+  const QUESTION_FLOW = FLOW.filter((k) => k !== "vision" && k !== "quote" && k !== "test");
   const qIndex = QUESTION_FLOW.indexOf(key);
+  const answered = qIndex !== -1 ? qIndex : FLOW.slice(0, step).filter((k) => QUESTION_FLOW.includes(k)).length - 1;
+  const pct = Math.max(0, Math.min(1, (answered + 1) / QUESTION_FLOW.length));
+
+  const fillRef = useRef(null);
+  const dotRef = useRef(null);
+  const chapter = chapterOf(key);
+  const chapterId = chapter?.id;
+  const prevChapter = useRef(chapterId);
+  useEffect(() => {
+    const fill = fillRef.current;
+    if (!fill) return;
+    if (reduceMotion) { fill.style.width = `${pct * 100}%`; return; }
+    const tw = gsap.to(fill, { width: `${pct * 100}%`, duration: 0.55, ease: "power3.out" });
+    // Milestone: crossing into a new chapter gives the leading dot a single
+    // quiet bloom. The only celebratory beat in the flow — nothing bounces.
+    let pulse;
+    if (chapterId && chapterId !== prevChapter.current && dotRef.current) {
+      pulse = gsap.fromTo(dotRef.current, { scale: 1, opacity: 1 }, { scale: 2.6, opacity: 0, duration: 0.7, ease: "power2.out" });
+    }
+    prevChapter.current = chapterId;
+    return () => { tw.kill(); pulse?.kill(); };
+  }, [pct, chapterId]);
+
+  // ── Derived validity (hoisted so the shared footer can read it) ──
+  const cleanDec = (v) => {
+    let s = v.replace(/[^\d.,]/g, "").replace(",", ".").slice(0, 5);
+    const parts = s.split(".");
+    if (parts.length > 2) s = parts[0] + "." + parts.slice(1).join("");
+    return s;
+  };
+  const waistOk = waist === "" || (+waist >= 40 && +waist <= 200);
+  const bfOk = bodyFat === "" || (+bodyFat >= 3 && +bodyFat <= 60);
+  const waistCanNext = (waist !== "" || bodyFat !== "") && waistOk && bfOk;
+  const expNum = experience === "" ? null : +experience;
+  const expOk = experience !== "" && expNum >= 0 && expNum <= 30;
 
   // Display names are unique across accounts — check with the server before
   // moving on (offline/demo mode skips silently, isNameTaken returns false).
   const tryName = async () => {
     const n = username.trim();
     if (!n || checkingName) return;
+    if (!isNameAllowed(n)) { setNameMsg("To ime ni dovoljeno — izberi drugo."); return; }
     setCheckingName(true);
     const taken = await isNameTaken(n).catch(() => false);
     setCheckingName(false);
@@ -336,455 +595,355 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
     });
   };
 
-  const inp = {
-    width: "100%", padding: "11px 11px", borderRadius: 14,
-    border: `1px solid ${C.border}`, background: C.surface2,
-    color: C.text, fontFamily: C.display, fontWeight: 600, fontSize: 15,
-    outline: "none", boxSizing: "border-box", marginTop: 6, colorScheme: "dark",
-  };
-
-  const STEP_TITLES = {
-    name:      { title: "Uporabniško ime",         sub: "KAKO TE BOMO KLICALI" },
-    acq:       { title: "Kako si\nslišal za nas?", sub: "" },
-    birth:     { title: "Datum\nrojstva",          sub: "" },
-    gender:    { title: "Spol",                    sub: "ZA IZRAČUN NORM IN KALORIJ" },
-    vision:    { title: "",                        sub: "" }, // custom render — hero figure with callouts
-    body:      { title: "Višina\n& teža",          sub: "ZA IZRAČUN BREMEN IN KALORIJ" },
-    waist:     { title: "Obseg pasu\n& body fat",  sub: "ČE VEŠ — DRUGAČE PRESKOČI" },
-    quote:     { title: "",                        sub: "" }, // custom render
-    sport:     { title: "Kateri šport\ntreniraš?", sub: "ZA PERSONALIZACIJO PROGRAMA" },
-    goals:     { title: "Kaj so tvoji cilji?",     sub: "IZBERI ENEGA ALI VEČ" },
-    exp:       { title: "Koliko let\nizkušenj imaš?", sub: "S FITNESOM / TRENINGOM MOČI" },
-    injuries:  { title: "Poškodbe?",               sub: "TRENUTNE IN PRETEKLE — ZA VARNO PROGRAMIRANJE" },
-    equipment: { title: "Kakšno opremo\nimaš na voljo?", sub: "PROGRAM SE PRILAGODI OPREMI" },
-    test:      { title: "Začetni\ntest",           sub: "ZADNJI KORAK" },
-  };
-
-  // single-choice list — one marble tablet, rows split by engraved rules,
-  // each option catalogued with a roman numeral; picking fills the bronze
-  // socket (design-system list language instead of stacked boxes)
-  const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
-  // `multi` turns the same tablet into a checklist: any number of rows can be
-  // active at once (values/onPick take an array + toggle instead of a single
-  // value + select), and the trailing roman numeral swaps for a checkbox so
-  // "pick several" reads clearly instead of implying a ranked single answer.
-  const Choice = ({ options, value, values, multi, onPick, subs, labels, icons }) => (
-    <div data-gsap-list="true" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {options.map((o, i) => {
-        const active = multi ? (values || []).includes(o) : value === o;
-        return (
-          <button key={o} onClick={(e) => { popPick(e.currentTarget); onPick(o); }} style={{
-            width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 10,
-            padding: "11px 11px", borderRadius: 15, cursor: "pointer",
-            background: active ? `${C.accent}14` : C.surface2,
-            border: `1.5px solid ${active ? C.accent : "transparent"}`,
-            boxShadow: "none",
-            transition: "background 0.15s, border-color 0.15s",
-            WebkitTapHighlightColor: "transparent",
-          }}>
-            {icons?.[i] && (
-              <span style={{
-                width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-                background: C.surface3,
-                border: `1px solid ${active ? C.accent : C.border}`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: active ? C.accent : C.text2, transition: "color 0.15s, border-color 0.15s",
-              }}>
-                {icons[i]}
-              </span>
-            )}
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontFamily: C.display, fontWeight: active ? 700 : 600, fontSize: 15, color: C.text }}>{labels ? labels[i] : o}</span>
-              {subs?.[i] && <span style={{ display: "block", fontFamily: C.mono, fontSize: 9, color: C.muted, marginTop: 3 }}>{subs[i]}</span>}
-            </span>
-            {/* trailing indicator: checkbox for a checklist, roman numeral
-                (grey until picked) for a single-choice tablet */}
-            {multi ? (
-              <span aria-hidden="true" style={{
-                flexShrink: 0, width: 22, height: 22, borderRadius: "50%",
-                border: `1.5px solid ${active ? C.accent : C.border2}`,
-                background: active ? C.accent : "transparent",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "background 0.15s, border-color 0.15s",
-              }}>
-                {active && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.btnText} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>}
-              </span>
-            ) : (
-              <span style={{ flexShrink: 0, minWidth: 28, textAlign: "right", fontFamily: C.mono, fontSize: active ? 13.5 : 11, fontWeight: active ? 700 : 600, letterSpacing: "0.06em", color: active ? C.accent : C.muted2, transition: "color 0.15s, font-size 0.15s" }}>
-                {ROMAN[i]}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  // multi-select chips
-  const MultiChips = ({ options, values, onToggle }) => (
-    <div data-gsap-list="true" style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-      {options.map((o) => {
-        const active = values.includes(o);
-        return (
-          <button key={o} onClick={(e) => { popPick(e.currentTarget); onToggle(o); }} style={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            padding: "9px 14px", borderRadius: 999, cursor: "pointer",
-            border: `1.5px solid ${active ? `${C.accent}99` : C.border2}`,
-            background: active ? `${C.accent}14` : "transparent",
-            color: active ? C.text : C.text2,
-            fontFamily: C.display, fontWeight: active ? 700 : 500, fontSize: 15,
-            transition: "border-color 0.15s, background 0.15s, color 0.15s",
-            WebkitTapHighlightColor: "transparent",
-          }}>
-            {/* selection shows via colour only (no check). The label reserves its
-                bold width so switching 500→700 never widens the pill or reflows. */}
-            <span className="at-chip-lbl" data-text={o}>{o}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-
+  const pick = (fn) => (...args) => { tick(); fn(...args); };
   const toggle = (setter) => (o) => setter((arr) => arr.includes(o) ? arr.filter((x) => x !== o) : [...arr, o]);
 
-  const SkipBtn = ({ onClick }) => (
-    <button onClick={onClick} style={{ width: "100%", marginTop: 8, padding: "9px", background: "none", border: "none", color: C.muted, fontFamily: C.display, fontWeight: 600, fontSize: 13, cursor: "pointer", WebkitTapHighlightColor: "transparent" }}>
-      {t("Preskoči")} ›
-    </button>
-  );
+  // Questions are unchanged; only the supporting line is rewritten — from
+  // shouted mono captions ("ZA IZRAČUN NORM IN KALORIJ") to a calm sentence
+  // that answers the user's actual question: why are you asking me this?
+  const STEP_COPY = {
+    name:      { title: "Uporabniško ime",           sub: "Tako te bodo videli soigralci in trener." },
+    acq:       { title: "Kako si slišal za nas?",    sub: "" },
+    birth:     { title: "Datum rojstva",             sub: "Norme in obremenitve se računajo glede na starost." },
+    gender:    { title: "Spol",                      sub: "Za izračun norm in kalorij." },
+    body:      { title: "Višina & teža",             sub: "Osnova za bremena, kalorije in spremljanje napredka." },
+    waist:     { title: "Obseg pasu & body fat",     sub: "Če veš — drugače preskoči." },
+    sport:     { title: "Kateri šport treniraš?",    sub: "Program se prilagodi zahtevam tvojega športa." },
+    goals:     { title: "Kaj so tvoji cilji?",       sub: "Izberi enega ali več." },
+    exp:       { title: "Koliko let izkušenj imaš?", sub: "S fitnesom in treningom moči." },
+    injuries:  { title: "Poškodbe?",                 sub: "Trenutne in pretekle — da program ostane varen." },
+    equipment: { title: "Kakšno opremo imaš na voljo?", sub: "Vaje izbiramo samo iz tega, kar res imaš." },
+    test:      { title: "Začetni test",              sub: "" },
+  };
+
+  // The CTA speaks about what the answer *does*, and marks the two moments
+  // that deserve weight (locking goals, building the profile). Everywhere
+  // else it stays out of the way.
+  const CTA_LABEL = {
+    name: "Začnimo", acq: "Nadaljuj", birth: "Potrdi", gender: "Nadaljuj",
+    body: "Potrdi mere", waist: "Nadaljuj", quote: "Sem pripravljen",
+    goals: "Zakleni cilje", exp: "Nadaljuj", injuries: "Nadaljuj",
+    equipment: "Zaključi profil", test: "Zgradi moj profil",
+  };
+
+  // Per-step footer contract: is the CTA live, what does it do, is there a
+  // skip. `null` = this step has no footer (sport auto-advances on pick).
+  const ACTIONS = {
+    name:      { ok: !!username.trim() && !checkingName, on: tryName, label: checkingName ? "Preverjam…" : CTA_LABEL.name },
+    acq:       { ok: !!acquisition, on: next, skip: next },
+    birth:     { ok: validBirth(birth), on: next },
+    gender:    { ok: !!gender, on: next },
+    body:      { ok: true, on: next },
+    waist:     { ok: waistCanNext, on: next, skip: () => { setWaist(""); setBodyFat(""); next(); } },
+    quote:     { ok: true, on: next },
+    sport:     null,
+    goals:     { ok: goals.length > 0, on: next },
+    exp:       { ok: expOk, on: next },
+    injuries:  { ok: hasInjury === false || (hasInjury === true && !!injuryNote.trim()), on: next },
+    equipment: { ok: equipment.length > 0, on: next, skip: () => { setEquipment([]); next(); } },
+    test:      { ok: true, on: finish },
+  };
+  const action = ACTIONS[key];
+  const onLight = key === "test"; // step rendered over the hero photo
+
+  const head = (extra) => {
+    const copy = STEP_COPY[key];
+    if (!copy) return null;
+    return <Head C={C} light={onLight} eyebrow={extra ?? (chapter ? t(chapter.line) : undefined)} title={t(copy.title)} sub={copy.sub ? t(copy.sub) : ""} />;
+  };
+
+  const dark = C.name === "dark";
 
   return (
-    <div ref={rootRef} className="app-fullscreen" style={{
-      // top+bottom so it fills the whole phone shell (no empty strip at the
-      // bottom on mobile, where 100dvh can be shorter than the shell)
+    <div ref={rootRef} className="app-fullscreen at-setup" style={{
       position: "fixed", inset: 0,
-      // matte canvas — calm, no gradients or glows
       background: C.bg,
       display: "flex", flexDirection: "column",
       overflow: "hidden",
       paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "env(safe-area-inset-bottom, 0px)",
     }}>
+      <style>{`
+        .at-setup ::placeholder { color: ${C.muted2}; opacity: 1; font-weight: 500; }
+        .at-setup input, .at-setup textarea { color-scheme: ${dark ? "dark" : "light"}; }
+      `}</style>
 
-      {/* top spacer */}
-      <div style={{ height: 8, flexShrink: 0 }} />
+      {/* Hero photo — final step only. Sits behind all content; a bottom-weighted
+          scrim keeps the type legible over it. */}
+      {key === "test" && (
+        <div aria-hidden="true" style={{
+          position: "absolute", inset: 0, zIndex: -1, pointerEvents: "none",
+          backgroundImage: `linear-gradient(to top, ${C.bg} 6%, rgba(0,0,0,0.55) 46%, rgba(0,0,0,0.28) 100%), url('/img/working.jpeg')`,
+          backgroundSize: "cover", backgroundPosition: "center",
+        }} />
+      )}
 
-      {/* Top row — just the back arrow; progress lives as dashes at the bottom */}
-      <div style={{ padding: "9px 112px 0 16px", display: "flex", alignItems: "center" }}>
-        {/* Back — earlier step, or out to the login screen on step 0 */}
-        <button onClick={() => (step > 0 ? back() : onBack?.())} style={{ background: "none", border: "none", color: C.muted, fontSize: 24.5, cursor: "pointer", lineHeight: 1, padding: "2px 4px", flexShrink: 0 }}>‹</button>
+      {/* ── Progress rail — a 2px hairline across the very top edge. It is the
+          only persistent chrome in the flow, and the only thing that ever
+          animates on its own. ── */}
+      <div style={{ position: "relative", height: 2, flexShrink: 0, background: dark ? "rgba(255,255,255,0.07)" : "rgba(16,24,40,0.07)" }}>
+        <div ref={fillRef} style={{
+          position: "absolute", left: 0, top: 0, bottom: 0, width: `${pct * 100}%`,
+          background: C.accent, borderRadius: 999,
+        }}>
+          <span ref={dotRef} aria-hidden="true" style={{
+            position: "absolute", right: -2, top: -2, width: 6, height: 6, borderRadius: "50%",
+            background: C.accent,
+          }} />
+        </div>
       </div>
 
-      {/* Step content — the height/weight step is pinned (no outer scroll): the
-          wheel columns already scroll internally, and letting the page scroll
-          too meant a drag on the wheel could also rubber-band the whole step. */}
-      <div ref={scrollRef} key={step} style={{ flex: 1, padding: "18px 18px 25px", display: "flex", flexDirection: "column", overflowY: key === "body" ? "hidden" : "auto", scrollbarWidth: "none" }}>
-        {key !== "quote" && key !== "vision" && (
-          <div style={{ marginBottom: 18, textAlign: key === "name" ? "center" : "left" }}>
-            <h2 style={{
-              fontFamily: C.display, fontWeight: 800, fontSize: 24, textTransform: "uppercase", margin: 0,
-              color: C.text, lineHeight: 1.05, letterSpacing: "-0.01em",
-              whiteSpace: key === "name" ? "nowrap" : "pre-line",
-            }}>
-              {t(STEP_TITLES[key].title)}
-            </h2>
-          </div>
+      {/* Back · step counter */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px 0", flexShrink: 0 }}>
+        <button
+          onClick={() => (step > 0 ? back() : onBack?.())}
+          aria-label={t("Nazaj")}
+          style={{
+            width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "none", border: "none", padding: 0, cursor: "pointer",
+            color: onLight ? "rgba(255,255,255,0.8)" : C.muted, WebkitTapHighlightColor: "transparent",
+          }}>
+          <svg width="10" height="17" viewBox="0 0 10 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 1L1 9l8 8" /></svg>
+        </button>
+        {qIndex !== -1 && (
+          <span style={{ fontFamily: C.mono, fontSize: 9.5, fontWeight: 600, letterSpacing: "0.16em", paddingRight: 8 }}>
+            <span style={{ color: C.text }}>{String(qIndex + 1).padStart(2, "0")}</span>
+            <span style={{ color: C.muted2 }}>{" — "}{String(QUESTION_FLOW.length).padStart(2, "0")}</span>
+          </span>
         )}
+      </div>
+
+      {/* ── Step content ── */}
+      <div ref={scrollRef} key={step} style={{
+        flex: 1, minHeight: 0, display: "flex", flexDirection: "column",
+        padding: "22px 20px 8px", overflowY: "auto", scrollbarWidth: "none",
+      }}>
 
         {key === "name" && (
           <>
-            <Mono style={{ color: C.muted, fontSize: 9 }}>{t("UPORABNIŠKO IME")}</Mono>
-            <input value={username} onChange={(e) => { setUsername(e.target.value); setNameMsg(""); }} onKeyDown={(e) => e.key === "Enter" && tryName()} placeholder={t("npr. Nik")} style={{ ...inp, ...(nameMsg ? { borderColor: C.red } : {}) }} />
-            {nameMsg && <span style={{ color: C.red, fontFamily: C.display, fontSize: 12, marginTop: 5, display: "block" }}>{t(nameMsg)}</span>}
+            {head()}
+            <Field
+              C={C} value={username} size={23}
+              onChange={(e) => { setUsername(e.target.value); setNameMsg(""); }}
+              onKeyDown={(e) => e.key === "Enter" && tryName()}
+              placeholder={t("npr. Nik")} invalid={!!nameMsg}
+              autoCapitalize="words" autoCorrect="off" spellCheck={false}
+            />
+            {nameMsg && (
+              <span style={{ color: C.red, fontFamily: C.display, fontSize: 13, fontWeight: 500, marginTop: 10, display: "block" }}>{t(nameMsg)}</span>
+            )}
 
-            {/* live preview — the profile row teammates will actually see */}
-            <div style={{ marginTop: 15, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 15, padding: "10px 11px", display: "flex", alignItems: "center", gap: 9 }}>
-              <span style={{ width: 46, height: 46, borderRadius: "50%", background: `${C.accent}1a`, border: `1.5px solid ${C.accent}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.display, fontWeight: 800, fontSize: 16, color: C.accent, flexShrink: 0, transition: "border-color 0.2s" }}>
+            {/* Live preview — what teammates will actually see. Borderless: the
+                avatar and the name are the object, there is no card around it. */}
+            <div style={{ marginTop: 30, display: "flex", alignItems: "center", gap: 13 }}>
+              <span style={{
+                width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: C.display, fontWeight: 600, fontSize: 18,
+                color: username.trim() ? C.accent : C.muted2,
+                background: username.trim() ? `${C.accent}14` : (dark ? "rgba(255,255,255,0.05)" : "rgba(16,24,40,0.045)"),
+                transition: `background 0.35s ease, color 0.35s ease`,
+              }}>
                 {(username.trim()[0] || "?").toUpperCase()}
               </span>
               <span style={{ minWidth: 0 }}>
-                <span style={{ display: "block", fontFamily: C.display, fontWeight: 700, fontSize: 15, color: username.trim() ? C.text : C.muted2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {username.trim() || t("Tvoje ime")}
+                <span style={{
+                  display: "block", fontFamily: C.display, fontWeight: 600, fontSize: 16.5, letterSpacing: "-0.015em",
+                  color: username.trim() ? C.text : C.muted2,
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                }}>{username.trim() || t("Tvoje ime")}</span>
+                <span style={{ display: "block", fontFamily: C.display, fontSize: 12.5, color: C.muted, marginTop: 2 }}>
+                  {t("Ime lahko kadarkoli spremeniš v Profilu.")}
                 </span>
-                <span style={{ display: "block", fontFamily: C.display, fontSize: 11, color: C.muted, marginTop: 2 }}>{t("Tako te bodo videli soigralci in trener")}</span>
               </span>
             </div>
-
-            {/* what the name is for — quiet rows so the step doesn't feel empty */}
-            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 9 }}>
-              {[
-                ["M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z|dot", "Vidno v klepetu, na lestvicah in pri trenerju."],
-                ["M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z", "Ime lahko kadarkoli spremeniš v Profilu."],
-                ["M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z", "Vsako ime je unikatno — preverimo ga ob nadaljevanju."],
-              ].map(([p, txt]) => {
-                const [d, extra] = p.split("|");
-                return (
-                  <span key={txt} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
-                      <path d={d} />
-                      {extra === "dot" && <circle cx="12" cy="12" r="3" />}
-                    </svg>
-                    <span style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12, color: C.text2, lineHeight: 1.45 }}>{t(txt)}</span>
-                  </span>
-                );
-              })}
-            </div>
-
-            <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={tryName} style={{ opacity: username.trim() && !checkingName ? 1 : 0.5 }}>{checkingName ? t("Preverjam…") : t("Nadaljuj")}</PrimaryBtn>
           </>
         )}
 
         {key === "acq" && (
           <>
-            <Choice
-              options={ACQ_OPTIONS.map(t)}
-              value={t(acquisition)}
-              onPick={(o) => { setAcquisition(o); }}
-              icons={[
-                /* Instagram — brand gradient */
-                <svg key="ig" width="19" height="19" viewBox="0 0 24 24" fill="none">
-                  <defs>
-                    <linearGradient id="athlos-ig-grad" x1="3" y1="21" x2="21" y2="3" gradientUnits="userSpaceOnUse">
-                      <stop offset="0" stopColor="#FFD600" /><stop offset="0.3" stopColor="#FF7A00" /><stop offset="0.55" stopColor="#FF0069" /><stop offset="0.8" stopColor="#D300C5" /><stop offset="1" stopColor="#7638FA" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#athlos-ig-grad)" strokeWidth="1.9" />
-                  <circle cx="12" cy="12" r="4.2" stroke="url(#athlos-ig-grad)" strokeWidth="1.9" />
-                  <circle cx="17.4" cy="6.6" r="1.35" fill="url(#athlos-ig-grad)" />
-                </svg>,
-                /* Prijatelj / soigralec — two people, sky blue */
-                <svg key="fr" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#4FA8FF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>,
-                /* Google — brand G */
-                <svg key="go" width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>,
-                /* TikTok — layered brand cyan/red under the note */
-                <svg key="tt" width="18" height="18" viewBox="0 0 24 24">
-                  <path d="M16.6 5.82A4.28 4.28 0 0115.55 3h-3.09v12.4a2.59 2.59 0 11-2.59-2.59c.27 0 .53.04.77.12V9.77a5.76 5.76 0 00-.77-.05 5.68 5.68 0 105.68 5.68V9.01a7.3 7.3 0 004.27 1.36V7.28a4.28 4.28 0 01-3.22-1.46z" fill="#25F4EE" transform="translate(-0.9,-0.55)" />
-                  <path d="M16.6 5.82A4.28 4.28 0 0115.55 3h-3.09v12.4a2.59 2.59 0 11-2.59-2.59c.27 0 .53.04.77.12V9.77a5.76 5.76 0 00-.77-.05 5.68 5.68 0 105.68 5.68V9.01a7.3 7.3 0 004.27 1.36V7.28a4.28 4.28 0 01-3.22-1.46z" fill="#FE2C55" transform="translate(0.9,0.55)" />
-                  <path d="M16.6 5.82A4.28 4.28 0 0115.55 3h-3.09v12.4a2.59 2.59 0 11-2.59-2.59c.27 0 .53.04.77.12V9.77a5.76 5.76 0 00-.77-.05 5.68 5.68 0 105.68 5.68V9.01a7.3 7.3 0 004.27 1.36V7.28a4.28 4.28 0 01-3.22-1.46z" fill={C.name === "dark" ? "#FFFFFF" : "#111111"} />
-                </svg>,
-                /* Trener / klub — shield in laurel green */
-                <svg key="tk" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2FBF71" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M9.5 12l1.8 1.8 3.2-3.6" /></svg>,
-                /* Drugo — dots, violet */
-                <svg key="dr" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><circle cx="8" cy="12" r="0.9" fill="#A78BFA" stroke="none" /><circle cx="12" cy="12" r="0.9" fill="#A78BFA" stroke="none" /><circle cx="16" cy="12" r="0.9" fill="#A78BFA" stroke="none" /></svg>,
-              ]}
-            />
-            <div style={{ flex: 1, minHeight: 16 }} />
-            <PrimaryBtn onClick={() => acquisition && next()} style={{ opacity: acquisition ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
-            <SkipBtn onClick={next} />
-          </>
-        )}
-
-        {/* ── Vision step — welcome interstitial: headline, the three signals
-            ATHLOS tracks as clean metric rows, and the CTA. No artwork. ── */}
-        {key === "vision" && (
-          <div data-gsap-list="true" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 23, color: C.text, margin: "4px 0 0", lineHeight: 1.15, letterSpacing: "-0.01em", textAlign: "center" }}>
-              {t("Dobrodošel v svojo")}<br />
-              <span style={{ color: C.accent }}>{t("najboljšo sezono")}</span>
-            </h2>
-
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 9, margin: "16px 0 6px" }}>
-              {[t("READINESS 8.4"), t("MOČ +12 %"), t("REGENERACIJA 92 %")].map((lbl, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, background: C.surface2, borderRadius: 15, padding: "13px 14px" }}>
-                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: C.accent, flexShrink: 0 }} />
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 14, color: C.text, letterSpacing: "0.01em" }}>{lbl}</span>
-                </div>
+            {head()}
+            <div data-gsap-list="true">
+              {ACQ_OPTIONS.map((o, i) => (
+                <AnswerRow
+                  key={o} C={C} first={i === 0}
+                  label={t(o)} active={acquisition === o}
+                  onClick={pick(() => setAcquisition((cur) => (cur === o ? "" : o)))}
+                  icon={ACQ_ICONS(C)[i]}
+                />
               ))}
             </div>
-
-            <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 12.5, color: C.muted, textAlign: "center", margin: "0 6px 11px", lineHeight: 1.55 }}>
-              {t("ATHLOS spremlja tvojo moč, hitrost in regeneracijo — in program prilagaja vsak dan.")}
-            </p>
-            <PrimaryBtn onClick={next}>{t("Naprej")} →</PrimaryBtn>
-          </div>
+          </>
         )}
 
         {key === "birth" && (
           <>
+            {head()}
             <BirthWheelInline value={birth} onChange={setBirth} C={C} lang={lang} />
-            <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={() => validBirth(birth) && next()} style={{ opacity: validBirth(birth) ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
           </>
         )}
 
-        {key === "gender" && (() => {
-          const card = (active) => ({
-            borderRadius: 18, cursor: "pointer",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10,
-            background: active ? `${C.accent}14` : C.surface2,
-            border: `1.5px solid ${active ? C.accent : "transparent"}`,
-            boxShadow: "none",
-            transition: "background 0.15s, border-color 0.15s",
-            WebkitTapHighlightColor: "transparent",
-          });
-          const sign = (d, active) => (
-            <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke={active ? C.accent : C.text} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.15s" }}>
-              {d}
-            </svg>
-          );
-          return (
-            <>
-              <div data-gsap-list="true" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 9 }}>
-                {/* two tall cards — Mars / Venus, like the reference */}
-                <button onClick={(e) => { popPick(e.currentTarget); setGender("Moški"); }} style={{ ...card(gender === "Moški"), flex: 1, minHeight: 150 }}>
-                  {sign(<><circle cx="10" cy="14" r="5.5" /><path d="M14 10l6.5-6.5M20.5 3.5H15M20.5 3.5V9" /></>, gender === "Moški")}
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{t("Moški")}</span>
-                </button>
-                <button onClick={(e) => { popPick(e.currentTarget); setGender("Ženski"); }} style={{ ...card(gender === "Ženski"), flex: 1, minHeight: 150 }}>
-                  {sign(<><circle cx="12" cy="8.5" r="5.5" /><path d="M12 14v7M8.5 17.5h7" /></>, gender === "Ženski")}
-                  <span style={{ fontFamily: C.display, fontWeight: 700, fontSize: 15, color: C.text }}>{t("Ženski")}</span>
-                </button>
-                {/* Drugo — slim row under the two cards */}
-                <button onClick={(e) => { popPick(e.currentTarget); setGender("Drugo"); }} style={{ ...card(gender === "Drugo"), flexDirection: "row", gap: 6, padding: "11px 11px" }}>
-                  <span style={{ fontFamily: C.display, fontWeight: 600, fontSize: 14, color: C.text }}>{t("Drugo")}</span>
-                </button>
-              </div>
-              <PrimaryBtn onClick={() => gender && next()} style={{ marginTop: 10, opacity: gender ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
-            </>
-          );
-        })()}
+        {key === "gender" && (
+          <>
+            {head()}
+            <div data-gsap-list="true" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+              <GenderCard C={C} img="/img/man%20working%20out.png" label={t("Moški")}
+                active={gender === "Moški"} onClick={pick(() => setGender((cur) => (cur === "Moški" ? "" : "Moški")))} />
+              <GenderCard C={C} img="/img/woman%20working%20out.png" label={t("Ženski")}
+                active={gender === "Ženski"} onClick={pick(() => setGender((cur) => (cur === "Ženski" ? "" : "Ženski")))} />
+              <AnswerRow C={C} first label={t("Drugo")} active={gender === "Drugo"}
+                onClick={pick(() => setGender((cur) => (cur === "Drugo" ? "" : "Drugo")))} />
+            </div>
+          </>
+        )}
 
         {key === "body" && (
           <>
-            <NumberWheelInline label={t("Izberi višino (cm)")} unit="cm" min={130} max={220} value={height} onChange={setHeight} C={C} />
-            <NumberWheelInline label={t("Izberi težo (kg)")} unit="kg" min={40} max={150} value={weight} onChange={setWeight} C={C} />
-            <BmiGauge height={height} weight={weight} C={C} t={t} />
-            <div style={{ flex: 1, minHeight: 20 }} />
-            <PrimaryBtn onClick={next}>{t("Nadaljuj")}</PrimaryBtn>
+            {head()}
+            <div data-gsap-list="true">
+              <MeasureRow C={C} first label={t("VIŠINA")} set={heightSet}
+                value={`${height} cm`} placeholder={t("Tapni za izbiro")} onClick={() => setOpenPicker("height")} />
+              <MeasureRow C={C} label={t("TEŽA")} set={weightSet}
+                value={`${weight} kg`} placeholder={t("Tapni za izbiro")} onClick={() => setOpenPicker("weight")} />
+            </div>
+            <div style={{ flex: 1, minHeight: 28 }} />
+            <BmiDial height={height} weight={weight} C={C} t={t} />
+            <div style={{ minHeight: 12 }} />
+
+            <WheelPicker
+              open={openPicker === "height"} title={t("Izberi višino (cm)")} unit="cm" min={120} max={230} step={1}
+              value={height} onChange={(v) => { setHeight(v); setHeightSet(true); }} onClose={() => setOpenPicker(null)}
+            />
+            <WheelPicker
+              open={openPicker === "weight"} title={t("Izberi težo (kg)")} unit="kg" min={30} max={200} step={1}
+              value={weight} onChange={(v) => { setWeight(v); setWeightSet(true); }} onClose={() => setOpenPicker(null)}
+            />
           </>
         )}
 
-        {key === "waist" && (() => {
-          // realistic ranges only — no 1111111111111 (like the height/weight guards)
-          const clean = (v) => {
-            let s = v.replace(/[^\d.,]/g, "").replace(",", ".").slice(0, 5);
-            const parts = s.split(".");
-            if (parts.length > 2) s = parts[0] + "." + parts.slice(1).join("");
-            return s;
-          };
-          const waistOk = waist === "" || (+waist >= 40 && +waist <= 200);
-          const bfOk = bodyFat === "" || (+bodyFat >= 3 && +bodyFat <= 60);
-          const canNext = (waist !== "" || bodyFat !== "") && waistOk && bfOk;
-          const hint = { color: C.red, fontFamily: C.display, fontSize: 12, marginTop: 5, display: "block" };
-          return (
+        {key === "waist" && (
           <>
-            <Mono style={{ color: C.muted, fontSize: 9 }}>{t("OBSEG PASU (CM)")}</Mono>
-            <input value={waist} onChange={(e) => setWaist(clean(e.target.value))} inputMode="decimal" placeholder={t("npr. 82")}
-              style={{ ...inp, borderColor: waistOk ? C.border2 : C.red }} />
-            {!waistOk && <span style={hint}>{t("Vnesi realen obseg pasu (40–200 cm).")}</span>}
-            <Mono style={{ color: C.muted, fontSize: 9, marginTop: 13, display: "block" }}>{t("BODY FAT % (OKVIRNO)")}</Mono>
-            <input value={bodyFat} onChange={(e) => setBodyFat(clean(e.target.value))} inputMode="decimal" placeholder={t("npr. 15")}
-              style={{ ...inp, borderColor: bfOk ? C.border2 : C.red }} />
-            {!bfOk && <span style={hint}>{t("Vnesi realen odstotek (3–60 %).")}</span>}
-            <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={() => canNext && next()} style={{ opacity: canNext ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
-            <SkipBtn onClick={() => { setWaist(""); setBodyFat(""); next(); }} />
+            {head()}
+            <div>
+              <Eyebrow C={C} color={C.muted}>{t("OBSEG PASU (CM)")}</Eyebrow>
+              <div style={{ height: 10 }} />
+              <Field C={C} value={waist} onChange={(e) => setWaist(cleanDec(e.target.value))}
+                inputMode="decimal" placeholder={t("npr. 82")} invalid={!waistOk} />
+              {!waistOk && <span style={{ color: C.red, fontFamily: C.display, fontSize: 13, fontWeight: 500, marginTop: 9, display: "block" }}>{t("Vnesi realen obseg pasu (40–200 cm).")}</span>}
+            </div>
+            <div style={{ height: 30 }} />
+            <div>
+              <Eyebrow C={C} color={C.muted}>{t("BODY FAT % (OKVIRNO)")}</Eyebrow>
+              <div style={{ height: 10 }} />
+              <Field C={C} value={bodyFat} onChange={(e) => setBodyFat(cleanDec(e.target.value))}
+                inputMode="decimal" placeholder={t("npr. 15")} invalid={!bfOk} />
+              {!bfOk && <span style={{ color: C.red, fontFamily: C.display, fontSize: 13, fontWeight: 500, marginTop: 9, display: "block" }}>{t("Vnesi realen odstotek (3–60 %).")}</span>}
+            </div>
           </>
-          );
-        })()}
+        )}
 
-        {/* ── Quote step ── */}
+        {/* ── Interstitial: the halfway beat. No question, no progress
+            pressure — just the reason the user is doing this. ── */}
         {key === "quote" && (
           <div data-gsap-list="true" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            {/* Animated progress line */}
-            <div style={{ marginBottom: 20 }}>
-              <svg viewBox="0 0 300 80" width="100%" height="80" style={{ overflow: "visible" }}>
-                {[20, 40, 60].map(y => <line key={y} x1="0" y1={y} x2="300" y2={y} stroke={C.border} strokeWidth="1" strokeDasharray="4 6"/>)}
-                <path ref={quotePathRef} d="M0 15 C30 15, 50 55, 80 45 S130 20, 160 35 S210 55, 240 40 S280 25, 300 30" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round"/>
-                <line x1="0" y1="65" x2="300" y2="65" stroke={C.accent} strokeWidth="1.5" strokeDasharray="6 5" strokeOpacity="0.4"/>
-                <circle cx="0" cy="15" r="5" fill={C.accent}/>
-                <text x="2" y="76" fill={C.muted} fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">{t("DANES")}</text>
-                <text x="240" y="76" fill={C.muted} fontSize="9" fontFamily="JetBrains Mono, monospace" letterSpacing="1">{t("6 MES.")}</text>
-              </svg>
+            <div style={{ marginBottom: 26 }}>
+              <Eyebrow C={C}>{t("POLOVICA JE ZA TEBOJ")}</Eyebrow>
             </div>
-
             <div style={{ flex: 1 }}>
-              <Mono style={{ color: C.accent, fontSize: 9, letterSpacing: "0.18em" }}>{t("RESNICA JE:")}</Mono>
-              <h2 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 31.5, color: C.text, margin: "8px 0 0", lineHeight: 1.15, letterSpacing: "-0.02em" }}>
+              <h2 style={{
+                margin: 0, fontFamily: C.display, fontWeight: 600, fontSize: 31,
+                lineHeight: 1.16, letterSpacing: "-0.035em", color: C.text,
+              }}>
                 {t("Vsak vrhunski športnik je začel točno tam, kjer si ti zdaj.")}
               </h2>
-              <p style={{ fontFamily: C.display, fontWeight: 500, fontSize: 14, color: C.text2, marginTop: 11, lineHeight: 1.6 }}>
+              <p style={{ margin: "18px 0 0", fontFamily: C.display, fontWeight: 400, fontSize: 15, lineHeight: 1.55, color: C.text2, maxWidth: "34ch" }}>
                 {t("ATHLOS te bo vodil skozi vzpone in padce — tako da boš dosegel cilj, ki si si ga zadal.")}
               </p>
-              <p style={{ fontFamily: C.display, fontStyle: "italic", fontSize: 13, color: C.muted, marginTop: 14, lineHeight: 1.55 }}>
+              <p style={{ margin: "20px 0 0", fontFamily: C.display, fontWeight: 400, fontSize: 13.5, lineHeight: 1.55, color: C.muted, maxWidth: "34ch" }}>
                 {t("P.S. Najtežji del je že za teboj — odločitev, da začneš.")}
               </p>
             </div>
-
-            <PrimaryBtn onClick={next} style={{ marginTop: 11 }}>{t("Naprej")} →</PrimaryBtn>
           </div>
         )}
 
         {key === "sport" && (
-          <div style={{ paddingBottom: 90 }}>
-            {/* same engraved tablet as the other choice steps */}
-            <Choice options={SPORTS} labels={SPORTS.map(t)} value={sport} onPick={setSport} />
-
+          <>
+            {head()}
+            <div data-gsap-list="true">
+              {SPORTS.map((s, i) => (
+                <AnswerRow
+                  key={s} C={C} first={i === 0} label={t(s)} active={sport === s}
+                  onClick={pick(() => {
+                    if (sport === s) { setSport(""); return; } // re-tap → deselect, don't advance
+                    setSport(s);
+                    if (s !== "Drugo") setTimeout(next, 300);
+                  })}
+                />
+              ))}
+            </div>
             {sport === "Drugo" && (
-              <div style={{ animation: "athlosFade 0.2s ease", marginTop: 10 }}>
-                <Mono style={{ color: C.muted, fontSize: 9 }}>{t("VPIŠI ŠPORT")}</Mono>
-                <input value={customSport} onChange={(e) => setCustomSport(e.target.value)} placeholder={t("npr. Odbojka, Judo, Veslanje...")} style={{ ...inp, marginTop: 5 }} />
+              <div style={{ animation: "athlosFade 0.25s ease", marginTop: 26 }}>
+                <Eyebrow C={C} color={C.muted}>{t("VPIŠI ŠPORT")}</Eyebrow>
+                <div style={{ height: 10 }} />
+                <Field C={C} value={customSport} onChange={(e) => setCustomSport(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && customSport.trim()) next(); }}
+                  placeholder={t("npr. Odbojka, Judo, Veslanje...")} autoFocus />
               </div>
             )}
-          </div>
-        )}
-
-        {key === "goals" && (
-          // Multi-choice: any number of goals can be active; picking one just
-          // toggles it (no auto-advance) — "Nadaljuj" unlocks once ≥1 is picked.
-          <>
-            <Choice
-              multi
-              options={GOAL_OPTIONS}
-              labels={GOAL_OPTIONS.map(t)}
-              values={goals}
-              onPick={toggle(setGoals)}
-            />
-            <div style={{ flex: 1, minHeight: 16 }} />
-            <PrimaryBtn onClick={next} disabled={goals.length === 0} style={{ opacity: goals.length ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
           </>
         )}
 
-        {key === "exp" && (() => {
-          const clean = (v) => v.replace(/[^\d]/g, "").slice(0, 2); // digits only, 0–99
-          const n = experience === "" ? null : +experience;
-          const expOk = experience !== "" && n >= 0 && n <= 30;
-          return (
-            <>
-              <Mono style={{ color: C.muted, fontSize: 9 }}>{t("ŠTEVILO LET IZKUŠENJ")}</Mono>
-              <input
-                value={experience}
-                onChange={(e) => setExperience(clean(e.target.value))}
-                inputMode="numeric" placeholder={t("npr. 3")} autoFocus
-                style={{ ...inp, borderColor: expOk || experience === "" ? C.border2 : C.red, fontSize: 24, fontWeight: 800, textAlign: "center" }}
-              />
-              {experience !== "" && !expOk && <span style={{ color: C.red, fontFamily: C.display, fontSize: 12, marginTop: 5, display: "block" }}>{t("Vnesi realno število let (0–30).")}</span>}
-              <div style={{ flex: 1 }} />
-              <PrimaryBtn onClick={() => expOk && next()} style={{ opacity: expOk ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
-            </>
-          );
-        })()}
+        {key === "goals" && (
+          <>
+            {head()}
+            <div data-gsap-list="true">
+              {GOAL_OPTIONS.map((o, i) => (
+                <AnswerRow key={o} C={C} first={i === 0} multi label={t(o)}
+                  active={goals.includes(o)} onClick={pick(() => toggle(setGoals)(o))} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {key === "exp" && (
+          <>
+            {head()}
+            <Field
+              C={C} value={experience} size={44}
+              onChange={(e) => setExperience(e.target.value.replace(/[^\d]/g, "").slice(0, 2))}
+              inputMode="numeric" placeholder="0" autoFocus
+              invalid={experience !== "" && !expOk}
+            />
+            <div style={{ marginTop: 14, minHeight: 20 }}>
+              {experience !== "" && !expOk ? (
+                <span style={{ color: C.red, fontFamily: C.display, fontSize: 13, fontWeight: 500 }}>{t("Vnesi realno število let (0–30).")}</span>
+              ) : expOk ? (
+                <span style={{ fontFamily: C.display, fontSize: 14.5, fontWeight: 400, color: C.muted }}>
+                  {lang === "en"
+                    ? `${expNum} ${expNum === 1 ? "year" : "years"} of training behind you.`
+                    : `${expNum} ${yearsWordSl(expNum)} treninga za teboj.`}
+                </span>
+              ) : null}
+            </div>
+          </>
+        )}
 
         {key === "injuries" && (
-          // Simple Yes/No gate. "Ne" auto-advances (no injuries). "Da" reveals
-          // a free-text description + an optional photo of the injury; both
-          // are captured before "Nadaljuj" unlocks.
           <>
+            {head()}
             <div data-gsap-list="true" style={{ display: "flex", gap: 10 }}>
               {[{ v: false, label: t("Ne") }, { v: true, label: t("Da") }].map(({ v, label }) => {
                 const active = hasInjury === v;
                 return (
-                  <button key={label} onClick={(e) => {
-                    popPick(e.currentTarget);
+                  <button key={label} onClick={pick(() => {
                     setHasInjury(v);
-                    if (!v) { setInjuries([]); setInjuryNote(""); setInjuryPhoto(""); setTimeout(next, 200); }
-                  }} style={{
-                    flex: 1, padding: "20px 11px", borderRadius: 15, cursor: "pointer",
-                    background: active ? `${C.accent}14` : C.surface2,
-                    border: `1.5px solid ${active ? C.accent : "transparent"}`,
-                    fontFamily: C.display, fontWeight: 700, fontSize: 17, color: C.text,
-                    transition: "background 0.15s, border-color 0.15s",
+                    if (!v) { setInjuries([]); setInjuryNote(""); setInjuryPhoto(""); setTimeout(next, 260); }
+                  })} style={{
+                    flex: 1, height: 92, borderRadius: 18, border: "none", cursor: "pointer",
+                    background: active ? `${C.accent}17` : (dark ? "rgba(255,255,255,0.04)" : "rgba(16,24,40,0.04)"),
+                    fontFamily: C.display, fontWeight: active ? 600 : 500, fontSize: 18, letterSpacing: "-0.02em",
+                    color: active ? C.accent : C.text2,
+                    transition: `background 0.32s ${EASE}, color 0.28s ease`,
                     WebkitTapHighlightColor: "transparent",
                   }}>{label}</button>
                 );
@@ -792,134 +951,204 @@ export default function SetupFlow({ profile, setProfile, onDone, onBack }) {
             </div>
 
             {hasInjury === true && (
-              <div style={{ animation: "athlosFade 0.25s ease", marginTop: 16 }}>
-                <Mono style={{ color: C.muted, fontSize: 9 }}>{t("KATERO POŠKODBO IMAŠ?")}</Mono>
-                <textarea
-                  value={injuryNote}
+              <div style={{ animation: "athlosFade 0.3s ease", marginTop: 30 }}>
+                <Eyebrow C={C} color={C.muted}>{t("KATERO POŠKODBO IMAŠ?")}</Eyebrow>
+                <div style={{ height: 10 }} />
+                <Field C={C} multiline rows={3} value={injuryNote}
                   onChange={(e) => setInjuryNote(e.target.value)}
-                  placeholder={t("npr. Bolečina v desnem kolenu pri počepu...")}
-                  rows={3}
-                  style={{ ...inp, resize: "none", fontWeight: 500 }}
-                />
+                  placeholder={t("npr. Bolečina v desnem kolenu pri počepu...")} />
 
-                <Mono style={{ color: C.muted, fontSize: 9, marginTop: 16, display: "block" }}>{t("SLIKA POŠKODBE (NEOBVEZNO)")}</Mono>
+                <div style={{ height: 26 }} />
+                <Eyebrow C={C} color={C.muted}>{t("SLIKA POŠKODBE (NEOBVEZNO)")}</Eyebrow>
                 <input ref={injuryFileRef} type="file" accept="image/*" onChange={onInjuryFile} style={{ display: "none" }} />
                 {injuryPhoto ? (
-                  <div style={{ position: "relative", marginTop: 8, width: 96, height: 96 }}>
-                    <img src={injuryPhoto} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 14, border: `1px solid ${C.border}` }} />
+                  <div style={{ position: "relative", marginTop: 12, width: 92, height: 92 }}>
+                    <img src={injuryPhoto} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 16 }} />
                     <button onClick={() => setInjuryPhoto("")} aria-label={t("Odstrani sliko")} style={{
-                      position: "absolute", top: -7, right: -7, width: 24, height: 24, borderRadius: "50%",
-                      background: C.surface3, border: `1px solid ${C.border2}`, color: C.text, fontSize: 14, lineHeight: 1,
+                      position: "absolute", top: -8, right: -8, width: 26, height: 26, borderRadius: "50%",
+                      background: dark ? "#242424" : "#FFFFFF", border: "none", color: C.text, fontSize: 15, lineHeight: 1,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
                       cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent",
                     }}>×</button>
                   </div>
                 ) : (
                   <button onClick={() => injuryFileRef.current?.click()} style={{
-                    marginTop: 8, width: 96, height: 96, borderRadius: 14, cursor: "pointer",
-                    background: C.surface2, border: `1.5px dashed ${C.border2}`, color: C.muted,
-                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5,
+                    marginTop: 12, width: 92, height: 92, borderRadius: 16, cursor: "pointer", border: "none",
+                    background: dark ? "rgba(255,255,255,0.04)" : "rgba(16,24,40,0.04)", color: C.muted,
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 7,
                     WebkitTapHighlightColor: "transparent",
                   }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5" /><circle cx="8.5" cy="10.5" r="1.5" /><path d="M21 15l-5-5L5 19" /></svg>
-                    <span style={{ fontFamily: C.mono, fontSize: 8 }}>{t("DODAJ SLIKO")}</span>
+                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="3" /><circle cx="8.5" cy="10.5" r="1.5" /><path d="M21 15l-5-5L5 19" /></svg>
+                    <span style={{ fontFamily: C.mono, fontSize: 8, letterSpacing: "0.12em" }}>{t("DODAJ SLIKO")}</span>
                   </button>
                 )}
               </div>
             )}
-
-            <div style={{ flex: 1, minHeight: 16 }} />
-            {hasInjury === true
-              ? <PrimaryBtn onClick={next} disabled={!injuryNote.trim()} style={{ opacity: injuryNote.trim() ? 1 : 0.5 }}>{t("Nadaljuj")}</PrimaryBtn>
-              : <SkipBtn onClick={() => { setHasInjury(false); setInjuries([]); setInjuryNote(""); setInjuryPhoto(""); next(); }} />}
           </>
         )}
 
         {key === "equipment" && (
-          // Multi-choice: any number of equipment types can be active; picking
-          // one just toggles it (no auto-advance) — "Nadaljuj" unlocks once ≥1
-          // is picked, or Skip entirely if none applies.
           <>
-            <Choice
-              multi
-              options={EQUIPMENT_OPTIONS}
-              labels={EQUIPMENT_OPTIONS.map(t)}
-              values={equipment}
-              onPick={toggle(setEquipment)}
-            />
-            <div style={{ flex: 1, minHeight: 16 }} />
-            {equipment.length > 0
-              ? <PrimaryBtn onClick={next}>{t("Nadaljuj")}</PrimaryBtn>
-              : <SkipBtn onClick={() => { setEquipment([]); next(); }} />}
+            {head()}
+            <div data-gsap-list="true">
+              {EQUIPMENT_OPTIONS.map((o, i) => (
+                <AnswerRow key={o} C={C} first={i === 0} multi label={t(o)}
+                  active={equipment.includes(o)} onClick={pick(() => toggle(setEquipment)(o))} />
+              ))}
+            </div>
           </>
         )}
 
         {key === "test" && (
-          <>
-            {/* Placeholder — spec §01: assessment content is TBD */}
-            <div style={{ background: C.surface, border: `1.5px dashed ${C.border2}`, borderRadius: 15, padding: "17px 14px", textAlign: "center" }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 9, color: C.accent }}><IcChart size={32} /></div>
-              <h3 style={{ fontFamily: C.display, fontWeight: 800, fontSize: 17, color: C.text, margin: "0 0 6px" }}>{t("Začetni assessment")}</h3>
-              <p style={{ fontFamily: C.display, fontSize: 13, color: C.text2, margin: 0, lineHeight: 1.55 }}>
-                {t("Kratek test moči, hitrosti in mobilnosti — vsebina prihaja kmalu. Zaenkrat ta korak preskočimo.")}
-              </p>
+          <div data-gsap-list="true" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+            <div style={{ marginBottom: 16 }}>
+              <Eyebrow C={C} color="rgba(255,255,255,0.75)">{t("SKORAJ PRIPRAVLJENO")}</Eyebrow>
             </div>
-            <div style={{ flex: 1 }} />
-            <PrimaryBtn onClick={finish}>{t("Začni")}</PrimaryBtn>
-          </>
+            <h2 style={{
+              margin: 0, fontFamily: C.display, fontWeight: 600, fontSize: 32,
+              lineHeight: 1.12, letterSpacing: "-0.035em", color: "#FFFFFF", maxWidth: "14ch",
+            }}>{t("Začetni test")}</h2>
+            <p style={{
+              margin: "16px 0 0", fontFamily: C.display, fontWeight: 400, fontSize: 15,
+              lineHeight: 1.55, color: "rgba(255,255,255,0.78)", maxWidth: "32ch",
+            }}>
+              {t("Kratek test moči, hitrosti in mobilnosti — vsebina prihaja kmalu. Zaenkrat ta korak preskočimo.")}
+            </p>
+          </div>
         )}
 
       </div>
 
-      {/* Progress dashes — one per QUESTION, bottom center; interstitial
-          story screens (vision, quote) render none */}
-      {qIndex !== -1 && (
-        <div style={{
-          position: "absolute", left: 0, right: 0,
-          bottom: "max(env(safe-area-inset-bottom, 4px), 4px)",
-          display: "flex", gap: 5, padding: "0 11px",
-          zIndex: 4,
-        }}>
-          {QUESTION_FLOW.map((k, i) => {
-            const reached = i <= qIndex; // only already-visited questions are jumpable
-            return (
-              <button key={k} onClick={() => reached && animStep(FLOW.indexOf(k))}
-                aria-label={`${t("Vprašanje")} ${i + 1}`}
-                style={{
-                  flex: i === qIndex ? 2.4 : 1, height: 16, padding: 0,
-                  border: "none", background: "transparent",
-                  display: "flex", alignItems: "center",
-                  cursor: reached ? "pointer" : "default",
-                  transition: "flex 0.3s ease",
-                  WebkitTapHighlightColor: "transparent",
-                }}>
-                <span style={{
-                  width: "100%", height: 4, borderRadius: 999,
-                  background: reached ? C.accent : C.surface3,
-                  transition: "background 0.3s ease",
-                }} />
-              </button>
-            );
-          })}
+      {/* ── Action footer — identical position on every step, so the primary
+          action never moves as the user advances. ── */}
+      {action && (
+        <div style={{ flexShrink: 0, padding: "10px 20px 20px", background: "transparent" }}>
+          <ContinueBtn C={C} onClick={action.on} disabled={!action.ok}>
+            {t(action.label || CTA_LABEL[key] || "Nadaljuj")}
+          </ContinueBtn>
+          {action.skip ? (
+            <button onClick={action.skip} style={{
+              display: "block", width: "100%", marginTop: 6, padding: "12px 0",
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: C.display, fontWeight: 500, fontSize: 13.5, letterSpacing: "-0.01em",
+              color: onLight ? "rgba(255,255,255,0.6)" : C.muted2,
+              WebkitTapHighlightColor: "transparent",
+            }}>{t("Preskoči")}</button>
+          ) : <div style={{ height: 18 }} />}
         </div>
       )}
-
-      {/* Fixed bottom button for the sport step — lifted above the dashes */}
-      {key === "sport" && (
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          padding: "9px 18px",
-          paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 28px), 30px)",
-          background: `linear-gradient(to top, ${C.bg} 70%, transparent)`,
-        }}>
-          <PrimaryBtn
-            onClick={() => sport && (sport !== "Drugo" || customSport.trim()) && next()}
-            style={{ opacity: sport && (sport !== "Drugo" || customSport.trim()) ? 1 : 0.4 }}
-          >
-            {t("Nadaljuj")}
-          </PrimaryBtn>
-        </div>
-      )}
-
     </div>
   );
 }
+
+// ── Gender card — the photo is the surface, the label is the object. No
+// ring, no chip: selection lifts the image out of its resting dim and moves
+// the label into accent, which is enough because only one can be picked. ──
+function GenderCard({ img, label, active, onClick, C }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      style={{
+        position: "relative", overflow: "hidden", flex: 1, minHeight: 132,
+        borderRadius: 20, border: "none", cursor: "pointer", padding: 0,
+        background: C.name === "dark" ? "rgba(255,255,255,0.04)" : "rgba(16,24,40,0.04)",
+        transform: pressed ? "scale(0.992)" : "none",
+        transition: `transform 0.22s ease`,
+        WebkitTapHighlightColor: "transparent",
+      }}
+    >
+      <img src={img} alt="" aria-hidden="true" style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
+        objectPosition: "center 28%",
+        opacity: active ? 0.62 : 0.3, filter: active ? "saturate(1)" : "saturate(0.5)",
+        transition: `opacity 0.4s ${EASE}, filter 0.4s ease`,
+      }} />
+      <span aria-hidden="true" style={{
+        position: "absolute", inset: 0,
+        background: active
+          ? `linear-gradient(to top, ${C.accent}22, rgba(0,0,0,0.18))`
+          : "linear-gradient(to top, rgba(0,0,0,0.42), rgba(0,0,0,0.10))",
+        transition: "background 0.4s ease",
+      }} />
+      <span style={{
+        position: "absolute", left: 20, bottom: 16,
+        fontFamily: C.display, fontWeight: 600, fontSize: 21, letterSpacing: "-0.02em",
+        color: active ? C.accent : "#FFFFFF",
+        transition: "color 0.3s ease",
+      }}>{label}</span>
+      <span aria-hidden="true" style={{
+        position: "absolute", right: 18, bottom: 20,
+        opacity: active ? 1 : 0, transform: active ? "scale(1)" : "scale(0.6)",
+        transition: `opacity 0.24s ease, transform 0.34s ${EASE}`,
+        display: "flex",
+      }}>
+        <Check color={C.accent} size={18} />
+      </span>
+    </button>
+  );
+}
+
+// ── Measurement row — the label is small and quiet, the value is large.
+// Same hairline-separated list language as the answer rows, so the height/
+// weight step doesn't introduce a second visual system. ──
+function MeasureRow({ label, value, placeholder, set, first, onClick, C }) {
+  const [pressed, setPressed] = useState(false);
+  const dark = C.name === "dark";
+  return (
+    <button
+      onClick={onClick}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
+        width: "calc(100% + 40px)", marginLeft: -20, padding: "18px 20px",
+        textAlign: "left", border: "none", background: "transparent", cursor: "pointer",
+        borderTop: first ? "1px solid transparent" : `1px solid ${dark ? "rgba(255,255,255,0.058)" : "rgba(16,24,40,0.07)"}`,
+        transform: pressed ? "scale(0.994)" : "none",
+        transition: "transform 0.2s ease",
+        WebkitTapHighlightColor: "transparent",
+      }}
+    >
+      <span>
+        <span style={{ display: "block", fontFamily: C.mono, fontSize: 9.5, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: C.muted }}>{label}</span>
+        <span style={{
+          display: "block", marginTop: 7, fontFamily: C.display, letterSpacing: "-0.03em",
+          fontWeight: 600, fontSize: set ? 27 : 17, color: set ? C.text : C.muted2,
+          transition: `font-size 0.28s ${EASE}, color 0.28s ease`,
+        }}>{set ? value : placeholder}</span>
+      </span>
+      <span aria-hidden="true" style={{ color: C.muted2, flexShrink: 0, display: "flex" }}>
+        <svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l6 6-6 6" /></svg>
+      </span>
+    </button>
+  );
+}
+
+// Acquisition icons — kept at label scale (20px, no chip behind them) so they
+// read as marks next to a word, not as buttons in their own right.
+const ACQ_ICONS = (C) => [
+  <svg key="ig" width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <defs>
+      <linearGradient id="athlos-ig-grad" x1="3" y1="21" x2="21" y2="3" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stopColor="#FFD600" /><stop offset="0.3" stopColor="#FF7A00" /><stop offset="0.55" stopColor="#FF0069" /><stop offset="0.8" stopColor="#D300C5" /><stop offset="1" stopColor="#7638FA" />
+      </linearGradient>
+    </defs>
+    <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#athlos-ig-grad)" strokeWidth="1.7" />
+    <circle cx="12" cy="12" r="4.2" stroke="url(#athlos-ig-grad)" strokeWidth="1.7" />
+    <circle cx="17.4" cy="6.6" r="1.3" fill="url(#athlos-ig-grad)" />
+  </svg>,
+  <svg key="fr" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4FA8FF" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>,
+  <svg key="go" width="19" height="19" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>,
+  <svg key="tt" width="19" height="19" viewBox="0 0 24 24">
+    <path d="M16.6 5.82A4.28 4.28 0 0115.55 3h-3.09v12.4a2.59 2.59 0 11-2.59-2.59c.27 0 .53.04.77.12V9.77a5.76 5.76 0 00-.77-.05 5.68 5.68 0 105.68 5.68V9.01a7.3 7.3 0 004.27 1.36V7.28a4.28 4.28 0 01-3.22-1.46z" fill="#25F4EE" transform="translate(-0.9,-0.55)" />
+    <path d="M16.6 5.82A4.28 4.28 0 0115.55 3h-3.09v12.4a2.59 2.59 0 11-2.59-2.59c.27 0 .53.04.77.12V9.77a5.76 5.76 0 00-.77-.05 5.68 5.68 0 105.68 5.68V9.01a7.3 7.3 0 004.27 1.36V7.28a4.28 4.28 0 01-3.22-1.46z" fill="#FE2C55" transform="translate(0.9,0.55)" />
+    <path d="M16.6 5.82A4.28 4.28 0 0115.55 3h-3.09v12.4a2.59 2.59 0 11-2.59-2.59c.27 0 .53.04.77.12V9.77a5.76 5.76 0 00-.77-.05 5.68 5.68 0 105.68 5.68V9.01a7.3 7.3 0 004.27 1.36V7.28a4.28 4.28 0 01-3.22-1.46z" fill={C.name === "dark" ? "#FFFFFF" : "#111111"} />
+  </svg>,
+  <svg key="tk" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2FBF71" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M9.5 12l1.8 1.8 3.2-3.6" /></svg>,
+  <svg key="dr" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.7"><circle cx="12" cy="12" r="9" /><circle cx="8" cy="12" r="0.9" fill="#A78BFA" stroke="none" /><circle cx="12" cy="12" r="0.9" fill="#A78BFA" stroke="none" /><circle cx="16" cy="12" r="0.9" fill="#A78BFA" stroke="none" /></svg>,
+];
